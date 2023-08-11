@@ -1,0 +1,20 @@
+
+Missing features:
+
+TODO: Write test with state that begins in the middle of the trick
+TODO: Return optimal card, not only the value.
+TODO: Calculate playout with one single tt.
+TODO: Calculate best skat (loop over all cards and use alpha/beta)
+
+Then:
+
+TODO: Document everything.
+TODO: Make interface ready for python usage.
+TODO: Add more flavors as pointed out in skatcalc.
+TODO: Test equivalence of results of all flavors with easy problems
+TODO: Shift complex tests to another test suite.
+
+Then:
+
+TODO: Add tests from books.
+TODO: Add tests from proprietary program to check correctness.

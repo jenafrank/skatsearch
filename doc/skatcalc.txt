@@ -1,0 +1,34 @@
+skatcalc search flavors.
+
+basic: minimax algorithm.
+[ab] Alpha-beta enhancement to add alpha-beta cutoffs to search tree. Highly theoretical sound.
+[mr] Move reduction. Not all legal moves are considered. Certain moves are skipped
+     according to equal move reduction (EMR) and unequal move reduction (UMR). The latter one
+	 is based on "rank-equivalent" cards like 10-K-Q of a suit. It is combined with a 
+	 brute force play-out of the current trick. If in every case the trick will be made by one
+	 party, rank-equivalent cards can be skipped. E.g. considering a 10-K-Q "connection", when 
+	 I play the 10 and the trick will be mine, then there is no reason to play king or queen.
+[ms] Move sorting. Highly dubious and up for research. A good starting point would be to 
+     sort moves with the intention to reduce branching.
+[tt] Transposition table (TT). A TT is used to store results of the current state under investigation.
+     In a tree search it is very likely that another path in the tree will yield to the same state.
+	 Then, we already have the result at hand. Very common technique. Albeit error-prone.
+[qs] Quasi-symmetrics according to Kupferschmid. Published technique.
+[cb] CTBRE. A new technique. We use the current tree path that comes back from its leaf. If
+     the trick in the current path will be won, then we can skip "rank-equivalent" cards.
+	 The reasoning is the same as in [mr]. However, here, we do not use additional brute force
+	 forward calculation to determine if in every case the trick will be made by one party.
+	 Instead, we use the "real" back-propagated trick-won value to skip moves in the current
+	 node and therefore reduce branching. E.g. if I calculated the 10-card-branch and the 
+	 back propagated value ensures that I have won the trick, then I do not need to calculate
+	 the K-branch or Q-branch.
+	 
+Search flavors:
+
+Minimax:         []
+Alpha_beta:      [ab]
+Mr1:             [ab] [mr]
+Qs2:             [ab] [mr] [qs]
+Cb3:             [ab] [mr] [qs] [cb]
+Ms4:             [ab] [mr] [qs] [cb] [ms]
+Tt5:             [ab] [mr] [qs] [cb] [ms] [tt]
