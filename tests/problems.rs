@@ -1,7 +1,7 @@
-use skatcalc::types::game::Game;
-use skatcalc::types::player::Player;
-use skatcalc::types::problem::Problem;
-use skatcalc::traits::BitConverter;
+use skat_aug23::types::game::Game;
+use skat_aug23::types::player::Player;
+use skat_aug23::types::problem::Problem;
+use skat_aug23::traits::BitConverter;
 
 pub fn one_trick_rank_in_one_suit() -> (Problem, u8) {
     let p = Problem::create_farbe_declarer_problem("SA", "ST", "SK");

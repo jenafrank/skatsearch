@@ -1,43 +1,16 @@
 #![feature(test)]
 
 extern crate test;
-extern crate skatcalc;
+extern crate skat_aug23;
 
 use std::time::Instant;
 use test::bench::Bencher;
-use skatcalc::traits::{Augen, StringConverter};
-use skatcalc::types::problem::Problem;
-use skatcalc::types::problem_alpha_beta::ProblemAlphaBeta;
-use skatcalc::types::problem_alpha_beta_refac::ProblemAlphaBetaRefac;
-use skatcalc::types::problem_minimax::ProblemMiniMax;
-use skatcalc::types::problem_transposition_table::ProblemTranspositionTable;
-use skatcalc::types::state_transposition_table::StateTranspositionTable;
+use skat_aug23::traits::{Augen, StringConverter};
+use skat_aug23::types::problem::Problem;
+use skat_aug23::types::problem_transposition_table::ProblemTranspositionTable;
+use skat_aug23::types::state_transposition_table::StateTranspositionTable;
 
 mod problems;
-
-#[allow(dead_code)]
-fn assert_solution_minimax((p, s): (&Problem, u8)) {
-    let now = Instant::now();
-    assert_eq!(ProblemMiniMax::search_with_problem(p.clone()), s);
-    let elapsed = now.elapsed();
-    println!("Minimax duration = {} µs",elapsed.as_micros());
-}
-
-#[allow(dead_code)]
-fn assert_solution_alphabeta((p, s): (&Problem, u8)) {
-    let now = Instant::now();
-    assert_eq!(ProblemAlphaBeta::search_with_problem(p.clone()), s);
-    let elapsed = now.elapsed();
-    println!("Alphabeta duration = {} µs",elapsed.as_micros());
-}
-
-#[allow(dead_code)]
-fn assert_solution_alphabeta_refac((p, s): (&Problem, u8)) {
-    let now = Instant::now();
-    assert_eq!(ProblemAlphaBetaRefac::search_with_problem(p.clone(), 0, 0).1, s);
-    let elapsed = now.elapsed();
-    println!("Alphabeta_refac duration = {} µs",elapsed.as_micros());
-}
 
 fn assert_solution_transposition_table((p, s): (Problem, u8)) {
     let now = Instant::now();
@@ -49,9 +22,6 @@ fn assert_solution_transposition_table((p, s): (Problem, u8)) {
 }
 
 fn assert_solution_all((p, s): (Problem, u8)) {
-    // assert_solution_minimax((&p, s));
-    // assert_solution_alphabeta((&p, s));
-    // assert_solution_alphabeta_refac((&p, s));
     assert_solution_transposition_table((p, s));
 }
 
@@ -104,23 +74,7 @@ fn eight_tricks() { assert_solution_all(problems::eight_tricks()); }
 fn ten_tricks() { assert_solution_all(problems::ten_tricks()); }
 
 // #[test]
-// fn ten_grand_hard() { assert_solution_all(problems::ten_grand_hard())}
-
-/// Test checks if an intermediate state can be searched. Since a problem can
-/// not be generated for an intermediate state, we provide the search routine
-/// with two extra parameters for the cards that will be played to generate
-/// the intermediate state.
-#[test]
-fn intermediate_state() {
-    let now = Instant::now();
-    let pset = problems::intermediate_state();
-    assert_eq!(ProblemAlphaBetaRefac::search_with_problem(
-        pset.0,
-        pset.2,
-        pset.3).1, pset.1);
-    let elapsed = now.elapsed();
-    println!("Alphabeta_refac duration = {} µs",elapsed.as_micros());
-}
+// fn ten_grand_hard() { assert_solution_all(problems::ten_grand_hard())}}
 
 /// Checks playout capabilities. We do not have access to a principal variation.
 /// Therefore, we play out a game to see sequence of moves w.r.t. best play.
@@ -275,13 +229,3 @@ pub fn all_skat_values () {
             skat_value, el.1, (allcards ^ el.0.0 ^ el.0.1).__str());
     }
 }
-
-#[bench]
-fn bench_three_tricks(b: &mut Bencher) {
-    let p = problems::bench_three_tricks();
-
-    b.iter(|| ProblemMiniMax::search_with_problem(p));
-    b.iter(|| ProblemAlphaBeta::search_with_problem(p));
-    b.iter(|| ProblemTranspositionTable::search_with_problem(p));
-}
-

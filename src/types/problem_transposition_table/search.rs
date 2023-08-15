@@ -308,43 +308,10 @@ impl ProblemTranspositionTable {
         // let (moves, n) = get_sorted_main(state,moves_word, self.problem.game_type);
         let (moves, n) = get_sorted_by_value(moves_word);
 
-        /*
-        let move_connections = get_move_connections(
-            self.problem.game_type,
-            state,
-            moves_word,
-            moves,
-            n
-        );
-
-        let mut quasi_symm: [(u32, u8, u8); 10] = [(0,0,0); 10];  // contains: connection, card value, tree value
-        let mut skip_moves: u32 = 0;
-        */
-
         let mut i: usize = 0;
 
         // BASIC: Branching loop
         for mov in &moves[0..n] {
-
-            let card_val = mov.__get_value();
-
-            /*
-            if should_skip_because_quasisymmetric(
-                state.player,
-                &optimized_value,
-                move_connections[i],
-                &quasi_symm,
-                card_val,
-                i)
-            {
-                continue;
-            }
-
-            if should_skip_because_ctbre(*mov, skip_moves)
-            {
-                continue;
-            }
-            */
 
             // BASIC: Generate child state
             let (child_state, trick_won) = state_trans_table.create_child_state(
@@ -355,23 +322,6 @@ impl ProblemTranspositionTable {
 
             // BASIC: Search child state
             let child_state_value = self.search(&child_state);
-
-            /*add_skip_moves_from_ctbre(
-                state.player,
-                move_connections[i],
-                *mov,
-                trick_won,
-                child_state_value,
-                &mut skip_moves
-            );
-
-            add_quasi_symmetric_move(
-                move_connections[i],
-                card_val,
-                child_state_value,
-                i,
-                &mut quasi_symm
-            );*/
 
             // Optimize value
             optimized_value = optimize(child_state_value, optimized_value, state.player, *mov,self.problem.game_type);
@@ -663,89 +613,4 @@ fn optimized_value(player: Player, alpha: u8, beta: u8) -> u8 {
         Player::Declarer => alpha,
         _ => beta
     }
-}
-
-// CTBRE: Overwrite trick-won state if not available from child state but transported back from tree
-// CTBRE = current trick based rank equivalence
-fn add_skip_moves_from_ctbre(
-    current_player: Player,
-    connection: u32,
-    mov: u32,
-    trick_won: Option<bool>,
-    child_state_value: (u32, u8, Option<bool>),
-    skip_moves: &mut u32)
-{
-    let mut cvs = child_state_value;
-
-    // Overwrite if new trick was generated. Then we do not need the old trick anymore.
-    if trick_won != None {
-        cvs.2 = trick_won;
-    }
-
-    // If trick-won state is within connection, add moves to skip from lower/upper
-    // boundary issues
-    if cvs.2.is_some() && connection != 0 {
-
-        let cut_lower_moves_in_connection =
-            cvs.2.unwrap() == (current_player == Player::Declarer);
-
-        if cut_lower_moves_in_connection {
-            *skip_moves = add_lower_moves_to_skip_moves_pattern(
-                *skip_moves, mov,connection);
-        } else {
-            *skip_moves = add_upper_moves_to_skip_moves_pattern(
-                *skip_moves, mov,connection);
-        }
-    }
-}
-
-fn should_skip_because_quasisymmetric(
-    player: Player,
-    optimized_value: & (u32, u8, Option<bool>),
-    connection: u32,
-    quasi_symm: & [(u32, u8, u8); 10],
-    card_val: u8,
-    current_index: usize
-) -> bool {
-
-    if current_index > 0 && connection > 0
-    {
-        for j in 0..current_index
-        {
-            if connection == quasi_symm[j].0
-            {
-                let quasi_cardval = quasi_symm[j].1;
-                let quasi_val = quasi_symm[j].2 as i8;
-                let diff: i8 = card_val as i8 - quasi_cardval as i8;
-                let diffabs = diff.abs();
-                let optval = optimized_value.1 as i8;
-
-                if player == Player::Declarer {
-                    if optval > quasi_val + diffabs {
-                        return true;
-                    }
-                } else if optval < quasi_val - diffabs {
-                    return true;
-                }
-            }
-        }
-    }
-
-    false
-}
-
-#[inline(always)]
-fn should_skip_because_ctbre(mov: u32, skip_moves: u32) -> bool
-{
-    (mov & skip_moves) > 0
-}
-
-fn add_quasi_symmetric_move(
-    connection: u32,
-    card_val: u8,
-    child_state_value: (u32, u8, Option<bool>),
-    current_index: usize,
-    quasi_symm: &mut [(u32, u8, u8); 10])
-{
-    quasi_symm[current_index] = (connection, card_val, child_state_value.1);
 }
