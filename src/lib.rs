@@ -1,5 +1,4 @@
 #![feature(test)]
-#![allow(dead_code)]
 #![allow(clippy::unusual_byte_groupings)]
 
 extern crate core;

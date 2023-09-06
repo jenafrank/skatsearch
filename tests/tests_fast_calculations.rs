@@ -4,7 +4,6 @@ extern crate test;
 extern crate skat_aug23;
 
 use std::time::Instant;
-use test::bench::Bencher;
 use skat_aug23::traits::{Augen, StringConverter};
 use skat_aug23::types::problem::Problem;
 use skat_aug23::types::problem_transposition_table::ProblemTranspositionTable;

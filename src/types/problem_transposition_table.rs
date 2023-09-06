@@ -8,7 +8,6 @@ use crate::types::problem_transposition_table::counters::CountersTranspositionTa
 use crate::types::tt_table::TtTable;
 
 pub struct ProblemTranspositionTable {
-
     pub problem: Problem,
     pub transposition_table: TtTable,
     pub counters: CountersTranspositionTable

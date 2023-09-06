@@ -11,5 +11,3 @@ pub struct StateTranspositionTable {
     pub mapped_hash: usize,
     pub is_root_state: bool
 }
-
-

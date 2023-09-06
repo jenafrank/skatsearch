@@ -1,18 +1,13 @@
 use std::cmp;
 use std::time::Instant;
-use crate::types::connections::Connections;
 use crate::types::game::Game;
 use crate::types::player::Player;
 use crate::types::problem::Problem;
 use crate::types::problem_transposition_table::{CountersTranspositionTable, ProblemTranspositionTable};
-use crate::types::state::State;
 use crate::types::state_transposition_table::*;
 use crate::types::tt_flag::TtFlag;
 use crate::types::tt_table::TtTable;
-use crate::core_functions::get_connections::get_connections;
 use crate::core_functions::get_sorted_by_value::get_sorted_by_value;
-use crate::core_functions::get_sorted_by_zugebung::get_sorted_by_zugebung;
-use crate::core_functions::get_sorted_main::get_sorted_main;
 use crate::traits::{Augen, Bitboard};
 use crate::types::problem_transposition_table::playout_row::PlayoutRow;
 
@@ -113,7 +108,7 @@ impl ProblemTranspositionTable {
             let card = legal_moves.0[i];
             let state_adv =
                 state_tt.create_child_state(card,&self.problem,0,120);
-            let res = self.search(&state_adv.0);
+            let res = self.search(&state_adv);
             ret[i] = Some((card, res.0, res.1));
         }
 
@@ -159,7 +154,7 @@ impl ProblemTranspositionTable {
                 played_card,
                 &(problem_tt.problem),
                 state_tt.alpha,
-                state_tt.beta).0;
+                state_tt.beta);
 
             ret[i] = Some(row);
             i += 1;
@@ -193,7 +188,7 @@ impl ProblemTranspositionTable {
                 played_card,
                 &(problem_tt.problem),
                 state_tt.alpha,
-                state_tt.beta).0;
+                state_tt.beta);
 
             ret[i].0 = played_card;
             ret[i].2 = state_tt.state.augen_declarer;
@@ -303,18 +298,13 @@ impl ProblemTranspositionTable {
 
         // BASIC: Reduce moves, sort moves, find connections
         let moves_word = state.get_reduced(&self.problem);
-
-        // let (moves, n) = get_sorted_by_zugebung(state,moves_word);
-        // let (moves, n) = get_sorted_main(state,moves_word, self.problem.game_type);
         let (moves, n) = get_sorted_by_value(moves_word);
-
-        let mut i: usize = 0;
 
         // BASIC: Branching loop
         for mov in &moves[0..n] {
 
             // BASIC: Generate child state
-            let (child_state, trick_won) = state_trans_table.create_child_state(
+            let child_state = state_trans_table.create_child_state(
                 *mov,
                 &self.problem,
                 alpha,
@@ -331,8 +321,6 @@ impl ProblemTranspositionTable {
                 self.counters.cnt_breaks += 1;
                 break;
             }
-
-            i+=1;
         }
 
         transposition_table_write(
@@ -345,58 +333,6 @@ impl ProblemTranspositionTable {
 
         optimized_value
     }
-}
-
-fn add_lower_moves_to_skip_moves_pattern(skip_moves_old: u32, mov: u32, mov_conn: u32) -> u32 {
-    let mut ret: u32 = skip_moves_old;
-    let mut x: u32 = mov;
-
-    while x & mov_conn > 0 {
-        ret |= x;
-        x >>= 1;
-    }
-
-    ret
-}
-
-fn add_upper_moves_to_skip_moves_pattern(skip_moves_old: u32, mov: u32, mov_conn: u32) -> u32 {
-    let mut ret: u32 = skip_moves_old;
-    let mut x: u32 = mov;
-
-    while x & mov_conn > 0 {
-        ret |= x;
-        x <<= 1;
-    }
-
-    ret
-}
-
-fn get_move_connections(game: Game, state: State, moves_word: u32, moves: [u32; 10], n: usize) -> [u32; 10] {
-
-    let connections = get_connections(
-        moves_word,
-        state.get_all_unplayed_cards(),
-        game.get_unequal_sequence()
-    );
-
-    let mut ret: [u32; 10] = [0; 10];
-
-    for i in 0..n {
-        let mov = moves[i];
-       ret[i] = get_connection_wrt_move(mov, &connections);
-    }
-
-    ret
-}
-
-fn get_connection_wrt_move(mov: u32, conn: &Connections) -> u32 {
-    for i in 1..(conn[0].0 + 1) {
-        let x = conn[i as usize].0;
-        if ( x & mov ) > 0 {
-            return x;
-        }
-    }
-    0
 }
 
 fn optimize(child_state_value: (u32, u8, Option<bool>),
@@ -605,12 +541,4 @@ fn shrink_alpha_beta_window(player: Player, alpha: &mut u8, beta: &mut u8, child
     }
 
     false
-}
-
-#[inline(always)]
-fn optimized_value(player: Player, alpha: u8, beta: u8) -> u8 {
-    match player {
-        Player::Declarer => alpha,
-        _ => beta
-    }
 }

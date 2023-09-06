@@ -3,7 +3,7 @@ use std::io::Write;
 use std::time::Instant;
 use rand::rngs::StdRng;
 use rand::seq::SliceRandom;
-use rand::{SeedableRng, thread_rng};
+use rand::SeedableRng;
 use crate::traits::{Augen, StringConverter};
 use crate::types::game::Game;
 use crate::types::player::Player;
@@ -15,7 +15,7 @@ pub fn sample_farbe_declarer_tt(number_of_samples: usize) -> std::io::Result<()>
     let mut file = File::create(r"C:\Users\m1fpeuke\PyCharmProjects\p1\data\data3.txt")?;
     let mut rand = StdRng::seed_from_u64(222);
 
-    for i in 0..number_of_samples {
+    for _ in 0..number_of_samples {
         let cards = get_random_card_distribution_with_seed(&mut rand);
         let p = Problem::create(
             cards.0, cards.1, cards.2,
@@ -45,7 +45,7 @@ pub fn sample_farbe_declarer_tt_dd(number_of_samples: usize) -> std::io::Result<
     let mut file = File::create(r"C:\Users\m1fpeuke\PyCharmProjects\p1\data\data3.txt")?;
     let mut rand = StdRng::seed_from_u64(222);
 
-    for i in 0..number_of_samples {
+    for _ in 0..number_of_samples {
         let cards = get_random_card_distribution_with_seed(&mut rand);
         let p = Problem::create(
             cards.0, cards.1, cards.2,
@@ -113,12 +113,14 @@ pub fn get_random_card_distribution_with_seed(rand: &mut StdRng) -> (u32, u32, u
 
 #[cfg(test)]
 mod tests {
-    use crate::traits::{Bitboard, StringConverter};
-    use crate::uncertain::random_series::get_random_card_distribution;
+    use rand::{rngs::StdRng, SeedableRng};
+    use crate::uncertain::random_series::get_random_card_distribution_with_seed;
+    use crate::traits::StringConverter;
 
     #[test]
     pub fn test1() {
-        let x = get_random_card_distribution();
+        let mut rand = StdRng::seed_from_u64(222);
+        let x = get_random_card_distribution_with_seed(&mut rand);
 
         println!("D: {}", x.0.__str());
         println!("L: {}", x.1.__str());

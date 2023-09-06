@@ -129,18 +129,3 @@ pub fn nine_grand_hard() -> (Problem, u8) {
     );
     (p,39)
 }
-
-pub fn intermediate_state() -> (Problem, u8, u32, u32) {
-    let p = Problem::create(
-        "CA SA".__bit(),
-        "CT ST".__bit(),
-        "C9 S9".__bit(),
-        Game::Farbe,
-        Player::Declarer
-    );
-    (p, 42, "CA".__bit(), "CT".__bit())
-}
-
-pub fn bench_three_tricks()-> Problem {
-    Problem::create_farbe_declarer_problem("DJ CT C7", "HA D8 D7", "CA CK C8")
-}

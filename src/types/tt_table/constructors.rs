@@ -1,5 +1,3 @@
-use std::time::Instant;
-
 use crate::types::tt_entry::TtEntry;
 use crate::types::tt_flag::TtFlag;
 use crate::types::tt_table::TtTable;
@@ -7,8 +5,6 @@ use crate::consts::general::TT_SIZE;
 
 impl TtTable {
     pub fn create() -> TtTable {
-
-        let sw = Instant::now();
 
         let mut x = TtTable {
             data: Vec::with_capacity(TT_SIZE)
@@ -25,8 +21,6 @@ impl TtTable {
                 bestcard: 0
             });
         }
-
-        // println!("TT creation time = {} µs", sw.elapsed().as_micros());
 
         x
     }
