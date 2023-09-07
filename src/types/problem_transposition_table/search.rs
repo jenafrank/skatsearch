@@ -236,17 +236,6 @@ impl ProblemTranspositionTable {
             }
         }
 
-        /*
-        println!(" Iters: {}, Slots: {}, Writes: {}, Reads: {}, ExactReads: {}, Collisions: {}, Breaks: {}",
-                 problem.counters.cnt_iters,
-                 problem.transposition_table.get_occupied_slots(),
-                 problem.counters.cnt_writes,
-                 problem.counters.cnt_reads,
-                 problem.counters.cnt_exactreads,
-                 problem.counters.cnt_collisions,
-                 problem.counters.cnt_breaks);
-         */
-
         (val, problem.counters.cnt_iters, problem.counters.cnt_collisions)
     }
 
