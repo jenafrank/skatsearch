@@ -8,7 +8,7 @@ use crate::traits::{Augen, StringConverter};
 use crate::types::game::Game;
 use crate::types::player::Player;
 use crate::types::problem::Problem;
-use crate::types::problem_transposition_table::ProblemTranspositionTable;
+use crate::types::state::State;
 
 pub fn sample_farbe_declarer_tt(number_of_samples: usize) -> std::io::Result<()> {
 
@@ -17,24 +17,27 @@ pub fn sample_farbe_declarer_tt(number_of_samples: usize) -> std::io::Result<()>
 
     for _ in 0..number_of_samples {
         let cards = get_random_card_distribution_with_seed(&mut rand);
-        let p = Problem::create(
+        let mut p = Problem::create(
             cards.0, cards.1, cards.2,
             Game::Grand, Player::Declarer);
 
-        let (mut ptt, stt)= ProblemTranspositionTable::from_problem_with_initial_state(p);
+        let s = State::create_initial_state_from_problem(&p);
 
         let now = Instant::now();
-        let result = ptt.search(&stt);
+        let result = p.search(&s);
 
         println!("{:5} ms {:9} iters {:3} pnts | D: {} L: {} R: {}",
                  now.elapsed().as_millis(),
-                 ptt.counters.cnt_iters,
+                 p.counters.cnt_iters,
                  result.1 + p.get_skat().__get_value(),
                  cards.0.__str(),
                  cards.1.__str(),
                  cards.2.__str());
 
-        file.write_fmt(format_args!("{} {} {} \n", now.elapsed().as_millis(), ptt.counters.cnt_iters, result.1 + p.get_skat().__get_value()))?;
+        file.write_fmt(format_args!("{} {} {} \n", 
+        now.elapsed().as_millis(), 
+        p.counters.cnt_iters, 
+        result.1 + p.get_skat().__get_value()))?;
     }
 
     Ok(())
@@ -47,12 +50,12 @@ pub fn sample_farbe_declarer_tt_dd(number_of_samples: usize) -> std::io::Result<
 
     for _ in 0..number_of_samples {
         let cards = get_random_card_distribution_with_seed(&mut rand);
-        let p = Problem::create(
+        let mut p = Problem::create(
             cards.0, cards.1, cards.2,
             Game::Grand, Player::Declarer);
 
         let now = Instant::now();
-        let result = ProblemTranspositionTable::search_win_loss(p);
+        let result = Problem::search_win_loss(&mut p);
 
         match p.game_type {
             Game::Null => {

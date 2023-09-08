@@ -6,14 +6,13 @@ extern crate skat_aug23;
 use std::time::Instant;
 use skat_aug23::traits::{Augen, StringConverter};
 use skat_aug23::types::problem::Problem;
-use skat_aug23::types::problem_transposition_table::ProblemTranspositionTable;
-use skat_aug23::types::state_transposition_table::StateTranspositionTable;
+use skat_aug23::types::state::State;
 
 mod problems;
 
 fn assert_solution_transposition_table((p, s): (Problem, u8)) {
     let now = Instant::now();
-    let res = ProblemTranspositionTable::search_with_problem_using_double_dummy_solver(p);
+    let res = Problem::search_with_problem_using_double_dummy_solver(p);
     assert_eq!(res.0, s);
     let elapsed = now.elapsed();
     println!("Transtable duration = {} µs",elapsed.as_micros());
@@ -82,7 +81,7 @@ fn play_out () {
     let now = Instant::now();
     let pset = problems::ten_tricks();
 
-    let res = ProblemTranspositionTable::get_playout(pset.0);
+    let res = Problem::get_playout(pset.0);
 
     for (i, el) in res.iter().flatten().enumerate() {
 
@@ -118,10 +117,10 @@ fn allvalues () {
     let now = Instant::now();
     let pset = problems::ten_tricks();
 
-    let mut problem_tt = ProblemTranspositionTable::from_problem(pset.0);
-    let state_tt = StateTranspositionTable::initial_state_from_problem(&problem_tt);
+    let mut problem = pset.0;
+    let state = State::create_initial_state_from_problem(&problem);
 
-    let res = problem_tt.get_allvalues(&state_tt);
+    let res = problem.get_allvalues(&state);
 
     for el in res.iter().flatten() {
         let card = el.0;
@@ -145,7 +144,7 @@ fn allvalues_playout () {
 
     let problem = pset.0;
 
-    let res = ProblemTranspositionTable::get_allvalues_playout(problem);
+    let res = Problem::get_allvalues_playout(problem);
 
     for (i, el) in res.iter().enumerate() {
 
@@ -181,14 +180,12 @@ fn allvalues_playout () {
 #[test]
 pub fn search_if_winning () {
     let pset = problems::ten_tricks();
-
-    let problem = pset.0;
-
-    let mut problem_tt = ProblemTranspositionTable::from_problem(problem);
-    let mut state_tt = StateTranspositionTable::initial_state_from_problem(&problem_tt);
+    
+    let mut problem = pset.0;
+    let mut state = State::create_initial_state_from_problem(&problem);
 
     let start = Instant::now();
-    let result = problem_tt.search_if_declarer_is_winning(&mut state_tt);
+    let result = problem.search_if_declarer_is_winning(&mut state);
     let time = start.elapsed().as_micros();
 
     println!("Consumed time: {} µs",time);
@@ -199,11 +196,10 @@ pub fn search_if_winning () {
 
 #[test]
 pub fn all_skat_values () {
-    let p = problems::ten_tricks().0;
-    let mut p_tt = ProblemTranspositionTable::from_problem(p);
-
+    let mut p = problems::ten_tricks().0;
+    
     let start = Instant::now();
-    let result = p_tt.get_all_skat_values(false,false);
+    let result = p.get_all_skat_values(false,false);
     let time = start.elapsed().as_micros();
 
     let mut vec = result.2.to_vec();

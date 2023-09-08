@@ -1,6 +1,6 @@
 
-#[derive(Default)]
-pub struct CountersTranspositionTable {
+#[derive(Default, Copy, Clone)]
+pub struct Counters {
     pub cnt_writes: u32,
     pub cnt_reads: u32,
     pub cnt_breaks: u32,

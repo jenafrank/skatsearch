@@ -13,9 +13,9 @@ mod tests {
     use super::*;
 
     use crate::types::player::Player;
-    use crate::types::state::State;
     use crate::consts::bitboard::{CLUBS, DIAMONDS, HEARTS, NULL_CLUBS, NULL_DIAMONDS, NULL_HEARTS, NULL_SPADES, SPADES, TRUMP_FARBE, TRUMP_GRAND};
     use crate::traits::BitConverter;
+    use crate::types::state::State;
 
     #[test]
     fn farb() {
@@ -85,6 +85,10 @@ mod tests {
             augen_team: 0,
             player: Player::Declarer,
             player_cards: get_hand(),
+            alpha: 0,
+            beta: 120,
+            mapped_hash: 0,
+            is_root_state: false
         }
     }
 
@@ -102,6 +106,10 @@ mod tests {
             augen_team: 0,
             player: Player::Declarer,
             player_cards: get_hand(),
+            alpha: 0,
+            beta: 120,
+            mapped_hash: 0,
+            is_root_state: false
         }
     }
 

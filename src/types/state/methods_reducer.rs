@@ -1,6 +1,7 @@
+use super::State;
+
 use crate::types::game::Game;
 use crate::types::problem::Problem;
-use crate::types::state::State;
 
 use crate::core_functions::get_connections::get_connections;
 use crate::core_functions::get_reduced_equal_core::get_reduced_equal_core;

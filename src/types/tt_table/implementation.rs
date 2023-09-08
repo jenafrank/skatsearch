@@ -1,6 +1,5 @@
-use crate::types::problem_transposition_table::counters::CountersTranspositionTable;
+use crate::types::problem::counters::Counters;
 use crate::types::state::State;
-use crate::types::state_transposition_table::StateTranspositionTable;
 use crate::types::tt_entry::TtEntry;
 use crate::types::tt_flag::TtFlag;
 use crate::types::tt_table::TtTable;
@@ -8,7 +7,12 @@ use crate::consts::general::TT_SIZE;
 use crate::core_functions::get_mapped_hash::get_mapped_hash;
 
 impl TtTable {
-    pub fn write(&mut self, state: &State, mapped_hash: usize, alpha: u8, beta: u8, value: (u32, u8, Option<bool>)) {
+    pub fn write(&mut self, 
+        state: &State, 
+        mapped_hash: usize, 
+        alpha: u8, 
+        beta: u8, 
+        value: (u32, u8, Option<bool>)) {
 
         let flag: TtFlag =
             match value.1 {
@@ -35,13 +39,13 @@ impl TtTable {
         self.write(state, idx, alpha, beta, (0, value, None));
     }
 
-    pub fn read(&self, state_trans_table: &StateTranspositionTable, counters: &mut CountersTranspositionTable) -> Option<&TtEntry> {
+    pub fn read(&self, state: &State, counters: &mut Counters) -> Option<&TtEntry> {
 
-        let candidate = &self.data[state_trans_table.mapped_hash];
+        let candidate = &self.data[state.mapped_hash];
 
         if !candidate.occupied {
             None // empty slot
-        } else if candidate.matches(&state_trans_table.state) {
+        } else if candidate.matches(&state) {
             counters.cnt_reads += 1;
             Some(candidate) // matches key values
         } else {
@@ -62,7 +66,7 @@ impl TtTable {
         ret
     }
 
-    pub fn is_tt_compatible_state(state_trans_table: &StateTranspositionTable) -> bool {
-        state_trans_table.is_not_root_state() && state_trans_table.state.trick_cards_count == 0
+    pub fn is_tt_compatible_state(state: &State) -> bool {
+        state.is_not_root_state() && state.trick_cards_count == 0
     }
 }

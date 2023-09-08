@@ -55,8 +55,9 @@ mod tests {
 
         let p = Problem::default();
         let s1 = State::create_initial_state_from_problem(&p);
-        let mut s2 = s1.clone();
-        let mut s3 = s1.clone();
+        let mut s2 = s1;
+        let mut s3 = s1;
+
         s2.player = Player::Left;
         s3.player = Player::Right;
 

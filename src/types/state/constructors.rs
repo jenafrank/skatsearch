@@ -1,8 +1,7 @@
-use super::*;
-
+use crate::traits::Augen;
 use crate::types::player::Player;
 use crate::types::problem::Problem;
-use crate::traits::Augen;
+use crate::types::state::State;
 
 impl State {
 
@@ -13,6 +12,8 @@ impl State {
         augen_declarer: u8,
         player: Player,
         problem: &Problem,
+        is_root_state: bool
+
     ) -> State {
 
         let declarer_cards: u32 = problem.declarer_cards_all & !played_cards;
@@ -28,6 +29,7 @@ impl State {
         let augen_team = problem.augen_total - augen_future - augen_declarer;
 
         State {
+            
             // Primary values
             player,
             played_cards,
@@ -43,10 +45,26 @@ impl State {
             trick_cards_count,
             augen_future,
             augen_team,
-        }
+
+            // Additional values
+            alpha: 0,
+            beta: 120,
+            mapped_hash: 0,
+            is_root_state
+
+        }.add_hash()
+
     }
 
     pub fn create_initial_state_from_problem(problem: &Problem) -> State {
-        State::create(0u32, 0u32, 0u32, 0u8, problem.start_player, problem)
-    }
+        State::create(
+            0u32, 
+            0u32, 
+            0u32, 
+            0u8, 
+            problem.start_player, 
+            problem,
+            true)
+    }   
+
 }

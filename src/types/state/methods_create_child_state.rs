@@ -1,12 +1,20 @@
-use super::*;
+use crate::core_functions::get_suit_for_card::get_suit_for_card;
+
+use crate::traits::Augen;
 
 use crate::types::player::Player;
 use crate::types::problem::Problem;
-use crate::core_functions::get_suit_for_card::get_suit_for_card;
-use crate::traits::Augen;
+use crate::types::state::State;
 
 impl State {
-    pub fn create_child_state(&self, card: u32, problem: &Problem) -> State {
+
+    pub fn create_child_state(
+        &self, 
+        card: u32, 
+        problem: &Problem,
+        alpha_start: u8,
+        beta_start: u8) -> State {
+
         // new_player, may be overwritten after trick calculation !!
         let mut new_player = self.player.inc();
 
@@ -16,15 +24,19 @@ impl State {
         } else {
             self.trick_suit
         };
+
         // new played_cards
         let new_played_cards = self.played_cards ^ card;
+
         // new trick_cards
         let mut new_trick_cards = self.trick_cards ^ card;
         let mut new_trick_cards_count = self.trick_cards_count + 1;
+
         // new augen
         let mut new_augen_declarer = self.augen_declarer;
         let mut new_augen_team = self.augen_team;
         let mut new_augen_future = self.augen_future;
+        
         // new cards on hand
         let mut new_declarer_cards = self.declarer_cards;
         let mut new_left_cards = self.left_cards;
@@ -75,6 +87,12 @@ impl State {
             augen_future: new_augen_future,
             player: new_player,
             player_cards: new_player_cards,
-        }
+            alpha: alpha_start,
+            beta: beta_start,
+            mapped_hash: 0,
+            is_root_state: false
+        }.add_hash()
+
     }
+
 }

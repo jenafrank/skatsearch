@@ -1,6 +1,5 @@
 mod constructors;
 mod methods;
-mod traits;
 mod methods_create_child_state;
 mod methods_get_all_unplayed_cards;
 mod methods_get_cards_for_player;
@@ -9,23 +8,19 @@ mod methods_get_legal_moves;
 mod methods_get_trick_winner;
 mod methods_reducer;
 
-use crate::types::player::Player;
-use crate::core_functions::get_mapped_hash::get_mapped_hash;
+use super::player::Player;
 
-#[derive(Copy, Clone)]
+#[derive(PartialEq, Eq, Debug, Clone, Copy)]
 pub struct State {
 
     // Primary values
-
     pub player: Player,
     pub played_cards: u32,
     pub trick_cards: u32,
     pub trick_suit: u32,
     pub augen_declarer: u8,
 
-
     // Derived (cached) values
-
     pub declarer_cards: u32,
     pub left_cards: u32,
     pub right_cards: u32,
@@ -33,12 +28,26 @@ pub struct State {
     pub trick_cards_count: u8,
     pub augen_future: u8,
     pub augen_team: u8,
+
+    // Additional values
+    pub alpha: u8,
+    pub beta: u8,
+    pub mapped_hash: usize,
+    pub is_root_state: bool
+
 }
+impl State {
+    pub fn add_hash(&self) -> State {
+        let mut hashed_state = self.to_owned();
+        hashed_state.mapped_hash = self.get_mapped_hash();
 
-
+        hashed_state
+    }
+}
 
 #[cfg(test)]
 mod tests_derived_state {
+    
     use crate::types::game::Game;
     use crate::types::state::State;
     use crate::types::problem::Problem;
@@ -71,7 +80,11 @@ mod tests_derived_state {
             augen_future: "CJ SJ SA ST CA CT".__bit().__get_value(),
             augen_declarer: 0,
             augen_team: 0,
-        };
+            alpha: 0,
+            beta: 120,
+            mapped_hash: 0,
+            is_root_state: true,
+        }.add_hash();
 
         assert_eq!(x, y);
     }
@@ -93,6 +106,7 @@ mod tests_derived_state {
             0,
             Player::Right,
             &p,
+            false
         );
 
         let y = State {
@@ -108,7 +122,11 @@ mod tests_derived_state {
             augen_future: "CJ SJ SA ST CA CT".__bit().__get_value(),
             augen_declarer: 0,
             augen_team: 0,
-        };
+            alpha: 0,
+            beta: 120,
+            mapped_hash: 0,
+            is_root_state: false,
+        }.add_hash();
 
         assert_eq!(x, y);
     }
@@ -135,11 +153,11 @@ mod tests_evaluation {
 
         let s = State::create_initial_state_from_problem(&p);
 
-        let s1 = s.create_child_state("CJ".__bit(), &p);
-        let s2 = s1.create_child_state("SA".__bit(), &p);
-        let sa = s2.create_child_state("CA".__bit(), &p);
+        let s1 = s.create_child_state("CJ".__bit(), &p, 0, 120);
+        let s2 = s1.create_child_state("SA".__bit(), &p, 0, 120);
+        let sa = s2.create_child_state("CA".__bit(), &p, 0, 120);
 
-        let es = State::create("CJ SA CA".__bit(), 0, 0, 24, Player::Declarer, &p);
+        let es = State::create("CJ SA CA".__bit(), 0, 0, 24, Player::Declarer, &p, false);
 
         assert_eq!(sa, es);
     }
@@ -165,6 +183,8 @@ mod tests_no_evaluation {
             augen_total: "CJ ST SJ SA CA S7".__bit().__get_value(),
             start_player: Player::Declarer,
             nr_of_cards: 6,
+            transposition_table: Default::default(),
+            counters: Default::default(),
         };
 
         let state = State {
@@ -180,10 +200,14 @@ mod tests_no_evaluation {
             augen_team: 0,
             player: Player::Declarer,
             player_cards: "[CJ ST]".__bit(),
-        };
+            alpha: 0,
+            beta: 120,
+            mapped_hash: 0,
+            is_root_state: false
+        }.add_hash();
 
 
-        let next_state = state.create_child_state("CJ".__bit(),&problem);
+        let next_state = state.create_child_state("CJ".__bit(),&problem,0,120);
 
         let expected_next_state = State {
             played_cards: "CJ".__bit(),
@@ -198,7 +222,11 @@ mod tests_no_evaluation {
             augen_future: "CJ ST SJ SA CA S7".__bit().__get_value(),
             player: Player::Left,
             player_cards: "[SJ SA]".__bit(),
-        };
+            alpha: 0,
+            beta: 120,
+            mapped_hash: 0,
+            is_root_state: false
+        }.add_hash();
 
         assert_eq!(next_state, expected_next_state);
     }
@@ -213,6 +241,8 @@ mod tests_no_evaluation {
             augen_total: "CJ ST SJ SA CA S7".__bit().__get_value(),
             start_player: Player::Declarer,
             nr_of_cards: 6,
+            transposition_table: Default::default(),
+            counters: Default::default(),
         };
 
         let state = State {
@@ -227,11 +257,15 @@ mod tests_no_evaluation {
             augen_declarer: 0,
             augen_team: 0, // cache var 5: augen_team = 120 - augen_declarer - augen_future
             player: Player::Left,
-            player_cards: "[SJ SA]".__bit(), // cache var 6
+            player_cards: "[SJ SA]".__bit(),
+            alpha: 0,
+            beta: 120,
+            mapped_hash: 0,
+            is_root_state: false // cache var 6
             // cache var 7: augen_future ??
-        };
+        }.add_hash();
 
-        let next_state = state.create_child_state("SA".__bit(), &problem);
+        let next_state = state.create_child_state("SA".__bit(), &problem, 0, 120);
 
         let expected_next_state = State {
             played_cards: "[CJ SA]".__bit(),
@@ -246,7 +280,11 @@ mod tests_no_evaluation {
             augen_future: "CJ ST SJ SA CA S7".__bit().__get_value(),
             player: Player::Right,
             player_cards: "[CA S7]".__bit(),
-        };
+            alpha: 0,
+            beta: 120,
+            mapped_hash: 0,
+            is_root_state: false
+        }.add_hash();
 
         assert_eq!(next_state, expected_next_state);
     }
