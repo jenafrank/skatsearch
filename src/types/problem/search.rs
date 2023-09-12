@@ -9,18 +9,18 @@ use crate::core_functions::get_sorted_by_value::get_sorted_by_value;
 
 impl Problem {
 
-    pub fn search(&mut self, state: &State) -> (u32, u8, Option<bool>) {
+    pub fn search(&mut self, state: &State) -> (u32, u8) {
 
         self.counters.iters += 1;
 
         // BASIC: Termination of recursive search
         if let Some(x) = apply_termination_criteria(&self, &state) {
-            return (0, x, None);
+            return (0, x);
         }
         
         let mut alpha = state.alpha;
         let mut beta = state.beta;
-        let mut optimized_value: (u32, u8, Option<bool>) = (0, get_value_to_optimize(state.player,self.game_type), None);
+        let mut optimized_value: (u32, u8) = (0, get_value_to_optimize(state.player,self.game_type));
 
         // TRANS:
         if let Some(x) = transposition_table_lookup(
@@ -76,9 +76,9 @@ impl Problem {
     }
 }
 
-fn optimize(child_state_value: (u32, u8, Option<bool>),
-            optimized_value: (u32, u8, Option<bool>),
-            player: Player, mov: u32, game: Game) -> (u32, u8, Option<bool>) {
+fn optimize(child_state_value: (u32, u8),
+            optimized_value: (u32, u8),
+            player: Player, mov: u32, game: Game) -> (u32, u8) {
 
     match game {
         Game::Null => {
@@ -192,18 +192,17 @@ fn transposition_table_lookup(
     counters: &mut Counters,
     alpha: &mut u8,
     beta: &mut u8
-) -> Option<(u32, u8, Option<bool>)>
+) -> Option<(u32, u8)>
 {
 
     if TtTable::is_tt_compatible_state(state) {
         if let Some(tt_entry) = tt.read(state, counters) {
             let value = tt_entry.value + state.augen_declarer;
-            let trickwon = tt_entry.trickwon;
             let bestcard = tt_entry.bestcard;
             match tt_entry.flag {
                 TtFlag::EXACT => {
                     counters.exactreads += 1;
-                    return Some((bestcard,value,trickwon));
+                    return Some((bestcard,value));
                 },
                 TtFlag::LOWER => {
                     *alpha = cmp::max(*alpha, value);
@@ -213,7 +212,7 @@ fn transposition_table_lookup(
                 }
             }
             if *alpha >= *beta {
-                return Some((bestcard,value,trickwon));
+                return Some((bestcard,value));
             }
         }
     }
@@ -227,7 +226,7 @@ fn transposition_table_write(
     state: &State,
     alphaorig: u8,
     betaorig: u8,
-    value: (u32, u8, Option<bool>)
+    value: (u32, u8)
 ) {
     if TtTable::is_tt_compatible_state(state) {
         problem.counters.writes += 1;

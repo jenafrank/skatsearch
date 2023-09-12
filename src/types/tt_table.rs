@@ -44,7 +44,7 @@ mod tests {
         let p = Problem::default();
         let s = State::create_initial_state_from_problem(&p);
 
-        x.write(&s,1,0,120,(1, 60, None));
+        x.write(&s,1,0,120,(1, 60));
 
         assert_eq!(x.get_occupied_slots(), 1);
     }

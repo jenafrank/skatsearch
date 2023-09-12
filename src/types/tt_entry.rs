@@ -18,6 +18,5 @@ pub struct TtEntry {
 
     // for alpha-beta functions
     pub flag: TtFlag,
-    pub trickwon: Option<bool>,
-    pub bestcard: u32,
+    pub bestcard: u32
 }

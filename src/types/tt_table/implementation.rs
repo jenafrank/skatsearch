@@ -12,7 +12,7 @@ impl TtTable {
         mapped_hash: usize, 
         alpha: u8, 
         beta: u8, 
-        value: (u32, u8, Option<bool>)) {
+        value: (u32, u8)) {
 
         let flag: TtFlag =
             match value.1 {
@@ -26,7 +26,6 @@ impl TtTable {
             player: state.player,
             cards: state.get_all_unplayed_cards(),
             value: value.1 - state.augen_declarer,
-            trickwon: value.2,
             bestcard: value.0,
             flag,
         };
@@ -36,7 +35,7 @@ impl TtTable {
 
     pub fn write_without_hash(&mut self, state: &State, alpha: u8, beta: u8, value: u8) {
         let idx = get_mapped_hash(state.player,state.get_all_unplayed_cards(), state.trick_cards);
-        self.write(state, idx, alpha, beta, (0, value, None));
+        self.write(state, idx, alpha, beta, (0, value));
     }
 
     pub fn read(&self, state: &State, counters: &mut Counters) -> Option<&TtEntry> {

@@ -17,7 +17,6 @@ impl TtTable {
                 cards: 0,
                 value: 0,
                 flag: TtFlag::EXACT,
-                trickwon: None,
                 bestcard: 0
             });
         }

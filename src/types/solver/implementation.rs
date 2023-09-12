@@ -85,20 +85,24 @@ impl Solver {
     /// Investigates all legal moves for a given state and returns an option array
     /// with 0) card under investigation 1) follow-up card from tree search (tree root) and
     /// 2) value of search
-    pub fn solve_all_cards(&mut self) -> [Option<(u32, u32, u8)>; 10] {
+    pub fn get_all_cards(&mut self, state: State) -> [Option<(u32, u32, u8)>; 10] {
         let mut ret: [Option<(u32, u32, u8)>; 10] = [None; 10];
-        let initial_state = State::create_initial_state_from_problem(&self.problem);
 
-        let legal_moves = initial_state.get_legal_moves().__decompose();
+        let legal_moves = state.get_legal_moves().__decompose();
 
         for i in 0..legal_moves.1 {
             let card = legal_moves.0[i];
-            let state_adv = initial_state.create_child_state(card, &self.problem, 0, 120);
+            let state_adv = state.create_child_state(card, &self.problem, 0, 120);
             let res = self.problem.search(&state_adv);
             ret[i] = Some((card, res.0, res.1));
         }
 
         ret
+    }
+
+    pub fn solve_all_cards(&mut self) -> [Option<(u32, u32, u8)>; 10] {
+        let initial_state = State::create_initial_state_from_problem(&self.problem);
+        self.get_all_cards(initial_state)
     }
 
     /// Generates playout.
@@ -161,8 +165,8 @@ impl Solver {
             self.problem.counters.iters = 0;
             self.problem.counters.breaks = 0;
 
-            let res = self.solve();
-            let resall = self.solve_all_cards();
+            let res = self.get(state);
+            let resall = self.get_all_cards(state);
 
             let played_card = res.0;
             ret[i].1 = state.player;
@@ -238,8 +242,7 @@ impl Solver {
         )
     }
 
-    pub fn solve(&mut self) -> (u32, u8) {
-        let state = State::create_initial_state_from_problem(&self.problem);
+    pub fn get(&mut self, state: State) -> (u32, u8) {        
         let res = self.problem.search(&state);
         println!(" Iters: {}, Slots: {}, Writes: {}, Reads: {}, ExactReads: {}, Collisions: {}, Breaks: {}",
         self.problem.counters.iters,
@@ -255,4 +258,10 @@ impl Solver {
             res.1
         )
     }
+
+    pub fn solve(&mut self) -> (u32, u8) {
+        let state = State::create_initial_state_from_problem(&self.problem);
+        self.get(state)
+    }
+
 }
