@@ -6,13 +6,16 @@ extern crate skat_aug23;
 use std::time::Instant;
 use skat_aug23::traits::{Augen, StringConverter};
 use skat_aug23::types::problem::Problem;
+use skat_aug23::types::solver::Solver;
 use skat_aug23::types::state::State;
 
 mod problems;
 
 fn assert_solution_transposition_table((p, s): (Problem, u8)) {
     let now = Instant::now();
-    let res = Problem::search_with_problem_using_double_dummy_solver(p);
+    let mut solver = Solver::create(p);    
+    let res = solver.solve_double_dummy();
+
     assert_eq!(res.0, s);
     let elapsed = now.elapsed();
     println!("Transtable duration = {} µs",elapsed.as_micros());
@@ -79,11 +82,13 @@ fn ten_tricks() { assert_solution_all(problems::ten_tricks()); }
 #[test]
 fn play_out () {
     let now = Instant::now();
-    let pset = problems::ten_tricks();
+    let problem_set = problems::ten_tricks();
 
-    let res = Problem::get_playout(pset.0);
+    let mut solver = Solver::create(problem_set.0);
 
-    for (i, el) in res.iter().flatten().enumerate() {
+    let result = solver.playout();
+
+    for (i, el) in result.iter().flatten().enumerate() {
 
         if i % 3 == 0 {
             println!();
@@ -108,7 +113,7 @@ fn play_out () {
     let elapsed = now.elapsed();
 
     println!();
-    println!("Final score: {}", pset.1);
+    println!("Final score: {}", problem_set.1);
     println!("TT duration playout = {} ms",elapsed.as_millis());
 }
 
@@ -117,10 +122,10 @@ fn allvalues () {
     let now = Instant::now();
     let pset = problems::ten_tricks();
 
-    let mut problem = pset.0;
-    let state = State::create_initial_state_from_problem(&problem);
+    let state = State::create_initial_state_from_problem(&pset.0);
+    let mut solver = Solver::create(pset.0);
 
-    let res = problem.get_allvalues(&state);
+    let res = solver.solve_all_cards(&state);
 
     for el in res.iter().flatten() {
         let card = el.0;
@@ -142,9 +147,9 @@ fn allvalues_playout () {
     let now = Instant::now();
     let pset = problems::ten_tricks();
 
-    let problem = pset.0;
+    let mut solver = Solver::create(pset.0);
 
-    let res = Problem::get_allvalues_playout(problem);
+    let res = solver.playout_all_cards();
 
     for (i, el) in res.iter().enumerate() {
 
@@ -181,25 +186,25 @@ fn allvalues_playout () {
 pub fn search_if_winning () {
     let pset = problems::ten_tricks();
     
-    let mut problem = pset.0;
-    let mut state = State::create_initial_state_from_problem(&problem);
+    let mut solver = Solver::create(pset.0);
 
     let start = Instant::now();
-    let result = problem.search_if_declarer_is_winning(&mut state);
+    let result = solver.solve_win();
+    let is_winning = result.0 > 60;
     let time = start.elapsed().as_micros();
 
     println!("Consumed time: {} µs",time);
-    println!("Declarer is winning: {}", result);
+    println!("Declarer is winning: {}", is_winning);
 
-    assert!(!result);
+    assert!(!is_winning);
 }
 
 #[test]
 pub fn all_skat_values () {
-    let mut p = problems::ten_tricks().0;
+    let mut solver = Solver::create(problems::ten_tricks().0);
     
     let start = Instant::now();
-    let result = p.get_all_skat_values(false,false);
+    let result = solver.solve_with_skat(false,false);
     let time = start.elapsed().as_micros();
 
     let mut vec = result.2.to_vec();
@@ -209,6 +214,7 @@ pub fn all_skat_values () {
     println!();
 
     println!("All twelve cards:");
+    let p = &solver.problem;
     let allcards: u32 = (!0u32) ^ p.left_cards_all ^ p.right_cards_all;
     let skat: u32 = (!0u32) ^ p.left_cards_all ^ p.right_cards_all ^ p.declarer_cards_all;
     println!("{} | {}", p.declarer_cards_all.__str() , skat.__str());

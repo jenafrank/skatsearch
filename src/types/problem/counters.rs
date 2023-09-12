@@ -1,10 +1,10 @@
 
 #[derive(Default, Copy, Clone)]
 pub struct Counters {
-    pub cnt_writes: u32,
-    pub cnt_reads: u32,
-    pub cnt_breaks: u32,
-    pub cnt_collisions: u32,
-    pub cnt_exactreads: u32,
-    pub cnt_iters: u32
+    pub writes: u32,
+    pub reads: u32,
+    pub breaks: u32,
+    pub collisions: u32,
+    pub exactreads: u32,
+    pub iters: u32
 }

@@ -46,10 +46,10 @@ impl TtTable {
         if !candidate.occupied {
             None // empty slot
         } else if candidate.matches(&state) {
-            counters.cnt_reads += 1;
+            counters.reads += 1;
             Some(candidate) // matches key values
         } else {
-            counters.cnt_collisions += 1;
+            counters.collisions += 1;
             None // collision
         }
     }

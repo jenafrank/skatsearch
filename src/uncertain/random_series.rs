@@ -8,6 +8,7 @@ use crate::traits::{Augen, StringConverter};
 use crate::types::game::Game;
 use crate::types::player::Player;
 use crate::types::problem::Problem;
+use crate::types::solver::Solver;
 use crate::types::state::State;
 
 pub fn sample_farbe_declarer_tt(number_of_samples: usize) -> std::io::Result<()> {
@@ -28,7 +29,7 @@ pub fn sample_farbe_declarer_tt(number_of_samples: usize) -> std::io::Result<()>
 
         println!("{:5} ms {:9} iters {:3} pnts | D: {} L: {} R: {}",
                  now.elapsed().as_millis(),
-                 p.counters.cnt_iters,
+                 p.counters.iters,
                  result.1 + p.get_skat().__get_value(),
                  cards.0.__str(),
                  cards.1.__str(),
@@ -36,7 +37,7 @@ pub fn sample_farbe_declarer_tt(number_of_samples: usize) -> std::io::Result<()>
 
         file.write_fmt(format_args!("{} {} {} \n", 
         now.elapsed().as_millis(), 
-        p.counters.cnt_iters, 
+        p.counters.iters, 
         result.1 + p.get_skat().__get_value()))?;
     }
 
@@ -50,14 +51,15 @@ pub fn sample_farbe_declarer_tt_dd(number_of_samples: usize) -> std::io::Result<
 
     for _ in 0..number_of_samples {
         let cards = get_random_card_distribution_with_seed(&mut rand);
-        let mut p = Problem::create(
+        let p = Problem::create(
             cards.0, cards.1, cards.2,
             Game::Grand, Player::Declarer);
 
         let now = Instant::now();
-        let result = Problem::search_win_loss(&mut p);
+        let mut solver = Solver::create(p);
+        let result = solver.solve_win();
 
-        match p.game_type {
+        match solver.problem.game_type {
             Game::Null => {
                 println!("{:5} ms {:9} | {:9} iters/colls {:3} pnts | D: {} L: {} R: {}",
                          now.elapsed().as_millis(),
@@ -75,12 +77,12 @@ pub fn sample_farbe_declarer_tt_dd(number_of_samples: usize) -> std::io::Result<
                          now.elapsed().as_millis(),
                          result.1,
                          result.2,
-                         result.0 + p.get_skat().__get_value(),
+                         result.0 + solver.problem.get_skat().__get_value(),
                          cards.0.__str(),
                          cards.1.__str(),
                          cards.2.__str());
 
-                file.write_fmt(format_args!("{} {} {} \n", now.elapsed().as_millis(), result.1, result.0 + p.get_skat().__get_value()))?;
+                file.write_fmt(format_args!("{} {} {} \n", now.elapsed().as_millis(), result.1, result.0 + solver.problem.get_skat().__get_value()))?;
             }
         }
 
