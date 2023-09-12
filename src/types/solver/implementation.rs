@@ -22,8 +22,8 @@ impl Solver {
     /// in the basic search routines.
     pub fn solve_with_skat(
         &mut self,
-        is_alpha_beta: bool,
-        is_winning: bool,
+        is_alpha_beta_accelerating: bool,
+        is_winning_only: bool,
     ) -> (u32, u32, [((u32, u32), u8); 66]) {
         let mut ret: (u32, u32, [((u32, u32), u8); 66]) = (0, 0, [((0, 0), 0); 66]);
 
@@ -48,11 +48,11 @@ impl Solver {
                 let mut current_initial_state =
                     State::create_initial_state_from_problem(&self.problem);
 
-                if is_alpha_beta {
+                if is_alpha_beta_accelerating {
                     if alpha_with_skat > skat.__get_value() {
                         current_initial_state.alpha = alpha_with_skat - skat.__get_value();
                     }
-                } else if is_winning {
+                } else if is_winning_only {
                     if alpha_with_skat >= 61 {
                         return ret;
                     }
@@ -85,13 +85,15 @@ impl Solver {
     /// Investigates all legal moves for a given state and returns an option array
     /// with 0) card under investigation 1) follow-up card from tree search (tree root) and
     /// 2) value of search
-    pub fn solve_all_cards(&mut self, state_tt: &State) -> [Option<(u32, u32, u8)>; 10] {
+    pub fn solve_all_cards(&mut self) -> [Option<(u32, u32, u8)>; 10] {
         let mut ret: [Option<(u32, u32, u8)>; 10] = [None; 10];
-        let legal_moves = state_tt.get_legal_moves().__decompose();
+        let initial_state = State::create_initial_state_from_problem(&self.problem);
+
+        let legal_moves = initial_state.get_legal_moves().__decompose();
 
         for i in 0..legal_moves.1 {
             let card = legal_moves.0[i];
-            let state_adv = state_tt.create_child_state(card, &self.problem, 0, 120);
+            let state_adv = initial_state.create_child_state(card, &self.problem, 0, 120);
             let res = self.problem.search(&state_adv);
             ret[i] = Some((card, res.0, res.1));
         }
@@ -146,9 +148,7 @@ impl Solver {
     }
 
     /// Generates playout with all values for each card..
-    pub fn playout_all_cards(
-        &mut self,
-    ) -> [(u32, Player, u8, [Option<(u32, u32, u8)>; 10]); 30] {
+    pub fn playout_all_cards(&mut self) -> [(u32, Player, u8, [Option<(u32, u32, u8)>; 10]); 30] {
 
         let mut ret: [(u32, Player, u8, [Option<(u32, u32, u8)>; 10]); 30] =
             [(0, Player::Declarer, 0, [None; 10]); 30];
@@ -161,8 +161,8 @@ impl Solver {
             self.problem.counters.iters = 0;
             self.problem.counters.breaks = 0;
 
-            let res = self.problem.search(&state);
-            let resall = self.solve_all_cards(&state);
+            let res = self.solve();
+            let resall = self.solve_all_cards();
 
             let played_card = res.0;
             ret[i].1 = state.player;
@@ -238,10 +238,9 @@ impl Solver {
         )
     }
 
-    pub fn solve(&mut self) -> u8 {
+    pub fn solve(&mut self) -> (u32, u8) {
         let state = State::create_initial_state_from_problem(&self.problem);
         let res = self.problem.search(&state);
-        let val = res.1;
         println!(" Iters: {}, Slots: {}, Writes: {}, Reads: {}, ExactReads: {}, Collisions: {}, Breaks: {}",
         self.problem.counters.iters,
         self.problem.transposition_table.get_occupied_slots(),
@@ -251,6 +250,9 @@ impl Solver {
         self.problem.counters.collisions,
         self.problem.counters.breaks);
 
-        val
+        (
+            res.0,
+            res.1
+        )
     }
 }

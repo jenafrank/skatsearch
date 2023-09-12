@@ -7,7 +7,6 @@ use std::time::Instant;
 use skat_aug23::traits::{Augen, StringConverter};
 use skat_aug23::types::problem::Problem;
 use skat_aug23::types::solver::Solver;
-use skat_aug23::types::state::State;
 
 mod problems;
 
@@ -121,11 +120,9 @@ fn play_out () {
 fn allvalues () {
     let now = Instant::now();
     let pset = problems::ten_tricks();
-
-    let state = State::create_initial_state_from_problem(&pset.0);
     let mut solver = Solver::create(pset.0);
 
-    let res = solver.solve_all_cards(&state);
+    let res = solver.solve_all_cards();
 
     for el in res.iter().flatten() {
         let card = el.0;

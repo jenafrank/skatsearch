@@ -223,15 +223,15 @@ fn transposition_table_lookup(
 
 #[inline(always)]
 fn transposition_table_write(
-    problem_tt: &mut Problem,
+    problem: &mut Problem,
     state: &State,
     alphaorig: u8,
     betaorig: u8,
     value: (u32, u8, Option<bool>)
 ) {
     if TtTable::is_tt_compatible_state(state) {
-        problem_tt.counters.writes += 1;
-        problem_tt.transposition_table.write(
+        problem.counters.writes += 1;
+        problem.transposition_table.write(
             &state,
             state.mapped_hash,
             alphaorig,
