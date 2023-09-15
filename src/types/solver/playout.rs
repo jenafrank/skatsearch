@@ -1,5 +1,5 @@
 use std::time::Instant;
-use crate::types::{state::State, player::Player};
+use crate::types::state::State;
 use super::{Solver, playout_row::PlayoutLine, retargs::PlayoutAllCardsRetLine};
 
 impl Solver {
@@ -84,6 +84,8 @@ impl Solver {
             row.augen_declarer = state.augen_declarer;
 
             row.all_cards = resall;
+
+            ret.push(row);
 
             i += 1;
         }

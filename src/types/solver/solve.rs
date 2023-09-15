@@ -39,7 +39,6 @@ impl Solver {
         let twelve_bit = remaining_cards | state.declarer_cards;
         let twelve = twelve_bit.__decompose_twelve();
 
-        let mut k = 0;
         let mut alpha_with_skat = 0;
         for i in 0..11 {
             for j in i + 1..12 {
@@ -86,8 +85,6 @@ impl Solver {
 
                     alpha_with_skat = value_with_skat;
                 }
-
-                k += 1;
             }
         }
 

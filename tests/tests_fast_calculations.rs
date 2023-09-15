@@ -4,13 +4,13 @@ extern crate test;
 extern crate skat_aug23;
 
 use std::time::Instant;
-use skat_aug23::traits::{Augen, StringConverter};
+use skat_aug23::traits::{StringConverter, Augen};
 use skat_aug23::types::problem::Problem;
 use skat_aug23::types::solver::Solver;
 
 mod problems;
 
-fn assert_solution_transposition_table((p, s): (Problem, u8)) {
+fn assert_solution((p, s): (Problem, u8)) {
     let now = Instant::now();
     let mut solver = Solver::create(p);    
     let res = solver.solve_double_dummy();
@@ -21,57 +21,53 @@ fn assert_solution_transposition_table((p, s): (Problem, u8)) {
     println!("NPS: {} kN", (res.counters.iters as f32)/((elapsed.as_micros() as f32)/1e6)/1000f32);
 }
 
-fn assert_solution_all((p, s): (Problem, u8)) {
-    assert_solution_transposition_table((p, s));
-}
+#[test]
+fn one_trick_rank_in_one_suit() { assert_solution(problems::one_trick_rank_in_one_suit()); }
 
 #[test]
-fn one_trick_rank_in_one_suit() { assert_solution_all(problems::one_trick_rank_in_one_suit()); }
+fn one_trick_suit_wins_decl() { assert_solution(problems::one_trick_suit_wins_decl()); }
 
 #[test]
-fn one_trick_suit_wins_decl() { assert_solution_all(problems::one_trick_suit_wins_decl()); }
+fn one_trick_suit_wins_left() { assert_solution(problems::one_trick_suit_wins_left()); }
 
 #[test]
-fn one_trick_suit_wins_left() { assert_solution_all(problems::one_trick_suit_wins_left()); }
+fn one_trick_suit_wins_right() { assert_solution(problems::one_trick_suit_wins_right()); }
 
 #[test]
-fn one_trick_suit_wins_right() { assert_solution_all(problems::one_trick_suit_wins_right()); }
+fn two_tricks_suit_wins_decl() { assert_solution(problems::two_tricks_suit_wins_decl()); }
 
 #[test]
-fn two_tricks_suit_wins_decl() { assert_solution_all(problems::two_tricks_suit_wins_decl()); }
+fn two_tricks_suit_wins_left() { assert_solution(problems::two_tricks_suit_wins_left()); }
 
 #[test]
-fn two_tricks_suit_wins_left() { assert_solution_all(problems::two_tricks_suit_wins_left()); }
+fn two_tricks_suit_wins_right() { assert_solution(problems::two_tricks_suit_wins_right()); }
 
 #[test]
-fn two_tricks_suit_wins_right() { assert_solution_all(problems::two_tricks_suit_wins_right()); }
+fn two_tricks_forking_decl_all() { assert_solution(problems::two_tricks_forking_decl_all()); }
 
 #[test]
-fn two_tricks_forking_decl_all() { assert_solution_all(problems::two_tricks_forking_decl_all()); }
+fn two_tricks_forking_decl_part() { assert_solution(problems::two_tricks_forking_decl_part()); }
 
 #[test]
-fn two_tricks_forking_decl_part() { assert_solution_all(problems::two_tricks_forking_decl_part()); }
+fn two_tricks_forking_team_part() { assert_solution(problems::two_tricks_forking_team_part()); }
 
 #[test]
-fn two_tricks_forking_team_part() { assert_solution_all(problems::two_tricks_forking_team_part()); }
+fn two_tricks_not_allowed_to_trump() { assert_solution(problems::two_tricks_not_allowed_to_trump()); }
 
 #[test]
-fn two_tricks_not_allowed_to_trump() { assert_solution_all(problems::two_tricks_not_allowed_to_trump()); }
+fn five_tricks() { assert_solution(problems::five_tricks()); }
 
 #[test]
-fn five_tricks() { assert_solution_all(problems::five_tricks()); }
+fn six_tricks() { assert_solution(problems::six_tricks()); }
 
 #[test]
-fn six_tricks() { assert_solution_all(problems::six_tricks()); }
+fn seven_tricks() { assert_solution(problems::seven_tricks()); }
 
 #[test]
-fn seven_tricks() { assert_solution_all(problems::seven_tricks()); }
+fn eight_tricks() { assert_solution(problems::eight_tricks()); }
 
 #[test]
-fn eight_tricks() { assert_solution_all(problems::eight_tricks()); }
-
-#[test]
-fn ten_tricks() { assert_solution_all(problems::ten_tricks()); }
+fn ten_tricks() { assert_solution(problems::ten_tricks()); }
 
 // #[test]
 // fn ten_grand_hard() { assert_solution_all(problems::ten_grand_hard())}}
@@ -87,7 +83,7 @@ fn play_out () {
 
     let result = solver.playout();
 
-    for (i, el) in result.iter().flatten().enumerate() {
+    for (i, el) in result.iter().enumerate() {
 
         if i % 3 == 0 {
             println!();
@@ -124,12 +120,11 @@ fn allvalues () {
 
     let res = solver.solve_all_cards();
 
-    for el in res.iter().flatten() {
-        let card = el.0;
-        let follow_up_card = el.1;
-        let value = el.2;
-
-        println!("{} -> {} ({})", card.__str(), follow_up_card.__str(), value);
+    for el in res.card_list {
+        println!("{} -> {} ({})", 
+            el.investigated_card.__str(), 
+            el.best_follow_up_card.__str(), 
+            el.value);
     }
 
     let elapsed = now.elapsed();
@@ -150,10 +145,10 @@ fn allvalues_playout () {
 
     for (i, el) in res.iter().enumerate() {
 
-        let card = el.0;
-        let player = el.1;
-        let pnts = el.2;
-        let allvals = el.3;
+        let card = el.best_card;
+        let player = el.player;
+        let pnts = el.augen_declarer;
+        let allvals = &el.all_cards;
 
         if i%3 != 2 {
             print!("{} {}    | ", player.str(), card.__str());
@@ -161,8 +156,8 @@ fn allvalues_playout () {
             print!("{} {} {:2} | ", player.str(), card.__str(), pnts);
         }
 
-        for el2 in allvals.iter().flatten() {
-            print!("[{}, {} {}] ", el2.0.__str(), el2.1.__str(), el2.2);
+        for el2 in &allvals.card_list {
+            print!("[{}, {} {}] ", el2.investigated_card.__str(), el2.best_follow_up_card.__str(), el2.value);
         }
 
         println!();
@@ -187,13 +182,14 @@ pub fn search_if_winning () {
 
     let start = Instant::now();
     let result = solver.solve_win_10tricks();
-    let is_winning = result.0 > 60;
+    let is_winning = result.declarer_wins;
     let time = start.elapsed().as_micros();
 
     println!("Consumed time: {} µs",time);
     println!("Declarer is winning: {}", is_winning);
 
-    assert!(!is_winning);
+    // The ten tricks would give 59 points, together with the 7 points from skat, this hand is won.
+    assert!(is_winning);
 }
 
 #[test]
@@ -204,8 +200,8 @@ pub fn all_skat_values () {
     let result = solver.solve_with_skat(false,false);
     let time = start.elapsed().as_micros();
 
-    let mut vec = result.2.to_vec();
-    vec.sort_by(|a,b| b.1.cmp(&a.1));
+    let mut vec = result.all_skats;
+    vec.sort_by(|a,b| b.value.cmp(&a.value));
 
     println!("Consumed time: {} µs",time);
     println!();
@@ -217,13 +213,19 @@ pub fn all_skat_values () {
     println!("{} | {}", p.declarer_cards_all.__str() , skat.__str());
     println!();
 
+    let best_skat = result.best_skat.unwrap();
     println!("One of best skat drueckungs found:");
-    println!("{} {}",result.0.__str(), result.1.__str());
+    println!("{} {}", best_skat.skat_card_1, best_skat.skat_card_2);
     println!();
 
-    for el in vec {
-        let skat_value = el.0.0.__get_value() + el.0.1.__get_value();
-        println!("{} {} : {:3} + {:3} = {:3} | {}", el.0.0.__str(), el.0.1.__str(), el.1 - skat_value,
-            skat_value, el.1, (allcards ^ el.0.0 ^ el.0.1).__str());
+    for el in vec {        
+        let skat_value = el.skat_card_1.__get_value() + el.skat_card_2.__get_value();
+        println!("{} {} : {:3} + {:3} = {:3} | {}", 
+        el.skat_card_1.__str(), 
+        el.skat_card_2.__str(), 
+        el.value - skat_value,
+        skat_value, 
+        el.value, 
+        (allcards ^ el.skat_card_1 ^ el.skat_card_2).__str());
     }
 }
