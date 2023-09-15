@@ -1,4 +1,9 @@
 use super::Solver;
+use super::retargs::SolveAllCardsRet;
+use super::retargs::SolveRet;
+use super::retargs::SolveWithSkatRet;
+use super::retargs::SolveWithSkatRetLine;
+use super::retargs::SolveWin10TricksRet;
 use crate::consts::bitboard::ALLCARDS;
 use crate::traits::Augen;
 use crate::traits::Bitboard;
@@ -21,8 +26,13 @@ impl Solver {
         &mut self,
         is_alpha_beta_accelerating: bool,
         is_winning_only: bool,
-    ) -> (u32, u32, [((u32, u32), u8); 66]) {
-        let mut ret: (u32, u32, [((u32, u32), u8); 66]) = (0, 0, [((0, 0), 0); 66]);
+    ) -> SolveWithSkatRet {
+        
+        let mut ret: SolveWithSkatRet = SolveWithSkatRet {
+            best_skat: None,
+            all_skats: Vec::new(),
+            counters: self.problem.counters
+        };
 
         let state = State::create_initial_state_from_problem(&self.problem);
         let remaining_cards = !state.get_all_unplayed_cards();
@@ -61,13 +71,18 @@ impl Solver {
                 let result = self.problem.search(&current_initial_state);
                 let value_with_skat = result.1 + skat.__get_value();
 
-                ret.2[k].0 .0 = twelve[i];
-                ret.2[k].0 .1 = twelve[j];
-                ret.2[k].1 = value_with_skat;
+                ret.all_skats.push( SolveWithSkatRetLine {
+                    skat_card_1: twelve[i],
+                    skat_card_2: twelve[j],
+                    value: value_with_skat
+                });
 
                 if value_with_skat > alpha_with_skat {
-                    ret.0 = twelve[i];
-                    ret.1 = twelve[j];
+                    ret.best_skat = SolveWithSkatRetLine {
+                        skat_card_1: twelve[i],
+                        skat_card_2: twelve[j],
+                        value: value_with_skat
+                    }.into();                        
 
                     alpha_with_skat = value_with_skat;
                 }
@@ -76,30 +91,36 @@ impl Solver {
             }
         }
 
+        ret.counters = self.problem.counters;
+
         ret
     }
 
     /// Investigates all legal moves for a given state and returns an option array
     /// with 0) card under investigation 1) follow-up card from tree search (tree root) and
     /// 2) value of search
-    pub fn solve_all_cards(&mut self) -> [Option<(u32, u32, u8)>; 10] {
+    pub fn solve_all_cards(&mut self) -> SolveAllCardsRet {
         let initial_state = State::create_initial_state_from_problem(&self.problem);        
         self.get_all_cards(initial_state)
     }
 
-    pub fn solve_win(&mut self) -> (u8, u32, u32) {
+    // works currently only with 10 cards, since all cards not part of the full deck
+    // are considered as skat and thus as points fot the declarer.
+    pub fn solve_win_10tricks(&mut self) -> SolveWin10TricksRet {
         let mut state = State::create_initial_state_from_problem(&self.problem);
 
         let skat_value = self.problem.get_skat().__get_value();
 
+        let threshold_farbe_and_grand = 60 - skat_value;
+
         match self.problem.game_type {
             Game::Farbe => {
-                state.alpha = 60 - skat_value;
-                state.beta = 61 - skat_value;
+                state.alpha = threshold_farbe_and_grand;
+                state.beta = threshold_farbe_and_grand + 1;
             }
             Game::Grand => {
-                state.alpha = 60 - skat_value;
-                state.beta = 61 - skat_value;
+                state.alpha = threshold_farbe_and_grand;
+                state.beta = threshold_farbe_and_grand + 1;
             }
             Game::Null => {
                 state.alpha = 0;
@@ -107,38 +128,43 @@ impl Solver {
             }
         }
 
-        let val = self.problem.search(&state).1;
+        let result = self.problem.search(&state);
+        let val = result.1;
 
-        (
-            val,
-            self.problem.counters.iters,
-            self.problem.counters.collisions,
-        )
+        let declarer_wins = if self.problem.game_type == Game::Null {
+            val == 0
+        } else {
+            val > threshold_farbe_and_grand
+        };
+
+        SolveWin10TricksRet {
+            best_card: result.0,
+            declarer_wins,
+            counters: self.problem.counters            
+        }
     }
 
-    pub fn solve_double_dummy(&mut self) -> (u8, u32, u32) {
-        let mut val = 0;
+    // unclear, if the right best card is determined. complicated. in search routine we should
+    // identify, if any best card has been detected so far
+    pub fn solve_double_dummy(&mut self) -> SolveRet {
+        let mut result = (0u32, 0u8);
         let mdf = 5u8;
 
         for i in 0..119 {
             let mut state = State::create_initial_state_from_problem(&self.problem);
             state.alpha = mdf * i;
             state.beta = mdf * (i + 1);
-            val = self.problem.search(&state).1;
+            result = self.problem.search(&state);
 
-            if val < state.beta {
+            if result.1 < state.beta {
                 break;
             }
         }
 
-        (
-            val,
-            self.problem.counters.iters,
-            self.problem.counters.collisions,
-        )
+        SolveRet { best_card: result.0, best_value: result.1, counters: self.problem.counters }
     }   
 
-    pub fn solve(&mut self) -> (u32, u8) {
+    pub fn solve(&mut self) -> SolveRet {
         let state = State::create_initial_state_from_problem(&self.problem);
         let result = self.get(state);
 

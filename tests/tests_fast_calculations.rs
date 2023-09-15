@@ -15,10 +15,10 @@ fn assert_solution_transposition_table((p, s): (Problem, u8)) {
     let mut solver = Solver::create(p);    
     let res = solver.solve_double_dummy();
 
-    assert_eq!(res.0, s);
+    assert_eq!(res.best_value, s);
     let elapsed = now.elapsed();
     println!("Transtable duration = {} µs",elapsed.as_micros());
-    println!("NPS: {} kN", (res.1 as f32)/((elapsed.as_micros() as f32)/1e6)/1000f32);
+    println!("NPS: {} kN", (res.counters.iters as f32)/((elapsed.as_micros() as f32)/1e6)/1000f32);
 }
 
 fn assert_solution_all((p, s): (Problem, u8)) {
@@ -186,7 +186,7 @@ pub fn search_if_winning () {
     let mut solver = Solver::create(pset.0);
 
     let start = Instant::now();
-    let result = solver.solve_win();
+    let result = solver.solve_win_10tricks();
     let is_winning = result.0 > 60;
     let time = start.elapsed().as_micros();
 

@@ -1,19 +1,20 @@
 use std::time::Instant;
 use crate::types::{state::State, player::Player};
-use super::{Solver, playout_row::PlayoutRow};
+use super::{Solver, playout_row::PlayoutLine, retargs::PlayoutAllCardsRetLine};
 
 impl Solver {
 
        /// Generates playout.
-       pub fn playout(&mut self) -> [Option<PlayoutRow>; 30] {
-        let mut ret: [Option<PlayoutRow>; 30] = [None; 30];
+       pub fn playout(&mut self) -> Vec<PlayoutLine> {
+        
+        let mut ret: Vec<PlayoutLine> = Vec::new();
         let mut i: usize = 0;
         let n: usize = self.problem.nr_of_cards as usize;
 
         let mut initial_state = State::create_initial_state_from_problem(&self.problem);
 
         while i < n {
-            let mut row: PlayoutRow = Default::default();
+            let mut row: PlayoutLine = Default::default();
 
             row.declarer_cards = initial_state.declarer_cards;
             row.left_cards = initial_state.left_cards;
@@ -43,7 +44,7 @@ impl Solver {
                 initial_state.beta,
             );
 
-            ret[i] = Some(row);
+            ret.push(row);
             i += 1;
         }
 
@@ -51,38 +52,38 @@ impl Solver {
     }
 
     /// Generates playout with all values for each card..
-    pub fn playout_all_cards(&mut self) -> [(u32, Player, u8, [Option<(u32, u32, u8)>; 10]); 30] {
+    pub fn playout_all_cards(&mut self) -> Vec<PlayoutAllCardsRetLine> {
 
-        let mut ret: [(u32, Player, u8, [Option<(u32, u32, u8)>; 10]); 30] =
-            [(0, Player::Declarer, 0, [None; 10]); 30];
+        let mut ret: Vec<PlayoutAllCardsRetLine> = Vec::new();
         let mut i: usize = 0;
         let n: usize = self.problem.nr_of_cards as usize;
         
         let mut state = State::create_initial_state_from_problem(&self.problem);
 
         while i < n {
+
+            let mut row: PlayoutAllCardsRetLine = Default::default();
+
             self.problem.counters.iters = 0;
             self.problem.counters.breaks = 0;
 
             let res = self.get(state);
             let resall = self.get_all_cards(state);
 
-            let played_card = res.0;
-            ret[i].1 = state.player;
+            let best_card = res.best_card;
+            row.player = state.player;
 
             state = state.create_child_state(
-                played_card,
+                best_card,
                 &self.problem,
                 state.alpha,
                 state.beta,
             );
 
-            ret[i].0 = played_card;
-            ret[i].2 = state.augen_declarer;
+            row.best_card = best_card;
+            row.augen_declarer = state.augen_declarer;
 
-            for (j, el) in resall.iter().flatten().enumerate() {
-                ret[i].3[j] = Some((el.0, el.1, el.2));
-            }
+            row.all_cards = resall;
 
             i += 1;
         }

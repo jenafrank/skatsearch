@@ -57,7 +57,7 @@ pub fn sample_farbe_declarer_tt_dd(number_of_samples: usize) -> std::io::Result<
 
         let now = Instant::now();
         let mut solver = Solver::create(p);
-        let result = solver.solve_win();
+        let result = solver.solve_win_10tricks();
 
         match solver.problem.game_type {
             Game::Null => {
