@@ -72,4 +72,18 @@ impl Problem {
         )
     }
 
+    pub fn new() -> Self {
+        Problem {
+            declarer_cards_all: 0u32,
+            left_cards_all: 0u32,
+            right_cards_all: 0u32,
+            game_type: Game::Farbe,
+            start_player: Player::Declarer,
+            augen_total: 0u8,
+            nr_of_cards: 0u8,
+            transposition_table: Default::default(),
+            counters: Default::default()
+        }
+    }
+
 }
