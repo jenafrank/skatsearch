@@ -62,6 +62,8 @@ impl UncertainProblem {
 
     pub fn generate_concrete_problem(&self) -> Problem {
 
+        self.validate();
+
         let mut problem = Problem::new();
 
         problem.game_type = self.game_type;
@@ -76,6 +78,25 @@ impl UncertainProblem {
             panic!("Something went wrong in randomly select cards with given facts.");
         }
     }
+
+    fn validate(&self) {
+        self.validate_facts();
+        self.validate_all_cards();
+    }
+
+    fn validate_facts(&self) {
+        assert!(self.my_player != self.facts[0].player);
+        assert!(self.my_player != self.facts[1].player);
+        assert!(self.facts[0].player != self.facts[1].player);
+    }
+
+    fn validate_all_cards(&self) {
+        assert!(self.all_cards & self.my_cards == self.my_cards);
+        
+        // currently uncertain problems can only be solved before a trick starts:
+        assert!(self.all_cards.count_ones() % 3 == 0); 
+    }
+
 }
 
 fn verify_card_distribution(problem: &Problem) -> bool {
@@ -193,7 +214,7 @@ fn cancel_cards(cards: u32, facts: Facts, game: Game) -> u32 {
 }
 
 fn set_cards_for_problem(problem: &mut Problem, my_cards: u32, my_player: Player) {    
-    match (my_player) {
+    match my_player {
         Player::Declarer => problem.declarer_cards_all = my_cards,
         Player::Left => problem.left_cards_all = my_cards,
         Player::Right => problem.right_cards_all = my_cards
