@@ -6,6 +6,8 @@ impl Default for Problem {
             declarer_cards_all: 0, 
             left_cards_all: 0, 
             right_cards_all: 0, 
+            trick_cards: 0,
+            trick_suit: 0,
             game_type: Default::default(), 
             start_player: Default::default(), 
             augen_total: 0, 

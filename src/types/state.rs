@@ -185,6 +185,8 @@ mod tests_no_evaluation {
             nr_of_cards: 6,
             transposition_table: Default::default(),
             counters: Default::default(),
+            trick_cards: 0,
+            trick_suit: 0,
         };
 
         let state = State {
@@ -241,6 +243,8 @@ mod tests_no_evaluation {
             augen_total: "CJ ST SJ SA CA S7".__bit().__get_value(),
             start_player: Player::Declarer,
             nr_of_cards: 6,
+            trick_cards: 0,
+            trick_suit: 0,
             transposition_table: Default::default(),
             counters: Default::default(),
         };
@@ -264,6 +268,48 @@ mod tests_no_evaluation {
             is_root_state: false // cache var 6
             // cache var 7: augen_future ??
         }.add_hash();
+
+        let next_state = state.create_child_state("SA".__bit(), &problem, 0, 120);
+
+        let expected_next_state = State {
+            played_cards: "[CJ SA]".__bit(),
+            declarer_cards: "[ST]".__bit(),
+            left_cards: "[SJ]".__bit(),
+            right_cards: "[CA S7]".__bit(),
+            trick_cards: "[CJ SA]".__bit(),
+            trick_suit: TRUMP_FARBE,
+            trick_cards_count: 2,
+            augen_declarer: 0,
+            augen_team: 0,
+            augen_future: "CJ ST SJ SA CA S7".__bit().__get_value(),
+            player: Player::Right,
+            player_cards: "[CA S7]".__bit(),
+            alpha: 0,
+            beta: 120,
+            mapped_hash: 0,
+            is_root_state: false
+        }.add_hash();
+
+        assert_eq!(next_state, expected_next_state);
+    }
+
+    #[test]
+    fn test_advance_from_within_trick_via_problem_only() {
+        let problem = Problem {
+            declarer_cards_all: "[ST]".__bit(),
+            left_cards_all: "[SJ SA]".__bit(),
+            right_cards_all: "[CA S7]".__bit(),
+            game_type: Game::Farbe,
+            augen_total: "CJ ST SJ SA CA S7".__bit().__get_value(),
+            start_player: Player::Left,
+            nr_of_cards: 5,
+            trick_cards: "CJ".__bit(),
+            trick_suit: TRUMP_FARBE,
+            transposition_table: Default::default(),
+            counters: Default::default(),
+        };
+
+        let state = problem.new_state(0, 120);
 
         let next_state = state.create_child_state("SA".__bit(), &problem, 0, 120);
 
