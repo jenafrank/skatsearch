@@ -22,6 +22,7 @@ impl Problem {
             start_player,
             trick_cards: 0,
             trick_suit: 0,
+            points_to_win: 0,
 
             augen_total: allcards.__get_value(),
             nr_of_cards: allcards.__get_number_of_bits(),
@@ -85,6 +86,7 @@ impl Problem {
             nr_of_cards: 0u8,
             trick_cards: 0,
             trick_suit: 0,
+            points_to_win: 0,
             transposition_table: Default::default(),
             counters: Default::default()
         }

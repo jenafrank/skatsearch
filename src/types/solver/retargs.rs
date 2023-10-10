@@ -6,7 +6,7 @@ pub struct SolveRet {
     pub counters: Counters
 }
 
-pub struct SolveWin10TricksRet {
+pub struct SolveWinRet {
     pub best_card: u32,
     pub declarer_wins: bool,
     pub counters: Counters

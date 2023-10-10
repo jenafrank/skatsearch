@@ -3,10 +3,11 @@ use super::retargs::SolveAllCardsRet;
 use super::retargs::SolveRet;
 use super::retargs::SolveWithSkatRet;
 use super::retargs::SolveWithSkatRetLine;
-use super::retargs::SolveWin10TricksRet;
+use super::retargs::SolveWinRet;
 use crate::consts::bitboard::ALLCARDS;
 use crate::traits::Augen;
 use crate::traits::Bitboard;
+use crate::traits::StringConverter;
 use crate::types::game::Game;
 use crate::types::state::State;
 
@@ -101,9 +102,23 @@ impl Solver {
         self.get_all_cards(initial_state)
     }
 
+    pub fn solve_win(&mut self) -> SolveWinRet {
+        let alpha = self.problem.points_to_win - 1;
+        let beta = self.problem.points_to_win;
+        let mut state = self.problem.new_state(alpha, beta);
+        let (best_card, value) = self.problem.search(&mut state);
+        let declarer_wins = value > alpha;
+
+        SolveWinRet {
+            best_card,
+            declarer_wins,
+            counters: self.problem.counters
+        }
+    }
+
     // works currently only with 10 cards, since all cards not part of the full deck
     // are considered as skat and thus as points fot the declarer.
-    pub fn solve_win_10tricks(&mut self) -> SolveWin10TricksRet {
+    pub fn solve_win_10tricks(&mut self) -> SolveWinRet {
         let mut state = State::create_initial_state_from_problem(&self.problem);
 
         let skat_value = self.problem.get_skat().__get_value();
@@ -134,7 +149,7 @@ impl Solver {
             val > threshold_farbe_and_grand
         };
 
-        SolveWin10TricksRet {
+        SolveWinRet {
             best_card: result.0,
             declarer_wins,
             counters: self.problem.counters            
@@ -177,4 +192,56 @@ impl Solver {
         result
     }
 
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::{types::{problem::{Problem, counters::Counters}, tt_table::TtTable, solver::Solver, game::Game, player::Player}, traits::{BitConverter, Augen}, consts::bitboard::SPADES};
+
+
+    #[test]
+    fn test_solve_win() {
+        let problem = Problem {
+            declarer_cards_all: "SA SK".__bit(),
+            left_cards_all: "ST SQ".__bit(),
+            right_cards_all: "S9 S8".__bit(),
+            game_type: Game::Farbe,
+            start_player: Player::Declarer,
+            points_to_win: 14,
+            trick_cards: 0,
+            trick_suit: 0,
+            augen_total: "SA ST SK SQ S9 S8".__bit().__get_value(),
+            nr_of_cards: 6,
+            transposition_table: TtTable::default() ,
+            counters: Counters::default(),
+        };
+
+        let mut solver = Solver::create(problem);
+        let result = solver.solve_win();
+
+        assert_eq!(result.declarer_wins, true);
+    }
+
+    #[test]
+    fn test_solve_win_intertrick() {
+        let problem = Problem {
+            declarer_cards_all: "SA SK".__bit(),
+            left_cards_all: "ST SQ".__bit(),
+            right_cards_all: "S9 S8".__bit(),
+            game_type: Game::Farbe,
+            start_player: Player::Left,
+            points_to_win: 3,
+            trick_cards: "SA".__bit(),
+            trick_suit: SPADES,
+            augen_total: "SA ST SK SQ S9 S8".__bit().__get_value(),
+            nr_of_cards: 5,
+            transposition_table: TtTable::default() ,
+            counters: Counters::default(),
+        };
+
+        let mut solver = Solver::create(problem);
+        let result = solver.solve_win();
+
+        assert_eq!(result.declarer_wins, true);
+    }
 }

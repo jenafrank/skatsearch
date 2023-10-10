@@ -81,6 +81,7 @@ impl UncertainProblem {
             trick_suit: self.active_suit,
             augen_total: 0,
             nr_of_cards: 0,
+            points_to_win: self.points_to_win,
             transposition_table: TtTable::default(),
             counters: Counters::default(),        
         };
@@ -137,13 +138,46 @@ fn set_cards_for_other_players(
     let mut cards_player_1 = cards_on_hands_of_both_other_players;
     let mut cards_player_2 = cards_on_hands_of_both_other_players;
 
-    cards_player_1 = cancel_cards(cards_player_1, facts[0], problem.game_type);
-    cards_player_2 = cancel_cards(cards_player_2, facts[1], problem.game_type);
+    cards_player_1 = cancel_cards_with_facts(cards_player_1, facts[0], problem.game_type);
+    cards_player_2 = cancel_cards_with_facts(cards_player_2, facts[1], problem.game_type);
 
     randomly_cancel_out_shared_cards_wrapper(problem, &mut cards_player_1, &mut cards_player_2, my_cards);
 
+    add_trick_cards_to_all_cards(&mut cards_player_1, &mut cards_player_2, cards_on_table, problem.start_player);
+
     set_cards_to_player(problem, cards_player_1, facts[0].player);
     set_cards_to_player(problem, cards_player_2, facts[1].player);
+}
+
+fn add_trick_cards_to_all_cards(cards_player_1: &mut u32, cards_player_2: &mut u32, cards_on_table: u32, start_player: Player) {
+    let nr_of_trick_cards = cards_on_table.count_ones();
+
+    if nr_of_trick_cards == 0 {
+        return;
+    }
+
+    if nr_of_trick_cards == 1 {
+        let trick_card = cards_on_table.__decompose().0[0];
+        let nr_cards_player_1 = cards_player_1.count_ones();
+        let nr_cards_player_2 = cards_player_2.count_ones();
+        
+        if  nr_cards_player_1 < nr_cards_player_2 {
+            *cards_player_1 |= trick_card;
+        } else {
+            *cards_player_2 |= trick_card;
+        }
+
+        return;
+    }
+
+    if nr_of_trick_cards == 2 {
+        *cards_player_1 |= cards_on_table;
+        *cards_player_2 |= cards_on_table;
+        return;
+    }
+
+    panic!("Illegal number of trick cards.");
+
 }
 
 fn randomly_cancel_out_shared_cards_wrapper(problem: &mut Problem, cards_player_1: &mut u32, cards_player_2: &mut u32, my_cards: u32) {
@@ -203,7 +237,7 @@ fn set_cards_to_player(problem: &mut Problem, cards: u32, player: Player) {
     }
 }
 
-fn cancel_cards(cards: u32, facts: Facts, game: Game) -> u32 {
+fn cancel_cards_with_facts(cards: u32, facts: Facts, game: Game) -> u32 {
     let mut ret_cards = cards;
 
     if facts.no_trump {
@@ -303,7 +337,7 @@ mod tests {
             cards_on_table: "ST".__bit(),
             active_suit: TRUMP_FARBE,
             facts: [
-                Facts::one_fact(Player::Right,false,false,false,false,true),
+                Facts::one_fact(Player::Right,false,false,false,false,false),
                 Facts::zero_fact(Player::Left)
             ]
         };

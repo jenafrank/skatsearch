@@ -18,6 +18,7 @@ pub struct Problem {
     pub right_cards_all: u32,
     pub game_type: Game,
     pub start_player: Player,
+    pub points_to_win: u8,
     
     // Primary values for intertrick problems
     pub trick_cards: u32,
