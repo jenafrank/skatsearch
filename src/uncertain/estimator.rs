@@ -59,4 +59,24 @@ mod tests {
 
         println!("Probability of win: {}", probability);
     }
+
+    #[test]
+    fn test_uproblem_full() {
+        
+        let uproblem = UncertainProblem {
+            game_type: Game::Farbe,
+            player: Player::Declarer,
+            my_cards: "SA SK S9".__bit(),
+            cards_on_table: 0,
+            all_cards: "SA SK S9 ST SQ S8 C7 H7 D7".__bit(),
+            active_suit: 0,
+            points_to_win: 21,
+            facts: [Facts::zero_fact(Player::Left), Facts::zero_fact(Player::Right)]
+        };
+
+        let mut estimator = super::Estimator::new(uproblem, 1000);
+        let probability = estimator.estimate_win(false);
+
+        println!("Probability of win: {}", probability);
+    }
 }
