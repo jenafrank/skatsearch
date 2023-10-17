@@ -12,8 +12,7 @@ impl Default for Problem {
             start_player: Default::default(), 
             augen_total: 0, 
             nr_of_cards: 0, 
-            points_to_win: 0,
-            transposition_table: Default::default()
+            points_to_win: 0
         }
      }
 }

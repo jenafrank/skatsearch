@@ -6,7 +6,6 @@ mod traits;
 use super::game::Game;
 use super::player::Player;
 use super::state::State;
-use crate::types::tt_table::TtTable;
 
 pub struct Problem {
 
@@ -25,9 +24,6 @@ pub struct Problem {
     // Derived values
     pub augen_total: u8,
     pub nr_of_cards: u8,
-
-    // Transposition table and counters for statistics
-    pub transposition_table: TtTable
 }
 
 impl Problem {

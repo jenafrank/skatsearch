@@ -183,7 +183,6 @@ mod tests_no_evaluation {
             augen_total: "CJ ST SJ SA CA S7".__bit().__get_value(),
             start_player: Player::Declarer,
             nr_of_cards: 6,
-            transposition_table: Default::default(),
             trick_cards: 0,
             trick_suit: 0,
             points_to_win: 0
@@ -246,7 +245,6 @@ mod tests_no_evaluation {
             trick_cards: 0,
             trick_suit: 0,
             points_to_win: 0,
-            transposition_table: Default::default(),
         };
 
         let state = State {
@@ -306,7 +304,6 @@ mod tests_no_evaluation {
             points_to_win: 0,
             trick_cards: "CJ".__bit(),
             trick_suit: TRUMP_FARBE,
-            transposition_table: Default::default(),
         };
 
         let state = problem.new_state(0, 120);

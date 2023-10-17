@@ -8,6 +8,26 @@ pub struct TtTable {
     pub data: Vec<TtEntry>
 }
 
+static mut TABLE_INSTANCE: Option<TtTable> = None;
+
+impl TtTable {
+    pub fn get() -> &'static TtTable {
+        unsafe {
+            TABLE_INSTANCE.get_or_insert_with(|| TtTable::create())
+        }
+    }
+
+    pub fn get_mutable() -> &'static mut TtTable {
+        unsafe {
+            TABLE_INSTANCE.get_or_insert_with(|| TtTable::create())
+        }
+    }
+
+    pub fn reset() {
+        unsafe { TABLE_INSTANCE = None };
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

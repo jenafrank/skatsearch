@@ -18,7 +18,7 @@ pub fn sample_farbe_declarer_tt(number_of_samples: usize) -> std::io::Result<()>
 
     for _ in 0..number_of_samples {
         let cards = get_random_card_distribution_with_seed(&mut rand);
-        let mut p = Problem::create(cards.0, cards.1, cards.2, Game::Grand, Player::Declarer);
+        let p = Problem::create(cards.0, cards.1, cards.2, Game::Grand, Player::Declarer);
 
         let s = State::create_initial_state_from_problem(&p);
 

@@ -12,7 +12,7 @@ mod problems;
 
 fn assert_solution((p, s): (Problem, u8)) {
     let now = Instant::now();
-    let mut solver = Solver::create(p);    
+    let solver = Solver::create_with_new_transposition_table(p);    
     let res = solver.solve_double_dummy();
 
     assert_eq!(res.best_value, s);

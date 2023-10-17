@@ -3,7 +3,6 @@ use crate::traits::{Bitboard, Augen};
 use crate::types::game::Game;
 use crate::types::player::Player;
 use crate::types::problem::Problem;
-use crate::types::tt_table::TtTable;
 
 pub struct UncertainProblem {
     pub game_type: Game,
@@ -81,7 +80,6 @@ impl UncertainProblem {
             augen_total: 0,
             nr_of_cards: 0,
             points_to_win: self.points_to_win,
-            transposition_table: TtTable::default(),
         };
 
         set_cards_for_problem(&mut problem, self.my_cards, self.player);

@@ -10,6 +10,7 @@ use crate::traits::Bitboard;
 use crate::types::counter::Counters;
 use crate::types::game::Game;
 use crate::types::state::State;
+use crate::types::tt_table::TtTable;
 
 impl Solver {
     
@@ -158,7 +159,7 @@ impl Solver {
 
     // unclear, if the right best card is determined. complicated. in search routine we should
     // identify, if any best card has been detected so far
-    pub fn solve_double_dummy(&mut self) -> SolveRet {
+    pub fn solve_double_dummy(&self) -> SolveRet {
         let mut result = (0u32, 0u8);
         let mdf = 5u8;
 
@@ -182,7 +183,7 @@ impl Solver {
 
         println!(" Iters: {}, Slots: {}, Writes: {}, Reads: {}, ExactReads: {}, Collisions: {}, Breaks: {}",
         result.counters.iters,
-        self.problem.transposition_table.get_occupied_slots(),
+        TtTable::get().get_occupied_slots(),
         result.counters.writes,
         result.counters.reads,
         result.counters.exactreads,
@@ -196,8 +197,7 @@ impl Solver {
 
 #[cfg(test)]
 mod tests {
-    use crate::{types::{problem::Problem, tt_table::TtTable, solver::Solver, game::Game, player::Player}, traits::{BitConverter, Augen}, consts::bitboard::SPADES};
-
+    use crate::{types::{problem::Problem, solver::Solver, game::Game, player::Player}, traits::{BitConverter, Augen}, consts::bitboard::SPADES};
 
     #[test]
     fn test_solve_win() {
@@ -211,8 +211,7 @@ mod tests {
             trick_cards: 0,
             trick_suit: 0,
             augen_total: "SA ST SK SQ S9 S8".__bit().__get_value(),
-            nr_of_cards: 6,
-            transposition_table: TtTable::default()
+            nr_of_cards: 6
         };
 
         let mut solver = Solver::create(problem);
@@ -233,8 +232,7 @@ mod tests {
             trick_cards: "SA".__bit(),
             trick_suit: SPADES,
             augen_total: "SA ST SK SQ S9 S8".__bit().__get_value(),
-            nr_of_cards: 5,
-            transposition_table: TtTable::default()
+            nr_of_cards: 5
         };
 
         let mut solver = Solver::create(problem);
