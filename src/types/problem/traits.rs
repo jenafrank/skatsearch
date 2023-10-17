@@ -13,8 +13,7 @@ impl Default for Problem {
             augen_total: 0, 
             nr_of_cards: 0, 
             points_to_win: 0,
-            transposition_table: Default::default(), 
-            counters: Default::default() 
+            transposition_table: Default::default()
         }
      }
 }

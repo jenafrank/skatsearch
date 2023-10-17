@@ -1,7 +1,8 @@
 use std::cmp;
+use crate::types::counter::Counters;
 use crate::types::game::Game;
 use crate::types::player::Player;
-use crate::types::problem::{Counters, Problem};
+use crate::types::problem::Problem;
 use crate::types::state::*;
 use crate::types::tt_flag::TtFlag;
 use crate::types::tt_table::TtTable;
@@ -11,7 +12,7 @@ impl Problem {
 
     pub fn search(&mut self, state: &State) -> (u32, u8) {
 
-        self.counters.iters += 1;
+        Counters::inc_iters();
 
         // BASIC: Termination of recursive search
         if let Some(x) = apply_termination_criteria(&self, &state) {
@@ -26,7 +27,6 @@ impl Problem {
         if let Some(x) = transposition_table_lookup(
             &self.transposition_table,
             &state,
-            &mut self.counters,
             &mut alpha,
             &mut beta
         ) {
@@ -59,7 +59,7 @@ impl Problem {
 
             // Alpha-beta cutoffs
             if shrink_alpha_beta_window(state.player, &mut alpha, &mut beta, child_state_value.1, self.game_type) {
-                self.counters.breaks += 1;
+                Counters::inc_breaks();
                 break;
             }
         }
@@ -189,19 +189,18 @@ fn apply_termination_criteria(problem: &Problem, state: &State) -> Option<u8> {
 fn transposition_table_lookup(
     tt: &TtTable,
     state: &State,
-    counters: &mut Counters,
     alpha: &mut u8,
     beta: &mut u8
 ) -> Option<(u32, u8)>
 {
 
     if TtTable::is_tt_compatible_state(state) {
-        if let Some(tt_entry) = tt.read(state, counters) {
+        if let Some(tt_entry) = tt.read(state) {
             let value = tt_entry.value + state.augen_declarer;
             let bestcard = tt_entry.bestcard;
             match tt_entry.flag {
                 TtFlag::EXACT => {
-                    counters.exactreads += 1;
+                    Counters::inc_exactreads();
                     return Some((bestcard,value));
                 },
                 TtFlag::LOWER => {
@@ -229,7 +228,7 @@ fn transposition_table_write(
     value: (u32, u8)
 ) {
     if TtTable::is_tt_compatible_state(state) {
-        problem.counters.writes += 1;
+        Counters::inc_writes();
         problem.transposition_table.write(
             &state,
             state.mapped_hash,

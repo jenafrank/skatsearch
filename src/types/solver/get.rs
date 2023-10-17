@@ -1,4 +1,4 @@
-use crate::{types::state::State, traits::Bitboard};
+use crate::{types::{state::State, counter::Counters}, traits::Bitboard};
 
 use super::{Solver, retargs::{SolveRet, SolveAllLineRetArgs, SolveAllCardsRet}};
 
@@ -6,7 +6,7 @@ impl Solver {
     
     pub fn get_all_cards(&mut self, state: State) -> SolveAllCardsRet {
         
-        let mut ret: SolveAllCardsRet = SolveAllCardsRet { card_list: Vec::new(), counters: self.problem.counters };
+        let mut ret: SolveAllCardsRet = SolveAllCardsRet { card_list: Vec::new(), counters: Counters::get() };
 
         let legal_moves = state.get_legal_moves().__decompose();
 
@@ -22,14 +22,14 @@ impl Solver {
                 });                
         }
 
-        ret.counters = self.problem.counters;
+        ret.counters = Counters::get();
 
         ret
     }
 
     pub fn get(&mut self, state: State) -> SolveRet {        
         let result = self.problem.search(&state);
-        SolveRet { best_card: result.0, best_value: result.1, counters: self.problem.counters }
+        SolveRet { best_card: result.0, best_value: result.1, counters: Counters::get() }
     }
 
 }

@@ -11,3 +11,6 @@ pub mod solver;
 pub mod problem;
 pub mod state;
 
+pub mod counter;
+pub mod table;
+

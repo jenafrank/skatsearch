@@ -1,5 +1,5 @@
 use std::time::Instant;
-use crate::types::state::State;
+use crate::types::{state::State, counter::Counters};
 use super::{Solver, playout_row::PlayoutLine, retargs::PlayoutAllCardsRetLine};
 
 impl Solver {
@@ -20,8 +20,7 @@ impl Solver {
             row.left_cards = initial_state.left_cards;
             row.right_cards = initial_state.right_cards;
 
-            self.problem.counters.iters = 0;
-            self.problem.counters.breaks = 0;
+            Counters::reset();
 
             let now = Instant::now();
             let res = self.problem.search(&initial_state);
@@ -33,8 +32,8 @@ impl Solver {
             row.card = played_card;
             row.augen_declarer = initial_state.augen_declarer;
             row.augen_team = initial_state.augen_team;
-            row.cnt_iters = self.problem.counters.iters;
-            row.cnt_breaks = self.problem.counters.breaks;
+            row.cnt_iters = Counters::get().iters;
+            row.cnt_breaks = Counters::get().breaks;
             row.time = time;
 
             initial_state = initial_state.create_child_state(
@@ -64,8 +63,7 @@ impl Solver {
 
             let mut row: PlayoutAllCardsRetLine = Default::default();
 
-            self.problem.counters.iters = 0;
-            self.problem.counters.breaks = 0;
+            Counters::reset();
 
             let res = self.get(state);
             let resall = self.get_all_cards(state);

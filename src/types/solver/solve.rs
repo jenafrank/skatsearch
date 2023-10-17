@@ -7,7 +7,7 @@ use super::retargs::SolveWinRet;
 use crate::consts::bitboard::ALLCARDS;
 use crate::traits::Augen;
 use crate::traits::Bitboard;
-use crate::traits::StringConverter;
+use crate::types::counter::Counters;
 use crate::types::game::Game;
 use crate::types::state::State;
 
@@ -32,7 +32,7 @@ impl Solver {
         let mut ret: SolveWithSkatRet = SolveWithSkatRet {
             best_skat: None,
             all_skats: Vec::new(),
-            counters: self.problem.counters
+            counters: Counters::new()
         };
 
         let state = State::create_initial_state_from_problem(&self.problem);
@@ -89,7 +89,7 @@ impl Solver {
             }
         }
 
-        ret.counters = self.problem.counters;
+        ret.counters = Counters::get();
 
         ret
     }
@@ -112,7 +112,7 @@ impl Solver {
         SolveWinRet {
             best_card,
             declarer_wins,
-            counters: self.problem.counters
+            counters: Counters::get()
         }
     }
 
@@ -152,7 +152,7 @@ impl Solver {
         SolveWinRet {
             best_card: result.0,
             declarer_wins,
-            counters: self.problem.counters            
+            counters: Counters::get()
         }
     }
 
@@ -173,7 +173,7 @@ impl Solver {
             }
         }
 
-        SolveRet { best_card: result.0, best_value: result.1, counters: self.problem.counters }
+        SolveRet { best_card: result.0, best_value: result.1, counters: Counters::get() }
     }   
 
     pub fn solve(&mut self) -> SolveRet {
@@ -181,13 +181,13 @@ impl Solver {
         let result = self.get(state);
 
         println!(" Iters: {}, Slots: {}, Writes: {}, Reads: {}, ExactReads: {}, Collisions: {}, Breaks: {}",
-        self.problem.counters.iters,
+        result.counters.iters,
         self.problem.transposition_table.get_occupied_slots(),
-        self.problem.counters.writes,
-        self.problem.counters.reads,
-        self.problem.counters.exactreads,
-        self.problem.counters.collisions,
-        self.problem.counters.breaks);
+        result.counters.writes,
+        result.counters.reads,
+        result.counters.exactreads,
+        result.counters.collisions,
+        result.counters.breaks);
 
         result
     }
@@ -196,7 +196,7 @@ impl Solver {
 
 #[cfg(test)]
 mod tests {
-    use crate::{types::{problem::{Problem, counters::Counters}, tt_table::TtTable, solver::Solver, game::Game, player::Player}, traits::{BitConverter, Augen}, consts::bitboard::SPADES};
+    use crate::{types::{problem::Problem, tt_table::TtTable, solver::Solver, game::Game, player::Player}, traits::{BitConverter, Augen}, consts::bitboard::SPADES};
 
 
     #[test]
@@ -212,8 +212,7 @@ mod tests {
             trick_suit: 0,
             augen_total: "SA ST SK SQ S9 S8".__bit().__get_value(),
             nr_of_cards: 6,
-            transposition_table: TtTable::default() ,
-            counters: Counters::default(),
+            transposition_table: TtTable::default()
         };
 
         let mut solver = Solver::create(problem);
@@ -235,8 +234,7 @@ mod tests {
             trick_suit: SPADES,
             augen_total: "SA ST SK SQ S9 S8".__bit().__get_value(),
             nr_of_cards: 5,
-            transposition_table: TtTable::default() ,
-            counters: Counters::default(),
+            transposition_table: TtTable::default()
         };
 
         let mut solver = Solver::create(problem);

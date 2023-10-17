@@ -1,4 +1,5 @@
 use crate::traits::{Augen, StringConverter};
+use crate::types::counter::Counters;
 use crate::types::game::Game;
 use crate::types::player::Player;
 use crate::types::problem::Problem;
@@ -23,11 +24,12 @@ pub fn sample_farbe_declarer_tt(number_of_samples: usize) -> std::io::Result<()>
 
         let now = Instant::now();
         let result = p.search(&s);
+        let counters = Counters::get();
 
         println!(
             "{:5} ms {:9} iters {:3} pnts | D: {} L: {} R: {}",
             now.elapsed().as_millis(),
-            p.counters.iters,
+            counters.iters,
             result.1 + p.get_skat().__get_value(),
             cards.0.__str(),
             cards.1.__str(),
@@ -37,7 +39,7 @@ pub fn sample_farbe_declarer_tt(number_of_samples: usize) -> std::io::Result<()>
         file.write_fmt(format_args!(
             "{} {} {} \n",
             now.elapsed().as_millis(),
-            p.counters.iters,
+            counters.iters,
             result.1 + p.get_skat().__get_value()
         ))?;
     }

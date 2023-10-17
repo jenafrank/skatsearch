@@ -1,4 +1,4 @@
-use crate::types::{problem::counters::Counters, player::Player};
+use crate::types::{player::Player, counter::Counters};
 
 pub struct SolveRet {
     pub best_card: u32,

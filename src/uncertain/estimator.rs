@@ -12,7 +12,7 @@ impl Estimator {
         Estimator { uproblem, sample_size }
     }
 
-    pub fn estimate_win(&mut self, info: bool) -> f32 {
+    pub fn estimate_win(&self, info: bool) -> f32 {
         let mut sum: f32 = 0.0;
         for i in 0..self.sample_size {
             let concrete_problem = self.uproblem.generate_concrete_problem();                        
@@ -54,7 +54,7 @@ mod tests {
             facts: [Facts::zero_fact(Player::Left), Facts::zero_fact(Player::Right)]
         };
 
-        let mut estimator = super::Estimator::new(uproblem, 1000);
+        let estimator = super::Estimator::new(uproblem, 10);
         let probability = estimator.estimate_win(false);
 
         println!("Probability of win: {}", probability);
@@ -74,7 +74,7 @@ mod tests {
             facts: [Facts::zero_fact(Player::Left), Facts::zero_fact(Player::Right)]
         };
 
-        let mut estimator = super::Estimator::new(uproblem, 1000);
+        let estimator = super::Estimator::new(uproblem, 10);
         let probability = estimator.estimate_win(false);
 
         println!("Probability of win: {}", probability);

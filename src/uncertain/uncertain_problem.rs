@@ -3,7 +3,6 @@ use crate::traits::{Bitboard, Augen};
 use crate::types::game::Game;
 use crate::types::player::Player;
 use crate::types::problem::Problem;
-use crate::types::problem::counters::Counters;
 use crate::types::tt_table::TtTable;
 
 pub struct UncertainProblem {
@@ -83,7 +82,6 @@ impl UncertainProblem {
             nr_of_cards: 0,
             points_to_win: self.points_to_win,
             transposition_table: TtTable::default(),
-            counters: Counters::default(),        
         };
 
         set_cards_for_problem(&mut problem, self.my_cards, self.player);
@@ -143,13 +141,13 @@ fn set_cards_for_other_players(
 
     randomly_cancel_out_shared_cards_wrapper(problem, &mut cards_player_1, &mut cards_player_2, my_cards);
 
-    add_trick_cards_to_all_cards(&mut cards_player_1, &mut cards_player_2, cards_on_table, problem.start_player);
+    add_trick_cards_to_all_cards(&mut cards_player_1, &mut cards_player_2, cards_on_table);
 
     set_cards_to_player(problem, cards_player_1, facts[0].player);
     set_cards_to_player(problem, cards_player_2, facts[1].player);
 }
 
-fn add_trick_cards_to_all_cards(cards_player_1: &mut u32, cards_player_2: &mut u32, cards_on_table: u32, start_player: Player) {
+fn add_trick_cards_to_all_cards(cards_player_1: &mut u32, cards_player_2: &mut u32, cards_on_table: u32) {
     let nr_of_trick_cards = cards_on_table.count_ones();
 
     if nr_of_trick_cards == 0 {

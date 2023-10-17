@@ -1,4 +1,4 @@
-use crate::types::problem::counters::Counters;
+use crate::types::counter::Counters;
 use crate::types::state::State;
 use crate::types::tt_entry::TtEntry;
 use crate::types::tt_flag::TtFlag;
@@ -38,17 +38,17 @@ impl TtTable {
         self.write(state, idx, alpha, beta, (0, value));
     }
 
-    pub fn read(&self, state: &State, counters: &mut Counters) -> Option<&TtEntry> {
+    pub fn read(&self, state: &State) -> Option<&TtEntry> {
 
         let candidate = &self.data[state.mapped_hash];
 
         if !candidate.occupied {
             None // empty slot
         } else if candidate.matches(&state) {
-            counters.reads += 1;
+            Counters::inc_reads();
             Some(candidate) // matches key values
         } else {
-            counters.collisions += 1;
+            Counters::inc_collisions();
             None // collision
         }
     }

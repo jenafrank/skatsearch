@@ -1,5 +1,4 @@
 mod search;
-pub mod counters;
 mod constructors;
 mod methods;
 mod traits;
@@ -7,7 +6,6 @@ mod traits;
 use super::game::Game;
 use super::player::Player;
 use super::state::State;
-use crate::types::problem::counters::Counters;
 use crate::types::tt_table::TtTable;
 
 pub struct Problem {
@@ -29,9 +27,7 @@ pub struct Problem {
     pub nr_of_cards: u8,
 
     // Transposition table and counters for statistics
-    pub transposition_table: TtTable,
-    pub counters: Counters
-
+    pub transposition_table: TtTable
 }
 
 impl Problem {

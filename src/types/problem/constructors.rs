@@ -27,8 +27,7 @@ impl Problem {
             augen_total: allcards.__get_value(),
             nr_of_cards: allcards.__get_number_of_bits(),
             
-            transposition_table: Default::default(),
-            counters: Default::default(),
+            transposition_table: Default::default()
         }
     }
 
@@ -87,8 +86,7 @@ impl Problem {
             trick_cards: 0,
             trick_suit: 0,
             points_to_win: 0,
-            transposition_table: Default::default(),
-            counters: Default::default()
+            transposition_table: Default::default()
         }
     }
 
