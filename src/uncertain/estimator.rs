@@ -16,7 +16,7 @@ impl Estimator {
         let mut sum: f32 = 0.0;
         for i in 0..self.sample_size {
             let concrete_problem = self.uproblem.generate_concrete_problem();                        
-            let mut solver = Solver::new(concrete_problem);
+            let mut solver = Solver::create(concrete_problem);
             let search_result = solver.solve_win();
 
             if info {
@@ -68,13 +68,13 @@ mod tests {
             player: Player::Declarer,
             my_cards: "SA SK S9".__bit(),
             cards_on_table: 0,
-            all_cards: "SA SK S9 ST SQ S8 C7 H7 D7".__bit(),
+            all_cards: "SA SK S9 ST SQ S8 C7 H7 D7".__bit(), 
             active_suit: 0,
             points_to_win: 21,
             facts: [Facts::zero_fact(Player::Left), Facts::zero_fact(Player::Right)]
         };
 
-        let estimator = super::Estimator::new(uproblem, 10);
+        let estimator = super::Estimator::new(uproblem, 1000);
         let probability = estimator.estimate_win(false);
 
         println!("Probability of win: {}", probability);
