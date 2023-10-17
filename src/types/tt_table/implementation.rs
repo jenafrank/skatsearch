@@ -4,7 +4,6 @@ use crate::types::tt_entry::TtEntry;
 use crate::types::tt_flag::TtFlag;
 use crate::types::tt_table::TtTable;
 use crate::consts::general::TT_SIZE;
-use crate::core_functions::get_mapped_hash::get_mapped_hash;
 
 impl TtTable {
     pub fn write(&mut self, 
@@ -31,11 +30,6 @@ impl TtTable {
         };
 
         self.data[mapped_hash] = entry;
-    }
-
-    pub fn write_without_hash(&mut self, state: &State, alpha: u8, beta: u8, value: u8) {
-        let idx = get_mapped_hash(state.player,state.get_all_unplayed_cards(), state.trick_cards);
-        self.write(state, idx, alpha, beta, (0, value));
     }
 
     pub fn read(&self, state: &State) -> Option<&TtEntry> {
