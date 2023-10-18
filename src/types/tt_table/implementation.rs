@@ -23,7 +23,9 @@ impl TtTable {
         let entry = TtEntry {
             occupied: true,
             player: state.player,
-            cards: state.get_all_unplayed_cards(),
+            left_cards: state.left_cards,
+            right_cards: state.right_cards,
+            declarer_cards: state.declarer_cards,
             value: value.1 - state.augen_declarer,
             bestcard: value.0,
             flag,

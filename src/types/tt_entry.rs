@@ -8,10 +8,12 @@ pub mod traits;
 pub struct TtEntry {
     // occupied or empty slot -> for statistics
     pub occupied: bool,
-
-    // state
+        
+    // full state
     pub player: Player,
-    pub cards: u32,
+    pub left_cards: u32,
+    pub right_cards: u32,
+    pub declarer_cards: u32,
 
     // value
     pub value: u8,

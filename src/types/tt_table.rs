@@ -43,7 +43,9 @@ fn create_transposition_table() -> TtTable {
         x.data.push(TtEntry {
             occupied: false,
             player: Default::default(),
-            cards: 0,
+            left_cards: 0,
+            right_cards: 0,
+            declarer_cards: 0,
             value: 0,
             flag: TtFlag::EXACT,
             bestcard: 0
@@ -78,7 +80,9 @@ mod tests {
         for i in 1..TT_SIZE {
             assert_eq!(TtTable::get().data[i].occupied, false);
             assert_eq!(TtTable::get().data[i].player, Player::default());
-            assert_eq!(TtTable::get().data[i].cards, 0);
+            assert_eq!(TtTable::get().data[i].left_cards, 0);
+            assert_eq!(TtTable::get().data[i].right_cards, 0);
+            assert_eq!(TtTable::get().data[i].declarer_cards, 0);
         }
     }
 
@@ -118,12 +122,12 @@ mod tests {
     }
 
     fn print_hash(prefix: &str, state: &State) {
-        println!("{}-Hash: {}",prefix,get_hash(state.player, state.get_all_unplayed_cards(), state.trick_cards));
-        println!("{}-Mapped Hash: {}",prefix,get_mapped_hash(state.player, state.get_all_unplayed_cards(), state.trick_cards));
+        println!("{}-Hash: {}",prefix,get_hash(state.player, state.left_cards, state.right_cards, state.declarer_cards));
+        println!("{}-Mapped Hash: {}",prefix,get_mapped_hash(state.player, state.left_cards, state.right_cards, state.declarer_cards));
     }
 
     fn write_without_hash(state: &State, alpha: u8, beta: u8, value: u8) {
-        let idx = get_mapped_hash(state.player,state.get_all_unplayed_cards(), state.trick_cards);
+        let idx = get_mapped_hash(state.player,state.left_cards, state.right_cards, state.declarer_cards);
         TtTable::get_mutable().write(state, idx, alpha, beta, (0, value));
     }
 }

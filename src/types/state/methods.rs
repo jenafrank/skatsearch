@@ -8,7 +8,7 @@ impl State {
     }
 
     pub fn get_mapped_hash(&self) -> usize {
-        get_mapped_hash(self.player, self.get_all_unplayed_cards(), self.trick_cards)
+        get_mapped_hash(self.player, self.left_cards, self.right_cards, self.declarer_cards)
     }
 
     pub fn is_new_trick(&self) -> bool {
