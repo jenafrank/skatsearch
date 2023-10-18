@@ -21,6 +21,19 @@ fn assert_solution((p, s): (Problem, u8)) {
     println!("NPS: {} kN", (res.counters.iters as f32)/((elapsed.as_micros() as f32)/1e6)/1000f32);
 }
 
+fn assert_solution_null((p, s): (Problem, u8)) {
+    let now = Instant::now();
+    let solver = Solver::create_with_new_transposition_table(p);    
+    let res = solver.solve_win();
+
+    let elapsed = now.elapsed();
+    println!("Best card: {}", res.best_card.__str());
+    println!("Transtable duration = {} µs",elapsed.as_micros());
+    println!("NPS: {} kN", (res.counters.iters as f32)/((elapsed.as_micros() as f32)/1e6)/1000f32);
+    
+    assert_eq!(res.declarer_wins, s == 0);
+}
+
 #[test]
 fn one_trick_rank_in_one_suit() { assert_solution(problems::one_trick_rank_in_one_suit()); }
 
@@ -228,4 +241,24 @@ pub fn all_skat_values () {
         el.value, 
         (allcards ^ el.skat_card_1 ^ el.skat_card_2).__str());
     }
+}
+
+#[test]
+pub fn null_1() {
+    assert_solution_null(problems::null_1());
+}
+
+#[test]
+pub fn null_2() {
+    assert_solution_null(problems::null_2());
+}
+
+#[test]
+pub fn null_shrinked_1() {
+    assert_solution_null(problems::null_shrinked_1());
+}
+
+#[test]
+pub fn null_1_debug() {
+    assert_solution_null(problems::null_1_debug());
 }

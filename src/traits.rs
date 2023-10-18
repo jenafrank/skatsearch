@@ -17,7 +17,7 @@ pub trait Augen {
 pub trait Bitboard {
     fn __contain(&self, card: u32) -> bool;
     fn __is_odd(&self) -> bool;
-    fn __decompose(&self) -> ([u32; 10],usize);
+    fn __decompose(&self) -> ([u32; 32],usize);
     fn __decompose_twelve(&self) -> [u32; 12];
 
 }

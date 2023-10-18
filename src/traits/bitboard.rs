@@ -9,8 +9,8 @@ impl Bitboard for u32 {
 
     fn __is_odd(&self) -> bool { self % 2 == 1 }
 
-    fn __decompose(&self) -> ([u32; 10], usize) {
-        let mut ret = [0; 10];
+    fn __decompose(&self) -> ([u32; 32], usize) {
+        let mut ret = [0; 32];
         let mut i = 0;
         let mut x = JACKOFCLUBS;
 

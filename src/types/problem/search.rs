@@ -56,11 +56,11 @@ impl Problem {
             // Optimize value
             optimized_value = optimize(child_state_value, optimized_value, state.player, *mov,self.game_type);
 
-            // Alpha-beta cutoffs
+            // Alpha-beta cutoffs            
             if shrink_alpha_beta_window(state.player, &mut alpha, &mut beta, child_state_value.1, self.game_type) {
                 Counters::inc_breaks();
                 break;
-            }
+            }            
         }
 
         transposition_table_write(            

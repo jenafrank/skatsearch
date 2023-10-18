@@ -129,3 +129,47 @@ pub fn nine_grand_hard() -> (Problem, u8) {
     );
     (p,39)
 }
+
+pub fn null_1() -> (Problem, u8) {   
+    let p = Problem::create(
+        "SJ C9 C7 ST S9 S8 H9 DT D9 D8".__bit(),
+        "HJ DJ CA CT CK C8 SA SK HA H8".__bit(),
+        "CJ CQ SQ HT HK HQ H7 DA DK DQ".__bit(),
+        Game::Null,
+        Player::Declarer
+    );
+    (p,1)
+}
+
+pub fn null_2() -> (Problem, u8) {   
+    let p = Problem::create(
+        "SJ C9 C7 ST S9 S8 H9 DT D9 D8".__bit(),
+        "DJ CA CQ SA SK SQ HT H8 H7 DK".__bit(),
+        "CJ HJ CT CK C8 HA HK HQ DA DQ".__bit(),
+        Game::Null,
+        Player::Declarer
+    );
+    (p,0)
+}
+
+pub fn null_shrinked_1() -> (Problem, u8) {   
+    let p = Problem::create(
+        "S9 S7 H8 D7".__bit(),
+        "S8 H9 D8 D9".__bit(),
+        "SA SK H7 DJ".__bit(),
+        Game::Null,
+        Player::Right
+    );
+    (p,1)
+}
+
+pub fn null_1_debug() -> (Problem, u8) {   
+    let p = Problem::create(
+        "D9 CJ".__bit(),
+        "D8 SJ".__bit(),
+        "D7 DT".__bit(),
+        Game::Null,
+        Player::Declarer
+    );
+    (p,1)
+}

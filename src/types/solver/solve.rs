@@ -103,12 +103,23 @@ impl Solver {
         self.get_all_cards(initial_state)
     }
 
-    pub fn solve_win(&mut self) -> SolveWinRet {
-        let alpha = self.problem.points_to_win - 1;
-        let beta = self.problem.points_to_win;
-        let mut state = self.problem.new_state(alpha, beta);
-        let (best_card, value) = self.problem.search(&mut state);
-        let declarer_wins = value > alpha;
+    pub fn solve_win(&self) -> SolveWinRet {
+        let mut alpha = self.problem.points_to_win - 1;
+        let mut beta = self.problem.points_to_win;
+
+        if self.problem.game_type == Game::Null {
+            alpha = 0;
+            beta = 1;
+        } 
+
+        let state = self.problem.new_state(alpha, beta);
+        let (best_card, value) = self.problem.search(&state);
+        
+        let mut declarer_wins = value > alpha;
+        
+        if self.problem.game_type == Game::Null {
+            declarer_wins = !declarer_wins;
+        }        
 
         SolveWinRet {
             best_card,
@@ -214,7 +225,7 @@ mod tests {
             nr_of_cards: 6
         };
 
-        let mut solver = Solver::create(problem);
+        let solver = Solver::create(problem);
         let result = solver.solve_win();
 
         assert_eq!(result.declarer_wins, true);
@@ -235,7 +246,7 @@ mod tests {
             nr_of_cards: 5
         };
 
-        let mut solver = Solver::create(problem);
+        let solver = Solver::create(problem);
         let result = solver.solve_win();
 
         assert_eq!(result.declarer_wins, true);

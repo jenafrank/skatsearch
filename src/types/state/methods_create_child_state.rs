@@ -2,19 +2,19 @@ use crate::core_functions::get_suit_for_card::get_suit_for_card;
 
 use crate::traits::Augen;
 
+use crate::types::game::Game;
 use crate::types::player::Player;
 use crate::types::problem::Problem;
 use crate::types::state::State;
 
 impl State {
-
     pub fn create_child_state(
-        &self, 
-        card: u32, 
+        &self,
+        card: u32,
         problem: &Problem,
         alpha_start: u8,
-        beta_start: u8) -> State {
-
+        beta_start: u8,
+    ) -> State {
         // new_player, may be overwritten after trick calculation !!
         let mut new_player = self.player.inc();
 
@@ -36,7 +36,7 @@ impl State {
         let mut new_augen_declarer = self.augen_declarer;
         let mut new_augen_team = self.augen_team;
         let mut new_augen_future = self.augen_future;
-        
+
         // new cards on hand
         let mut new_declarer_cards = self.declarer_cards;
         let mut new_left_cards = self.left_cards;
@@ -51,7 +51,12 @@ impl State {
 
         // evaluate upon trick completion. Overwrites four variables. Accumulates augen vars.
         if new_trick_cards_count == 3 {
-            let augen = new_trick_cards.__get_value_of_three_cards();
+            let augen = if problem.game_type == Game::Null {
+                1
+            } else {
+                new_trick_cards.__get_value_of_three_cards()
+            };
+
             let winner = self.get_trick_winner(new_trick_cards, new_trick_suit, problem);
 
             new_trick_cards = 0;
@@ -90,9 +95,8 @@ impl State {
             alpha: alpha_start,
             beta: beta_start,
             mapped_hash: 0,
-            is_root_state: false
-        }.add_hash()
-
+            is_root_state: false,
+        }
+        .add_hash()
     }
-
 }

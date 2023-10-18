@@ -13,7 +13,10 @@ impl Problem {
     ) -> Problem {
         
         let allcards = declarer_cards_all | left_cards_all | right_cards_all;
-
+        assert!(declarer_cards_all & left_cards_all == 0);
+        assert!(declarer_cards_all & right_cards_all == 0);
+        assert!(left_cards_all & right_cards_all == 0);
+        
         Problem {
             declarer_cards_all,
             left_cards_all,
@@ -22,7 +25,7 @@ impl Problem {
             start_player,
             trick_cards: 0,
             trick_suit: 0,
-            points_to_win: 0,
+            points_to_win: 1,
 
             augen_total: allcards.__get_value(),
             nr_of_cards: allcards.__get_number_of_bits(),
