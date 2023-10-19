@@ -194,7 +194,7 @@ mod tests {
     #[test]
     fn test_uproblem_ten_cards_null() {
 
-        let my_cards = "SJ S9 S7 HJ H9 H7 CJ C9 C7 D7".__bit();
+        let my_cards = "SJ S9 S7 HJ H9 H7 CJ C9 C7 D8".__bit();
         let skat_cards = "CA SA".__bit(); 
 
         let other_cards = ALLCARDS ^ my_cards ^ skat_cards;
@@ -204,7 +204,7 @@ mod tests {
         let uproblem = UncertainProblem {
             game_type: Game::Null,
             my_player: Player::Declarer,
-            next_player: Player::Declarer,
+            next_player: Player::Left,
             my_cards: my_cards,
             cards_on_table: 0,
             all_cards: all_cards,
@@ -222,7 +222,7 @@ mod tests {
     #[test]
     fn test_uproblem_ten_cards_null_all_cards() {
 
-        let my_cards = "SJ S9 S7 HJ H9 H7 CJ C9 C7 D7".__bit();
+        let my_cards = "SJ S9 S7 HJ H9 H7 CK CJ C9 C7".__bit();
         let skat_cards = "CA SA".__bit(); 
 
         let other_cards = ALLCARDS ^ my_cards ^ skat_cards;

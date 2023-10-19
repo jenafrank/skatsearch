@@ -1,3 +1,8 @@
+use rand::Rng;
+use rand::distributions::Uniform;
+use rand::prelude::Distribution;
+use rand::seq::index::sample;
+
 use crate::consts::bitboard::*;
 use crate::traits::{Bitboard, Augen};
 use crate::types::game::Game;
@@ -138,7 +143,10 @@ fn set_cards_for_other_players(
     cards_player_1 = cancel_cards_with_facts(cards_player_1, facts[0], problem.game_type);
     cards_player_2 = cancel_cards_with_facts(cards_player_2, facts[1], problem.game_type);
 
-    randomly_cancel_out_shared_cards_wrapper(problem, &mut cards_player_1, &mut cards_player_2, my_cards);
+    let proposed_draw = draw_cards(problem, cards_player_1, cards_player_2, my_cards);
+
+    cards_player_1 = proposed_draw.0;
+    cards_player_2 = proposed_draw.1;
 
     add_trick_cards_to_all_cards(&mut cards_player_1, &mut cards_player_2, cards_on_table);
 
@@ -177,53 +185,59 @@ fn add_trick_cards_to_all_cards(cards_player_1: &mut u32, cards_player_2: &mut u
 
 }
 
-fn randomly_cancel_out_shared_cards_wrapper(problem: &mut Problem, cards_player_1: &mut u32, cards_player_2: &mut u32, my_cards: u32) {
+fn draw_cards(problem: &Problem, cards_player_1: u32, cards_player_2: u32, my_cards: u32) -> (u32, u32) {
     
     let nr_trick_cards = problem.trick_cards.count_ones();
     let my_nr_cards = my_cards.count_ones();
     
-    if nr_trick_cards == 0 {        
-        randomly_cancel_out_shared_cards(cards_player_1, cards_player_2, my_nr_cards, my_nr_cards);
-        return;
-    }
+    let nr_player1_cards = match nr_trick_cards {
+        0 => my_nr_cards,
+        1 => my_nr_cards - 1,
+        2 => my_nr_cards - 1,      
+        _ => panic!("Illegal number of trick cards.")
+    };
 
-    if nr_trick_cards == 1 {
-        randomly_cancel_out_shared_cards(cards_player_1, cards_player_2, my_nr_cards - 1, my_nr_cards);
-        return;
-    }
+    let nr_player2_cards = match nr_trick_cards {
+        0 => my_nr_cards,
+        1 => my_nr_cards,
+        2 => my_nr_cards - 1,
+        _ => panic!("Illegal number of trick cards.")
+    };
 
-    if nr_trick_cards == 2 {
-        randomly_cancel_out_shared_cards(cards_player_1, cards_player_2, my_nr_cards - 1, my_nr_cards - 1);
-        return;
-    }
+    let definite_cards_player_1 = cards_player_1 & !cards_player_2;    
+    let definite_cards_player_2 = cards_player_2 & !cards_player_1;
 
-    panic!("Illegal number of trick cards.");
+    let ambiguous_cards = cards_player_1 & cards_player_2;
+    let nr_ambiguous_cards = ambiguous_cards.count_ones();
+    let nr_definite_cards_player_1 = definite_cards_player_1.count_ones();
+    let nr_definite_cards_player_2 = definite_cards_player_2.count_ones();
+    let nr_ambiguous_cards_player_1 = nr_player1_cards - nr_definite_cards_player_1;
+    let nr_ambiguous_cards_player_2 = nr_player2_cards - nr_definite_cards_player_2;
+
+    assert!(nr_ambiguous_cards_player_1 + nr_ambiguous_cards_player_2 == nr_ambiguous_cards);
+
+    let draw_player_1 = random_cards(ambiguous_cards, nr_ambiguous_cards_player_1);
+
+    let proposed_player_1 = definite_cards_player_1 | draw_player_1;
+    let proposed_player_2 = definite_cards_player_2 | (ambiguous_cards & !draw_player_1);
+
+    (proposed_player_1, proposed_player_2)    
 }
 
-fn randomly_cancel_out_shared_cards(cards_player_1: &mut u32, cards_player_2: &mut u32, min_cards_player_1: u32, min_cards_player_2: u32) {    
+fn random_cards(cards: u32, nr: u32) -> u32 {
+    let mut random_number_generator = rand::thread_rng();
 
-    let common_cards = *cards_player_1 & *cards_player_2;
-    let decomposed_common_cards = common_cards.__decompose();
+    let cards_dec = cards.__decompose();
+    assert!(cards_dec.1 >= nr as usize);
 
-    for i in 0..decomposed_common_cards.1 {
-        let current_card = decomposed_common_cards.0[i];
-        let random_number = rand::random::<u8>() % 2;
-        let mut player_1_gets_card = random_number == 0;
-
-        if (*cards_player_1).count_ones() == min_cards_player_1 {
-            player_1_gets_card = false;
-        }
-
-        if (*cards_player_2).count_ones() == min_cards_player_2 {
-            player_1_gets_card = true;
-        }
-
-        if player_1_gets_card {
-            *cards_player_1 = *cards_player_1 & !current_card;
-        } else {
-            *cards_player_2 = *cards_player_2 & !current_card;
-        }
+    let indices = sample(&mut random_number_generator, cards_dec.1, nr as usize);
+    
+    let mut ret = 0;
+    for i in indices.iter() {
+        ret |= cards_dec.0[i];
     }
+
+    ret
 }
 
 fn set_cards_to_player(problem: &mut Problem, cards: u32, player: Player) {
