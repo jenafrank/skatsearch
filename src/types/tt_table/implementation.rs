@@ -26,6 +26,8 @@ impl TtTable {
             left_cards: state.left_cards,
             right_cards: state.right_cards,
             declarer_cards: state.declarer_cards,
+            trick_cards: state.trick_cards,
+
             value: value.1 - state.augen_declarer,
             bestcard: value.0,
             flag,

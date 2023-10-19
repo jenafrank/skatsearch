@@ -14,6 +14,7 @@ pub struct TtEntry {
     pub left_cards: u32,
     pub right_cards: u32,
     pub declarer_cards: u32,
+    pub trick_cards: u32,
 
     // value
     pub value: u8,

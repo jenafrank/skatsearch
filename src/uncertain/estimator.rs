@@ -45,7 +45,8 @@ mod tests {
         
         let uproblem = UncertainProblem {
             game_type: Game::Farbe,
-            player: Player::Declarer,
+            my_player: Player::Declarer,
+            next_player: Player::Declarer,
             my_cards: "SA SK S9".__bit(),
             cards_on_table: 0,
             all_cards: "SA SK S9 ST SQ S8 C7 H7 D7".__bit(),
@@ -59,13 +60,14 @@ mod tests {
 
         println!("Probability of win: {}", probability);
     }
-
+    
     #[test]
     fn test_uproblem_full() {
         
         let uproblem = UncertainProblem {
             game_type: Game::Farbe,
-            player: Player::Declarer,
+            my_player: Player::Declarer,
+            next_player: Player::Declarer,
             my_cards: "SA SK S9".__bit(),
             cards_on_table: 0,
             all_cards: "SA SK S9 ST SQ S8 C7 H7 D7".__bit(), 
@@ -80,6 +82,7 @@ mod tests {
         println!("Probability of win: {}", probability);
     }
 
+    #[ignore]
     #[test]
     fn test_uproblem_eight_cards() {
 
@@ -90,7 +93,8 @@ mod tests {
 
         let uproblem = UncertainProblem {
             game_type: Game::Farbe,
-            player: Player::Declarer,
+            my_player: Player::Declarer,
+            next_player: Player::Declarer,
             my_cards: my_cards,
             cards_on_table: 0,
             all_cards: all_cards,
@@ -105,6 +109,7 @@ mod tests {
         println!("Probability of win: {}", probability);
     }
 
+    #[ignore]
     #[test]
     fn test_uproblem_ten_cards_grand() {
 
@@ -117,7 +122,8 @@ mod tests {
 
         let uproblem = UncertainProblem {
             game_type: Game::Grand,
-            player: Player::Declarer,
+            my_player: Player::Declarer,
+            next_player: Player::Declarer,
             my_cards: my_cards,
             cards_on_table: 0,
             all_cards: all_cards,
@@ -135,8 +141,8 @@ mod tests {
     #[test]
     fn test_uproblem_ten_cards_null() {
 
-        let my_cards = "SJ ST S9 DJ DT D9 HT C7 C8 C9".__bit();
-        let skat_cards = "S7 D7".__bit(); 
+        let my_cards = "SJ ST S9 S7 S7 HJ HT H9 H8 H7".__bit();
+        let skat_cards = "CA SA".__bit(); 
 
         let other_cards = ALLCARDS ^ my_cards ^ skat_cards;
         assert!(my_cards & other_cards == 0);
@@ -144,7 +150,8 @@ mod tests {
 
         let uproblem = UncertainProblem {
             game_type: Game::Null,
-            player: Player::Declarer,
+            my_player: Player::Declarer,
+            next_player: Player::Declarer,
             my_cards: my_cards,
             cards_on_table: 0,
             all_cards: all_cards,

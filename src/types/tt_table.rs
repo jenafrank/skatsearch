@@ -46,6 +46,7 @@ fn create_transposition_table() -> TtTable {
             left_cards: 0,
             right_cards: 0,
             declarer_cards: 0,
+            trick_cards: 0,
             value: 0,
             flag: TtFlag::EXACT,
             bestcard: 0
@@ -122,12 +123,12 @@ mod tests {
     }
 
     fn print_hash(prefix: &str, state: &State) {
-        println!("{}-Hash: {}",prefix,get_hash(state.player, state.left_cards, state.right_cards, state.declarer_cards));
-        println!("{}-Mapped Hash: {}",prefix,get_mapped_hash(state.player, state.left_cards, state.right_cards, state.declarer_cards));
+        println!("{}-Hash: {}",prefix,get_hash(state.player, state.left_cards, state.right_cards, state.declarer_cards, state.trick_cards));
+        println!("{}-Mapped Hash: {}",prefix,get_mapped_hash(state.player, state.left_cards, state.right_cards, state.declarer_cards, state.trick_cards));
     }
 
     fn write_without_hash(state: &State, alpha: u8, beta: u8, value: u8) {
-        let idx = get_mapped_hash(state.player,state.left_cards, state.right_cards, state.declarer_cards);
+        let idx = get_mapped_hash(state.player,state.left_cards, state.right_cards, state.declarer_cards, state.trick_cards);
         TtTable::get_mutable().write(state, idx, alpha, beta, (0, value));
     }
 }

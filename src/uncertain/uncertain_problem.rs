@@ -6,15 +6,14 @@ use crate::types::problem::Problem;
 
 pub struct UncertainProblem {
     pub game_type: Game,
-    pub player: Player,
+    pub my_player: Player,
+    pub my_cards: u32,
+    pub next_player: Player,
 
     // Primary values
-    pub my_cards: u32,
     pub cards_on_table: u32,
     pub all_cards: u32,
-
-    pub active_suit: u32,
-    
+    pub active_suit: u32,    
     pub points_to_win: u8,
 
     // Facts
@@ -57,7 +56,8 @@ impl UncertainProblem {
         UncertainProblem {
             game_type: Game::Farbe,
             my_cards: 0u32,
-            player: Player::Declarer,
+            my_player: Player::Declarer,
+            next_player: Player::Declarer,
             all_cards: 0u32,
             cards_on_table: 0u32,
             active_suit: 0u32,
@@ -74,7 +74,7 @@ impl UncertainProblem {
             left_cards_all: 0u32,
             right_cards_all: 0u32,
             game_type: self.game_type,
-            start_player: self.player,
+            start_player: self.next_player,
             trick_cards: self.cards_on_table,
             trick_suit: self.active_suit,
             augen_total: 0,
@@ -82,7 +82,7 @@ impl UncertainProblem {
             points_to_win: self.points_to_win,
         };
 
-        set_cards_for_problem(&mut problem, self.my_cards, self.player);
+        set_cards_for_problem(&mut problem, self.my_cards, self.my_player);
         set_cards_for_other_players(&mut problem, self.all_cards, self.cards_on_table, self.my_cards, self.facts);
 
         problem.augen_total = (problem.declarer_cards_all | problem.left_cards_all | problem.right_cards_all).__get_value();
@@ -101,13 +101,14 @@ impl UncertainProblem {
     }
 
     fn validate_facts(&self) {
-        assert!(self.player != self.facts[0].player);
-        assert!(self.player != self.facts[1].player);
+        assert!(self.my_player != self.facts[0].player);
+        assert!(self.my_player != self.facts[1].player);
         assert!(self.facts[0].player != self.facts[1].player);
     }
 
     fn validate_all_cards(&self) {
         assert!(self.all_cards & self.my_cards == self.my_cards);
+        assert!(self.all_cards & self.cards_on_table == self.cards_on_table);        
 
         // currently uncertain problems can only be solved before a trick starts:
         assert!(self.all_cards.count_ones() % 3 == 0);
@@ -306,7 +307,8 @@ mod tests {
             my_cards: "CA CT SA".__bit(),
             cards_on_table: 0u32,
             active_suit: 0u32,
-            player: Player::Declarer,
+            my_player: Player::Declarer,
+            next_player: Player::Declarer,
             points_to_win: 1,
             facts: [
                 Facts::one_fact(Player::Left, true, false, false, false, true),
@@ -328,7 +330,8 @@ mod tests {
             game_type: Game::Farbe,
             all_cards: "CA CT SA ST HA HT DA DT D9".__bit(),
             my_cards: "CA CT SA".__bit(),
-            player: Player::Declarer,
+            my_player: Player::Declarer,
+            next_player: Player::Declarer,
             points_to_win: 1,
             cards_on_table: "ST".__bit(),
             active_suit: TRUMP_FARBE,

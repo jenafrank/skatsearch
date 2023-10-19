@@ -152,6 +152,17 @@ pub fn null_2() -> (Problem, u8) {
     (p,0)
 }
 
+pub fn null_3() -> (Problem, u8) {   
+    let p = Problem::create(
+        "SJ C9 C7 ST S9 S8 H9 DT D9 D8".__bit(),
+        "DJ CA CQ SA SK SQ HT H8 H7 DK".__bit(),
+        "CJ HJ CT CK C8 HA HK HQ DA DQ".__bit(),
+        Game::Null,
+        Player::Declarer
+    );
+    (p,0)
+}
+
 pub fn null_shrinked_1() -> (Problem, u8) {   
     let p = Problem::create(
         "S9 S7 H8 D7".__bit(),

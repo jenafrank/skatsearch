@@ -40,6 +40,9 @@ impl Problem {
         let moves_word = state.get_reduced(&self);
         let (moves, n) = get_sorted_by_value(moves_word);
 
+        // Set dummy card if no optimization of start value possible
+        optimized_value.0 = moves[0];
+
         // BASIC: Branching loop
         for mov in &moves[0..n] {
 

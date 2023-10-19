@@ -6,6 +6,7 @@ impl TtEntry {
             self.player == state.player &&
             self.left_cards == state.left_cards &&
             self.right_cards == state.right_cards &&
-            self.declarer_cards == state.declarer_cards
+            self.declarer_cards == state.declarer_cards &&
+            self.trick_cards == state.trick_cards
     }
 }

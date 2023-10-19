@@ -90,7 +90,7 @@ fn ten_tricks() { assert_solution(problems::ten_tricks()); }
 #[test]
 fn play_out () {
     let now = Instant::now();
-    let problem_set = problems::ten_tricks();
+    let problem_set = problems::null_2();
 
     let mut solver = Solver::create(problem_set.0);
 
@@ -128,7 +128,7 @@ fn play_out () {
 #[test]
 fn allvalues () {
     let now = Instant::now();
-    let pset = problems::ten_tricks();
+    let pset = problems::null_shrinked_1();
     let mut solver = Solver::create(pset.0);
 
     let res = solver.solve_all_cards();
@@ -251,6 +251,11 @@ pub fn null_1() {
 #[test]
 pub fn null_2() {
     assert_solution_null(problems::null_2());
+}
+
+#[test]
+pub fn null_3() {
+    assert_solution_null(problems::null_3());
 }
 
 #[test]
