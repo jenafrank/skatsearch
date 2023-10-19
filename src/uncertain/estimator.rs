@@ -16,7 +16,7 @@ impl Estimator {
         let mut sum: f32 = 0.0;
         for i in 0..self.sample_size {
             let concrete_problem = self.uproblem.generate_concrete_problem();                        
-            let solver = Solver::create_with_new_transposition_table(concrete_problem);
+            let solver = Solver::create(concrete_problem);
             let search_result = solver.solve_win();
 
             if info {
@@ -141,7 +141,7 @@ mod tests {
     #[test]
     fn test_uproblem_ten_cards_null() {
 
-        let my_cards = "SJ ST S9 S7 S7 HJ HT H9 H8 H7".__bit();
+        let my_cards = "SJ S9 S7 HJ H9 H7 CJ C9 C7 D7".__bit();
         let skat_cards = "CA SA".__bit(); 
 
         let other_cards = ALLCARDS ^ my_cards ^ skat_cards;
