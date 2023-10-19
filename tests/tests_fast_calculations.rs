@@ -129,9 +129,9 @@ fn play_out () {
 fn allvalues () {
     let now = Instant::now();
     let pset = problems::null_shrinked_1();
-    let mut solver = Solver::create(pset.0);
+    let solver = Solver::create(pset.0);
 
-    let res = solver.solve_all_cards();
+    let res = solver.solve_all_cards(0, 120);
 
     for el in res.card_list {
         println!("{} -> {} ({})", 

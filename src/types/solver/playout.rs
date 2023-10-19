@@ -66,7 +66,7 @@ impl Solver {
             Counters::reset();
 
             let res = self.get(state);
-            let resall = self.get_all_cards(state);
+            let resall = self.get_all_cards(state, 0, 120);
 
             let best_card = res.best_card;
             row.player = state.player;

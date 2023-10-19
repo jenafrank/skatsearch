@@ -98,9 +98,9 @@ impl Solver {
     /// Investigates all legal moves for a given state and returns an option array
     /// with 0) card under investigation 1) follow-up card from tree search (tree root) and
     /// 2) value of search
-    pub fn solve_all_cards(&mut self) -> SolveAllCardsRet {
+    pub fn solve_all_cards(&self, alpha: u8, beta: u8) -> SolveAllCardsRet {
         let initial_state = State::create_initial_state_from_problem(&self.problem);        
-        self.get_all_cards(initial_state)
+        self.get_all_cards(initial_state, alpha, beta)
     }
 
     pub fn solve_win(&self) -> SolveWinRet {

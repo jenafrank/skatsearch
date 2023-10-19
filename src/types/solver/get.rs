@@ -4,7 +4,7 @@ use super::{Solver, retargs::{SolveRet, SolveAllLineRetArgs, SolveAllCardsRet}};
 
 impl Solver {
     
-    pub fn get_all_cards(&mut self, state: State) -> SolveAllCardsRet {
+    pub fn get_all_cards(&self, state: State, alpha: u8, beta: u8) -> SolveAllCardsRet {
         
         let mut ret: SolveAllCardsRet = SolveAllCardsRet { card_list: Vec::new(), counters: Counters::get() };
 
@@ -12,7 +12,7 @@ impl Solver {
 
         for i in 0..legal_moves.1 {
             let card = legal_moves.0[i];
-            let state_adv = state.create_child_state(card, &self.problem, 0, 120);
+            let state_adv = state.create_child_state(card, &self.problem, alpha, beta);
             let res = self.problem.search(&state_adv);
             ret.card_list.push(
                 SolveAllLineRetArgs{

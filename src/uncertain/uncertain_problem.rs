@@ -14,7 +14,7 @@ pub struct UncertainProblem {
     pub cards_on_table: u32,
     pub all_cards: u32,
     pub active_suit: u32,    
-    pub points_to_win: u8,
+    pub upper_bound_of_null_window: u8,
 
     // Facts
     pub facts: [Facts; 2],
@@ -61,7 +61,7 @@ impl UncertainProblem {
             all_cards: 0u32,
             cards_on_table: 0u32,
             active_suit: 0u32,
-            points_to_win: 0u8,
+            upper_bound_of_null_window: 0u8,
             facts: [Facts::new(); 2],
         }
     }
@@ -79,7 +79,7 @@ impl UncertainProblem {
             trick_suit: self.active_suit,
             augen_total: 0,
             nr_of_cards: 0,
-            points_to_win: self.points_to_win,
+            points_to_win: self.upper_bound_of_null_window,
         };
 
         set_cards_for_problem(&mut problem, self.my_cards, self.my_player);
@@ -309,7 +309,7 @@ mod tests {
             active_suit: 0u32,
             my_player: Player::Declarer,
             next_player: Player::Declarer,
-            points_to_win: 1,
+            upper_bound_of_null_window: 1,
             facts: [
                 Facts::one_fact(Player::Left, true, false, false, false, true),
                 Facts::zero_fact(Player::Right)
@@ -332,7 +332,7 @@ mod tests {
             my_cards: "CA CT SA".__bit(),
             my_player: Player::Declarer,
             next_player: Player::Declarer,
-            points_to_win: 1,
+            upper_bound_of_null_window: 1,
             cards_on_table: "ST".__bit(),
             active_suit: TRUMP_FARBE,
             facts: [
