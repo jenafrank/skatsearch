@@ -1,6 +1,3 @@
-use rand::Rng;
-use rand::distributions::Uniform;
-use rand::prelude::Distribution;
 use rand::seq::index::sample;
 
 use crate::consts::bitboard::*;

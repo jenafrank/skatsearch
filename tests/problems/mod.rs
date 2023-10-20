@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use skat_aug23::types::game::Game;
 use skat_aug23::types::player::Player;
 use skat_aug23::types::problem::Problem;
@@ -94,7 +96,6 @@ pub fn ten_tricks() -> (Problem, u8) {
     (p, 59)
 }
 
-#[allow(dead_code)]
 pub fn ten_grand_hard() -> (Problem, u8) {
     let p = Problem::create(
         "HJ DJ CA CT CK CQ C9 D9 D8 D7".__bit(),
@@ -106,7 +107,6 @@ pub fn ten_grand_hard() -> (Problem, u8) {
     (p,38)
 }
 
-#[allow(dead_code)]
 pub fn eight_grand_hard() -> (Problem, u8) {
     let p = Problem::create(
         "HJ DJ CA CT CK CQ C9 D9".__bit(),
@@ -118,7 +118,6 @@ pub fn eight_grand_hard() -> (Problem, u8) {
     (p,42)
 }
 
-#[allow(dead_code)]
 pub fn nine_grand_hard() -> (Problem, u8) {
     let p = Problem::create(
         "HJ DJ CA CT CK CQ C9 D9 D8".__bit(),
