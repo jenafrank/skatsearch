@@ -41,7 +41,7 @@ impl Estimator {
         for i in 0..self.sample_size {
             let concrete_problem = self.uproblem.generate_concrete_problem();                        
             let solver = Solver::create(concrete_problem);
-            let x = self.uproblem.upper_bound_of_null_window;
+            let x = self.uproblem.threshold_upper();
             let search_result = solver.solve_all_cards(x-1, x);
             let mut local_dict = HashMap::new(); 
 
@@ -50,12 +50,12 @@ impl Estimator {
                 let value = line.value;
                 let mut winvalue:u8 = 0;
 
-                if self.uproblem.game_type == Game::Null {
+                if self.uproblem.game_type() == Game::Null {
                     if value == 0 {
                         winvalue = 1;
                     }
                 } else {
-                    if value >= self.uproblem.upper_bound_of_null_window {
+                    if value >= self.uproblem.threshold_upper() {
                         winvalue = 1;
                     }
                 }
@@ -90,24 +90,16 @@ impl Estimator {
 
 #[cfg(test)]
 mod tests {
-    use crate::{uncertain::uncertain_problem::{UncertainProblem, Facts}, types::{player::Player, game::Game}, traits::BitConverter};
-
+    use crate::{types::player::Player, uncertain::uproblem_builder::UProblemBuilder};
     
     #[test]
-    fn test_uproblem_1() {
-        
-        let uproblem = UncertainProblem {
-            game_type: Game::Farbe,
-            my_player: Player::Declarer,
-            next_player: Player::Declarer,
-            my_cards: "SA SK S9".__bit(),
-            cards_on_table: 0,
-            all_cards: "SA SK S9 ST SQ S8 C7 H7 D7".__bit(),
-            active_suit: 0,
-            upper_bound_of_null_window: 21,
-            facts: [Facts::zero_fact(Player::Left), Facts::zero_fact(Player::Right)]
-        };
-
+    fn test_uproblem_three_cards() {
+        let uproblem = UProblemBuilder::new_farbspiel()
+        .cards(Player::Declarer, "SA SK S9")
+        .remaining_cards("ST SQ S8 C7 H7 D7")
+        .threshold(21)
+        .build();
+    
         let estimator = super::Estimator::new(uproblem, 10);
         let (probability, _) = estimator.estimate_win(false);
 
@@ -115,20 +107,14 @@ mod tests {
     }
     
     #[test]
-    fn test_uproblem_full() {
+    fn test_uproblem_three_cards_with_debug_info() {
         
-        let uproblem = UncertainProblem {
-            game_type: Game::Farbe,
-            my_player: Player::Declarer,
-            next_player: Player::Declarer,
-            my_cards: "SA SK S9".__bit(),
-            cards_on_table: 0,
-            all_cards: "SA SK S9 ST SQ S8 C7 H7 D7".__bit(), 
-            active_suit: 0,
-            upper_bound_of_null_window: 21,
-            facts: [Facts::zero_fact(Player::Left), Facts::zero_fact(Player::Right)]
-        };
-
+        let uproblem = UProblemBuilder::new_farbspiel() 
+        .cards(Player::Declarer, "SA SK S9")
+        .remaining_cards("ST SQ S8 C7 H7 D7")
+        .threshold(21)
+        .build();
+  
         let estimator = super::Estimator::new(uproblem, 1000);
         let (probability, _) = estimator.estimate_win(true);
 
