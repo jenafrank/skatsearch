@@ -9,6 +9,7 @@ pub mod tt_table;
 
 pub mod solver;
 pub mod problem;
+pub mod problem_builder;
 pub mod state;
 
 pub mod counter;

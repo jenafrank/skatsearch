@@ -173,7 +173,7 @@ fn apply_termination_criteria(problem: &Problem, state: &State) -> Option<u8> {
             }
         }
         _ => {
-            if problem.augen_total - state.augen_team <= state.alpha {
+            if problem.augen_total() - state.augen_team <= state.alpha {
                 return Some(state.alpha);
             }
 

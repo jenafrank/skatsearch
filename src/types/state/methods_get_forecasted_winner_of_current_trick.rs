@@ -17,7 +17,7 @@ impl State {
     }
 
     fn trick_will_be_won_with_no_card_already_on_table(&self, card: u32, problem: &Problem) -> Option<Player> {
-        let trick_suit = get_suit_for_card(card, problem.game_type);
+        let trick_suit = get_suit_for_card(card, problem.game_type());
         let mut winner_accumulated: Option<Player> = None;
 
         let next_player_moves = self.get_forecasted_moves(self.player.inc(), trick_suit);

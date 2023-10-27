@@ -1,4 +1,4 @@
-use crate::traits::{Augen, BitConverter};
+use crate::traits::BitConverter;
 
 use super::*;
 
@@ -18,17 +18,14 @@ impl Problem {
         assert!(left_cards_all & right_cards_all == 0);
         
         Problem {
-            declarer_cards_all,
-            left_cards_all,
-            right_cards_all,
+            declarer_cards: declarer_cards_all,
+            left_cards: left_cards_all,
+            right_cards: right_cards_all,
             game_type,
             start_player,
             trick_cards: 0,
             trick_suit: 0,
-            points_to_win: 1,
-
-            augen_total: allcards.__get_value(),
-            nr_of_cards: allcards.__get_number_of_bits(),
+            threshold_upper: 1,
         }
     }
 
@@ -77,16 +74,14 @@ impl Problem {
 
     pub fn new() -> Self {
         Problem {
-            declarer_cards_all: 0u32,
-            left_cards_all: 0u32,
-            right_cards_all: 0u32,
+            declarer_cards: 0u32,
+            left_cards: 0u32,
+            right_cards: 0u32,
             game_type: Game::Farbe,
             start_player: Player::Declarer,
-            augen_total: 0u8,
-            nr_of_cards: 0u8,
             trick_cards: 0,
             trick_suit: 0,
-            points_to_win: 0
+            threshold_upper: 0
         }
     }
 

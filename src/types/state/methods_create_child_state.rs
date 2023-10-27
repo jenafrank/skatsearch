@@ -20,7 +20,7 @@ impl State {
 
         // new_trick_suit
         let mut new_trick_suit: u32 = if self.trick_suit == 0 {
-            get_suit_for_card(card, problem.game_type)
+            get_suit_for_card(card, problem.game_type())
         } else {
             self.trick_suit
         };
@@ -51,7 +51,7 @@ impl State {
 
         // evaluate upon trick completion. Overwrites four variables. Accumulates augen vars.
         if new_trick_cards_count == 3 {
-            let augen = if problem.game_type == Game::Null {
+            let augen = if problem.game_type() == Game::Null {
                 1
             } else {
                 new_trick_cards.__get_value_of_three_cards()

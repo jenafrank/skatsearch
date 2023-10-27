@@ -1,10 +1,11 @@
 use rand::seq::index::sample;
 
 use crate::consts::bitboard::*;
-use crate::traits::{Bitboard, Augen};
+use crate::traits::{Bitboard, Augen, StringConverter};
 use crate::types::game::Game;
 use crate::types::player::Player;
 use crate::types::problem::Problem;
+use crate::types::problem_builder::ProblemBuilder;
 
 use super::facts::Facts;
 
@@ -138,27 +139,21 @@ impl UncertainProblem {
     }
 
     pub fn generate_concrete_problem(&self) -> Problem {
+        
         self.validate();
 
-        let mut problem = Problem {
-            declarer_cards_all: 0u32,
-            left_cards_all: 0u32,
-            right_cards_all: 0u32,
-            game_type: self.game_type,
-            start_player: self.next_player,
-            trick_cards: self.cards_on_table,
-            trick_suit: self.active_suit,
-            augen_total: 0,
-            nr_of_cards: 0,
-            points_to_win: self.threshold_upper,
-        };
+        let mut problem = ProblemBuilder::new(self.game_type)
+        .cards(Player::Declarer, "")
+        .cards(Player::Left, "")
+        .cards(Player::Right, "")
+        .turn(self.next_player)
+        .trick(self.active_suit, self.cards_on_table.__str().as_str())
+        .threshold(self.threshold_upper)
+        .build();
 
         set_cards_for_problem(&mut problem, self.my_cards, self.my_player);
         set_cards_for_other_players(&mut problem, self.all_cards, self.cards_on_table, self.my_cards, self.my_player, 
             self.next_player_facts(), self.previous_player_facts());
-
-        problem.augen_total = (problem.declarer_cards_all | problem.left_cards_all | problem.right_cards_all).__get_value();
-        problem.nr_of_cards = (problem.declarer_cards_all | problem.left_cards_all | problem.right_cards_all).count_ones() as u8;
 
         if verify_card_distribution(&problem) {
             return problem;
@@ -198,9 +193,9 @@ impl UncertainProblem {
 }
 
 fn verify_card_distribution(problem: &Problem) -> bool {
-    assert!(problem.declarer_cards_all & problem.left_cards_all == 0);
-    assert!(problem.declarer_cards_all & problem.right_cards_all == 0);
-    assert!(problem.left_cards_all & problem.right_cards_all == 0);
+    assert!(problem.declarer_cards() & problem.left_cards() == 0);
+    assert!(problem.declarer_cards() & problem.right_cards() == 0);
+    assert!(problem.left_cards() & problem.right_cards() == 0);
 
     return true;
 }
@@ -219,8 +214,8 @@ fn set_cards_for_other_players(
     let mut cards_next_player = cards_on_hands_of_both_other_players;
     let mut cards_previous_player = cards_on_hands_of_both_other_players;
 
-    cards_next_player = cancel_cards_with_facts(cards_next_player, next_player_facts, problem.game_type);
-    cards_previous_player = cancel_cards_with_facts(cards_previous_player, previous_player_facts, problem.game_type);
+    cards_next_player = cancel_cards_with_facts(cards_next_player, next_player_facts, problem.game_type());
+    cards_previous_player = cancel_cards_with_facts(cards_previous_player, previous_player_facts, problem.game_type());
 
     let proposed_draw = draw_cards(problem, cards_next_player, cards_previous_player, my_cards);
 
@@ -266,7 +261,7 @@ fn add_trick_cards_to_all_cards(cards_player_1: &mut u32, cards_player_2: &mut u
 
 fn draw_cards(problem: &Problem, cards_player_1: u32, cards_player_2: u32, my_cards: u32) -> (u32, u32) {
     
-    let nr_trick_cards = problem.trick_cards.count_ones();
+    let nr_trick_cards = problem.trick_cards().count_ones();
     let my_nr_cards = my_cards.count_ones();
     
     let nr_player1_cards = match nr_trick_cards {
@@ -321,9 +316,9 @@ fn random_cards(cards: u32, nr: u32) -> u32 {
 
 fn set_cards_to_player(problem: &mut Problem, cards: u32, player: Player) {
     match player {
-        Player::Declarer => problem.declarer_cards_all = cards,
-        Player::Left => problem.left_cards_all = cards,
-        Player::Right => problem.right_cards_all = cards,
+        Player::Declarer => problem.set_declarer_cards(cards),
+        Player::Left => problem.set_left_cards(cards),
+        Player::Right => problem.set_right_cards(cards),
     }
 }
 
@@ -375,9 +370,9 @@ fn cancel_cards_with_facts(cards: u32, facts: Facts, game: Game) -> u32 {
 
 fn set_cards_for_problem(problem: &mut Problem, my_cards: u32, my_player: Player) {
     match my_player {
-        Player::Declarer => problem.declarer_cards_all = my_cards,
-        Player::Left => problem.left_cards_all = my_cards,
-        Player::Right => problem.right_cards_all = my_cards,
+        Player::Declarer => problem.set_declarer_cards(my_cards),
+        Player::Left => problem.set_left_cards(my_cards),
+        Player::Right => problem.set_right_cards(my_cards),
     }
 }
 
@@ -410,9 +405,9 @@ mod tests {
 
         let problem = uproblem.generate_concrete_problem();
 
-        println!("Declarer cards: {}", problem.declarer_cards_all.__str());
-        println!("Left cards    : {}", problem.left_cards_all.__str());
-        println!("Right cards   : {}", problem.right_cards_all.__str());
+        println!("Declarer cards: {}", problem.declarer_cards().__str());
+        println!("Left cards    : {}", problem.left_cards().__str());
+        println!("Right cards   : {}", problem.right_cards().__str());
     }
 
     #[test]
@@ -434,8 +429,8 @@ mod tests {
 
         let problem = uproblem.generate_concrete_problem();
 
-        println!("Declarer cards: {}", problem.declarer_cards_all.__str());
-        println!("Left cards    : {}", problem.left_cards_all.__str());
-        println!("Right cards   : {}", problem.right_cards_all.__str());
+        println!("Declarer cards: {}", problem.declarer_cards().__str());
+        println!("Left cards    : {}", problem.left_cards().__str());
+        println!("Right cards   : {}", problem.right_cards().__str());
     }
 }

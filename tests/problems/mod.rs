@@ -91,7 +91,7 @@ pub fn ten_tricks() -> (Problem, u8) {
         "DJ CT CK CQ HQ S7 DQ D9 D8 D7"
     );
 
-    assert_eq!(p.nr_of_cards, 30);
+    assert_eq!(p.number_of_cards(), 30);
 
     (p, 59)
 }

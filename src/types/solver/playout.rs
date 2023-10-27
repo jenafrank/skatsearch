@@ -9,7 +9,7 @@ impl Solver {
         
         let mut ret: Vec<PlayoutLine> = Vec::new();
         let mut i: usize = 0;
-        let n: usize = self.problem.nr_of_cards as usize;
+        let n: usize = self.problem.number_of_cards() as usize;
 
         let mut initial_state = State::create_initial_state_from_problem(&self.problem);
 
@@ -55,7 +55,7 @@ impl Solver {
 
         let mut ret: Vec<PlayoutAllCardsRetLine> = Vec::new();
         let mut i: usize = 0;
-        let n: usize = self.problem.nr_of_cards as usize;
+        let n: usize = self.problem.number_of_cards() as usize;
         
         let mut state = State::create_initial_state_from_problem(&self.problem);
 

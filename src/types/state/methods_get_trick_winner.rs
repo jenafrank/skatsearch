@@ -13,10 +13,10 @@ impl State {
             crate::core_functions::get_trick_winner::get_trick_winner(
                 trick_cards,
                 trick_suit,
-                problem.game_type,
-                problem.declarer_cards_all,
-                problem.left_cards_all,
-                problem.right_cards_all,
+                problem.game_type(),
+                problem.declarer_cards(),
+                problem.left_cards(),
+                problem.right_cards(),
             )
     }
 }

@@ -23,9 +23,9 @@ impl Estimator {
 
             if info {
                 println!("Game {}", i);
-                println!("Declarer cards: {}", solver.problem.declarer_cards_all.__str());
-                println!("Left cards    : {}", solver.problem.left_cards_all.__str());
-                println!("Right cards   : {}", solver.problem.right_cards_all.__str());
+                println!("Declarer cards: {}", solver.problem.declarer_cards().__str());
+                println!("Left cards    : {}", solver.problem.left_cards().__str());
+                println!("Right cards   : {}", solver.problem.right_cards().__str());
                 println!("Best card: {} Win: {}", search_result.best_card.__str(), search_result.declarer_wins);
                 println!();
             }
@@ -68,9 +68,9 @@ impl Estimator {
 
             if info {
                 println!("Game {}", i);
-                println!("Declarer cards: {}", solver.problem.declarer_cards_all.__str());
-                println!("Left cards    : {}", solver.problem.left_cards_all.__str());
-                println!("Right cards   : {}", solver.problem.right_cards_all.__str());
+                println!("Declarer cards: {}", solver.problem.declarer_cards().__str());
+                println!("Left cards    : {}", solver.problem.left_cards().__str());
+                println!("Right cards   : {}", solver.problem.right_cards().__str());
                 println!("All moves: {}", local_dict.iter().map(|(k, v)| format!("{}: {}", k.__str(), v)).collect::<Vec<_>>().join(", "));
                 println!();
             }

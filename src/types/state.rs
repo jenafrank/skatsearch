@@ -166,33 +166,25 @@ mod tests_evaluation {
 
 #[cfg(test)]
 mod tests_no_evaluation {
-    use crate::types::game::*;
+    use crate::types::problem_builder::ProblemBuilder;
     use crate::types::state::State;
-    use crate::types::problem::Problem;
     use crate::types::player::Player;
     use crate::consts::bitboard::TRUMP_FARBE;
     use crate::traits::{Augen, BitConverter};
 
     #[test]
     fn test_advance_from_trick_beginning() {
-        let problem = Problem {
-            declarer_cards_all: "[CJ ST]".__bit(),
-            left_cards_all: "[SJ SA]".__bit(),
-            right_cards_all: "[CA S7]".__bit(),
-            game_type: Game::Farbe,
-            augen_total: "CJ ST SJ SA CA S7".__bit().__get_value(),
-            start_player: Player::Declarer,
-            nr_of_cards: 6,
-            trick_cards: 0,
-            trick_suit: 0,
-            points_to_win: 0
-        };
+
+        let problem = ProblemBuilder::new_farbspiel()
+        .cards_all("CJ ST", "SJ SA", "CA S7")
+        .turn(Player::Declarer)
+        .build();
 
         let state = State {
             played_cards: 0,
-            declarer_cards: problem.declarer_cards_all,
-            left_cards: problem.left_cards_all,
-            right_cards: problem.right_cards_all,
+            declarer_cards: problem.declarer_cards(),
+            left_cards: problem.left_cards(),
+            right_cards: problem.right_cards(),
             trick_cards: 0,
             trick_suit: 0,
             trick_cards_count: 0,
@@ -234,44 +226,37 @@ mod tests_no_evaluation {
 
     #[test]
     fn test_advance_from_within_trick() {
-        let problem = Problem {
-            declarer_cards_all: "[ST]".__bit(),
-            left_cards_all: "[SJ SA]".__bit(),
-            right_cards_all: "[CA S7]".__bit(),
-            game_type: Game::Farbe,
-            augen_total: "CJ ST SJ SA CA S7".__bit().__get_value(),
-            start_player: Player::Declarer,
-            nr_of_cards: 6,
-            trick_cards: 0,
-            trick_suit: 0,
-            points_to_win: 0,
-        };
+
+        let problem = ProblemBuilder::new_farbspiel()
+        .cards_all("CJ ST", "SJ SA", "CA S7")
+        .turn(Player::Left)
+        .trick(TRUMP_FARBE, "CJ")
+        .build();
 
         let state = State {
-            played_cards: "CJ".__bit(),
-            declarer_cards: problem.declarer_cards_all, // cache var 1, ToDo: Check if speed gain when del cached vars
-            left_cards: problem.left_cards_all,  // cache var 2
-            right_cards: problem.right_cards_all, // cache var 3
-            trick_cards: "CJ".__bit(),
-            trick_cards_count: 1, // cache var 4
-            trick_suit: TRUMP_FARBE,
-            augen_future: "CJ ST SJ SA CA S7".__bit().__get_value(),
+            played_cards: problem.trick_cards(),
+            declarer_cards: problem.declarer_cards(), 
+            left_cards: problem.left_cards(),  
+            right_cards: problem.right_cards(),
+            trick_cards: problem.trick_cards(),
+            trick_cards_count: 1,
+            trick_suit: problem.trick_suit(),
+            augen_future: problem.augen_total(),
             augen_declarer: 0,
-            augen_team: 0, // cache var 5: augen_team = 120 - augen_declarer - augen_future
-            player: Player::Left,
-            player_cards: "[SJ SA]".__bit(),
+            augen_team: 0, 
+            player: problem.start_player(),
+            player_cards: problem.left_cards(),
             alpha: 0,
             beta: 120,
             mapped_hash: 0,
-            is_root_state: false // cache var 6
-            // cache var 7: augen_future ??
+            is_root_state: false 
         }.add_hash();
 
         let next_state = state.create_child_state("SA".__bit(), &problem, 0, 120);
 
         let expected_next_state = State {
             played_cards: "[CJ SA]".__bit(),
-            declarer_cards: "[ST]".__bit(),
+            declarer_cards: "[CJ ST]".__bit(),
             left_cards: "[SJ]".__bit(),
             right_cards: "[CA S7]".__bit(),
             trick_cards: "[CJ SA]".__bit(),
@@ -293,18 +278,12 @@ mod tests_no_evaluation {
 
     #[test]
     fn test_advance_from_within_trick_via_problem_only() {
-        let problem = Problem {
-            declarer_cards_all: "[ST]".__bit(),
-            left_cards_all: "[SJ SA]".__bit(),
-            right_cards_all: "[CA S7]".__bit(),
-            game_type: Game::Farbe,
-            augen_total: "CJ ST SJ SA CA S7".__bit().__get_value(),
-            start_player: Player::Left,
-            nr_of_cards: 5,
-            points_to_win: 0,
-            trick_cards: "CJ".__bit(),
-            trick_suit: TRUMP_FARBE,
-        };
+
+        let problem = ProblemBuilder::new_farbspiel()
+        .cards_all("CJ ST", "SJ SA", "CA S7")
+        .turn(Player::Left)
+        .trick(TRUMP_FARBE, "CJ")
+        .build();
 
         let state = problem.new_state(0, 120);
 
@@ -312,7 +291,7 @@ mod tests_no_evaluation {
 
         let expected_next_state = State {
             played_cards: "[CJ SA]".__bit(),
-            declarer_cards: "[ST]".__bit(),
+            declarer_cards: "[CJ ST]".__bit(),
             left_cards: "[SJ]".__bit(),
             right_cards: "[CA S7]".__bit(),
             trick_cards: "[CJ SA]".__bit(),

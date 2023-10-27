@@ -4,7 +4,6 @@ use super::retargs::SolveRet;
 use super::retargs::SolveWithSkatRet;
 use super::retargs::SolveWithSkatRetLine;
 use super::retargs::SolveWinRet;
-use crate::consts::bitboard::ALLCARDS;
 use crate::traits::Augen;
 use crate::traits::Bitboard;
 use crate::types::counter::Counters;
@@ -47,12 +46,8 @@ impl Solver {
                 let skat = twelve[i] | twelve[j];
                 let declarer_cards = twelve_bit ^ skat;
 
-                let current_all_cards = ALLCARDS ^ skat;
-
-                self.problem.declarer_cards_all = declarer_cards;
-                self.problem.augen_total = current_all_cards.__get_value();
-                self.problem.nr_of_cards = current_all_cards.__get_number_of_bits();
-
+                self.problem.set_declarer_cards(declarer_cards);
+            
                 let mut current_initial_state =
                     State::create_initial_state_from_problem(&self.problem);
 
@@ -104,10 +99,10 @@ impl Solver {
     }
 
     pub fn solve_win(&self) -> SolveWinRet {
-        let mut alpha = self.problem.points_to_win - 1;
-        let mut beta = self.problem.points_to_win;
+        let mut alpha = self.problem.points_to_win() - 1;
+        let mut beta = self.problem.points_to_win();
 
-        if self.problem.game_type == Game::Null {
+        if self.problem.game_type() == Game::Null {
             alpha = 0;
             beta = 1;
         } 
@@ -117,7 +112,7 @@ impl Solver {
         
         let mut declarer_wins = value > alpha;
         
-        if self.problem.game_type == Game::Null {
+        if self.problem.game_type() == Game::Null {
             declarer_wins = !declarer_wins;
         }        
 
@@ -137,7 +132,7 @@ impl Solver {
 
         let threshold_farbe_and_grand = 60 - skat_value;
 
-        match self.problem.game_type {
+        match self.problem.game_type() {
             Game::Farbe => {
                 state.alpha = threshold_farbe_and_grand;
                 state.beta = threshold_farbe_and_grand + 1;
@@ -155,7 +150,7 @@ impl Solver {
         let result = self.problem.search(&state);
         let val = result.1;
 
-        let declarer_wins = if self.problem.game_type == Game::Null {
+        let declarer_wins = if self.problem.game_type() == Game::Null {
             val == 0
         } else {
             val > threshold_farbe_and_grand
@@ -208,22 +203,16 @@ impl Solver {
 
 #[cfg(test)]
 mod tests {
-    use crate::{types::{problem::Problem, solver::Solver, game::Game, player::Player}, traits::{BitConverter, Augen}, consts::bitboard::SPADES};
+    use crate::{types::{problem::Problem, solver::Solver, game::Game, player::Player, problem_builder::ProblemBuilder}, traits::{BitConverter, Augen}, consts::bitboard::SPADES};
 
     #[test]
     fn test_solve_win() {
-        let problem = Problem {
-            declarer_cards_all: "SA SK".__bit(),
-            left_cards_all: "ST SQ".__bit(),
-            right_cards_all: "S9 S8".__bit(),
-            game_type: Game::Farbe,
-            start_player: Player::Declarer,
-            points_to_win: 14,
-            trick_cards: 0,
-            trick_suit: 0,
-            augen_total: "SA ST SK SQ S9 S8".__bit().__get_value(),
-            nr_of_cards: 6
-        };
+
+        let problem = ProblemBuilder::new_farbspiel()
+        .cards_all("SA SK", "ST SQ", "S9 S8")
+        .turn(Player::Declarer)
+        .threshold(14)
+        .build();
 
         let solver = Solver::create(problem);
         let result = solver.solve_win();
@@ -233,18 +222,12 @@ mod tests {
 
     #[test]
     fn test_solve_win_intertrick() {
-        let problem = Problem {
-            declarer_cards_all: "SA SK".__bit(),
-            left_cards_all: "ST SQ".__bit(),
-            right_cards_all: "S9 S8".__bit(),
-            game_type: Game::Farbe,
-            start_player: Player::Left,
-            points_to_win: 3,
-            trick_cards: "SA".__bit(),
-            trick_suit: SPADES,
-            augen_total: "SA ST SK SQ S9 S8".__bit().__get_value(),
-            nr_of_cards: 5
-        };
+        let problem = ProblemBuilder::new_farbspiel()
+        .cards_all("SA SK", "ST SQ", "S9 S8")
+        .turn(Player::Left)
+        .threshold(3)
+        .trick(SPADES, "SA")
+        .build();
 
         let solver = Solver::create(problem);
         let result = solver.solve_win();

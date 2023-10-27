@@ -68,9 +68,9 @@ pub fn solve_with_skat () {
 
     println!("All twelve cards:");
     let p = &solver.problem;
-    let allcards: u32 = (!0u32) ^ p.left_cards_all ^ p.right_cards_all;
-    let skat: u32 = (!0u32) ^ p.left_cards_all ^ p.right_cards_all ^ p.declarer_cards_all;
-    println!("{} | {}", p.declarer_cards_all.__str() , skat.__str());
+    let allcards: u32 = (!0u32) ^ p.left_cards() ^ p.right_cards();
+    let skat: u32 = (!0u32) ^ p.left_cards() ^ p.right_cards() ^ p.declarer_cards();
+    println!("{} | {}", p.declarer_cards().__str() , skat.__str());
     println!();
 
     let best_skat = result.best_skat.unwrap();
