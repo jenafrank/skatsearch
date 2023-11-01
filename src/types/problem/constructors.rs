@@ -12,7 +12,6 @@ impl Problem {
         start_player: Player,
     ) -> Problem {
         
-        let allcards = declarer_cards_all | left_cards_all | right_cards_all;
         assert!(declarer_cards_all & left_cards_all == 0);
         assert!(declarer_cards_all & right_cards_all == 0);
         assert!(left_cards_all & right_cards_all == 0);

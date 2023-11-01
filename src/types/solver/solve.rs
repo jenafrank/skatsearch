@@ -203,7 +203,7 @@ impl Solver {
 
 #[cfg(test)]
 mod tests {
-    use crate::{types::{problem::Problem, solver::Solver, game::Game, player::Player, problem_builder::ProblemBuilder}, traits::{BitConverter, Augen}, consts::bitboard::SPADES};
+    use crate::{types::{solver::Solver, player::Player, problem_builder::ProblemBuilder}, consts::bitboard::SPADES};
 
     #[test]
     fn test_solve_win() {

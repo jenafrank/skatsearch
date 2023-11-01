@@ -8,7 +8,8 @@ pub struct UProblemBuilder {
     next_player: Option<Player>,
 
     // Primary values
-    cards_on_table: Option<u32>,
+    card_on_table_previous_player: Option<u32>,
+    card_on_table_next_player: Option<u32>,
     all_cards: Option<u32>,
     active_suit: Option<u32>,
     threshold_upper: Option<u8>,
@@ -62,8 +63,8 @@ impl UProblemBuilder {
         self
     }
 
-    pub fn trick(mut self, active_suit: u32, trick_cards: u32) -> UProblemBuilder {
-        self.cards_on_table = Some(trick_cards);
+    pub fn trick_previous_player(mut self, active_suit: u32, trick_previous_player: u32) -> UProblemBuilder {
+        self.card_on_table_previous_player = Some(trick_previous_player);
         self.active_suit = Some(active_suit);
         self
     }
@@ -80,7 +81,7 @@ impl UProblemBuilder {
     pub fn remaining_cards(mut self, remaining_cards: &str) -> UProblemBuilder{
         let remaining_cards_bit = remaining_cards.__bit();
         let my_cards_bit = self.my_cards.expect("No own cards found.");
-        let cards_on_table = self.cards_on_table.expect("No cards on table found.");
+        let cards_on_table = self.cards_on_table();
         
         assert!(remaining_cards_bit & my_cards_bit == 0);
         assert!(remaining_cards_bit & cards_on_table == 0);
@@ -97,7 +98,7 @@ impl UProblemBuilder {
     pub fn missing_cards(mut self, skat_cards: &str) -> UProblemBuilder {
         let skat_cards_bit = skat_cards.__bit();
         let my_cards_bit = self.my_cards.expect("No own cards found.");
-        let cards_on_table = self.cards_on_table.expect("No cards on table found.");
+        let cards_on_table = self.cards_on_table();
         
         assert!(skat_cards_bit & my_cards_bit == 0);
         assert!(skat_cards_bit & cards_on_table == 0);
@@ -139,16 +140,16 @@ impl UProblemBuilder {
             uproblem.set_next_player(next_player);
         }
 
-        if let Some(cards_on_table) = self.cards_on_table {
-            uproblem.set_cards_on_table(cards_on_table);
+        if let Some(card_on_table_previous_player) = self.card_on_table_previous_player {
+            uproblem.set_card_on_table_previous_player(card_on_table_previous_player);
+        }
+
+        if let Some(card_on_table_next_player) = self.card_on_table_next_player {
+            uproblem.set_card_on_table_next_player(card_on_table_next_player);
         }
 
         if let Some(all_cards) = self.all_cards {
-            if let Some(cards_on_table) = self.cards_on_table {
-                uproblem.set_all_cards(cards_on_table | all_cards);
-            } else {                
-                uproblem.set_all_cards(all_cards);
-            }
+            uproblem.set_all_cards(self.cards_on_table() | all_cards);         
         }
 
         if let Some(active_suit) = self.active_suit {
@@ -184,7 +185,8 @@ impl UProblemBuilder {
             || self.my_player.is_none()
             || self.my_cards.is_none()
             || self.next_player.is_none()
-            || self.cards_on_table.is_none()
+            || self.card_on_table_next_player.is_none()
+            || self.card_on_table_previous_player.is_none()
             || self.all_cards.is_none()
             || self.active_suit.is_none()
             || self.threshold_upper.is_none()
@@ -203,6 +205,10 @@ impl UProblemBuilder {
         assert!(nr_all_cards %3 == 0);
         assert!(nr_all_cards == 3 * nr_own_cards);
     }
+
+    fn cards_on_table(&self) -> u32 {
+        self.card_on_table_next_player.unwrap_or(0u32) | self.card_on_table_previous_player.unwrap_or(0u32)
+    }
 }
 
 impl Default for UProblemBuilder {
@@ -212,7 +218,8 @@ impl Default for UProblemBuilder {
             my_player: None,
             my_cards: None,
             next_player: None,
-            cards_on_table: Some(0),
+            card_on_table_next_player: Some(0u32),
+            card_on_table_previous_player: Some(0u32),
             all_cards: None,
             active_suit: Some(0),
             threshold_upper: None,
