@@ -230,7 +230,7 @@ fn transposition_table_write(
         Counters::inc_writes();
         TtTable::get_mutable().write(
             &state,
-            state.mapped_hash,
+            state.get_hash(),
             alphaorig,
             betaorig,
             value

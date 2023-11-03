@@ -1,7 +1,4 @@
-use rand::seq::index::sample;
-
-use crate::consts::bitboard::*;
-use crate::traits::{Bitboard, StringConverter};
+use crate::traits::StringConverter;
 use crate::types::game::Game;
 use crate::types::player::Player;
 use crate::types::problem::Problem;

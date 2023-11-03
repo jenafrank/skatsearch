@@ -32,17 +32,22 @@ pub struct State {
     // Additional values
     pub alpha: u8,
     pub beta: u8,
-    pub mapped_hash: usize,
-    pub is_root_state: bool
+    pub is_root_state: bool,
+
+    mapped_hash: usize,
 
 }
 impl State {
-    pub fn add_hash(&self) -> State {
-        let mut hashed_state = self.to_owned();
-        hashed_state.mapped_hash = self.get_mapped_hash();
 
-        hashed_state
+    pub fn get_hash(&self) -> usize {
+        self.mapped_hash
     }
+
+    fn add_hash(mut self) -> State  {        
+        self.mapped_hash = self.get_mapped_hash();        
+        self
+    }
+    
 }
 
 #[cfg(test)]

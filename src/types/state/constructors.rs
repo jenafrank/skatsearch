@@ -5,6 +5,43 @@ use crate::types::state::State;
 
 impl State {
 
+    pub fn new(
+        player: Player,
+        played_cards: u32,
+        trick_cards: u32,
+        trick_suit: u32,
+        augen_declarer: u8,
+        declarer_cards: u32,
+        left_cards: u32,
+        right_cards: u32,
+        player_cards: u32,
+        trick_cards_count: u8,
+        augen_future: u8,
+        augen_team: u8,
+        alpha: u8,
+        beta: u8,
+        is_root_state: bool
+    ) -> Self {        
+        Self {
+            player,
+            played_cards,
+            trick_cards,
+            trick_suit,
+            augen_declarer,
+            declarer_cards,
+            left_cards,
+            right_cards,
+            player_cards,
+            trick_cards_count,
+            augen_future,
+            augen_team,
+            alpha,
+            beta,
+            is_root_state,
+            mapped_hash: 0,
+        }.add_hash()
+    }
+
     pub fn create(
         played_cards: u32,
         trick_cards: u32,

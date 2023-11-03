@@ -72,45 +72,40 @@ mod tests {
     }
 
     fn get_state_trick_not_empty() -> State {
-        State {
-            played_cards: 0,
-            declarer_cards: 0,
-            left_cards: 0,
-            right_cards: 0,
-            trick_cards: 0,
-            trick_suit: TRUMP_GRAND,
-            trick_cards_count: 0,
-            augen_future: 0,
-            augen_declarer: 0,
-            augen_team: 0,
-            player: Player::Declarer,
-            player_cards: get_hand(),
-            alpha: 0,
-            beta: 120,
-            mapped_hash: 0,
-            is_root_state: false
-        }
+        State::new(
+            Player::Declarer,           
+            get_hand(),
+            0,
+            TRUMP_GRAND,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            120,
+            false)        
     }
 
     fn get_state_trick_empty() -> State {
-        State {
-            played_cards: 0,
-            declarer_cards: 0,
-            left_cards: 0,
-            right_cards: 0,
-            trick_cards: 0,
-            trick_suit: 0,
-            trick_cards_count: 0,
-            augen_future: 0,
-            augen_declarer: 0,
-            augen_team: 0,
-            player: Player::Declarer,
-            player_cards: get_hand(),
-            alpha: 0,
-            beta: 120,
-            mapped_hash: 0,
-            is_root_state: false
-        }
+        State::new(
+            Player::Declarer,           
+            get_hand(),
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            120,
+            false)           
     }
-
 }

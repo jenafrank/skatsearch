@@ -96,7 +96,6 @@ impl State {
             beta: beta_start,
             mapped_hash: 0,
             is_root_state: false,
-        }
-        .add_hash()
+        }.add_hash().to_owned()
     }
 }

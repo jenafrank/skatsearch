@@ -38,7 +38,7 @@ impl TtTable {
 
     pub fn read(&self, state: &State) -> Option<&TtEntry> {
 
-        let candidate = &self.data[state.mapped_hash];
+        let candidate = &self.data[state.get_hash()];
 
         if !candidate.occupied {
             None // empty slot
