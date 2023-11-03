@@ -10,6 +10,24 @@ mod methods_reducer;
 
 use super::player::Player;
 
+pub struct StatePayload {
+    pub player: Player,
+    pub played_cards: u32,
+    pub trick_cards: u32,
+    pub trick_suit: u32,
+    pub augen_declarer: u8,
+    pub declarer_cards: u32,
+    pub left_cards: u32,
+    pub right_cards: u32,
+    pub player_cards: u32,
+    pub trick_cards_count: u8,
+    pub augen_future: u8,
+    pub augen_team: u8,
+    pub alpha: u8,
+    pub beta: u8,
+    pub is_root_state: bool
+}
+
 #[derive(PartialEq, Eq, Debug, Clone, Copy)]
 pub struct State {
 
@@ -34,27 +52,27 @@ pub struct State {
     pub beta: u8,
     pub is_root_state: bool,
 
-    mapped_hash: usize,
+    hash: usize,
 
 }
 impl State {
 
     pub fn get_hash(&self) -> usize {
-        self.mapped_hash
+        self.hash
     }
 
     fn add_hash(mut self) -> State  {        
-        self.mapped_hash = self.get_mapped_hash();        
+        self.hash = self.get_mapped_hash();        
         self
     }
-    
+
 }
 
 #[cfg(test)]
 mod tests_derived_state {
     
     use crate::types::game::Game;
-    use crate::types::state::State;
+    use crate::types::state::{State, StatePayload};
     use crate::types::problem::Problem;
     use crate::types::player::Player;
     use crate::consts::bitboard::TRUMP_FARBE;
@@ -72,7 +90,7 @@ mod tests_derived_state {
 
         let x = State::create_initial_state_from_problem(&p);
 
-        let y = State {
+        let y = State::new(StatePayload {
             player: Player::Declarer,
             played_cards: 0,
             declarer_cards: "CJ SJ".__bit(),
@@ -87,9 +105,8 @@ mod tests_derived_state {
             augen_team: 0,
             alpha: 0,
             beta: 120,
-            mapped_hash: 0,
             is_root_state: true,
-        }.add_hash();
+        });
 
         assert_eq!(x, y);
     }
@@ -114,7 +131,7 @@ mod tests_derived_state {
             false
         );
 
-        let y = State {
+        let y = State::new(StatePayload {
             player: Player::Right,
             played_cards: "CJ SA".__bit(),
             declarer_cards: "SJ".__bit(),
@@ -128,10 +145,9 @@ mod tests_derived_state {
             augen_declarer: 0,
             augen_team: 0,
             alpha: 0,
-            beta: 120,
-            mapped_hash: 0,
-            is_root_state: false,
-        }.add_hash();
+            beta: 120,            
+            is_root_state: false
+        });
 
         assert_eq!(x, y);
     }
@@ -172,7 +188,7 @@ mod tests_evaluation {
 #[cfg(test)]
 mod tests_no_evaluation {
     use crate::types::problem_builder::ProblemBuilder;
-    use crate::types::state::State;
+    use crate::types::state::{State, StatePayload};
     use crate::types::player::Player;
     use crate::consts::bitboard::TRUMP_FARBE;
     use crate::traits::{Augen, BitConverter};
@@ -185,7 +201,7 @@ mod tests_no_evaluation {
         .turn(Player::Declarer)
         .build();
 
-        let state = State {
+        let state = State::new(StatePayload{
             played_cards: 0,
             declarer_cards: problem.declarer_cards(),
             left_cards: problem.left_cards(),
@@ -200,14 +216,13 @@ mod tests_no_evaluation {
             player_cards: "[CJ ST]".__bit(),
             alpha: 0,
             beta: 120,
-            mapped_hash: 0,
             is_root_state: false
-        }.add_hash();
+        });
 
 
         let next_state = state.create_child_state("CJ".__bit(),&problem,0,120);
 
-        let expected_next_state = State {
+        let expected_next_state = State::new(StatePayload {
             played_cards: "CJ".__bit(),
             declarer_cards: "[ST]".__bit(),
             left_cards: "[SJ SA]".__bit(),
@@ -222,9 +237,8 @@ mod tests_no_evaluation {
             player_cards: "[SJ SA]".__bit(),
             alpha: 0,
             beta: 120,
-            mapped_hash: 0,
             is_root_state: false
-        }.add_hash();
+        });
 
         assert_eq!(next_state, expected_next_state);
     }
@@ -238,7 +252,7 @@ mod tests_no_evaluation {
         .trick(TRUMP_FARBE, "CJ")
         .build();
 
-        let state = State {
+        let state = State::new(StatePayload {
             played_cards: problem.trick_cards(),
             declarer_cards: problem.declarer_cards(), 
             left_cards: problem.left_cards(),  
@@ -252,14 +266,13 @@ mod tests_no_evaluation {
             player: problem.start_player(),
             player_cards: problem.left_cards(),
             alpha: 0,
-            beta: 120,
-            mapped_hash: 0,
+            beta: 120,           
             is_root_state: false 
-        }.add_hash();
+        });
 
         let next_state = state.create_child_state("SA".__bit(), &problem, 0, 120);
 
-        let expected_next_state = State {
+        let expected_next_state = State::new(StatePayload {
             played_cards: "[CJ SA]".__bit(),
             declarer_cards: "[CJ ST]".__bit(),
             left_cards: "[SJ]".__bit(),
@@ -273,10 +286,9 @@ mod tests_no_evaluation {
             player: Player::Right,
             player_cards: "[CA S7]".__bit(),
             alpha: 0,
-            beta: 120,
-            mapped_hash: 0,
+            beta: 120,            
             is_root_state: false
-        }.add_hash();
+        });
 
         assert_eq!(next_state, expected_next_state);
     }
@@ -294,7 +306,7 @@ mod tests_no_evaluation {
 
         let next_state = state.create_child_state("SA".__bit(), &problem, 0, 120);
 
-        let expected_next_state = State {
+        let expected_next_state = State::new(StatePayload {
             played_cards: "[CJ SA]".__bit(),
             declarer_cards: "[CJ ST]".__bit(),
             left_cards: "[SJ]".__bit(),
@@ -308,10 +320,9 @@ mod tests_no_evaluation {
             player: Player::Right,
             player_cards: "[CA S7]".__bit(),
             alpha: 0,
-            beta: 120,
-            mapped_hash: 0,
+            beta: 120,         
             is_root_state: false
-        }.add_hash();
+        });
 
         assert_eq!(next_state, expected_next_state);
     }

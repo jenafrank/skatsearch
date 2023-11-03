@@ -5,7 +5,7 @@ mod traits;
 
 use super::game::Game;
 use super::player::Player;
-use super::state::State;
+use super::state::{State, StatePayload};
 
 pub struct Problem {
     declarer_cards: u32,
@@ -105,23 +105,22 @@ impl Problem {
 
         let trick_cards_count = self.trick_cards.count_ones() as u8;       
 
-        State::new(
-            self.start_player,
-            self.trick_cards,
-            self.trick_cards,
-            self.trick_suit,
-            0,
-            self.declarer_cards,
-            self.left_cards,
-            self.right_cards,
+        State::new(StatePayload{
+            player: self.start_player,
+            played_cards: self.trick_cards,
+            trick_cards: self.trick_cards,
+            trick_suit: self.trick_suit,
+            augen_declarer: 0,
+            declarer_cards: self.declarer_cards,
+            left_cards: self.left_cards,
+            right_cards: self.right_cards,
             player_cards,
             trick_cards_count,
-            self.augen_total(),
-            0,
+            augen_future: self.augen_total(),
+            augen_team: 0,
             alpha,
             beta,
-            true
-        )
-
+            is_root_state: true,
+        })
     }
 }

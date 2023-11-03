@@ -7,6 +7,8 @@ use crate::types::player::Player;
 use crate::types::problem::Problem;
 use crate::types::state::State;
 
+use super::StatePayload;
+
 impl State {
     pub fn create_child_state(
         &self,
@@ -79,7 +81,7 @@ impl State {
             Player::Right => new_right_cards,
         };
 
-        State {
+        State::new(StatePayload {
             played_cards: new_played_cards,
             declarer_cards: new_declarer_cards,
             left_cards: new_left_cards,
@@ -93,9 +95,8 @@ impl State {
             player: new_player,
             player_cards: new_player_cards,
             alpha: alpha_start,
-            beta: beta_start,
-            mapped_hash: 0,
+            beta: beta_start,            
             is_root_state: false,
-        }.add_hash().to_owned()
+        })
     }
 }

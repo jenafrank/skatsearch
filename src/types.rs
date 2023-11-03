@@ -13,3 +13,4 @@ pub mod problem_builder;
 pub mod state;
 
 pub mod counter;
+pub mod state_builder;
