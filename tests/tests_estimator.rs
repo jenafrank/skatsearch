@@ -87,10 +87,8 @@ fn test_uproblem_ten_cards_grand_all_cards() {
     show_probabilites(res);
 }
 
-fn show_probabilites(res: std::collections::HashMap<u32, f32>) {
-    let mut sorted_entries = res.iter().collect::<Vec<_>>();
-    sorted_entries.sort_by(|a,b| b.1.partial_cmp(a.1).unwrap());
-
-    for (key, value) in sorted_entries {
-        println!("{}: {:.2}", (*key).__str(), value);        }
+fn show_probabilites(probabilities: Vec<(u32, f32)>) {    
+    for (key, value) in probabilities {
+        println!("{}: {:.2}", key.__str(), value);        
+    }
 }

@@ -78,6 +78,7 @@ impl UProblemBuilder {
         self
     }
 
+    // cards part of the game
     pub fn remaining_cards(mut self, remaining_cards: &str) -> UProblemBuilder{
         let remaining_cards_bit = remaining_cards.__bit();
         let my_cards_bit = self.my_cards.expect("No own cards found.");
@@ -95,6 +96,7 @@ impl UProblemBuilder {
         self
     }
 
+    // cards not part of the game
     pub fn missing_cards(mut self, skat_cards: &str) -> UProblemBuilder {
         let skat_cards_bit = skat_cards.__bit();
         let my_cards_bit = self.my_cards.expect("No own cards found.");
@@ -194,6 +196,19 @@ impl UProblemBuilder {
             || self.facts_left.is_none()
             || self.facts_right.is_none()
         {
+            if self.game_type.is_none() { println!("Game Type missing."); }
+            if self.my_player.is_none() { println!("My player missing."); }
+            if self.my_cards.is_none() { println!("My cards missing."); }
+            if self.next_player.is_none() { println!("Next player missing."); }
+            if self.card_on_table_next_player.is_none() { println!("Card on table next player missing."); }
+            if self.card_on_table_previous_player.is_none() { println!("Card on table previous player missing."); }
+            if self.all_cards.is_none() { println!("All cards missing."); }
+            if self.active_suit.is_none() { println!("Active suit missing."); }
+            if self.threshold_upper.is_none() { println!("Upper Threshold missing."); }
+            if self.facts_declarer.is_none() { println!("Facts Declarer missing."); }
+            if self.facts_left.is_none() { println!("Facts Left missing."); }
+            if self.facts_right.is_none() { println!("Facts Right missing."); }
+
             panic!("Incomplete build. Can not create uproblem from builder.");
         }
     }

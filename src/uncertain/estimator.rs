@@ -35,7 +35,7 @@ impl Estimator {
         (sum / self.sample_size as f32, sum as u32)
     }
 
-    pub fn estimate_probability_of_all_cards(&self, info: bool) -> HashMap<u32, f32> {
+    pub fn estimate_probability_of_all_cards(&self, info: bool) -> Vec<(u32, f32)> {
         let mut global_dict = HashMap::new(); 
         
         for i in 0..self.sample_size {
@@ -83,7 +83,16 @@ impl Estimator {
             *entry = *v as f32 / self.sample_size as f32;
         }
 
-        ret_dict
+        let mut sorted_entries = ret_dict.iter().collect::<Vec<_>>();
+        sorted_entries.sort_by(|a,b| b.1.partial_cmp(a.1).unwrap());
+
+        let mut ret: Vec<(u32, f32)> = Vec::new();
+
+        for entry in sorted_entries {
+            ret.push((*entry.0, *entry.1));
+        }
+
+        ret
     }
 
 }

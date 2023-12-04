@@ -6,6 +6,7 @@ use crate::types::problem_builder::ProblemBuilder;
 
 use super::facts::Facts;
 
+#[derive(Clone, Copy)]
 pub struct UncertainProblem {
     game_type: Game,
     my_player: Player,
