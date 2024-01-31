@@ -33,7 +33,7 @@ fn test_uproblem_ten_cards_grand() {
     .threshold_half()
     .build();
 
-    assert!(uproblem.threshold_upper() == 61);
+    assert_eq!(uproblem.threshold_upper(), 61);
 
     let estimator = Estimator::new(uproblem, 100);
     let (probability, _) = estimator.estimate_win(true);
@@ -79,6 +79,7 @@ fn test_uproblem_ten_cards_grand_all_cards() {
     let uproblem = UProblemBuilder::new_grand()
     .cards(Player::Declarer, "SJ DJ CA CT CK CQ C9 C8 DA H7")
     .skat_cards("D7 S7")
+    .threshold_half()
     .build();
 
     let estimator = Estimator::new(uproblem, 100);
