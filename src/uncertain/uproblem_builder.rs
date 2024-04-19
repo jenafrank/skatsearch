@@ -97,17 +97,17 @@ impl UProblemBuilder {
     }
 
     // cards not part of the game
-    pub fn missing_cards(mut self, skat_cards: &str) -> UProblemBuilder {
-        let skat_cards_bit = skat_cards.__bit();
+    pub fn missing_cards(mut self, missing_cards: &str) -> UProblemBuilder {
+        let missing_cards_bit = missing_cards.__bit();
         let my_cards_bit = self.my_cards.expect("No own cards found.");
         let cards_on_table = self.cards_on_table();
         
-        assert!(skat_cards_bit & my_cards_bit == 0);
-        assert!(skat_cards_bit & cards_on_table == 0);
+        assert!(missing_cards_bit & my_cards_bit == 0);
+        assert!(missing_cards_bit & cards_on_table == 0);
         assert!(my_cards_bit & cards_on_table == 0);
         
         self.all_cards = Some(
-            (ALLCARDS & !skat_cards_bit) | 
+            (ALLCARDS & !missing_cards_bit) | 
             my_cards_bit |
             cards_on_table
         );
@@ -136,11 +136,7 @@ impl UProblemBuilder {
 
         if let Some(my_cards) = self.my_cards {
             uproblem.set_my_cards(my_cards);
-        }
-
-        if let Some(next_player) = self.next_player {
-            uproblem.set_next_player(next_player);
-        }
+        }     
 
         if let Some(card_on_table_previous_player) = self.card_on_table_previous_player {
             uproblem.set_card_on_table_previous_player(card_on_table_previous_player);
@@ -152,19 +148,11 @@ impl UProblemBuilder {
 
         if let Some(all_cards) = self.all_cards {
             uproblem.set_all_cards(self.cards_on_table() | all_cards);         
-        }
-
-        if let Some(active_suit) = self.active_suit {
-            uproblem.set_active_suit(active_suit);
-        }
+        }       
 
         if let Some(upper_bound_of_null_window) = self.threshold_upper {
             uproblem.set_threshold_upper(upper_bound_of_null_window);
-        }
-
-        if let Some(facts) = self.facts_declarer {
-            uproblem.set_facts_declarer(facts);
-        }
+        }       
 
         if let Some(facts) = self.facts_left {
             uproblem.set_facts_left(facts);

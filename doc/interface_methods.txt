@@ -1,0 +1,89 @@
+Problem variables
+
+    declarer_cards: u32  | cards on hand or in trick of declarer
+    left_cards: u32      | cards on hand or in trick of player on the left hand side of declarer
+    right_cards: u32     | cards on hand or in trick of player on the right hand side of declarer
+    game_type: Game      | game to be played: Farbe, Grand or Null
+    start_player: Player | player whose turn it is
+    threshold_upper: u8  | points needed at minimum for declarer to win
+    trick_cards: u32     | Set of cards on the table (trick cards)
+    trick_suit: u32      | Suit of trick (derived from first card in trick normally, but we do not store order)
+
+Problem Builder - Commands
+
+    new_farbspiel    | Creates Farbspiel Problem
+    new_grand        | Creates Grand Problem
+    new_null         | Creates Null Problem
+
+    cards            | Assign cards on hand (hidden) and in trick (on table) to a specific player
+    cards_all        | Assign cards on hand (hidden) and in trick (on table)  to all three players at once
+    turn             | Sets player whose turn it is
+    threshold        | Defines value for declarer to win the game (i.e. 61 for a full game)
+    threshold_half   | Sets value to win to half the accumulated value of all cards
+    trick            | Assigns card to trick (if > 0: INTERMEDIATE TRICK SCENARIO)
+
+Solver
+
+    solve_with_skat    | Analyzes twelve card hand and returns all possible skats and their values
+                       | If alpha-beta scenario is on, then only the best skat value is meaningful
+
+    solve_all_cards    | Gives theoretical value for each allowed card and its follow-up answer card
+
+    solve_win          | Determines, if hand will be one (null-window search). A win value must be provided
+
+    solve_double_dummy | Determines theoretical value without determining best card using double dummy solver
+
+    solve              | Solves for best card and best value using maximum window (0,120)
+
+    playout            | Returns a best play game playout.
+    
+    playout_all_cards  | Returns a best play game playout with best play values for all allowed cards per move.
+
+
+UProblem variables
+
+    game_type: Game                     | What game is played ?
+    my_player: Player                   | What player am I ?
+    my_cards: u32                       | What are my cards ?
+    next_player: Player                 | Whose turn is it ?
+
+    card_on_table_previous_player: u32  | Has the previous player played a card w.r.t. current player
+    card_on_table_next_player: u32      | Has the next player played a card w.r.t. current player
+    all_cards: u32                      | All cards
+    active_suit: u32                    | Current suit for trick
+    threshold_upper: u8                 | Points the declarer needs minimum to win the game
+
+    facts_declarer: Facts               | Which colors are known to be missing in cards from declarer
+    facts_left: Facts                   | Which colors are known to be missing in cards from left player
+    facts_right: Facts                  | Which colors are known to be missing in cards from right player
+
+UProblem Builder
+
+    new_farbspiel           | Creates Farbspiel
+    new_grand               | Creates Grand
+    new_null                | Creates Null
+
+    cards                   | Sets my cards and sets me as player for next turn
+    turn                    | Sets player whose turn it is
+    threshold               | Sets minimum value for declarer win
+    threshold_half          | Sets minimum value for declarer win to half the total card value
+    trick_previous_player   | Sets trick card of previous player (the player before current turn player)
+    facts                   | Provides missing colors of players as known restrictions for random generator
+    remaining_cards         | Set all cards via remaining cards (not my cards and not trick cards)
+    missing_cards           | Set all cards to total skat cards (32) minus the skat cards which are out of the game by default
+    skat_cards              | Same thing as missing cards but checks if there are only two skat cards.
+
+Estimator
+
+    estimate_win                       | Estimate win probability
+    estimate_probability_of_all_cards  | Estimate win probability of all cards for selecting best card (highest win probability)
+    
+    /* PLAYOUTS MISSING */
+    playout (based on probability of all cards) => pass on
+    
+    /* DOUBLE UNCERTAIN: Play some uncertain playouts and record result. Repeat 100 times and calculate new probability.
+                         Compare to probability vector: single-uncertain vs. double-uncertain
+                         Should be interesting, because uncertain game just shuffles cards and plays open game. */
+
+/* Missing: Undo global transposition table to allow parallel execution */
+    

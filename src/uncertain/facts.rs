@@ -7,6 +7,13 @@ pub struct Facts {
     pub no_diamonds: bool,
 }
 
+impl Facts {
+    pub(crate) fn convert_to_string(&self) -> String {
+        let ret = format!("{} {} {} {} - {}", self.no_clubs, self.no_diamonds, self.no_hearts, self.no_spades, self.no_trump);
+        ret
+    }
+}
+
 impl Default for Facts {
     fn default() -> Self {
         Self { 

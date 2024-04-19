@@ -1,4 +1,4 @@
-use crate::traits::StringConverter;
+use crate::traits::{BitConverter, StringConverter};
 use crate::types::game::Game;
 use crate::types::player::Player;
 use crate::types::problem::Problem;
@@ -11,19 +11,51 @@ pub struct UncertainProblem {
     game_type: Game,
     my_player: Player,
     my_cards: u32,
-    next_player: Player,
 
     // Primary values
     card_on_table_previous_player: u32,
     card_on_table_next_player: u32,
     all_cards: u32,
-    active_suit: u32,    
     threshold_upper: u8,
 
     // Facts
-    facts_declarer: Facts,
-    facts_left: Facts,
-    facts_right: Facts,
+    facts_previous_player: Facts,
+    facts_next_player: Facts,
+}
+
+impl UncertainProblem {
+    pub(crate) fn advance(&self, played_card: String) -> UncertainProblem {
+        let mut ret = self.clone();
+
+        ret.print_object();
+
+        // Check if facts are added
+        // todo!() assuming no for now
+
+        // Check if trick completed => Remove trick from table and adjust points
+        // todo!() assuming no for now
+
+        // Add card to trick card
+        ret.card_on_table_previous_player = played_card.__bit();
+
+        ret.print_object();
+
+        ret
+    }
+    fn print_object(&self) {
+        println!("");
+        println!("DUMPING UNCERTAIN PROBLEM: ");
+        println!("-------------------------- ");
+        println!("game type = {}", self.game_type.convert_to_string());
+        println!("my player = {}" , self.my_player.str());
+        println!("my cards = {}", self.my_cards.__str());
+        println!("trick_card_previous_player = {}", self.card_on_table_previous_player.__str());
+        println!("trick_card_next_player = {}", self.card_on_table_next_player.__str());
+        println!("all cards = {}", self.all_cards.__str());
+        println!("threshold = {}", self.threshold_upper);
+        println!("facts left = {}", self.facts_previous_player.convert_to_string());
+        println!("facts right = {}", self.facts_next_player.convert_to_string());
+    }
 }
 
 // Gettter
@@ -38,10 +70,6 @@ impl UncertainProblem {
 
     pub fn my_cards(&self) -> u32 {
         self.my_cards
-    }
-
-    pub fn next_player(&self) -> Player {
-        self.next_player
     }
 
     pub fn card_on_table_previous_player(&self) -> u32 {
@@ -60,24 +88,16 @@ impl UncertainProblem {
         self.all_cards
     }
 
-    pub fn active_suit(&self) -> u32 {
-        self.active_suit
-    }
-
     pub fn threshold_upper(&self) -> u8 {
         self.threshold_upper
     }
 
-    pub fn facts_declarer(&self) -> Facts {
-        self.facts_declarer
+    pub fn facts_previous_player(&self) -> Facts {
+        self.facts_previous_player
     }
 
-    pub fn facts_left(&self) -> Facts {
-        self.facts_left
-    }
-
-    pub fn facts_right(&self) -> Facts {
-        self.facts_right
+    pub fn facts_next_player(&self) -> Facts {
+        self.facts_next_player
     }
 }
 
@@ -95,10 +115,6 @@ impl UncertainProblem {
         self.my_cards = my_cards;
     }
 
-    pub fn set_next_player(&mut self, next_player: Player) {
-        self.next_player = next_player;
-    }
-
     pub fn set_card_on_table_previous_player(&mut self, card_on_table_previous_player: u32) {
         self.card_on_table_previous_player = card_on_table_previous_player;
     }
@@ -111,24 +127,16 @@ impl UncertainProblem {
         self.all_cards = all_cards;
     }
 
-    pub fn set_active_suit(&mut self, active_suit: u32) {
-        self.active_suit = active_suit;
-    }
-
     pub fn set_threshold_upper(&mut self, threshold_upper: u8) {
         self.threshold_upper = threshold_upper;
     }
 
-    pub fn set_facts_declarer(&mut self, facts_declarer: Facts) {
-        self.facts_declarer = facts_declarer;
-    }
-
     pub fn set_facts_left(&mut self, facts_left: Facts) {
-        self.facts_left = facts_left;
+        self.facts_previous_player = facts_left;
     }
 
     pub fn set_facts_right(&mut self, facts_right: Facts) {
-        self.facts_right = facts_right;
+        self.facts_next_player = facts_right;
     }
 }
 
@@ -138,15 +146,12 @@ impl UncertainProblem {
             game_type: Game::Farbe,
             my_cards: 0u32,
             my_player: Player::Declarer,
-            next_player: Player::Declarer,
             all_cards: 0u32,
             card_on_table_previous_player: 0u32,
             card_on_table_next_player: 0u32,
-            active_suit: 0u32,
             threshold_upper: 1u8,
-            facts_declarer: Facts::zero_fact(),
-            facts_left: Facts::zero_fact(),
-            facts_right: Facts::zero_fact()
+            facts_previous_player: Facts::zero_fact(),
+            facts_next_player: Facts::zero_fact()
         }
     }
 
@@ -158,8 +163,8 @@ impl UncertainProblem {
         .cards(Player::Declarer, "")
         .cards(Player::Left, "")
         .cards(Player::Right, "")
-        .turn(self.next_player)
-        .trick(self.active_suit, self.cards_on_table().__str().as_str())
+        .turn(self.my_player)
+        .trick_from_uproblem(self.card_on_table_previous_player, self.card_on_table_next_player)
         .threshold(self.threshold_upper)
         .set_cards_for_problem(self.my_cards, self.my_player)
         .set_cards_for_other_players(self.all_cards, self.card_on_table_previous_player, self.card_on_table_next_player, self.my_cards, self.my_player, self.next_player_facts(), self.previous_player_facts())
@@ -173,19 +178,11 @@ impl UncertainProblem {
     }
 
     fn next_player_facts(&self) -> Facts {
-        match self.my_player {
-            Player::Declarer => self.facts_left,
-            Player::Left => self.facts_right,
-            Player::Right => self.facts_declarer,
-        }
+       self.facts_next_player
     }
 
     fn previous_player_facts(&self) -> Facts {
-        match self.my_player {
-            Player::Declarer => self.facts_right,
-            Player::Left => self.facts_declarer,
-            Player::Right => self.facts_left,
-        }
+      self.facts_previous_player
     }
 
     fn validate(&self) {
@@ -217,7 +214,7 @@ mod tests {
     use crate::{
         traits::{BitConverter, StringConverter},
         types::{game::Game, player::Player},
-        uncertain::uncertain_problem::Facts, consts::bitboard::TRUMP_FARBE,
+        uncertain::uncertain_problem::Facts
     };
 
     #[test]
@@ -229,13 +226,10 @@ mod tests {
             my_cards: "CA CT SA".__bit(),
             card_on_table_next_player: 0u32,
             card_on_table_previous_player: 0u32,
-            active_suit: 0u32,
             my_player: Player::Declarer,
-            next_player: Player::Declarer,
             threshold_upper: 1,
-            facts_declarer: Facts::zero_fact(),
-            facts_left: Facts::one_fact(true, false, false, false, false),
-            facts_right: Facts::zero_fact()            
+            facts_previous_player: Facts::one_fact(true, false, false, false, false),
+            facts_next_player: Facts::zero_fact()
         };
 
         let problem = uproblem.generate_concrete_problem();
@@ -253,14 +247,11 @@ mod tests {
             all_cards: "CA CT SA ST HA HT DA DT D9".__bit(),
             my_cards: "CA CT SA".__bit(),
             my_player: Player::Declarer,
-            next_player: Player::Declarer,
             threshold_upper: 1,
             card_on_table_previous_player: "ST".__bit(),
             card_on_table_next_player: 0u32,
-            active_suit: TRUMP_FARBE,
-            facts_declarer: Facts::zero_fact(),
-            facts_left: Facts::zero_fact(),
-            facts_right: Facts::zero_fact(),
+            facts_previous_player: Facts::zero_fact(),
+            facts_next_player: Facts::zero_fact(),
         };
 
         let problem = uproblem.generate_concrete_problem();

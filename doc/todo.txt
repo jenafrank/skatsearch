@@ -1,19 +1,22 @@
 
-Missing features:
+Interface for outside call:
 
-* Add "real" KI, make decisions based on uncertainty, extra class to track down valid random distributions (if someone does not follow suit):
-      - UncertainSolve with: probability / card as return value
-      - only search for win/loss here to speed up 
-      - same procedures as with certain then: 
-            o Normal search (real KI decision)
-            o All value search (for learning tool about what to play)
-            o Normal Playout (real KI run)
-      - user parallelism to speed up distribution runs
-      - use same TT?
+Command line call:
+  * system.json => System parameters like size of transposition table
+  * input.json => For building problem => Implement parsing in both Creation assistants
+  * output.json => Export results
 
-* Check solve routines if they are valid for 10 tricks only or also for less and document that very well
+Problem Solver
+  * Creation assistant: ProblemBuilder class
+  * Information carrier: Problem class
+  * Algorithm carrier: Solver class
+
+Uncertain Problem Solver
+  * Creation assistant: UncertainProblemBuilder class
+  * Information carrier: UncertainProblem class
+  * Algorithm carrier: Estimator class
+
 * Document also "little" methods
-* Think about API 
 * Think about easy local UI that can call API perfectly (drag and drop of cards at least)
 
 Then:
