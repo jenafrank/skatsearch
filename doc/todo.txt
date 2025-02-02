@@ -1,18 +1,23 @@
 
-Missing features:
+Interface for outside call:
 
-TODO: Write test with state that begins in the middle of the trick
-TODO: Return optimal card, not only the value.
-TODO: Calculate playout with one single tt.
-TODO: Calculate best skat (loop over all cards and use alpha/beta)
+Command line call:
+  * system.json => System parameters like size of transposition table
+  * input.json => For building problem => Implement parsing in both Creation assistants
+  * output.json => Export results
 
-Then:
+Problem Solver
+  * Creation assistant: ProblemBuilder class
+  * Information carrier: Problem class
+  * Algorithm carrier: Solver class
 
-TODO: Document everything.
-TODO: Make interface ready for python usage.
-TODO: Add more flavors as pointed out in skatcalc.
-TODO: Test equivalence of results of all flavors with easy problems
-TODO: Shift complex tests to another test suite.
+Uncertain Problem Solver
+  * Creation assistant: UncertainProblemBuilder class
+  * Information carrier: UncertainProblem class
+  * Algorithm carrier: Estimator class
+
+* Document also "little" methods
+* Think about easy local UI that can call API perfectly (drag and drop of cards at least)
 
 Then:
 

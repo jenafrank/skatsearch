@@ -1,10 +1,9 @@
-use crate::types::problem::counters::Counters;
+use crate::types::counter::Counters;
 use crate::types::state::State;
 use crate::types::tt_entry::TtEntry;
 use crate::types::tt_flag::TtFlag;
 use crate::types::tt_table::TtTable;
 use crate::consts::general::TT_SIZE;
-use crate::core_functions::get_mapped_hash::get_mapped_hash;
 
 impl TtTable {
     pub fn write(&mut self, 
@@ -12,7 +11,7 @@ impl TtTable {
         mapped_hash: usize, 
         alpha: u8, 
         beta: u8, 
-        value: (u32, u8, Option<bool>)) {
+        value: (u32, u8)) {
 
         let flag: TtFlag =
             match value.1 {
@@ -24,9 +23,12 @@ impl TtTable {
         let entry = TtEntry {
             occupied: true,
             player: state.player,
-            cards: state.get_all_unplayed_cards(),
+            left_cards: state.left_cards,
+            right_cards: state.right_cards,
+            declarer_cards: state.declarer_cards,
+            trick_cards: state.trick_cards,
+
             value: value.1 - state.augen_declarer,
-            trickwon: value.2,
             bestcard: value.0,
             flag,
         };
@@ -34,22 +36,17 @@ impl TtTable {
         self.data[mapped_hash] = entry;
     }
 
-    pub fn write_without_hash(&mut self, state: &State, alpha: u8, beta: u8, value: u8) {
-        let idx = get_mapped_hash(state.player,state.get_all_unplayed_cards(), state.trick_cards);
-        self.write(state, idx, alpha, beta, (0, value, None));
-    }
+    pub fn read(&self, state: &State) -> Option<&TtEntry> {
 
-    pub fn read(&self, state: &State, counters: &mut Counters) -> Option<&TtEntry> {
-
-        let candidate = &self.data[state.mapped_hash];
+        let candidate = &self.data[state.get_hash()];
 
         if !candidate.occupied {
             None // empty slot
         } else if candidate.matches(&state) {
-            counters.cnt_reads += 1;
+            Counters::inc_reads();
             Some(candidate) // matches key values
         } else {
-            counters.cnt_collisions += 1;
+            Counters::inc_collisions();
             None // collision
         }
     }

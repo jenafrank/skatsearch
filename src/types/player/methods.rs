@@ -9,6 +9,10 @@ impl Player {
         }
     }
 
+    pub fn dec(&self) -> Player {
+        self.inc().inc()
+    }
+
     pub fn str(&self) -> &str {
         match self {
             Player::Declarer => "D",

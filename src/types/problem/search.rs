@@ -1,276 +1,31 @@
 use std::cmp;
-use std::time::Instant;
-use crate::consts::bitboard::ALLCARDS;
+use crate::types::counter::Counters;
 use crate::types::game::Game;
 use crate::types::player::Player;
-use crate::types::problem::{Counters, Problem};
+use crate::types::problem::Problem;
 use crate::types::state::*;
 use crate::types::tt_flag::TtFlag;
 use crate::types::tt_table::TtTable;
 use crate::core_functions::get_sorted_by_value::get_sorted_by_value;
-use crate::traits::{Augen, Bitboard};
-use crate::types::problem::playout_row::PlayoutRow;
 
 impl Problem {
 
-    /// Analyses a twelve-card hand during the task of putting away two cards (Skat) before
-    /// game starts. It analyses all 66 cases and calculating the best play for each of them
-    /// using the same transposition table for speed-up reasons.
-    /// # Variants of arguments
-    /// * _false_ _false_: Returns exact values for all 66 games.
-    /// * _true_ _false_: Returns best skat by means of alpha-window narrowing. Thus, the
-    /// 66-array does also contain wrong values.
-    /// * _false_ _true_: Returns some skat for which the game will be won.
-    /// The routine always takes into account the value of the skat which is neglected by default
-    /// in the basic search routines.
-    pub fn get_all_skat_values(&mut self, is_alpha_beta: bool, is_winning: bool) -> (u32, u32, [((u32, u32), u8); 66])
-    {
+    pub fn search(&self, state: &State) -> (u32, u8) {
 
-        let mut ret : (u32, u32, [((u32, u32), u8); 66]) = (0,0,[((0,0),0); 66]);
-
-        let state = State::create_initial_state_from_problem(self);
-        let remaining_cards = !state.get_all_unplayed_cards();
-        let twelve_bit = remaining_cards | state.declarer_cards;
-        let twelve = twelve_bit.__decompose_twelve();
-
-        let mut k = 0;
-        let mut alpha_with_skat = 0;
-        for i in 0..11 {
-            for j in i+1..12 {
-                let skat = twelve[i] | twelve[j];
-                let declarer_cards = twelve_bit ^ skat;
-
-                let current_all_cards = ALLCARDS ^ skat;
-
-                self.declarer_cards_all = declarer_cards;
-                self.augen_total = current_all_cards.__get_value();
-                self.nr_of_cards = current_all_cards.__get_number_of_bits();
-
-                let mut current_initial_state = State::create_initial_state_from_problem(&self);
-
-                if is_alpha_beta {
-                    if alpha_with_skat > skat.__get_value() {
-                        current_initial_state.alpha = alpha_with_skat - skat.__get_value();
-                    }
-                } else if is_winning {
-
-                    if alpha_with_skat >= 61 {
-                        return ret;
-                    }
-
-                    current_initial_state.alpha = 60 - skat.__get_value();
-                    current_initial_state.beta = current_initial_state.alpha + 1;
-                }
-
-                let result = self.search(&current_initial_state);
-                let value_with_skat = result.1 + skat.__get_value();
-
-                ret.2[k].0.0 = twelve[i];
-                ret.2[k].0.1 = twelve[j];
-                ret.2[k].1 = value_with_skat;
-
-                if value_with_skat > alpha_with_skat {
-                    ret.0 = twelve[i];
-                    ret.1 = twelve[j];
-
-                    alpha_with_skat = value_with_skat;
-                }
-
-                k+= 1;
-            }
-        }
-
-        ret
-    }
-
-    /// Checks if winning without determining the correct value (alpha = 60, beta = 61)
-    pub fn search_if_declarer_is_winning(&mut self, state_tt: &mut State) -> bool {
-        state_tt.alpha = 60;
-        state_tt.beta = 61;
-
-        let result = self.search(&state_tt);
-
-        result.1 >= 61
-    }
-
-    /// Investigates all legal moves for a given state and returns an option array
-    /// with 0) card under investigation 1) follow-up card from tree search (tree root) and
-    /// 2) value of search
-    pub fn get_allvalues(&mut self, state_tt: &State)
-    -> [Option<(u32,u32,u8)>; 10]
-    {
-        let mut ret: [Option<(u32, u32, u8)>; 10] = [None; 10];
-        let legal_moves = state_tt.get_legal_moves().__decompose();
-
-        for i in 0..legal_moves.1 {
-            let card = legal_moves.0[i];
-            let state_adv =
-                state_tt.create_child_state(card,&self,0,120);
-            let res = self.search(&state_adv);
-            ret[i] = Some((card, res.0, res.1));
-        }
-
-        ret
-    }
-
-    /// Generates playout.
-    pub fn get_playout(problem: Problem) -> [Option<PlayoutRow>; 30] {
-
-        let mut ret: [Option<PlayoutRow>; 30] = [None; 30];
-        let mut i: usize= 0;
-        let n: usize = problem.nr_of_cards as usize;
-
-        let mut problem_tt = problem;
-        let mut state_tt = State::create_initial_state_from_problem(&problem_tt);
-
-        while i < n {
-
-            let mut row : PlayoutRow = Default::default();
-
-            row.declarer_cards = state_tt.declarer_cards;
-            row.left_cards = state_tt.left_cards;
-            row.right_cards = state_tt.right_cards;
-
-            problem_tt.counters.cnt_iters = 0;
-            problem_tt.counters.cnt_breaks = 0;
-
-            let now = Instant::now();
-            let res = problem_tt.search(&state_tt);
-            let time = now.elapsed().as_millis();
-
-            let played_card = res.0;
-
-            row.player = state_tt.player;
-            row.card = played_card;
-            row.augen_declarer = state_tt.augen_declarer;
-            row.augen_team = state_tt.augen_team;
-            row.cnt_iters = problem_tt.counters.cnt_iters;
-            row.cnt_breaks = problem_tt.counters.cnt_breaks;
-            row.time = time;
-
-            state_tt = state_tt.create_child_state(
-                played_card,
-                &problem_tt,
-                state_tt.alpha,
-                state_tt.beta);
-
-            ret[i] = Some(row);
-            i += 1;
-        }
-
-        ret
-    }
-
-    /// Generates playout with all values for each card..
-    pub fn get_allvalues_playout(problem: Problem) -> [(u32, Player, u8, [Option<(u32, u32, u8)>; 10]); 30] {
-
-        let mut ret: [(u32, Player, u8, [Option<(u32, u32, u8)>; 10]); 30] = [(0, Player::Declarer, 0, [None; 10]) ;30];
-        let mut i: usize= 0;
-        let n: usize = problem.nr_of_cards as usize;
-
-        let mut problem_tt = problem;
-        let mut state_tt = State::create_initial_state_from_problem(&problem_tt);
-
-        while i < n {
-
-            problem_tt.counters.cnt_iters = 0;
-            problem_tt.counters.cnt_breaks = 0;
-
-            let res = problem_tt.search(&state_tt);
-            let resall = problem_tt.get_allvalues(&state_tt);
-
-            let played_card = res.0;
-            ret[i].1 = state_tt.player;
-
-            state_tt = state_tt.create_child_state(
-                played_card,
-                &(problem_tt),
-                state_tt.alpha,
-                state_tt.beta);
-
-            ret[i].0 = played_card;
-            ret[i].2 = state_tt.augen_declarer;
-
-            for (j, el) in resall.iter().flatten().enumerate() {
-                ret[i].3[j] = Some((el.0, el.1, el.2));
-            }
-
-            i += 1;
-        }
-
-        ret
-    }
-
-    pub fn search_win_loss(problem: &mut Problem) -> (u8, u32, u32) {        
-        let mut state = State::create_initial_state_from_problem(problem);
-
-        let skat_value = problem.get_skat().__get_value();
-
-        match problem.game_type {
-            Game::Farbe => {state.alpha = 60 - skat_value; state.beta = 61 - skat_value;}
-            Game::Grand => {state.alpha = 60 - skat_value; state.beta = 61 - skat_value;}
-            Game::Null => {state.alpha = 0; state.beta = 1;}
-        }
-
-        let val = problem.search(&state).1;
-
-        (val, problem.counters.cnt_iters, problem.counters.cnt_collisions)
-    }
-
-    pub fn search_with_problem_using_double_dummy_solver(problem: Problem) -> (u8, u32, u32) {
-        let mut problem = problem;
-        let mut val = 0;
-        let mdf = 5u8;
-
-        for i in 0..119 {
-            let mut state = State::create_initial_state_from_problem(&problem);
-            state.alpha = mdf*i;
-            state.beta = mdf*(i+1);
-            val = problem.search(&state).1;
-
-            if val < state.beta {
-                break;
-            }
-        }
-
-        (val, problem.counters.cnt_iters, problem.counters.cnt_collisions)
-    }
-
-    pub fn search_with_problem(problem: Problem) -> u8 {
-        let mut problem = problem;
-        let state = State::create_initial_state_from_problem(&problem);
-        let res = problem.search(&state);
-        let val = res.1;
-        println!(" Iters: {}, Slots: {}, Writes: {}, Reads: {}, ExactReads: {}, Collisions: {}, Breaks: {}",
-                 problem.counters.cnt_iters,
-                 problem.transposition_table.get_occupied_slots(),
-                 problem.counters.cnt_writes,
-                 problem.counters.cnt_reads,
-                 problem.counters.cnt_exactreads,
-                 problem.counters.cnt_collisions,
-                 problem.counters.cnt_breaks);
-
-        val
-    }
-
-    pub fn search(&mut self, state: &State) -> (u32, u8, Option<bool>) {
-
-        self.counters.cnt_iters += 1;
+        Counters::inc_iters();
 
         // BASIC: Termination of recursive search
         if let Some(x) = apply_termination_criteria(&self, &state) {
-            return (0, x, None);
+            return (0, x);
         }
         
         let mut alpha = state.alpha;
         let mut beta = state.beta;
-        let mut optimized_value: (u32, u8, Option<bool>) = (0, get_value_to_optimize(state.player,self.game_type), None);
+        let mut optimized_value: (u32, u8) = (0, get_value_to_optimize(state.player,self.game_type));
 
         // TRANS:
         if let Some(x) = transposition_table_lookup(
-            &self.transposition_table,
             &state,
-            &mut self.counters,
             &mut alpha,
             &mut beta
         ) {
@@ -284,6 +39,9 @@ impl Problem {
         // BASIC: Reduce moves, sort moves, find connections
         let moves_word = state.get_reduced(&self);
         let (moves, n) = get_sorted_by_value(moves_word);
+
+        // Set dummy card if no optimization of start value possible
+        optimized_value.0 = moves[0];
 
         // BASIC: Branching loop
         for mov in &moves[0..n] {
@@ -301,15 +59,14 @@ impl Problem {
             // Optimize value
             optimized_value = optimize(child_state_value, optimized_value, state.player, *mov,self.game_type);
 
-            // Alpha-beta cutoffs
+            // Alpha-beta cutoffs            
             if shrink_alpha_beta_window(state.player, &mut alpha, &mut beta, child_state_value.1, self.game_type) {
-                self.counters.cnt_breaks += 1;
+                Counters::inc_breaks();
                 break;
-            }
+            }            
         }
 
-        transposition_table_write(
-            self,
+        transposition_table_write(            
             &state,
             alphaorig,
             betaorig,
@@ -320,9 +77,9 @@ impl Problem {
     }
 }
 
-fn optimize(child_state_value: (u32, u8, Option<bool>),
-            optimized_value: (u32, u8, Option<bool>),
-            player: Player, mov: u32, game: Game) -> (u32, u8, Option<bool>) {
+fn optimize(child_state_value: (u32, u8),
+            optimized_value: (u32, u8),
+            player: Player, mov: u32, game: Game) -> (u32, u8) {
 
     match game {
         Game::Null => {
@@ -416,7 +173,7 @@ fn apply_termination_criteria(problem: &Problem, state: &State) -> Option<u8> {
             }
         }
         _ => {
-            if problem.augen_total - state.augen_team <= state.alpha {
+            if problem.augen_total() - state.augen_team <= state.alpha {
                 return Some(state.alpha);
             }
 
@@ -431,23 +188,20 @@ fn apply_termination_criteria(problem: &Problem, state: &State) -> Option<u8> {
 
 #[inline(always)]
 fn transposition_table_lookup(
-    tt: &TtTable,
     state: &State,
-    counters: &mut Counters,
     alpha: &mut u8,
     beta: &mut u8
-) -> Option<(u32, u8, Option<bool>)>
+) -> Option<(u32, u8)>
 {
 
     if TtTable::is_tt_compatible_state(state) {
-        if let Some(tt_entry) = tt.read(state, counters) {
+        if let Some(tt_entry) = TtTable::get().read(state) {
             let value = tt_entry.value + state.augen_declarer;
-            let trickwon = tt_entry.trickwon;
             let bestcard = tt_entry.bestcard;
             match tt_entry.flag {
                 TtFlag::EXACT => {
-                    counters.cnt_exactreads += 1;
-                    return Some((bestcard,value,trickwon));
+                    Counters::inc_exactreads();
+                    return Some((bestcard,value));
                 },
                 TtFlag::LOWER => {
                     *alpha = cmp::max(*alpha, value);
@@ -457,7 +211,7 @@ fn transposition_table_lookup(
                 }
             }
             if *alpha >= *beta {
-                return Some((bestcard,value,trickwon));
+                return Some((bestcard,value));
             }
         }
     }
@@ -467,17 +221,16 @@ fn transposition_table_lookup(
 
 #[inline(always)]
 fn transposition_table_write(
-    problem_tt: &mut Problem,
     state: &State,
     alphaorig: u8,
     betaorig: u8,
-    value: (u32, u8, Option<bool>)
+    value: (u32, u8)
 ) {
     if TtTable::is_tt_compatible_state(state) {
-        problem_tt.counters.cnt_writes += 1;
-        problem_tt.transposition_table.write(
+        Counters::inc_writes();
+        TtTable::get_mutable().write(
             &state,
-            state.mapped_hash,
+            state.get_hash(),
             alphaorig,
             betaorig,
             value

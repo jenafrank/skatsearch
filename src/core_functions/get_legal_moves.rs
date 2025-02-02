@@ -15,7 +15,7 @@ mod tests {
     use crate::types::player::Player;
     use crate::consts::bitboard::{CLUBS, DIAMONDS, HEARTS, NULL_CLUBS, NULL_DIAMONDS, NULL_HEARTS, NULL_SPADES, SPADES, TRUMP_FARBE, TRUMP_GRAND};
     use crate::traits::BitConverter;
-    use crate::types::state::State;
+    use crate::types::state::{State, StatePayload};
 
     #[test]
     fn farb() {
@@ -72,45 +72,42 @@ mod tests {
     }
 
     fn get_state_trick_not_empty() -> State {
-        State {
+        State::new(StatePayload {
+            player: Player::Declarer,
             played_cards: 0,
-            declarer_cards: 0,
-            left_cards: 0,
-            right_cards: 0,
             trick_cards: 0,
             trick_suit: TRUMP_GRAND,
-            trick_cards_count: 0,
-            augen_future: 0,
             augen_declarer: 0,
-            augen_team: 0,
-            player: Player::Declarer,
-            player_cards: get_hand(),
-            alpha: 0,
-            beta: 120,
-            mapped_hash: 0,
-            is_root_state: false
-        }
-    }
-
-    fn get_state_trick_empty() -> State {
-        State {
-            played_cards: 0,
             declarer_cards: 0,
             left_cards: 0,
             right_cards: 0,
-            trick_cards: 0,
-            trick_suit: 0,
+            player_cards: get_hand(),
             trick_cards_count: 0,
             augen_future: 0,
-            augen_declarer: 0,
             augen_team: 0,
-            player: Player::Declarer,
-            player_cards: get_hand(),
             alpha: 0,
             beta: 120,
-            mapped_hash: 0,
-            is_root_state: false
-        }
+            is_root_state: false,
+        })
     }
 
+    fn get_state_trick_empty() -> State {         
+        State::new(StatePayload {
+            player: Player::Declarer,
+            played_cards: 0,
+            trick_cards: 0,
+            trick_suit: 0,
+            augen_declarer: 0,
+            declarer_cards: 0,
+            left_cards: 0,
+            right_cards: 0,
+            player_cards: get_hand(),
+            trick_cards_count: 0,
+            augen_future: 0,
+            augen_team: 0,
+            alpha: 0,
+            beta: 120,
+            is_root_state: false,
+        })         
+    }
 }

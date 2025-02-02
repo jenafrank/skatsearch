@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use skat_aug23::types::game::Game;
 use skat_aug23::types::player::Player;
 use skat_aug23::types::problem::Problem;
@@ -89,12 +91,11 @@ pub fn ten_tricks() -> (Problem, u8) {
         "DJ CT CK CQ HQ S7 DQ D9 D8 D7"
     );
 
-    assert_eq!(p.nr_of_cards, 30);
+    assert_eq!(p.number_of_cards(), 30);
 
     (p, 59)
 }
 
-#[allow(dead_code)]
 pub fn ten_grand_hard() -> (Problem, u8) {
     let p = Problem::create(
         "HJ DJ CA CT CK CQ C9 D9 D8 D7".__bit(),
@@ -106,7 +107,6 @@ pub fn ten_grand_hard() -> (Problem, u8) {
     (p,38)
 }
 
-#[allow(dead_code)]
 pub fn eight_grand_hard() -> (Problem, u8) {
     let p = Problem::create(
         "HJ DJ CA CT CK CQ C9 D9".__bit(),
@@ -118,7 +118,6 @@ pub fn eight_grand_hard() -> (Problem, u8) {
     (p,42)
 }
 
-#[allow(dead_code)]
 pub fn nine_grand_hard() -> (Problem, u8) {
     let p = Problem::create(
         "HJ DJ CA CT CK CQ C9 D9 D8".__bit(),
@@ -128,4 +127,59 @@ pub fn nine_grand_hard() -> (Problem, u8) {
         Player::Declarer
     );
     (p,39)
+}
+
+pub fn null_1() -> (Problem, u8) {   
+    let p = Problem::create(
+        "SJ C9 C7 ST S9 S8 H9 DT D9 D8".__bit(),
+        "HJ DJ CA CT CK C8 SA SK HA H8".__bit(),
+        "CJ CQ SQ HT HK HQ H7 DA DK DQ".__bit(),
+        Game::Null,
+        Player::Declarer
+    );
+    (p,1)
+}
+
+pub fn null_2() -> (Problem, u8) {   
+    let p = Problem::create(
+        "SJ C9 C7 ST S9 S8 H9 DT D9 D8".__bit(),
+        "DJ CA CQ SA SK SQ HT H8 H7 DK".__bit(),
+        "CJ HJ CT CK C8 HA HK HQ DA DQ".__bit(),
+        Game::Null,
+        Player::Declarer
+    );
+    (p,0)
+}
+
+pub fn null_3() -> (Problem, u8) {   
+    let p = Problem::create(
+        "SJ C9 C7 ST S9 S8 H9 DT D9 D8".__bit(),
+        "DJ CA CQ SA SK SQ HT H8 H7 DK".__bit(),
+        "CJ HJ CT CK C8 HA HK HQ DA DQ".__bit(),
+        Game::Null,
+        Player::Declarer
+    );
+    (p,0)
+}
+
+pub fn null_shrinked_1() -> (Problem, u8) {   
+    let p = Problem::create(
+        "S9 S7 H8 D7".__bit(),
+        "S8 H9 D8 D9".__bit(),
+        "SA SK H7 DJ".__bit(),
+        Game::Null,
+        Player::Right
+    );
+    (p,1)
+}
+
+pub fn null_1_debug() -> (Problem, u8) {   
+    let p = Problem::create(
+        "D9 CJ".__bit(),
+        "D8 SJ".__bit(),
+        "D7 DT".__bit(),
+        Game::Null,
+        Player::Declarer
+    );
+    (p,1)
 }

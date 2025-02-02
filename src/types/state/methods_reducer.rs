@@ -10,13 +10,13 @@ impl State {
 
     pub fn get_reduced(&self, problem: &Problem) -> u32 {
         let mut moves = self.get_legal_moves();
-        match problem.game_type {
+        match problem.game_type() {
             Game::Farbe | Game::Grand => {
                 moves = self.reduce_unequal(moves, problem);
-                moves = self.reduce_equal(moves, problem.game_type);
+                moves = self.reduce_equal(moves, problem.game_type());
             },
             Game::Null => {
-                moves = self.reduce_equal(moves, problem.game_type);
+                moves = self.reduce_equal(moves, problem.game_type());
             }
         }
         moves
@@ -29,7 +29,7 @@ impl State {
         let all_moves = self.left_cards | self.right_cards | self.declarer_cards;
 
         let connections = get_connections(
-            moves, all_moves, problem.game_type.get_unequal_sequence());
+            moves, all_moves, problem.game_type().get_unequal_sequence());
 
         let mut i = 1;
         while connections[i].0 > 0 {
@@ -54,7 +54,7 @@ impl State {
 
     fn reduce_equal(&self, moves: u32, game: Game) -> u32 {
         // todo: add self.trick_cards ?
-        let all_moves = self.declarer_cards | self.left_cards | self.right_cards;
+        let all_moves = self.declarer_cards | self.left_cards | self.right_cards | self.trick_cards;
         let connection_list = game.get_equal_sequence();
 
         get_reduced_equal_core(moves, all_moves, connection_list)

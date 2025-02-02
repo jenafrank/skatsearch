@@ -1,4 +1,4 @@
-use crate::traits::{Augen, BitConverter};
+use crate::traits::BitConverter;
 
 use super::*;
 
@@ -12,20 +12,19 @@ impl Problem {
         start_player: Player,
     ) -> Problem {
         
-        let allcards = declarer_cards_all | left_cards_all | right_cards_all;
-
+        assert!(declarer_cards_all & left_cards_all == 0);
+        assert!(declarer_cards_all & right_cards_all == 0);
+        assert!(left_cards_all & right_cards_all == 0);
+        
         Problem {
-            declarer_cards_all,
-            left_cards_all,
-            right_cards_all,
+            declarer_cards: declarer_cards_all,
+            left_cards: left_cards_all,
+            right_cards: right_cards_all,
             game_type,
             start_player,
-
-            augen_total: allcards.__get_value(),
-            nr_of_cards: allcards.__get_number_of_bits(),
-            
-            transposition_table: Default::default(),
-            counters: Default::default(),
+            trick_cards: 0,
+            trick_suit: 0,
+            threshold_upper: 1,
         }
     }
 
@@ -70,6 +69,19 @@ impl Problem {
             Game::Farbe,
             Player::Right,
         )
+    }
+
+    pub fn new() -> Self {
+        Problem {
+            declarer_cards: 0u32,
+            left_cards: 0u32,
+            right_cards: 0u32,
+            game_type: Game::Farbe,
+            start_player: Player::Declarer,
+            trick_cards: 0,
+            trick_suit: 0,
+            threshold_upper: 0
+        }
     }
 
 }

@@ -1,7 +1,7 @@
 use crate::types::player::Player;
 
 #[derive(Default, Copy, Clone)]
-pub struct PlayoutRow {
+pub struct PlayoutLine {
     pub declarer_cards: u32,
     pub left_cards: u32,
     pub right_cards: u32,
