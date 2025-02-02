@@ -1,10 +1,7 @@
-#![feature(test)]
-
 use skat_aug23::{traits::StringConverter, uncertain::uproblem_builder::UProblemBuilder};
 use skat_aug23::types::player::Player;
 use skat_aug23::uncertain::estimator::Estimator;
 
-extern crate test;
 extern crate skat_aug23;
 
 #[ignore]
