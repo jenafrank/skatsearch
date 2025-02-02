@@ -1,6 +1,3 @@
-#![feature(test)]
-
-extern crate test;
 extern crate skat_aug23;
 
 use std::time::Instant;

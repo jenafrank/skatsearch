@@ -1,4 +1,3 @@
-#![feature(test)]
 #![allow(clippy::unusual_byte_groupings)]
 
 extern crate core;
