@@ -3,6 +3,18 @@ use crate::types::player::Player;
 use crate::consts::bitboard::{ACES, EIGHTS, JACKS, KINGS, NINES, QUEENS, SEVENS, TENS};
 use crate::traits::Bitboard;
 
+/// Determines the winner of a trick based on the played cards, the trump suit, and the game type.
+///
+/// # Arguments
+/// * `trick_cards` - A bitmask representing the cards played in the trick.
+/// * `trick_suit` - The suit of the leading card in the trick.
+/// * `game_type` - The type of game being played (`Game::Farbe`, `Game::Grand`, or `Game::Null`).
+/// * `declarer_cards_all` - A bitmask representing all cards of the declarer.
+/// * `left_cards_all` - A bitmask representing all cards of the left player.
+/// * `right_cards_all` - A bitmask representing all cards of the right player.
+///
+/// # Returns
+/// The player who won the trick (`Player::Declarer`, `Player::Left`, or `Player::Right`).
 pub fn get_trick_winner(
     trick_cards: u32,
     trick_suit: u32,
@@ -13,20 +25,25 @@ pub fn get_trick_winner(
 ) -> Player {
     let trump = game_type.get_trump();
 
-    let is_trump = (trick_cards & trump) > 0;
-    let lead_suit = if is_trump { trump } else { trick_suit };
-    let lead_trick = lead_suit & trick_cards;
+    let is_trump_played = (trick_cards & trump) > 0;
+    let effective_suit = if is_trump_played { trump } else { trick_suit };
+    let lead_cards = effective_suit & trick_cards;
 
-    let mut lead_declarer = lead_trick & declarer_cards_all;
-    let mut lead_left = lead_trick & left_cards_all;
-    let mut lead_right = lead_trick & right_cards_all;
+    let mut lead_declarer = lead_cards & declarer_cards_all;
+    let mut lead_left = lead_cards & left_cards_all;
+    let mut lead_right = lead_cards & right_cards_all;
 
     if let Game::Null = game_type {
-        lead_declarer = nullmap(lead_declarer);
-        lead_left = nullmap(lead_left);
-        lead_right = nullmap(lead_right);
+        lead_declarer = nullmap(lead_declarer).unwrap_or(0);
+        lead_left = nullmap(lead_left).unwrap_or(0);
+        lead_right = nullmap(lead_right).unwrap_or(0);
     }
 
+    determine_winner(lead_declarer, lead_left, lead_right)
+}
+
+/// Determines the winner based on the leading cards of each player.
+fn determine_winner(lead_declarer: u32, lead_left: u32, lead_right: u32) -> Player {
     if lead_left > lead_declarer || lead_right > lead_declarer {
         if lead_left < lead_right {
             Player::Right
@@ -38,18 +55,19 @@ pub fn get_trick_winner(
     }
 }
 
-fn nullmap(card: u32) -> u32 {
+/// Maps a card to its rank in a Null game.
+fn nullmap(card: u32) -> Option<u32> {
     match card {
-        x if SEVENS.__contain(x) => 1,
-        x if EIGHTS.__contain(x) => 2,
-        x if NINES.__contain(x) => 3,
-        x if TENS.__contain(x) => 4,
-        x if JACKS.__contain(x) => 5,
-        x if QUEENS.__contain(x) => 6,
-        x if KINGS.__contain(x) => 7,
-        x if ACES.__contain(x) => 8,
-        x if x == 0 => 0,
-        _ => panic!("Impossible single card '{}'", card)
+        x if SEVENS.__contain(x) => Some(1),
+        x if EIGHTS.__contain(x) => Some(2),
+        x if NINES.__contain(x) => Some(3),
+        x if TENS.__contain(x) => Some(4),
+        x if JACKS.__contain(x) => Some(5),
+        x if QUEENS.__contain(x) => Some(6),
+        x if KINGS.__contain(x) => Some(7),
+        x if ACES.__contain(x) => Some(8),
+        x if x == 0 => Some(0),
+        _ => None, // Invalid card
     }
 }
 
