@@ -1,6 +1,5 @@
 use rand::seq::index::sample;
 use crate::{traits::{BitConverter, Augen, Bitboard}, core_functions::get_all_unplayed_cards::get_all_unplayed_cards, uncertain::facts::Facts, consts::bitboard::*};
-use crate::core_functions::get_suit_for_card::get_suit_for_card;
 use super::{game::Game, player::Player, problem::Problem};
 
 pub struct ProblemBuilder {

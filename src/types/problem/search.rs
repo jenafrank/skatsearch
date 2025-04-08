@@ -8,12 +8,38 @@ use crate::types::tt_flag::TtFlag;
 use crate::types::tt_table::TtTable;
 use crate::core_functions::get_sorted_by_value::get_sorted_by_value;
 
+enum GameStrategy {
+    Standard,
+    Null,
+}
+
+impl GameStrategy {    
+    fn evaluate(&self, a: u8, b: u8, player: Player) -> bool {
+        match self {
+            GameStrategy::Standard => (player == Player::Declarer && a > b) || (player != Player::Declarer && a < b),
+            GameStrategy::Null => (player == Player::Declarer && a < b) || (player != Player::Declarer && a > b),
+        }
+    }
+
+    fn initial_value(&self, player: Player) -> u8 {
+        match self {
+            GameStrategy::Standard => if player == Player::Declarer { 0 } else { 120 },
+            GameStrategy::Null => if player == Player::Declarer { 1 } else { 0 },
+        }
+    }
+}
+
 impl Problem {
 
     pub fn search(&self, state: &State) -> (u32, u8) {
 
         Counters::inc_iters();
 
+        let strategy = match self.game_type {
+            Game::Null => GameStrategy::Null,
+            _ => GameStrategy::Standard,
+        };
+ 
         // BASIC: Termination of recursive search
         if let Some(x) = apply_termination_criteria(&self, &state) {
             return (0, x);
@@ -21,7 +47,7 @@ impl Problem {
         
         let mut alpha = state.alpha;
         let mut beta = state.beta;
-        let mut optimized_value: (u32, u8) = (0, get_value_to_optimize(state.player,self.game_type));
+        let mut optimized_value: (u32, u8) = (0, strategy.initial_value(state.player));
 
         // TRANS:
         if let Some(x) = transposition_table_lookup(
@@ -57,7 +83,10 @@ impl Problem {
             let child_state_value = self.search(&child_state);
 
             // Optimize value
-            optimized_value = evaluate_optimized_value(child_state_value, optimized_value, state.player, *mov,self.game_type);
+            if strategy.evaluate(child_state_value.1, optimized_value.1, state.player) {
+                optimized_value.0 = *mov;
+                optimized_value.1 = child_state_value.1;
+            }
 
             // Alpha-beta cutoffs            
             if shrink_alpha_beta_window(state.player, &mut alpha, &mut beta, child_state_value.1, self.game_type) {
@@ -74,51 +103,6 @@ impl Problem {
         );
 
         optimized_value
-    }
-}
-
-fn evaluate_optimized_value(
-    optimized_value: (u32, u8),
-    child_state_value: (u32, u8),
-    player: Player,
-    mov: u32,
-    game: Game,
-) -> (u32, u8) {
-    let mut new_optimized_value = optimized_value;
-    let is_declarer = player == Player::Declarer;
-    let is_null_game = game == Game::Null;
-
-    let should_update = match (is_null_game, is_declarer) {
-        (true, true)   => child_state_value.1 < optimized_value.1,
-        (true, false)  => child_state_value.1 > optimized_value.1,
-        (false, true)  => child_state_value.1 > optimized_value.1,
-        (false, false) => child_state_value.1 < optimized_value.1,
-    };
-
-    if should_update {
-        new_optimized_value.0 = mov;
-        new_optimized_value.1 = child_state_value.1;
-    }
-
-    new_optimized_value
-}
-
-fn get_value_to_optimize(player: Player, game: Game) -> u8 {
-    match player  {
-        Player::Declarer => {
-            match game {
-                Game::Farbe => 0,
-                Game::Grand => 0,
-                Game::Null => 1
-            }
-        },
-        _ => {
-            match game {
-                Game::Farbe => 120,
-                Game::Grand => 120,
-                Game::Null => 0
-            }
-        }
     }
 }
 
