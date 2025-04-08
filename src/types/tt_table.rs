@@ -31,6 +31,13 @@ impl TtTable {
     pub fn reset() {
         unsafe { TABLE_INSTANCE = None };
     }
+
+    pub fn invalidate() {
+        let tt = TtTable::get_mutable();
+        for i in 0..TT_SIZE {
+            tt.data[i].occupied = false;
+        }
+    }
 }
 
 fn create_transposition_table() -> TtTable {

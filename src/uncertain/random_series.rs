@@ -8,6 +8,7 @@ use crate::types::state::State;
 use rand::rngs::StdRng;
 use rand::seq::SliceRandom;
 use rand::SeedableRng;
+use std::cmp::max;
 use std::fs::File;
 use std::io::Write;
 use std::time::Instant;
@@ -51,34 +52,51 @@ pub fn sample_farbe_declarer_tt_dd(number_of_samples: usize) -> std::io::Result<
     let mut file = File::create(r"data.txt")?;
     let mut rand = StdRng::seed_from_u64(223);
     let mut total_wins:u32 = 0;
+    let allnow = Instant::now();
 
     for _ in 0..number_of_samples {
         let cards = get_random_card_distribution_with_seed(&mut rand);
         let p = Problem::create(cards.0, cards.1, cards.2, Game::Grand, Player::Declarer);
 
         let now = Instant::now();
+        
+        Counters::reset();
         let mut solver = Solver::create_with_new_transposition_table(p);
-        let result = solver.solve_win_10tricks();
+        let result = solver.solve_with_skat(true, true);
+        
+        let mut best_value = 0;
+        for card in result.all_skats {
+            best_value = max(best_value, card.value);
+        }        
 
-        total_wins += if result.declarer_wins { 1 } else { 0 };
+        total_wins += if best_value >= 61 { 1 } else { 0 };
 
         println!(
-            "{} -- {:5} ms {:9} | {:9} iters/colls {:3} pnts | D: {} L: {} R: {}",
+            "{} -- {:8} ms - {:5} ms {:9} | {:9} iters/colls - {:7.2} {:6} pnts | D: {} L: {} R: {}",
             total_wins,
+            allnow.elapsed().as_millis(),
             now.elapsed().as_millis(),
             result.counters.iters,
             result.counters.collisions,
-            result.declarer_wins,
+            (result.counters.collisions as f32)/(result.counters.iters as f32)*1000.,
+            best_value,
             cards.0.__str(),
             cards.1.__str(),
             cards.2.__str()
         );
 
         file.write_fmt(format_args!(
-            "{} {} {} \n",
+            "{} , {:8} , {:5} , {:9}, {:9}, {:7.2}, {:6}, {}, {}, {} \n",
+            total_wins,
+            allnow.elapsed().as_millis(),
             now.elapsed().as_millis(),
             result.counters.iters,
-            result.declarer_wins
+            result.counters.collisions,
+            (result.counters.collisions as f32)/(result.counters.iters as f32)*1000.,
+            best_value,
+            cards.0.__str(),
+            cards.1.__str(),
+            cards.2.__str()
         ))?;
     }
 

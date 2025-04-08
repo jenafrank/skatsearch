@@ -9,7 +9,8 @@ impl Solver {
     }
 
     pub fn create_with_new_transposition_table(problem: Problem) -> Solver {
-        TtTable::reset();
+        // If reset, is much slower, tested with 1M sized TT:
+        // TtTable::invalidate();
         Solver::create(problem)
     }
 }
