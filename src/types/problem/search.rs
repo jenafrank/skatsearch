@@ -57,7 +57,7 @@ impl Problem {
             let child_state_value = self.search(&child_state);
 
             // Optimize value
-            optimized_value = optimize(child_state_value, optimized_value, state.player, *mov,self.game_type);
+            optimized_value = evaluate_optimized_value(child_state_value, optimized_value, state.player, *mov,self.game_type);
 
             // Alpha-beta cutoffs            
             if shrink_alpha_beta_window(state.player, &mut alpha, &mut beta, child_state_value.1, self.game_type) {
@@ -77,65 +77,30 @@ impl Problem {
     }
 }
 
-fn optimize(child_state_value: (u32, u8),
-            optimized_value: (u32, u8),
-            player: Player, mov: u32, game: Game) -> (u32, u8) {
+fn evaluate_optimized_value(
+    optimized_value: (u32, u8),
+    child_state_value: (u32, u8),
+    player: Player,
+    mov: u32,
+    game: Game,
+) -> (u32, u8) {
+    let mut new_optimized_value = optimized_value;
+    let is_declarer = player == Player::Declarer;
+    let is_null_game = game == Game::Null;
 
-    match game {
-        Game::Null => {
-            match player {
-                Player::Declarer => if child_state_value.1 < optimized_value.1
-                {
-                    let mut ret = child_state_value;
-                    ret.0 = mov;
-                    ret
-                }
-                else
-                {
-                    optimized_value
-                },
+    let should_update = match (is_null_game, is_declarer) {
+        (true, true)   => child_state_value.1 < optimized_value.1,
+        (true, false)  => child_state_value.1 > optimized_value.1,
+        (false, true)  => child_state_value.1 > optimized_value.1,
+        (false, false) => child_state_value.1 < optimized_value.1,
+    };
 
-                _ => if child_state_value.1 > optimized_value.1
-                {
-                    let mut ret = child_state_value;
-                    ret.0 = mov;
-                    ret
-                }
-                else
-                {
-                    optimized_value
-                }
-            }
-
-        }
-        _ => {
-            match player {
-                Player::Declarer => if child_state_value.1 > optimized_value.1
-                {
-                    let mut ret = child_state_value;
-                    ret.0 = mov;
-                    ret
-                }
-                else
-                {
-                    optimized_value
-                },
-
-                _ => if child_state_value.1 < optimized_value.1
-                {
-                    let mut ret = child_state_value;
-                    ret.0 = mov;
-                    ret
-                }
-                else
-                {
-                    optimized_value
-                }
-            }
-        }
+    if should_update {
+        new_optimized_value.0 = mov;
+        new_optimized_value.1 = child_state_value.1;
     }
 
-
+    new_optimized_value
 }
 
 fn get_value_to_optimize(player: Player, game: Game) -> u8 {
@@ -159,31 +124,34 @@ fn get_value_to_optimize(player: Player, game: Game) -> u8 {
 
 #[inline(always)]
 fn apply_termination_criteria(problem: &Problem, state: &State) -> Option<u8> {
-
-    /* 1. Termination criteria: Return if no cards anymore available */
     if state.player_cards == 0 {
         return Some(state.augen_declarer);
     }
 
-    /* 2. Termination criteria: Check ab window */
     match problem.game_type {
-        Game::Null => {
-            if state.augen_declarer > 0 {
-                return Some(1);
-            }
-        }
-        _ => {
-            if problem.augen_total() - state.augen_team <= state.alpha {
-                return Some(state.alpha);
-            }
+        Game::Null => return apply_termination_criteria_null(state),
+        _ => return apply_termination_criteria_standard(problem, state),
+    };
+}
 
-            if state.augen_declarer >= state.beta {
-                return Some(state.beta);
-            }
-        }
+#[inline(always)]
+fn apply_termination_criteria_null(state: &State) -> Option<u8> {
+    if state.augen_declarer > 0 {
+        return Some(1);
+    }
+    None
+}
+
+#[inline(always)]
+fn apply_termination_criteria_standard(problem: &Problem, state: &State) -> Option<u8> {
+    if problem.augen_total() - state.augen_team <= state.alpha {
+        return Some(state.alpha);
     }
 
-    return None;
+    if state.augen_declarer >= state.beta {
+        return Some(state.beta);
+    }
+    None
 }
 
 #[inline(always)]
