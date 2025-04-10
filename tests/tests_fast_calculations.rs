@@ -62,7 +62,7 @@ fn ten_tricks() { assert_solution(problems::ten_tricks()); }
 
 fn assert_solution((p, s): (Problem, u8)) {
     let now = Instant::now();
-    let solver = Solver::create_with_new_transposition_table(p);    
+    let mut solver = Solver::new(p);    
     let res = solver.solve_double_dummy();
 
     assert_eq!(res.best_value, s);

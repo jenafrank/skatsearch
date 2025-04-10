@@ -9,7 +9,6 @@ use crate::traits::Bitboard;
 use crate::types::counter::Counters;
 use crate::types::game::Game;
 use crate::types::state::State;
-use crate::types::tt_table::TtTable;
 
 
 /// Analyses a twelve-card hand during the task of putting away two cards (Skat) before
@@ -43,11 +42,9 @@ impl Solver {
         let mut alpha = 0;
 
         let skat_combinations = self.generate_skat_combinations(&twelve_cards);
-
+        
         for (skat_card_1, skat_card_2) in skat_combinations {
             
-            TtTable::reset();
-
             let skat_bitmask = skat_card_1 | skat_card_2;
             let skat_value = skat_bitmask.__get_value();
             
@@ -55,7 +52,7 @@ impl Solver {
 
             self.problem.set_declarer_cards(player_hand_bitmask);
 
-            let game_value = self.evaluate_skat_combination(
+            let game_value = self.evaluate_skat_combination(                
                 skat_value,
                 is_alpha_beta_accelerating,
                 is_winning_only,
@@ -107,7 +104,7 @@ impl Solver {
             current_game_state.beta = current_game_state.alpha + 1;
         }
 
-        let result = self.problem.search(&current_game_state);
+        let result = self.problem.search(&current_game_state, &mut self.tt);
         result.1 + skat_value
     }
 
@@ -135,12 +132,12 @@ impl Solver {
     /// Investigates all legal moves for a given state and returns an option array
     /// with 0) card under investigation 1) follow-up card from tree search (tree root) and
     /// 2) value of search
-    pub fn solve_all_cards(&self, alpha: u8, beta: u8) -> SolveAllCardsRet {
+    pub fn solve_all_cards(&mut self, alpha: u8, beta: u8) -> SolveAllCardsRet {
         let initial_state = State::create_initial_state_from_problem(&self.problem);        
         self.get_all_cards(initial_state, alpha, beta)
     }
 
-    pub fn solve_win(&self) -> SolveWinRet {
+    pub fn solve_win(&mut self) -> SolveWinRet {
         let mut alpha = self.problem.points_to_win() - 1;
         let mut beta = self.problem.points_to_win();
 
@@ -150,7 +147,7 @@ impl Solver {
         } 
 
         let state = self.problem.new_state(alpha, beta);
-        let (best_card, value) = self.problem.search(&state);
+        let (best_card, value) = self.problem.search(&state, &mut self.tt);
         
         let mut declarer_wins = value > alpha;
         
@@ -189,7 +186,7 @@ impl Solver {
             }
         }
 
-        let result = self.problem.search(&state);
+        let result = self.problem.search(&state, &mut self.tt);
         let val = result.1;
 
         let declarer_wins = if self.problem.game_type() == Game::Null {
@@ -207,7 +204,7 @@ impl Solver {
 
     // unclear, if the right best card is determined. complicated. in search routine we should
     // identify, if any best card has been detected so far
-    pub fn solve_double_dummy(&self) -> SolveRet {
+    pub fn solve_double_dummy(&mut self) -> SolveRet {
         let mut result = (0u32, 0u8);
         let mdf = 5u8;
 
@@ -215,7 +212,7 @@ impl Solver {
             let mut state = State::create_initial_state_from_problem(&self.problem);
             state.alpha = mdf * i;
             state.beta = mdf * (i + 1);
-            result = self.problem.search(&state);
+            result = self.problem.search(&state, &mut self.tt);
 
             if result.1 < state.beta {
                 break;
@@ -231,7 +228,7 @@ impl Solver {
 
         println!(" Iters: {}, Slots: {}, Writes: {}, Reads: {}, ExactReads: {}, Collisions: {}, Breaks: {}",
         result.counters.iters,
-        TtTable::get().get_occupied_slots(),
+        self.tt.get_occupied_slots(),
         result.counters.writes,
         result.counters.reads,
         result.counters.exactreads,
@@ -245,7 +242,7 @@ impl Solver {
 
 #[cfg(test)]
 mod tests {
-    use crate::{types::{solver::Solver, player::Player, problem_builder::ProblemBuilder}, consts::bitboard::SPADES};
+    use crate::{consts::bitboard::SPADES, types::{player::Player, problem_builder::ProblemBuilder, solver::Solver}};
 
     #[test]
     fn test_solve_win() {
@@ -256,7 +253,7 @@ mod tests {
         .threshold(14)
         .build();
 
-        let solver = Solver::create(problem);
+        let mut solver = Solver::new(problem);
         let result = solver.solve_win();
 
         assert_eq!(result.declarer_wins, true);
@@ -271,7 +268,7 @@ mod tests {
         .trick(SPADES, "SA")
         .build();
 
-        let solver = Solver::create(problem);
+        let mut solver = Solver::new(problem);
         let result = solver.solve_win();
 
         assert_eq!(result.declarer_wins, true);

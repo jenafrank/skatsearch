@@ -23,7 +23,7 @@ impl Solver {
             Counters::reset();
 
             let now = Instant::now();
-            let res = self.problem.search(&initial_state);
+            let res = self.problem.search(&initial_state, &mut self.tt);
             let time = now.elapsed().as_millis();
 
             let played_card = res.0;

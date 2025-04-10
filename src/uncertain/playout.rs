@@ -19,8 +19,7 @@ impl Estimator {
         
         // advance situation
         
-        let second_uproblem = initial_problem.advance(best_card);
-        let estimator_2 = Estimator::new(second_uproblem, 100);
+        let second_uproblem = initial_problem.advance(best_card);        
 
         println!("Start calculating 2...");
         let result = estimator.estimate_probability_of_all_cards(false);

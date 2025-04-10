@@ -5,6 +5,7 @@ use crate::types::player::Player;
 use crate::types::problem::Problem;
 use crate::types::solver::Solver;
 use crate::types::state::State;
+use crate::types::tt_table::TtTable;
 use rand::rngs::StdRng;
 use rand::seq::SliceRandom;
 use rand::SeedableRng;
@@ -24,7 +25,9 @@ pub fn sample_farbe_declarer_tt(number_of_samples: usize) -> std::io::Result<()>
         let s = State::create_initial_state_from_problem(&p);
 
         let now = Instant::now();
-        let result = p.search(&s);
+        let mut tt = TtTable::new();
+
+        let result = p.search(&s, &mut tt);
         let counters = Counters::get();
 
         println!(
@@ -61,7 +64,7 @@ pub fn sample_farbe_declarer_tt_dd(number_of_samples: usize) -> std::io::Result<
         let now = Instant::now();
         
         Counters::reset();
-        let mut solver = Solver::create_with_new_transposition_table(p);
+        let mut solver = Solver::new(p);
         let result = solver.solve_with_skat(true, true);
         
         let mut best_value = 0;

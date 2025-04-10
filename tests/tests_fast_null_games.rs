@@ -35,7 +35,7 @@ pub fn null_1_debug() {
 
 fn assert_solution_null((p, s): (Problem, u8)) {
     let now = Instant::now();
-    let solver = Solver::create_with_new_transposition_table(p);    
+    let mut solver = Solver::new(p);    
     let res = solver.solve_win();
 
     let elapsed = now.elapsed();

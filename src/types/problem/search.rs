@@ -31,7 +31,7 @@ impl GameStrategy {
 
 impl Problem {
 
-    pub fn search(&self, state: &State) -> (u32, u8) {
+    pub fn search(&self, state: &State, tt: &mut TtTable) -> (u32, u8) {
 
         Counters::inc_iters();
 
@@ -51,6 +51,7 @@ impl Problem {
 
         // TRANS:
         if let Some(x) = transposition_table_lookup(
+            &tt,
             &state,
             &mut alpha,
             &mut beta
@@ -80,7 +81,7 @@ impl Problem {
                 beta);
 
             // BASIC: Search child state
-            let child_state_value = self.search(&child_state);
+            let child_state_value = self.search(&child_state, tt);
 
             // Optimize value
             if strategy.evaluate(child_state_value.1, optimized_value.1, state.player) {
@@ -95,7 +96,8 @@ impl Problem {
             }            
         }
 
-        transposition_table_write(            
+        transposition_table_write( 
+            tt,           
             &state,
             alphaorig,
             betaorig,
@@ -140,6 +142,7 @@ fn apply_termination_criteria_standard(problem: &Problem, state: &State) -> Opti
 
 #[inline(always)]
 fn transposition_table_lookup(
+    tt: &TtTable,
     state: &State,
     alpha: &mut u8,
     beta: &mut u8
@@ -147,7 +150,7 @@ fn transposition_table_lookup(
 {
 
     if TtTable::is_tt_compatible_state(state) {
-        if let Some(tt_entry) = TtTable::get().read(state) {
+        if let Some(tt_entry) = tt.read(state) {
             let value = tt_entry.value + state.augen_declarer;
             let bestcard = tt_entry.bestcard;
             match tt_entry.flag {
@@ -173,6 +176,7 @@ fn transposition_table_lookup(
 
 #[inline(always)]
 fn transposition_table_write(
+    tt: &mut TtTable,
     state: &State,
     alphaorig: u8,
     betaorig: u8,
@@ -180,7 +184,7 @@ fn transposition_table_write(
 ) {
     if TtTable::is_tt_compatible_state(state) {
         Counters::inc_writes();
-        TtTable::get_mutable().write(
+        tt.write(
             &state,
             state.get_hash(),
             alphaorig,
