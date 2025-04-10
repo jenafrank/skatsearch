@@ -11,84 +11,126 @@ use crate::types::game::Game;
 use crate::types::state::State;
 use crate::types::tt_table::TtTable;
 
+
+/// Analyses a twelve-card hand during the task of putting away two cards (Skat) before
+/// game starts. It analyses all 66 cases and calculating the best play for each of them
+/// using the same transposition table for speed-up reasons.
+/// # Variants of arguments
+/// * _false_ _false_: Returns exact values for all 66 games.
+/// * _true_ _false_: Returns best skat by means of alpha-window narrowing. Thus, the
+/// 66-array does also contain wrong values.
+/// * _false_ _true_: Returns some skat for which the game will be won.
+/// The routine always takes into account the value of the skat which is neglected by default
+/// in the basic search routines.
 impl Solver {
-    
-    /// Analyses a twelve-card hand during the task of putting away two cards (Skat) before
-    /// game starts. It analyses all 66 cases and calculating the best play for each of them
-    /// using the same transposition table for speed-up reasons.
-    /// # Variants of arguments
-    /// * _false_ _false_: Returns exact values for all 66 games.
-    /// * _true_ _false_: Returns best skat by means of alpha-window narrowing. Thus, the
-    /// 66-array does also contain wrong values.
-    /// * _false_ _true_: Returns some skat for which the game will be won.
-    /// The routine always takes into account the value of the skat which is neglected by default
-    /// in the basic search routines.
+
     pub fn solve_with_skat(
         &mut self,
         is_alpha_beta_accelerating: bool,
         is_winning_only: bool,
     ) -> SolveWithSkatRet {
-        
         let mut ret: SolveWithSkatRet = SolveWithSkatRet {
             best_skat: None,
             all_skats: Vec::new(),
-            counters: Counters::new()
+            counters: Counters::new(),
         };
 
-        let state = State::create_initial_state_from_problem(&self.problem);
-        let remaining_cards = !state.get_all_unplayed_cards();
-        let twelve_bit = remaining_cards | state.declarer_cards;
-        let twelve = twelve_bit.__decompose_twelve();
+        let initial_state = State::create_initial_state_from_problem(&self.problem);
+        let skatcards_bitmask = !initial_state.get_all_unplayed_cards();
+        let twelve_cards_bitmask = skatcards_bitmask | initial_state.declarer_cards;
+        let twelve_cards = twelve_cards_bitmask.__decompose_twelve();
 
-        let mut alpha_with_skat = 0;
-        for i in 0..11 {
-            for j in i + 1..12 {
-                let skat = twelve[i] | twelve[j];
-                let declarer_cards = twelve_bit ^ skat;
+        let mut alpha = 0;
 
-                self.problem.set_declarer_cards(declarer_cards);
+        let skat_combinations = self.generate_skat_combinations(&twelve_cards);
+
+        for (skat_card_1, skat_card_2) in skat_combinations {
             
-                let mut current_initial_state =
-                    State::create_initial_state_from_problem(&self.problem);
+            TtTable::reset();
 
-                if is_alpha_beta_accelerating {
-                    if alpha_with_skat > skat.__get_value() {
-                        current_initial_state.alpha = alpha_with_skat - skat.__get_value();
-                    }
-                } else if is_winning_only {
-                    if alpha_with_skat >= 61 {
-                        return ret;
-                    }
+            let skat_bitmask = skat_card_1 | skat_card_2;
+            let skat_value = skat_bitmask.__get_value();
+            
+            let player_hand_bitmask = twelve_cards_bitmask ^ skat_bitmask;
 
-                    current_initial_state.alpha = 60 - skat.__get_value();
-                    current_initial_state.beta = current_initial_state.alpha + 1;
-                }
+            self.problem.set_declarer_cards(player_hand_bitmask);
 
-                let result = self.problem.search(&current_initial_state);
-                let value_with_skat = result.1 + skat.__get_value();
+            let game_value = self.evaluate_skat_combination(
+                skat_value,
+                is_alpha_beta_accelerating,
+                is_winning_only,
+                alpha,
+            );
 
-                ret.all_skats.push( SolveWithSkatRetLine {
-                    skat_card_1: twelve[i],
-                    skat_card_2: twelve[j],
-                    value: value_with_skat
-                });
+            ret.all_skats.push(SolveWithSkatRetLine {
+                skat_card_1,
+                skat_card_2,
+                value: game_value,
+            });
 
-                if value_with_skat > alpha_with_skat {
-                    ret.best_skat = SolveWithSkatRetLine {
-                        skat_card_1: twelve[i],
-                        skat_card_2: twelve[j],
-                        value: value_with_skat
-                    }.into();                        
-
-                    alpha_with_skat = value_with_skat;
-                }
-            }
+            self.update_best_skat(&mut ret, skat_card_1, skat_card_2, game_value, &mut alpha);
         }
 
         ret.counters = Counters::get();
 
         ret
     }
+
+    fn generate_skat_combinations(&self, cards: &[u32]) -> Vec<(u32, u32)> {
+        let mut combinations = Vec::new();
+        for i in 0..11 {
+            for j in i + 1..12 {
+                combinations.push((cards[i], cards[j]));
+            }
+        }
+        combinations
+    }
+
+    fn evaluate_skat_combination(
+        &mut self,
+        skat_value: u8,
+        is_alpha_beta_accelerating: bool,
+        is_winning_only: bool,
+        alpha: u8,
+    ) -> u8 {
+        let mut current_game_state = State::create_initial_state_from_problem(&self.problem);
+
+        if is_alpha_beta_accelerating {
+            if alpha > skat_value {
+                current_game_state.alpha = alpha - skat_value;
+            }
+        } else if is_winning_only {
+            if alpha >= 61 {
+                return 0; // Early return, value doesn't matter
+            }
+            current_game_state.alpha = 60 - skat_value;
+            current_game_state.beta = current_game_state.alpha + 1;
+        }
+
+        let result = self.problem.search(&current_game_state);
+        result.1 + skat_value
+    }
+
+    fn update_best_skat(
+        &self,
+        ret: &mut SolveWithSkatRet,
+        skat_card_1: u32,
+        skat_card_2: u32,
+        game_value: u8,
+        alpha: &mut u8,
+    ) {
+        if game_value > *alpha {
+            ret.best_skat = Some(SolveWithSkatRetLine {
+                skat_card_1,
+                skat_card_2,
+                value: game_value,
+            });
+            *alpha = game_value;
+        }
+    }
+}
+
+impl Solver {
 
     /// Investigates all legal moves for a given state and returns an option array
     /// with 0) card under investigation 1) follow-up card from tree search (tree root) and

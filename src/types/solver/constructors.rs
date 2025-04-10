@@ -1,4 +1,4 @@
-use crate::types::{problem::Problem, tt_table::TtTable};
+use crate::types::problem::Problem;
 use super::Solver;
 
 impl Solver {
