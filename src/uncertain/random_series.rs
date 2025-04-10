@@ -58,15 +58,16 @@ pub fn sample_farbe_declarer_tt_dd(number_of_samples: usize) -> std::io::Result<
     let allnow = Instant::now();
 
     for _ in 0..number_of_samples {
-        let cards = get_random_card_distribution_with_seed(&mut rand);
-        let p = Problem::create(cards.0, cards.1, cards.2, Game::Grand, Player::Declarer);
-
-        let now = Instant::now();
-        
+        let cards = get_random_card_distribution_with_seed(&mut rand);        
+        let now = Instant::now();        
         Counters::reset();
-        let mut solver = Solver::new(p);
-        let result = solver.solve_with_skat(true, true);
         
+        // let p = Problem::create(cards.0, cards.1, cards.2, Game::Grand, Player::Declarer);
+        // let mut solver = Solver::new(p);
+        // let result = solver.solve_with_skat(true, true);
+        
+        let result = Solver::solve_with_skat_parallel_brute_force(cards.1, cards.2, cards.0, Game::Grand, Player::Declarer);
+
         let mut best_value = 0;
         for card in result.all_skats {
             best_value = max(best_value, card.value);

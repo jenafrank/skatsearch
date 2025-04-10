@@ -8,6 +8,8 @@ use crate::traits::Augen;
 use crate::traits::Bitboard;
 use crate::types::counter::Counters;
 use crate::types::game::Game;
+use crate::types::player::Player;
+use crate::types::problem::Problem;
 use crate::types::state::State;
 
 
@@ -22,6 +24,52 @@ use crate::types::state::State;
 /// The routine always takes into account the value of the skat which is neglected by default
 /// in the basic search routines.
 impl Solver {
+
+    pub fn solve_with_skat_parallel_brute_force(
+        left_cards: u32,
+        right_cards: u32,
+        declarer_cards: u32,
+        game: Game,
+        first_player: Player
+    ) -> SolveWithSkatRet {
+
+        let mut ret: SolveWithSkatRet = SolveWithSkatRet {
+            best_skat: None,
+            all_skats: Vec::new(),
+            counters: Counters::new(),
+        };
+
+        let skat = !(left_cards | right_cards | declarer_cards);
+        let cards12 = skat | declarer_cards;
+        let cards12_array = cards12.__decompose_twelve();        
+        let skat_combinations = Solver::generate_skat_combinations(&cards12_array);
+
+        for (skat_card_1, skat_card_2) in skat_combinations {
+
+            let current_drueckung = skat_card_1 | skat_card_2;
+            let skat_value = current_drueckung.__get_value();            
+            let current_declarer_cards = cards12 ^ current_drueckung;
+
+            let current_problem = Problem::create(current_declarer_cards, left_cards, right_cards, game, first_player);
+            let mut solver = Solver::new(current_problem);
+
+            let solution = solver.solve_double_dummy();
+            let game_value = solution.best_value + skat_value;
+
+            ret.all_skats.push(SolveWithSkatRetLine {
+                skat_card_1,
+                skat_card_2,
+                value: game_value,
+            });
+
+            let mut dummy = 0;
+            Solver::update_best_skat(&mut ret, skat_card_1, skat_card_2, game_value, &mut dummy);
+        }
+
+        ret.counters = Counters::get();
+
+        ret
+    }
 
     pub fn solve_with_skat(
         &mut self,
@@ -41,7 +89,7 @@ impl Solver {
 
         let mut alpha = 0;
 
-        let skat_combinations = self.generate_skat_combinations(&twelve_cards);
+        let skat_combinations = Solver::generate_skat_combinations(&twelve_cards);
         
         for (skat_card_1, skat_card_2) in skat_combinations {
             
@@ -65,7 +113,7 @@ impl Solver {
                 value: game_value,
             });
 
-            self.update_best_skat(&mut ret, skat_card_1, skat_card_2, game_value, &mut alpha);
+            Solver::update_best_skat(&mut ret, skat_card_1, skat_card_2, game_value, &mut alpha);
         }
 
         ret.counters = Counters::get();
@@ -73,7 +121,7 @@ impl Solver {
         ret
     }
 
-    fn generate_skat_combinations(&self, cards: &[u32]) -> Vec<(u32, u32)> {
+    fn generate_skat_combinations(cards: &[u32]) -> Vec<(u32, u32)> {
         let mut combinations = Vec::new();
         for i in 0..11 {
             for j in i + 1..12 {
@@ -108,8 +156,7 @@ impl Solver {
         result.1 + skat_value
     }
 
-    fn update_best_skat(
-        &self,
+    fn update_best_skat(        
         ret: &mut SolveWithSkatRet,
         skat_card_1: u32,
         skat_card_2: u32,
