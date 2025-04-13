@@ -36,17 +36,17 @@ impl TtTable {
         self.data[mapped_hash] = entry;
     }
 
-    pub fn read(&self, state: &State) -> Option<&TtEntry> {
+    pub fn read(&self, state: &State, cnt: &mut Counters) -> Option<&TtEntry> {
 
         let candidate = &self.data[state.get_hash()];
 
         if !candidate.occupied {
             None // empty slot
         } else if candidate.matches(&state) {
-            Counters::inc_reads();
+            cnt.inc_reads();
             Some(candidate) // matches key values
         } else {
-            Counters::inc_collisions();
+            cnt.inc_collisions();
             None // collision
         }
     }

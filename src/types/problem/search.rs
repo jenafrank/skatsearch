@@ -31,9 +31,9 @@ impl GameStrategy {
 
 impl Problem {
 
-    pub fn search(&self, state: &State, tt: &mut TtTable) -> (u32, u8) {
+    pub fn search(&self, state: &State, tt: &mut TtTable, cnt: &mut Counters) -> (u32, u8) {
 
-        Counters::inc_iters();
+        cnt.inc_iters();
 
         let strategy = match self.game_type {
             Game::Null => GameStrategy::Null,
@@ -54,7 +54,8 @@ impl Problem {
             &tt,
             &state,
             &mut alpha,
-            &mut beta
+            &mut beta,
+            cnt
         ) {
             return x;
         }
@@ -81,7 +82,7 @@ impl Problem {
                 beta);
 
             // BASIC: Search child state
-            let child_state_value = self.search(&child_state, tt);
+            let child_state_value = self.search(&child_state, tt, cnt);
 
             // Optimize value
             if strategy.evaluate(child_state_value.1, optimized_value.1, state.player) {
@@ -91,7 +92,7 @@ impl Problem {
 
             // Alpha-beta cutoffs            
             if shrink_alpha_beta_window(state.player, &mut alpha, &mut beta, child_state_value.1, self.game_type) {
-                Counters::inc_breaks();
+                cnt.inc_breaks();
                 break;
             }            
         }
@@ -101,7 +102,8 @@ impl Problem {
             &state,
             alphaorig,
             betaorig,
-            optimized_value
+            optimized_value,
+            cnt
         );
 
         optimized_value
@@ -145,17 +147,18 @@ fn transposition_table_lookup(
     tt: &TtTable,
     state: &State,
     alpha: &mut u8,
-    beta: &mut u8
+    beta: &mut u8,
+    cnt: &mut Counters
 ) -> Option<(u32, u8)>
 {
 
     if TtTable::is_tt_compatible_state(state) {
-        if let Some(tt_entry) = tt.read(state) {
+        if let Some(tt_entry) = tt.read(state, cnt) {
             let value = tt_entry.value + state.augen_declarer;
             let bestcard = tt_entry.bestcard;
             match tt_entry.flag {
                 TtFlag::EXACT => {
-                    Counters::inc_exactreads();
+                    cnt.inc_exactreads();
                     return Some((bestcard,value));
                 },
                 TtFlag::LOWER => {
@@ -180,10 +183,11 @@ fn transposition_table_write(
     state: &State,
     alphaorig: u8,
     betaorig: u8,
-    value: (u32, u8)
+    value: (u32, u8),
+    cnt: &mut Counters
 ) {
     if TtTable::is_tt_compatible_state(state) {
-        Counters::inc_writes();
+        cnt.inc_writes();
         tt.write(
             &state,
             state.get_hash(),

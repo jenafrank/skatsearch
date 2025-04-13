@@ -20,10 +20,10 @@ impl Solver {
             row.left_cards = initial_state.left_cards;
             row.right_cards = initial_state.right_cards;
 
-            Counters::reset();
+            let mut cnt: Counters = Counters::new();
 
             let now = Instant::now();
-            let res = self.problem.search(&initial_state, &mut self.tt);
+            let res = self.problem.search(&initial_state, &mut self.tt, &mut cnt);
             let time = now.elapsed().as_millis();
 
             let played_card = res.0;
@@ -32,8 +32,8 @@ impl Solver {
             row.card = played_card;
             row.augen_declarer = initial_state.augen_declarer;
             row.augen_team = initial_state.augen_team;
-            row.cnt_iters = Counters::get().iters;
-            row.cnt_breaks = Counters::get().breaks;
+            row.cnt_iters = cnt.iters;
+            row.cnt_breaks = cnt.breaks;
             row.time = time;
 
             initial_state = initial_state.create_child_state(
@@ -63,10 +63,13 @@ impl Solver {
 
             let mut row: PlayoutAllCardsRetLine = Default::default();
 
-            Counters::reset();
+            let mut cnt: Counters = Counters::new();
 
             let res = self.get(state);
             let resall = self.get_all_cards(state, 0, 120);
+
+            cnt.add(res.counters);
+            cnt.add(resall.counters);
 
             let best_card = res.best_card;
             row.player = state.player;

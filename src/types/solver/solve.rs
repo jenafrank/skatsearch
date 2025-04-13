@@ -42,14 +42,16 @@ impl Solver {
         let cards12 = skat | declarer_cards;
         let cards12_array = cards12.__decompose_twelve();
         let skat_combinations = Solver::generate_skat_combinations(&cards12_array);
-    
+        
         let best_skat: Arc<Mutex<Option<SolveWithSkatRetLine>>> = Arc::new(Mutex::new(None));
         let all_skats: Arc<Mutex<Vec<SolveWithSkatRetLine>>> = Arc::new(Mutex::new(Vec::new()));
+        let all_counters: Arc<Mutex<Vec<Counters>>> = Arc::new(Mutex::new(Vec::new()));
+
         let game_alpha: Arc<Mutex<u8>> = Arc::new(Mutex::new(0));
         let tt: Arc<Mutex<TtTable>> = Arc::new(Mutex::new(TtTable::new()));
-    
+        
         skat_combinations.into_par_iter().for_each(|(skat_card_1, skat_card_2)| {           
-    
+            
             let current_drueckung = skat_card_1 | skat_card_2;
             let skat_value = current_drueckung.__get_value();
             let current_declarer_cards = cards12 ^ current_drueckung;
@@ -77,6 +79,7 @@ impl Solver {
             };            
     
             all_skats.lock().unwrap().push(skat_ret_line.clone());
+            all_counters.lock().unwrap().push(solution.counters.clone());
     
             if game_value > game_alpha.lock().unwrap().clone() {                
                 *game_alpha.lock().unwrap() = game_value; 
@@ -88,11 +91,14 @@ impl Solver {
     
         let best_skat_result = best_skat.lock().unwrap().clone();
         let all_skats_result = all_skats.lock().unwrap().clone();
+        let all_counters_result = all_counters.lock().unwrap().clone();
+
+        let acc_counter = Counters::accumulate(all_counters_result);
     
         SolveWithSkatRet {            
             best_skat: best_skat_result,
             all_skats: all_skats_result,
-            counters: Counters::get(),
+            counters: acc_counter,
         }
     }
 
@@ -130,6 +136,7 @@ impl Solver {
                 is_alpha_beta_accelerating,
                 is_winning_only,
                 alpha,
+                &mut ret.counters
             );
 
             ret.all_skats.push(SolveWithSkatRetLine {
@@ -139,9 +146,7 @@ impl Solver {
             });
 
             Solver::update_best_skat(&mut ret, skat_card_1, skat_card_2, game_value, &mut alpha);
-        }
-
-        ret.counters = Counters::get();
+        }       
 
         ret
     }
@@ -162,6 +167,7 @@ impl Solver {
         is_alpha_beta_accelerating: bool,
         is_winning_only: bool,
         alpha: u8,
+        cnt: &mut Counters
     ) -> u8 {
         let mut current_game_state = State::create_initial_state_from_problem(&self.problem);
 
@@ -179,6 +185,9 @@ impl Solver {
 
         // let result = self.problem.search(&current_game_state, &mut self.tt);
         let result = self.solve_double_dummy(current_game_state.alpha, current_game_state.beta, 5);
+
+        cnt.add(result.counters);
+
         // result.1 + skat_value
         result.best_value + skat_value
     }
@@ -212,6 +221,9 @@ impl Solver {
     }
 
     pub fn solve_win(&mut self) -> SolveWinRet {
+        
+        let mut cnt = Counters::new();
+        
         let mut alpha = self.problem.points_to_win() - 1;
         let mut beta = self.problem.points_to_win();
 
@@ -221,7 +233,7 @@ impl Solver {
         } 
 
         let state = self.problem.new_state(alpha, beta);
-        let (best_card, value) = self.problem.search(&state, &mut self.tt);
+        let (best_card, value) = self.problem.search(&state, &mut self.tt, &mut cnt);
         
         let mut declarer_wins = value > alpha;
         
@@ -232,13 +244,16 @@ impl Solver {
         SolveWinRet {
             best_card,
             declarer_wins,
-            counters: Counters::get()
+            counters: cnt
         }
     }
 
     // works currently only with 10 cards, since all cards not part of the full deck
     // are considered as skat and thus as points fot the declarer.
     pub fn solve_win_10tricks(&mut self) -> SolveWinRet {
+
+        let mut cnt = Counters::new();
+
         let mut state = State::create_initial_state_from_problem(&self.problem);
 
         let skat_value = self.problem.get_skat().__get_value();
@@ -260,7 +275,7 @@ impl Solver {
             }
         }
 
-        let result = self.problem.search(&state, &mut self.tt);
+        let result = self.problem.search(&state, &mut self.tt, &mut cnt);
         let val = result.1;
 
         let declarer_wins = if self.problem.game_type() == Game::Null {
@@ -272,13 +287,15 @@ impl Solver {
         SolveWinRet {
             best_card: result.0,
             declarer_wins,
-            counters: Counters::get()
+            counters: cnt
         }
     }
 
     // unclear, if the right best card is determined. complicated. in search routine we should
     // identify, if any best card has been detected so far
     pub fn solve_double_dummy(&mut self, alpha: u8, beta: u8, width: u8) -> SolveRet {
+        
+        let mut cnt = Counters::new();
         let mut result = (0u32, 0u8);        
         
         let mut current_alpha = alpha;
@@ -288,7 +305,7 @@ impl Solver {
             let mut state = State::create_initial_state_from_problem(&self.problem);
             state.alpha = current_alpha;
             state.beta = current_beta;
-            result = self.problem.search(&state, &mut self.tt);
+            result = self.problem.search(&state, &mut self.tt, &mut cnt);
 
             if result.1 < current_beta {
                 break;
@@ -297,7 +314,7 @@ impl Solver {
             current_alpha = current_beta;
         }
 
-        SolveRet { best_card: result.0, best_value: result.1, counters: Counters::get() }
+        SolveRet { best_card: result.0, best_value: result.1, counters: cnt }
     }   
 
     pub fn solve(&mut self) -> SolveRet {

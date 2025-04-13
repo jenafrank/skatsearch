@@ -26,14 +26,14 @@ pub fn sample_farbe_declarer_tt(number_of_samples: usize) -> std::io::Result<()>
 
         let now = Instant::now();
         let mut tt = TtTable::new();
+        let mut cnt = Counters::new();
 
-        let result = p.search(&s, &mut tt);
-        let counters = Counters::get();
+        let result = p.search(&s, &mut tt, &mut cnt);
 
         println!(
             "{:5} ms {:9} iters {:3} pnts | D: {} L: {} R: {}",
             now.elapsed().as_millis(),
-            counters.iters,
+            cnt.iters,
             result.1 + p.get_skat().__get_value(),
             cards.0.__str(),
             cards.1.__str(),
@@ -43,7 +43,7 @@ pub fn sample_farbe_declarer_tt(number_of_samples: usize) -> std::io::Result<()>
         file.write_fmt(format_args!(
             "{} {} {} \n",
             now.elapsed().as_millis(),
-            counters.iters,
+            cnt.iters,
             result.1 + p.get_skat().__get_value()
         ))?;
     }
@@ -60,12 +60,12 @@ pub fn sample_farbe_declarer_tt_dd(number_of_samples: usize) -> std::io::Result<
     for _ in 0..number_of_samples {
         let cards = get_random_card_distribution_with_seed(&mut rand);        
         let now = Instant::now();        
-        Counters::reset();
         
         let p = Problem::create(cards.0, cards.1, cards.2, Game::Grand, Player::Declarer);
         let mut solver = Solver::new(p, None);
+        
         let result = solver.solve_with_skat(true, true);        
-                
+                       
         // let result = Solver::solve_with_skat_alpha_cut_parallel(cards.1, cards.2, cards.0, Game::Grand, Player::Declarer);
         
         let mut best_value = 0;

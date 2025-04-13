@@ -1,4 +1,5 @@
 #[derive(Default, Debug, Clone, Copy)]
+
 pub struct Counters {
     pub writes: u32,
     pub reads: u32,
@@ -8,53 +9,59 @@ pub struct Counters {
     pub iters: u32,
 }
 
-static COUNTERS_DEFAULT: Counters = Counters {
-    writes: 0,
-    reads: 0,
-    breaks: 0,
-    collisions: 0,
-    exactreads: 0,
-    iters: 0,
-};
-
-static mut COUNTERS_INSTANCE: Counters = COUNTERS_DEFAULT;
-
 impl Counters {    
 
     pub fn new() -> Counters {
-        COUNTERS_DEFAULT
+        Counters::default()
     }
 
-    pub fn reset() {
-        unsafe { COUNTERS_INSTANCE = COUNTERS_DEFAULT };
+    pub fn inc_writes(&mut self) {
+        self.writes += 1;
     }
 
-    pub fn inc_writes() {
-        unsafe { COUNTERS_INSTANCE.writes += 1 };
+    pub fn inc_reads(&mut self) {
+        self.reads += 1;
     }
 
-    pub fn inc_reads() {
-        unsafe { COUNTERS_INSTANCE.reads += 1 };
-    }
-
-    pub fn inc_breaks() {
-        unsafe { COUNTERS_INSTANCE.breaks += 1 };
+    pub fn inc_breaks(&mut self) {
+        self.breaks += 1;
     }  
 
-    pub fn inc_collisions() {
-        unsafe { COUNTERS_INSTANCE.collisions += 1 };
+    pub fn inc_collisions(&mut self) {
+        self.collisions += 1;
     }   
 
-    pub fn inc_exactreads() {
-        unsafe { COUNTERS_INSTANCE.exactreads += 1 };
+    pub fn inc_exactreads(&mut self) {
+        self.exactreads += 1;
     }   
 
-    pub fn inc_iters() {
-        unsafe { COUNTERS_INSTANCE.iters += 1 };
-    }   
-
-    pub fn get() -> Counters {
-        unsafe { COUNTERS_INSTANCE }
+    pub fn inc_iters(&mut self) {
+        self.iters += 1;
     }
+    
+    pub fn accumulate(all_counters_result: Vec<Counters>) -> Counters {
+        
+        let mut ret = Counters::new();
+
+        for counter in all_counters_result {
+            ret.breaks += counter.breaks;
+            ret.collisions += counter.collisions;
+            ret.exactreads += counter.exactreads;
+            ret.iters += counter.iters;
+            ret.writes += counter.writes;
+            ret.reads += counter.reads;
+        }
+
+        ret
+    }
+    
+    pub fn add(&mut self, counter: Counters) {
+        self.breaks += counter.breaks;
+        self.collisions += counter.collisions;
+        self.exactreads += counter.exactreads;
+        self.iters += counter.iters;
+        self.writes += counter.writes;
+        self.reads += counter.reads;
+    }   
 
 }
