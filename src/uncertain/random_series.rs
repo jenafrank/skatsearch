@@ -62,12 +62,12 @@ pub fn sample_farbe_declarer_tt_dd(number_of_samples: usize) -> std::io::Result<
         let now = Instant::now();        
         Counters::reset();
         
-        // let p = Problem::create(cards.0, cards.1, cards.2, Game::Grand, Player::Declarer);
-        // let mut solver = Solver::new(p);
-        // let result = solver.solve_with_skat(true, true);
+        let p = Problem::create(cards.0, cards.1, cards.2, Game::Grand, Player::Declarer);
+        let mut solver = Solver::new(p, None);
+        let result = solver.solve_with_skat(true, true);        
+                
+        // let result = Solver::solve_with_skat_alpha_cut_parallel(cards.1, cards.2, cards.0, Game::Grand, Player::Declarer);
         
-        let result = Solver::solve_with_skat_parallel_brute_force(cards.1, cards.2, cards.0, Game::Grand, Player::Declarer);
-
         let mut best_value = 0;
         for card in result.all_skats {
             best_value = max(best_value, card.value);
@@ -84,6 +84,7 @@ pub fn sample_farbe_declarer_tt_dd(number_of_samples: usize) -> std::io::Result<
             result.counters.collisions,
             (result.counters.collisions as f32)/(result.counters.iters as f32)*1000.,
             best_value,
+            // result.best_skat.unwrap().value,
             cards.0.__str(),
             cards.1.__str(),
             cards.2.__str()

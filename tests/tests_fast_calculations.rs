@@ -62,8 +62,8 @@ fn ten_tricks() { assert_solution(problems::ten_tricks()); }
 
 fn assert_solution((p, s): (Problem, u8)) {
     let now = Instant::now();
-    let mut solver = Solver::new(p);    
-    let res = solver.solve_double_dummy();
+    let mut solver = Solver::new(p, None);    
+    let res = solver.solve_double_dummy(0, 120, 5);
 
     assert_eq!(res.best_value, s);
     let elapsed = now.elapsed();

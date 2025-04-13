@@ -12,7 +12,7 @@ fn playout () {
     let now = Instant::now();
     let problem_set = problems::null_2();
 
-    let mut solver = Solver::new(problem_set.0);
+    let mut solver = Solver::new(problem_set.0, None);
 
     let result = solver.playout();
 
@@ -51,7 +51,7 @@ fn playout_all_cards () {
     let now = Instant::now();
     let pset = problems::ten_tricks();
 
-    let mut solver = Solver::new(pset.0);
+    let mut solver = Solver::new(pset.0, None);
 
     let res = solver.playout_all_cards();
 

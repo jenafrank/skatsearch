@@ -18,7 +18,7 @@ impl Estimator {
         let mut sum: f32 = 0.0;
         for i in 0..self.sample_size {
             let concrete_problem = self.uproblem.generate_concrete_problem();                        
-            let mut solver = Solver::new(concrete_problem);
+            let mut solver = Solver::new(concrete_problem, None);
             let search_result = solver.solve_win();
 
             if info {
@@ -40,7 +40,7 @@ impl Estimator {
         
         for i in 0..self.sample_size {
             let concrete_problem = self.uproblem.generate_concrete_problem();                        
-            let mut solver = Solver::new(concrete_problem);
+            let mut solver = Solver::new(concrete_problem, None);
             let x = self.uproblem.threshold_upper();
             let search_result = solver.solve_all_cards(x-1, x);
             let mut local_dict = HashMap::new(); 

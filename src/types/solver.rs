@@ -11,7 +11,10 @@ pub struct Solver {
     pub tt: TtTable
 }
 impl Solver {
-    pub fn new(concrete_problem: Problem) -> Solver {
-        Solver {problem: concrete_problem, tt: TtTable::new()}
+    pub fn new(concrete_problem: Problem, tt: Option<TtTable>) -> Solver {
+        Solver {
+            problem: concrete_problem,
+            tt: tt.unwrap_or_else(TtTable::new), // Verwende die gegebene TtTable oder erstelle eine neue
+        }
     }
 }

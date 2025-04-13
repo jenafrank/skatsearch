@@ -35,7 +35,7 @@ pub fn null_1_debug() {
 
 fn assert_solution_null((p, s): (Problem, u8)) {
     let now = Instant::now();
-    let mut solver = Solver::new(p);    
+    let mut solver = Solver::new(p, None);    
     let res = solver.solve_win();
 
     let elapsed = now.elapsed();

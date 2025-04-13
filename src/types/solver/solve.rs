@@ -4,6 +4,7 @@ use super::retargs::SolveRet;
 use super::retargs::SolveWithSkatRet;
 use super::retargs::SolveWithSkatRetLine;
 use super::retargs::SolveWinRet;
+use crate::consts::bitboard::JACKOFCLUBS;
 use crate::traits::Augen;
 use crate::traits::Bitboard;
 use crate::types::counter::Counters;
@@ -11,6 +12,10 @@ use crate::types::game::Game;
 use crate::types::player::Player;
 use crate::types::problem::Problem;
 use crate::types::state::State;
+use crate::types::tt_table::TtTable;
+use rayon::prelude::*; 
+use std::sync::{Arc, Mutex};
+use std::sync::atomic::{AtomicBool, Ordering};
 
 
 /// Analyses a twelve-card hand during the task of putting away two cards (Skat) before
@@ -25,50 +30,70 @@ use crate::types::state::State;
 /// in the basic search routines.
 impl Solver {
 
-    pub fn solve_with_skat_parallel_brute_force(
+    pub fn solve_with_skat_alpha_cut_parallel(
         left_cards: u32,
         right_cards: u32,
         declarer_cards: u32,
         game: Game,
-        first_player: Player
+        first_player: Player,
     ) -> SolveWithSkatRet {
-
-        let mut ret: SolveWithSkatRet = SolveWithSkatRet {
-            best_skat: None,
-            all_skats: Vec::new(),
-            counters: Counters::new(),
-        };
-
+        
         let skat = !(left_cards | right_cards | declarer_cards);
         let cards12 = skat | declarer_cards;
-        let cards12_array = cards12.__decompose_twelve();        
+        let cards12_array = cards12.__decompose_twelve();
         let skat_combinations = Solver::generate_skat_combinations(&cards12_array);
-
-        for (skat_card_1, skat_card_2) in skat_combinations {
-
+    
+        let best_skat: Arc<Mutex<Option<SolveWithSkatRetLine>>> = Arc::new(Mutex::new(None));
+        let all_skats: Arc<Mutex<Vec<SolveWithSkatRetLine>>> = Arc::new(Mutex::new(Vec::new()));
+        let game_alpha: Arc<Mutex<u8>> = Arc::new(Mutex::new(0));
+        let tt: Arc<Mutex<TtTable>> = Arc::new(Mutex::new(TtTable::new()));
+    
+        skat_combinations.into_par_iter().for_each(|(skat_card_1, skat_card_2)| {           
+    
             let current_drueckung = skat_card_1 | skat_card_2;
-            let skat_value = current_drueckung.__get_value();            
+            let skat_value = current_drueckung.__get_value();
             let current_declarer_cards = cards12 ^ current_drueckung;
+    
+            let current_problem = Problem::create(
+                current_declarer_cards,
+                left_cards,
+                right_cards,
+                game,
+                first_player,
+            );
+            
+            let mut solver = Solver::new(current_problem, Some(tt.lock().unwrap().clone()));
+            // let mut solver = Solver::new(current_problem, None);
+            let current_game_alpha = game_alpha.lock().unwrap().clone();
+            let mut current_alpha = 0;
+            if current_game_alpha > skat_value { current_alpha = current_game_alpha - skat_value; }
+            let solution = solver.solve_double_dummy(current_alpha, 120, 5);
+            
+            let game_value = solution.best_value + skat_value;                
+            let skat_ret_line = SolveWithSkatRetLine {
+              skat_card_1,
+              skat_card_2,
+              value: game_value,
+            };            
+    
+            all_skats.lock().unwrap().push(skat_ret_line.clone());
+    
+            if game_value > game_alpha.lock().unwrap().clone() {                
+                *game_alpha.lock().unwrap() = game_value; 
+                *best_skat.lock().unwrap() = Some(skat_ret_line);               
+            }
 
-            let current_problem = Problem::create(current_declarer_cards, left_cards, right_cards, game, first_player);
-            let mut solver = Solver::new(current_problem);
-
-            let solution = solver.solve_double_dummy();
-            let game_value = solution.best_value + skat_value;
-
-            ret.all_skats.push(SolveWithSkatRetLine {
-                skat_card_1,
-                skat_card_2,
-                value: game_value,
-            });
-
-            let mut dummy = 0;
-            Solver::update_best_skat(&mut ret, skat_card_1, skat_card_2, game_value, &mut dummy);
+            tt.lock().unwrap().add_entries(solver.tt);
+        });
+    
+        let best_skat_result = best_skat.lock().unwrap().clone();
+        let all_skats_result = all_skats.lock().unwrap().clone();
+    
+        SolveWithSkatRet {            
+            best_skat: best_skat_result,
+            all_skats: all_skats_result,
+            counters: Counters::get(),
         }
-
-        ret.counters = Counters::get();
-
-        ret
     }
 
     pub fn solve_with_skat(
@@ -146,14 +171,16 @@ impl Solver {
             }
         } else if is_winning_only {
             if alpha >= 61 {
-                return 0; // Early return, value doesn't matter
+                return 0; // Early return, value doesnt matter
             }
             current_game_state.alpha = 60 - skat_value;
             current_game_state.beta = current_game_state.alpha + 1;
         }
 
-        let result = self.problem.search(&current_game_state, &mut self.tt);
-        result.1 + skat_value
+        // let result = self.problem.search(&current_game_state, &mut self.tt);
+        let result = self.solve_double_dummy(current_game_state.alpha, current_game_state.beta, 5);
+        // result.1 + skat_value
+        result.best_value + skat_value
     }
 
     fn update_best_skat(        
@@ -177,8 +204,8 @@ impl Solver {
 impl Solver {
 
     /// Investigates all legal moves for a given state and returns an option array
-    /// with 0) card under investigation 1) follow-up card from tree search (tree root) and
-    /// 2) value of search
+    /// with 0. card under investigation 1. follow-up card from tree search (tree root) and
+    /// 2. value of search
     pub fn solve_all_cards(&mut self, alpha: u8, beta: u8) -> SolveAllCardsRet {
         let initial_state = State::create_initial_state_from_problem(&self.problem);        
         self.get_all_cards(initial_state, alpha, beta)
@@ -251,19 +278,23 @@ impl Solver {
 
     // unclear, if the right best card is determined. complicated. in search routine we should
     // identify, if any best card has been detected so far
-    pub fn solve_double_dummy(&mut self) -> SolveRet {
-        let mut result = (0u32, 0u8);
-        let mdf = 5u8;
-
-        for i in 0..119 {
+    pub fn solve_double_dummy(&mut self, alpha: u8, beta: u8, width: u8) -> SolveRet {
+        let mut result = (0u32, 0u8);        
+        
+        let mut current_alpha = alpha;
+        while current_alpha < beta {
+            let current_beta = std::cmp::min(current_alpha + width, beta);
+            
             let mut state = State::create_initial_state_from_problem(&self.problem);
-            state.alpha = mdf * i;
-            state.beta = mdf * (i + 1);
+            state.alpha = current_alpha;
+            state.beta = current_beta;
             result = self.problem.search(&state, &mut self.tt);
 
-            if result.1 < state.beta {
+            if result.1 < current_beta {
                 break;
             }
+            
+            current_alpha = current_beta;
         }
 
         SolveRet { best_card: result.0, best_value: result.1, counters: Counters::get() }
@@ -300,7 +331,7 @@ mod tests {
         .threshold(14)
         .build();
 
-        let mut solver = Solver::new(problem);
+        let mut solver = Solver::new(problem, None);
         let result = solver.solve_win();
 
         assert_eq!(result.declarer_wins, true);
@@ -315,7 +346,7 @@ mod tests {
         .trick(SPADES, "SA")
         .build();
 
-        let mut solver = Solver::new(problem);
+        let mut solver = Solver::new(problem, None);
         let result = solver.solve_win();
 
         assert_eq!(result.declarer_wins, true);

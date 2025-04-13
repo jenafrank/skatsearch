@@ -33,6 +33,7 @@ pub struct SolveAllLineRetArgs {
     pub value: u8
 }
 
+#[derive(Clone, Copy)]
 pub struct SolveWithSkatRetLine {
     pub skat_card_1: u32,
     pub skat_card_2: u32,

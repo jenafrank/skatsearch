@@ -4,6 +4,7 @@ use super::tt_flag::TtFlag;
 
 pub mod implementation;
 
+#[derive(Clone)]
 pub struct TtTable {
     pub data: Vec<TtEntry>
 }
@@ -30,6 +31,22 @@ impl TtTable {
         }
 
         x
+    }
+
+    pub fn add_entries(&mut self, other: TtTable) {
+        for i in 0..TT_SIZE {
+            if !self.data[i].occupied && other.data[i].occupied {
+                self.data[i].occupied = true;
+                self.data[i].player = other.data[i].player;
+                self.data[i].left_cards = other.data[i].left_cards;
+                self.data[i].right_cards = other.data[i].right_cards;
+                self.data[i].declarer_cards = other.data[i].declarer_cards;
+                self.data[i].trick_cards = other.data[i].trick_cards;
+                self.data[i].value = other.data[i].value;
+                self.data[i].flag = other.data[i].flag;
+                self.data[i].bestcard = other.data[i].bestcard;
+            }
+        }
     }
 }
 

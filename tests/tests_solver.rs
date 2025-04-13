@@ -11,7 +11,7 @@ mod problems;
 fn solve_all_cards () {
     let now = Instant::now();
     let pset = problems::null_shrinked_1();
-    let mut solver = Solver::new(pset.0);
+    let mut solver = Solver::new(pset.0, None);
 
     let res = solver.solve_all_cards(0, 120);
 
@@ -34,7 +34,7 @@ fn solve_all_cards () {
 pub fn solve_win_10tricks () {
     let pset = problems::ten_tricks();
     
-    let mut solver = Solver::new(pset.0);
+    let mut solver = Solver::new(pset.0, None);
 
     let start = Instant::now();
     let result = solver.solve_win_10tricks();
@@ -51,7 +51,7 @@ pub fn solve_win_10tricks () {
 #[ignore]
 #[test]
 pub fn solve_with_skat () {
-    let mut solver = Solver::new(problems::ten_tricks().0);
+    let mut solver = Solver::new(problems::ten_tricks().0, None);
     
     let start = Instant::now();
     let result = solver.solve_with_skat(false,false);
