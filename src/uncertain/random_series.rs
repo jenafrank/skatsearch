@@ -9,9 +9,12 @@ use crate::types::tt_table::TtTable;
 use rand::rngs::StdRng;
 use rand::seq::SliceRandom;
 use rand::SeedableRng;
+use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use std::cmp::max;
 use std::fs::File;
 use std::io::Write;
+use std::sync::atomic::{AtomicU32, Ordering};
+use std::sync::{Arc, Mutex};
 use std::time::Instant;
 
 pub fn sample_farbe_declarer_tt(number_of_samples: usize) -> std::io::Result<()> {
@@ -47,6 +50,80 @@ pub fn sample_farbe_declarer_tt(number_of_samples: usize) -> std::io::Result<()>
             result.1 + p.get_skat().__get_value()
         ))?;
     }
+
+    Ok(())
+}
+
+pub fn sample_farbe_declarer_tt_dd_parallel(number_of_samples: usize) -> std::io::Result<()> {
+    // Datei und Zähler in einen Arc/Mutex packen, um den gemeinsamen Zugriff zu schützen.
+    let file = Arc::new(Mutex::new(File::create("data.txt")?));
+    let total_wins = Arc::new(AtomicU32::new(0));
+    let allnow = Instant::now();
+
+    // Parallel Iteration: Hier wird der Range in einen Paralleliterator umgewandelt.
+    (0..number_of_samples).into_par_iter().for_each(|i| {
+        // Es ist sinnvoll, jedem Iterationsschritt einen leicht unterschiedlichen Seed zu geben,
+        // um identische Zufallszahlen in allen Threads zu vermeiden.
+        let mut local_rng = StdRng::seed_from_u64(223 + i as u64);
+        let cards = get_random_card_distribution_with_seed(&mut local_rng);
+        let now = Instant::now();
+
+        let p = Problem::create(cards.0, cards.1, cards.2, Game::Grand, Player::Declarer);
+        let mut solver = Solver::new(p, None);
+
+        let result = solver.solve_with_skat(true, true);
+
+        // Ermitteln Sie den besten Wert aus dem Ergebnis.
+        let best_value = result.all_skats
+            .iter()
+            .map(|card| card.value)
+            .max()
+            .unwrap_or(0);
+
+        // Erhöhen Sie den Gewinnzähler, falls der Wert eine bestimmte Grenze überschreitet.
+        if best_value >= 61 {
+            total_wins.fetch_add(1, Ordering::SeqCst);
+        }
+        let wins = total_wins.load(Ordering::SeqCst);
+
+        // Formatieren Sie den Fortschritts-String.
+        let progress_line = format!(
+            "{} -- {:8} ms - {:5} ms {:9} | {:9} iters/colls - {:7.2} {:6} pnts | D: {} L: {} R: {}",
+            wins,
+            allnow.elapsed().as_millis(),
+            now.elapsed().as_millis(),
+            result.counters.iters,
+            result.counters.collisions,
+            (result.counters.collisions as f32) / (result.counters.iters as f32) * 1000.0,
+            best_value,
+            cards.0.__str(),
+            cards.1.__str(),
+            cards.2.__str()
+        );
+
+        // Direkte Ausgabe auf dem Bildschirm. Hier können die Ausgaben
+        // unübersichtlich werden, wenn mehrere Threads gleichzeitig schreiben.
+        println!("{}", progress_line);
+
+        // Schreiben in die Datei – schützen Sie den Zugriff mit einem Mutex.
+        {
+            let mut file = file.lock().unwrap();
+            writeln!(
+                file,
+                "{} , {:8} , {:5} , {:9} , {:9} , {:7.2} , {:6} , {} , {} , {}",
+                wins,
+                allnow.elapsed().as_millis(),
+                now.elapsed().as_millis(),
+                result.counters.iters,
+                result.counters.collisions,
+                (result.counters.collisions as f32) / (result.counters.iters as f32) * 1000.0,
+                best_value,
+                cards.0.__str(),
+                cards.1.__str(),
+                cards.2.__str()
+            ).unwrap();
+        }
+    });
 
     Ok(())
 }
