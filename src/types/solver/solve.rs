@@ -28,6 +28,14 @@ use std::sync::atomic::{AtomicBool, Ordering};
 /// * _false_ _true_: Returns some skat for which the game will be won.
 /// The routine always takes into account the value of the skat which is neglected by default
 /// in the basic search routines.
+
+#[derive(Clone, Copy)]
+pub enum AccelerationMode {
+    NotAccelerating,
+    AlphaBetaAccelerating,
+    WinningOnly,
+}
+
 impl Solver {
 
     pub fn solve_with_skat_alpha_cut_parallel(
@@ -103,17 +111,30 @@ impl Solver {
     }
 
     pub fn solve_with_skat(
-        &mut self,
-        is_alpha_beta_accelerating: bool,
-        is_winning_only: bool,
+        left_cards: u32,
+        right_cards: u32,
+        declarer_cards: u32,
+        game: Game,
+        start_player: Player,
+        accelerating_mode: AccelerationMode,
     ) -> SolveWithSkatRet {
+
         let mut ret: SolveWithSkatRet = SolveWithSkatRet {
             best_skat: None,
             all_skats: Vec::new(),
             counters: Counters::new(),
         };
 
-        let initial_state = State::create_initial_state_from_problem(&self.problem);
+        let p = Problem::create(
+            declarer_cards, 
+            left_cards, 
+            right_cards, 
+            game, 
+            start_player);
+
+        let mut solver = Solver::new(p, None);
+
+        let initial_state = State::create_initial_state_from_problem(&solver.problem);
         let skatcards_bitmask = !initial_state.get_all_unplayed_cards();
         let twelve_cards_bitmask = skatcards_bitmask | initial_state.declarer_cards;
         let twelve_cards = twelve_cards_bitmask.__decompose_twelve();
@@ -129,12 +150,11 @@ impl Solver {
             
             let player_hand_bitmask = twelve_cards_bitmask ^ skat_bitmask;
 
-            self.problem.set_declarer_cards(player_hand_bitmask);
+            solver.problem.set_declarer_cards(player_hand_bitmask);
 
-            let game_value = self.evaluate_skat_combination(                
+            let game_value = solver.evaluate_skat_combination(                
                 skat_value,
-                is_alpha_beta_accelerating,
-                is_winning_only,
+                accelerating_mode,
                 alpha,
                 &mut ret.counters
             );
@@ -164,31 +184,34 @@ impl Solver {
     fn evaluate_skat_combination(
         &mut self,
         skat_value: u8,
-        is_alpha_beta_accelerating: bool,
-        is_winning_only: bool,
+        mode: AccelerationMode,
         alpha: u8,
-        cnt: &mut Counters
+        cnt: &mut Counters,
     ) -> u8 {
         let mut current_game_state = State::create_initial_state_from_problem(&self.problem);
-
-        if is_alpha_beta_accelerating {
-            if alpha > skat_value {
-                current_game_state.alpha = alpha - skat_value;
-            }
-        } else if is_winning_only {
-            if alpha >= 61 {
-                return 0; // Early return, value doesnt matter
-            }
-            current_game_state.alpha = 60 - skat_value;
-            current_game_state.beta = current_game_state.alpha + 1;
+    
+        match mode {
+            AccelerationMode::AlphaBetaAccelerating => {
+                if alpha > skat_value {
+                    current_game_state.alpha = alpha - skat_value;
+                }
+            },
+            AccelerationMode::WinningOnly => {
+                if alpha >= 61 {
+                    return 0; // Early return, Wert spielt hier keine Rolle
+                }
+                current_game_state.alpha = 60 - skat_value;
+                current_game_state.beta = current_game_state.alpha + 1;
+            },
+            AccelerationMode::NotAccelerating => {
+                // Hier erfolgt keine Änderung an current_game_state
+            },
         }
-
-        // let result = self.problem.search(&current_game_state, &mut self.tt);
-        let result = self.solve_double_dummy(current_game_state.alpha, current_game_state.beta, 5);
-
+    
+        let result = self.solve_double_dummy(current_game_state.alpha, current_game_state.beta, 1);
+    
         cnt.add(result.counters);
-
-        // result.1 + skat_value
+    
         result.best_value + skat_value
     }
 
@@ -207,7 +230,7 @@ impl Solver {
             });
             *alpha = game_value;
         }
-    }
+    }  
 }
 
 impl Solver {

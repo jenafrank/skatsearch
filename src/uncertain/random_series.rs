@@ -3,6 +3,7 @@ use crate::types::counter::Counters;
 use crate::types::game::Game;
 use crate::types::player::Player;
 use crate::types::problem::Problem;
+use crate::types::solver::solve::AccelerationMode;
 use crate::types::solver::Solver;
 use crate::types::state::State;
 use crate::types::tt_table::TtTable;
@@ -56,22 +57,22 @@ pub fn sample_farbe_declarer_tt(number_of_samples: usize) -> std::io::Result<()>
 
 pub fn sample_farbe_declarer_tt_dd_parallel(number_of_samples: usize) -> std::io::Result<()> {
     // Datei und Zähler in einen Arc/Mutex packen, um den gemeinsamen Zugriff zu schützen.
-    let file = Arc::new(Mutex::new(File::create("data.txt")?));
+    let file = Arc::new(Mutex::new(File::create("data_par.txt")?));
     let total_wins = Arc::new(AtomicU32::new(0));
     let allnow = Instant::now();
+    let distros = get_random_card_distros(number_of_samples);
 
     // Parallel Iteration: Hier wird der Range in einen Paralleliterator umgewandelt.
-    (0..number_of_samples).into_par_iter().for_each(|i| {
-        // Es ist sinnvoll, jedem Iterationsschritt einen leicht unterschiedlichen Seed zu geben,
-        // um identische Zufallszahlen in allen Threads zu vermeiden.
-        let mut local_rng = StdRng::seed_from_u64(223 + i as u64);
-        let cards = get_random_card_distribution_with_seed(&mut local_rng);
+    distros.into_par_iter().for_each(|(declarer_cards, left_cards, right_cards)| {        
+        
         let now = Instant::now();
-
-        let p = Problem::create(cards.0, cards.1, cards.2, Game::Grand, Player::Declarer);
-        let mut solver = Solver::new(p, None);
-
-        let result = solver.solve_with_skat(true, true);
+        let result = Solver::solve_with_skat(
+            left_cards, 
+            right_cards, 
+            declarer_cards, 
+            Game::Grand, 
+            Player::Declarer,
+        AccelerationMode::AlphaBetaAccelerating);
 
         // Ermitteln Sie den besten Wert aus dem Ergebnis.
         let best_value = result.all_skats
@@ -88,7 +89,7 @@ pub fn sample_farbe_declarer_tt_dd_parallel(number_of_samples: usize) -> std::io
 
         // Formatieren Sie den Fortschritts-String.
         let progress_line = format!(
-            "{} -- {:8} ms - {:5} ms {:9} | {:9} iters/colls - {:7.2} {:6} pnts | D: {} L: {} R: {}",
+            "{:2} -- {:8} ms - {:5} ms {:9} | {:9} iters/colls - {:7.2} {:6} pnts | D: {} L: {} R: {}",
             wins,
             allnow.elapsed().as_millis(),
             now.elapsed().as_millis(),
@@ -96,9 +97,9 @@ pub fn sample_farbe_declarer_tt_dd_parallel(number_of_samples: usize) -> std::io
             result.counters.collisions,
             (result.counters.collisions as f32) / (result.counters.iters as f32) * 1000.0,
             best_value,
-            cards.0.__str(),
-            cards.1.__str(),
-            cards.2.__str()
+            declarer_cards.__str(),
+            left_cards.__str(),
+            right_cards.__str()
         );
 
         // Direkte Ausgabe auf dem Bildschirm. Hier können die Ausgaben
@@ -110,7 +111,7 @@ pub fn sample_farbe_declarer_tt_dd_parallel(number_of_samples: usize) -> std::io
             let mut file = file.lock().unwrap();
             writeln!(
                 file,
-                "{} , {:8} , {:5} , {:9} , {:9} , {:7.2} , {:6} , {} , {} , {}",
+                "{:2} , {:8} , {:5} , {:9} , {:9} , {:7.2} , {:6} , {} , {} , {}",
                 wins,
                 allnow.elapsed().as_millis(),
                 now.elapsed().as_millis(),
@@ -118,9 +119,9 @@ pub fn sample_farbe_declarer_tt_dd_parallel(number_of_samples: usize) -> std::io
                 result.counters.collisions,
                 (result.counters.collisions as f32) / (result.counters.iters as f32) * 1000.0,
                 best_value,
-                cards.0.__str(),
-                cards.1.__str(),
-                cards.2.__str()
+                declarer_cards.__str(),
+                left_cards.__str(),
+                right_cards.__str()
             ).unwrap();
         }
     });
@@ -130,20 +131,21 @@ pub fn sample_farbe_declarer_tt_dd_parallel(number_of_samples: usize) -> std::io
 
 pub fn sample_farbe_declarer_tt_dd(number_of_samples: usize) -> std::io::Result<()> {
     let mut file = File::create(r"data.txt")?;
-    let mut rand = StdRng::seed_from_u64(223);
+    
     let mut total_wins:u32 = 0;
     let allnow = Instant::now();
+    let distros = get_random_card_distros(number_of_samples);
 
-    for _ in 0..number_of_samples {
-        let cards = get_random_card_distribution_with_seed(&mut rand);        
-        let now = Instant::now();        
+    for (declarer_cards, left_cards, right_cards) in distros {
         
-        let p = Problem::create(cards.0, cards.1, cards.2, Game::Grand, Player::Declarer);
-        let mut solver = Solver::new(p, None);
-        
-        let result = solver.solve_with_skat(true, true);        
-                       
-        // let result = Solver::solve_with_skat_alpha_cut_parallel(cards.1, cards.2, cards.0, Game::Grand, Player::Declarer);
+        let now = Instant::now();                        
+        let result = Solver::solve_with_skat(
+            left_cards, 
+            right_cards, 
+            declarer_cards, 
+            Game::Grand, 
+            Player::Declarer, 
+            AccelerationMode::WinningOnly);       
         
         let mut best_value = 0;
         for card in result.all_skats {
@@ -153,7 +155,7 @@ pub fn sample_farbe_declarer_tt_dd(number_of_samples: usize) -> std::io::Result<
         total_wins += if best_value >= 61 { 1 } else { 0 };
 
         println!(
-            "{} -- {:8} ms - {:5} ms {:9} | {:9} iters/colls - {:7.2} {:6} pnts | D: {} L: {} R: {}",
+            "{:2} -- {:8} ms - {:5} ms {:9} | {:9} iters/colls - {:7.2} {:6} pnts | D: {} L: {} R: {}",
             total_wins,
             allnow.elapsed().as_millis(),
             now.elapsed().as_millis(),
@@ -162,13 +164,13 @@ pub fn sample_farbe_declarer_tt_dd(number_of_samples: usize) -> std::io::Result<
             (result.counters.collisions as f32)/(result.counters.iters as f32)*1000.,
             best_value,
             // result.best_skat.unwrap().value,
-            cards.0.__str(),
-            cards.1.__str(),
-            cards.2.__str()
+            declarer_cards.__str(),
+            left_cards.__str(),
+            right_cards.__str()
         );
 
         file.write_fmt(format_args!(
-            "{} , {:8} , {:5} , {:9}, {:9}, {:7.2}, {:6}, {}, {}, {} \n",
+            "{:2} , {:8} , {:5} , {:9}, {:9}, {:7.2}, {:6}, {}, {}, {} \n",
             total_wins,
             allnow.elapsed().as_millis(),
             now.elapsed().as_millis(),
@@ -176,14 +178,27 @@ pub fn sample_farbe_declarer_tt_dd(number_of_samples: usize) -> std::io::Result<
             result.counters.collisions,
             (result.counters.collisions as f32)/(result.counters.iters as f32)*1000.,
             best_value,
-            cards.0.__str(),
-            cards.1.__str(),
-            cards.2.__str()
+            declarer_cards.__str(),
+            left_cards.__str(),
+            right_cards.__str()
         ))?;
     }
 
     Ok(())
 }
+
+fn get_random_card_distros(N: usize) -> Vec<(u32, u32, u32)> {
+    let mut rand = StdRng::seed_from_u64(223);
+    let mut ret = Vec::<(u32, u32, u32)>::new();
+
+    for _ in 0..N {
+        let cards = get_random_card_distribution_with_seed(&mut rand);   
+        ret.push(cards);
+    }
+
+    ret    
+}
+
 
 pub fn get_random_card_distribution_with_seed(rand: &mut StdRng) -> (u32, u32, u32) {
     let mut vec: Vec<usize> = (0..32).collect();

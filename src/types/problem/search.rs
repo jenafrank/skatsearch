@@ -17,7 +17,7 @@ impl GameStrategy {
     fn evaluate(&self, a: u8, b: u8, player: Player) -> bool {
         match self {
             GameStrategy::Standard => (player == Player::Declarer && a > b) || (player != Player::Declarer && a < b),
-            GameStrategy::Null => (player == Player::Declarer && a < b) || (player != Player::Declarer && a > b),
+            GameStrategy::Null     => (player == Player::Declarer && a < b) || (player != Player::Declarer && a > b),
         }
     }
 
@@ -37,7 +37,7 @@ impl Problem {
 
         let strategy = match self.game_type {
             Game::Null => GameStrategy::Null,
-            _ => GameStrategy::Standard,
+            _          => GameStrategy::Standard,
         };
  
         // BASIC: Termination of recursive search
@@ -202,6 +202,7 @@ fn transposition_table_write(
 fn shrink_alpha_beta_window(player: Player, alpha: &mut u8, beta: &mut u8, child_state_value: u8, game: Game) -> bool {
 
     match game {
+
         Game::Null => {
             match player {
                 Player::Declarer => {
@@ -218,6 +219,7 @@ fn shrink_alpha_beta_window(player: Player, alpha: &mut u8, beta: &mut u8, child
                 }
             }
         }
+        
         _ => {
             match player {
                 Player::Declarer => {
