@@ -80,3 +80,21 @@ pub struct AllGames {
     pub null: u8,
     pub null_hand: u8
 }
+impl AllGames {
+    pub(crate) fn default() -> AllGames {
+        AllGames {
+            eichel_farbe: 123,
+            gruen_farbe: 123,
+            herz_farbe: 123,
+            schell_farbe: 123,
+            eichel_hand: 123,
+            gruen_hand: 123,
+            herz_hand: 123,
+            schell_hand: 123,
+            grand: 123,
+            grand_hand: 123,
+            null: 123,
+            null_hand: 123,
+        }
+    }
+}

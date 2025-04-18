@@ -198,15 +198,20 @@ pub fn allgames(number_of_samples: usize) -> std::io::Result<()> {
         
         let now = Instant::now();
         let skat = ALLCARDS ^ declarer_cards ^ left_cards ^ right_cards;
-        let values = Solver::calc_all_games(left_cards, right_cards, declarer_cards, Player::Declarer);
+        let res = Solver::calc_all_games(left_cards, right_cards, declarer_cards, Player::Declarer);
 
-        println!("Declarer  : {}", declarer_cards.__str());
-        println!("Left      : {}", left_cards.__str());
-        println!("Right     : {}", right_cards.__str());
-        println!("Skat      : {}", skat.__str());
-        println!("            {:4} | {:4} | {:4} | {:4} | {:4} | {:4} ","Eich","Grue","Herz","Sche","Grnd","Null");
-        println!(" Mit Skat : {:4} | {:4} | {:4} | {:4} | {:4} | {:4} ",values.eichel_farbe, values.gruen_farbe, values.herz_farbe, values.schell_farbe, values.grand, values.null);
-        println!("     Hand : {:4} | {:4} | {:4} | {:4} | {:4} | {:4} ",values.eichel_hand, values.gruen_hand, values.herz_hand, values.schell_hand, values.grand_hand, values.null_hand);
+        match res {
+            Ok(values) => {
+                println!("Declarer  : {}", declarer_cards.__str());
+                println!("Left      : {}", left_cards.__str());
+                println!("Right     : {}", right_cards.__str());
+                println!("Skat      : {}", skat.__str());
+                println!("            {:4} | {:4} | {:4} | {:4} | {:4} | {:4} ","Eich","Grue","Herz","Sche","Grnd","Null");
+                println!(" Mit Skat : {:4} | {:4} | {:4} | {:4} | {:4} | {:4} ",values.eichel_farbe, values.gruen_farbe, values.herz_farbe, values.schell_farbe, values.grand, values.null);
+                println!("     Hand : {:4} | {:4} | {:4} | {:4} | {:4} | {:4} ",values.eichel_hand, values.gruen_hand, values.herz_hand, values.schell_hand, values.grand_hand, values.null_hand);
+            },
+            Err(_) => todo!(),
+        }
     }
 
     Ok(())
