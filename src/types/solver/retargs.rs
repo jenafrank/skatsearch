@@ -64,4 +64,19 @@ impl Default for PlayoutAllCardsRetLine {
      }
 }
 
- 
+pub struct AllGames {
+    pub eichel_farbe: u8,
+    pub gruen_farbe: u8,
+    pub herz_farbe: u8,
+    pub schell_farbe: u8,
+    pub eichel_hand: u8,
+    pub gruen_hand: u8,
+    pub herz_hand: u8,
+    pub schell_hand: u8,
+
+    pub grand: u8,
+    pub grand_hand: u8,
+
+    pub null: u8,
+    pub null_hand: u8
+}

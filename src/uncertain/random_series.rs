@@ -1,9 +1,10 @@
+use crate::consts::bitboard::ALLCARDS;
 use crate::traits::{Augen, StringConverter};
 use crate::types::counter::Counters;
 use crate::types::game::Game;
 use crate::types::player::Player;
 use crate::types::problem::Problem;
-use crate::types::solver::solve::AccelerationMode;
+use crate::types::solver::withskat::acceleration_mode::AccelerationMode;
 use crate::types::solver::Solver;
 use crate::types::state::State;
 use crate::types::tt_table::TtTable;
@@ -187,11 +188,35 @@ pub fn sample_farbe_declarer_tt_dd(number_of_samples: usize) -> std::io::Result<
     Ok(())
 }
 
-fn get_random_card_distros(N: usize) -> Vec<(u32, u32, u32)> {
+pub fn allgames(number_of_samples: usize) -> std::io::Result<()> {
+    let mut file = File::create(r"data_allgames.txt")?;
+    
+    let allnow = Instant::now();
+    let distros = get_random_card_distros(number_of_samples);
+
+    for (declarer_cards, left_cards, right_cards) in distros {
+        
+        let now = Instant::now();
+        let skat = ALLCARDS ^ declarer_cards ^ left_cards ^ right_cards;
+        let values = Solver::calc_all_games(left_cards, right_cards, declarer_cards, Player::Declarer);
+
+        println!("Declarer  : {}", declarer_cards.__str());
+        println!("Left      : {}", left_cards.__str());
+        println!("Right     : {}", right_cards.__str());
+        println!("Skat      : {}", skat.__str());
+        println!("            {:4} | {:4} | {:4} | {:4} | {:4} | {:4} ","Eich","Grue","Herz","Sche","Grnd","Null");
+        println!(" Mit Skat : {:4} | {:4} | {:4} | {:4} | {:4} | {:4} ",values.eichel_farbe, values.gruen_farbe, values.herz_farbe, values.schell_farbe, values.grand, values.null);
+        println!("     Hand : {:4} | {:4} | {:4} | {:4} | {:4} | {:4} ",values.eichel_hand, values.gruen_hand, values.herz_hand, values.schell_hand, values.grand_hand, values.null_hand);
+    }
+
+    Ok(())
+}
+
+fn get_random_card_distros(number_of_distros: usize) -> Vec<(u32, u32, u32)> {
     let mut rand = StdRng::seed_from_u64(223);
     let mut ret = Vec::<(u32, u32, u32)>::new();
 
-    for _ in 0..N {
+    for _ in 0..number_of_distros {
         let cards = get_random_card_distribution_with_seed(&mut rand);   
         ret.push(cards);
     }

@@ -5,6 +5,8 @@ pub mod playout_row;
 pub mod playout;
 pub mod get;
 pub mod retargs;
+pub mod withskat;
+pub mod allgames;
 
 pub struct Solver {
     pub problem: Problem,

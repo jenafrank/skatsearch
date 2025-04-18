@@ -2,6 +2,7 @@ extern crate skat_aug23;
 
 use std::time::Instant;
 use skat_aug23::traits::{StringConverter, Augen};
+use skat_aug23::types::solver::withskat::acceleration_mode::AccelerationMode;
 use skat_aug23::types::solver::Solver;
 
 mod problems;
@@ -51,20 +52,26 @@ pub fn solve_win_10tricks () {
 #[ignore]
 #[test]
 pub fn solve_with_skat () {
-    let mut solver = Solver::new(problems::ten_tricks().0, None);
+    let (p, _) = problems::ten_tricks();
     
     let start = Instant::now();
-    let result = solver.solve_with_skat(false,false);
-    let time = start.elapsed().as_micros();
+    let result = Solver::solve_with_skat(
+        p.left_cards(), 
+        p.right_cards(),
+        p.declarer_cards(), 
+        p.game_type(), 
+        p.start_player(),
+        AccelerationMode::NotAccelerating
+    );
 
+    let time = start.elapsed().as_micros();
     let mut vec = result.all_skats;
     vec.sort_by(|a,b| b.value.cmp(&a.value));
 
     println!("Consumed time: {} µs",time);
     println!();
 
-    println!("All twelve cards:");
-    let p = &solver.problem;
+    println!("All twelve cards:");    
     let allcards: u32 = (!0u32) ^ p.left_cards() ^ p.right_cards();
     let skat: u32 = (!0u32) ^ p.left_cards() ^ p.right_cards() ^ p.declarer_cards();
     println!("{} | {}", p.declarer_cards().__str() , skat.__str());

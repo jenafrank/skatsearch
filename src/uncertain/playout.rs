@@ -19,6 +19,7 @@ impl Estimator {
         
         // advance situation
         
+        /* 
         let second_uproblem = initial_problem.advance(best_card);        
 
         println!("Start calculating 2...");
@@ -28,7 +29,7 @@ impl Estimator {
         let best_card_probability = result[0].1;
 
         println!("Playing {} ({}) ...",best_card, best_card_probability);
-
+        */
 
     }
 

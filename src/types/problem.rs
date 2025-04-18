@@ -3,10 +3,15 @@ mod constructors;
 mod methods;
 mod traits;
 
+use crate::consts::bitboard::{CLUBS, DIAMONDS, HEARTS, SPADES};
+use crate::traits::Bitboard;
+
 use super::game::Game;
 use super::player::Player;
+use super::solver::allgames::ProblemTransformation;
 use super::state::{State, StatePayload};
 
+#[derive(Clone, Copy)]
 pub struct Problem {
     declarer_cards: u32,
     left_cards: u32,
@@ -52,6 +57,58 @@ impl Problem {
 
     pub fn set_trick_suit(&mut self, trick_suit: u32) {
         self.trick_suit = trick_suit;
+    }
+    
+    pub fn create_transformation(p: Problem, switch: ProblemTransformation) -> Problem {
+        let switched_declarer_cards = Problem::get_switched_cards(p.declarer_cards, switch);
+        let switched_left_cards = Problem::get_switched_cards(p.left_cards, switch);
+        let switched_right_cards = Problem::get_switched_cards(p.right_cards, switch);
+
+        Problem {
+            declarer_cards: switched_declarer_cards,
+            left_cards: switched_left_cards,
+            right_cards: switched_right_cards,
+            game_type: p.game_type,
+            start_player: p.start_player,
+            threshold_upper: p.threshold_upper,
+            trick_cards: p.trick_cards,
+            trick_suit: p.trick_suit,
+        }
+    }
+
+    fn get_switched_cards(cards: u32, switch: ProblemTransformation) -> u32 {
+
+        let shift = match switch {
+            ProblemTransformation::SpadesSwitch => 7usize,
+            ProblemTransformation::HeartsSwitch => 14usize,
+            ProblemTransformation::DiamondsSwitch => 21usize,
+        };
+
+        let switch_suit = match switch {
+            ProblemTransformation::SpadesSwitch => SPADES,
+            ProblemTransformation::HeartsSwitch => HEARTS,
+            ProblemTransformation::DiamondsSwitch => DIAMONDS,
+        };
+
+        let mut ret = 0u32;
+        let decomposed_cards = cards.__decompose();
+
+        for i in 0..decomposed_cards.1 {
+            let current_card = decomposed_cards.0[i];
+            let mut target_card = current_card;
+
+            if current_card & CLUBS > 0 {
+                target_card = target_card >> shift;
+            }
+
+            if current_card & switch_suit > 0 {
+                target_card = target_card << shift;
+            }
+
+            ret = ret ^ target_card;
+        }
+
+        ret        
     }
 
 }

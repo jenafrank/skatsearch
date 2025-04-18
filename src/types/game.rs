@@ -9,7 +9,7 @@ pub enum Game {
 }
 
 impl Game {
-    pub(crate) fn convert_to_string(&self) -> String {
+    pub fn convert_to_string(&self) -> String {
         return match self {
             Game::Farbe => { "Farbe".to_string() }
             Game::Grand => { "Grand".to_string() }

@@ -24,7 +24,7 @@ pub struct UncertainProblem {
 }
 
 impl UncertainProblem {
-    pub(crate) fn advance(&self, played_card: String) -> UncertainProblem {
+    pub fn advance(&self, played_card: String) -> UncertainProblem {
         let mut ret = self.clone();
 
         ret.print_object();

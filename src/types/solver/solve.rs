@@ -1,22 +1,11 @@
 use super::Solver;
 use super::retargs::SolveAllCardsRet;
 use super::retargs::SolveRet;
-use super::retargs::SolveWithSkatRet;
-use super::retargs::SolveWithSkatRetLine;
 use super::retargs::SolveWinRet;
-use crate::consts::bitboard::JACKOFCLUBS;
 use crate::traits::Augen;
-use crate::traits::Bitboard;
 use crate::types::counter::Counters;
 use crate::types::game::Game;
-use crate::types::player::Player;
-use crate::types::problem::Problem;
 use crate::types::state::State;
-use crate::types::tt_table::TtTable;
-use rayon::prelude::*; 
-use std::sync::{Arc, Mutex};
-use std::sync::atomic::{AtomicBool, Ordering};
-
 
 /// Analyses a twelve-card hand during the task of putting away two cards (Skat) before
 /// game starts. It analyses all 66 cases and calculating the best play for each of them
@@ -28,210 +17,6 @@ use std::sync::atomic::{AtomicBool, Ordering};
 /// * _false_ _true_: Returns some skat for which the game will be won.
 /// The routine always takes into account the value of the skat which is neglected by default
 /// in the basic search routines.
-
-#[derive(Clone, Copy)]
-pub enum AccelerationMode {
-    NotAccelerating,
-    AlphaBetaAccelerating,
-    WinningOnly,
-}
-
-impl Solver {
-
-    pub fn solve_with_skat_alpha_cut_parallel(
-        left_cards: u32,
-        right_cards: u32,
-        declarer_cards: u32,
-        game: Game,
-        first_player: Player,
-    ) -> SolveWithSkatRet {
-        
-        let skat = !(left_cards | right_cards | declarer_cards);
-        let cards12 = skat | declarer_cards;
-        let cards12_array = cards12.__decompose_twelve();
-        let skat_combinations = Solver::generate_skat_combinations(&cards12_array);
-        
-        let best_skat: Arc<Mutex<Option<SolveWithSkatRetLine>>> = Arc::new(Mutex::new(None));
-        let all_skats: Arc<Mutex<Vec<SolveWithSkatRetLine>>> = Arc::new(Mutex::new(Vec::new()));
-        let all_counters: Arc<Mutex<Vec<Counters>>> = Arc::new(Mutex::new(Vec::new()));
-
-        let game_alpha: Arc<Mutex<u8>> = Arc::new(Mutex::new(0));
-        let tt: Arc<Mutex<TtTable>> = Arc::new(Mutex::new(TtTable::new()));
-        
-        skat_combinations.into_par_iter().for_each(|(skat_card_1, skat_card_2)| {           
-            
-            let current_drueckung = skat_card_1 | skat_card_2;
-            let skat_value = current_drueckung.__get_value();
-            let current_declarer_cards = cards12 ^ current_drueckung;
-    
-            let current_problem = Problem::create(
-                current_declarer_cards,
-                left_cards,
-                right_cards,
-                game,
-                first_player,
-            );
-            
-            let mut solver = Solver::new(current_problem, Some(tt.lock().unwrap().clone()));
-            // let mut solver = Solver::new(current_problem, None);
-            let current_game_alpha = game_alpha.lock().unwrap().clone();
-            let mut current_alpha = 0;
-            if current_game_alpha > skat_value { current_alpha = current_game_alpha - skat_value; }
-            let solution = solver.solve_double_dummy(current_alpha, 120, 5);
-            
-            let game_value = solution.best_value + skat_value;                
-            let skat_ret_line = SolveWithSkatRetLine {
-              skat_card_1,
-              skat_card_2,
-              value: game_value,
-            };            
-    
-            all_skats.lock().unwrap().push(skat_ret_line.clone());
-            all_counters.lock().unwrap().push(solution.counters.clone());
-    
-            if game_value > game_alpha.lock().unwrap().clone() {                
-                *game_alpha.lock().unwrap() = game_value; 
-                *best_skat.lock().unwrap() = Some(skat_ret_line);               
-            }
-
-            tt.lock().unwrap().add_entries(solver.tt);
-        });
-    
-        let best_skat_result = best_skat.lock().unwrap().clone();
-        let all_skats_result = all_skats.lock().unwrap().clone();
-        let all_counters_result = all_counters.lock().unwrap().clone();
-
-        let acc_counter = Counters::accumulate(all_counters_result);
-    
-        SolveWithSkatRet {            
-            best_skat: best_skat_result,
-            all_skats: all_skats_result,
-            counters: acc_counter,
-        }
-    }
-
-    pub fn solve_with_skat(
-        left_cards: u32,
-        right_cards: u32,
-        declarer_cards: u32,
-        game: Game,
-        start_player: Player,
-        accelerating_mode: AccelerationMode,
-    ) -> SolveWithSkatRet {
-
-        let mut ret: SolveWithSkatRet = SolveWithSkatRet {
-            best_skat: None,
-            all_skats: Vec::new(),
-            counters: Counters::new(),
-        };
-
-        let p = Problem::create(
-            declarer_cards, 
-            left_cards, 
-            right_cards, 
-            game, 
-            start_player);
-
-        let mut solver = Solver::new(p, None);
-
-        let initial_state = State::create_initial_state_from_problem(&solver.problem);
-        let skatcards_bitmask = !initial_state.get_all_unplayed_cards();
-        let twelve_cards_bitmask = skatcards_bitmask | initial_state.declarer_cards;
-        let twelve_cards = twelve_cards_bitmask.__decompose_twelve();
-
-        let mut alpha = 0;
-
-        let skat_combinations = Solver::generate_skat_combinations(&twelve_cards);
-        
-        for (skat_card_1, skat_card_2) in skat_combinations {
-            
-            let skat_bitmask = skat_card_1 | skat_card_2;
-            let skat_value = skat_bitmask.__get_value();
-            
-            let player_hand_bitmask = twelve_cards_bitmask ^ skat_bitmask;
-
-            solver.problem.set_declarer_cards(player_hand_bitmask);
-
-            let game_value = solver.evaluate_skat_combination(                
-                skat_value,
-                accelerating_mode,
-                alpha,
-                &mut ret.counters
-            );
-
-            ret.all_skats.push(SolveWithSkatRetLine {
-                skat_card_1,
-                skat_card_2,
-                value: game_value,
-            });
-
-            Solver::update_best_skat(&mut ret, skat_card_1, skat_card_2, game_value, &mut alpha);
-        }       
-
-        ret
-    }
-
-    fn generate_skat_combinations(cards: &[u32]) -> Vec<(u32, u32)> {
-        let mut combinations = Vec::new();
-        for i in 0..11 {
-            for j in i + 1..12 {
-                combinations.push((cards[i], cards[j]));
-            }
-        }
-        combinations
-    }
-
-    fn evaluate_skat_combination(
-        &mut self,
-        skat_value: u8,
-        mode: AccelerationMode,
-        alpha: u8,
-        cnt: &mut Counters,
-    ) -> u8 {
-        let mut current_game_state = State::create_initial_state_from_problem(&self.problem);
-    
-        match mode {
-            AccelerationMode::AlphaBetaAccelerating => {
-                if alpha > skat_value {
-                    current_game_state.alpha = alpha - skat_value;
-                }
-            },
-            AccelerationMode::WinningOnly => {
-                if alpha >= 61 {
-                    return 0; // Early return, Wert spielt hier keine Rolle
-                }
-                current_game_state.alpha = 60 - skat_value;
-                current_game_state.beta = current_game_state.alpha + 1;
-            },
-            AccelerationMode::NotAccelerating => {
-                // Hier erfolgt keine Änderung an current_game_state
-            },
-        }
-    
-        let result = self.solve_double_dummy(current_game_state.alpha, current_game_state.beta, 1);
-    
-        cnt.add(result.counters);
-    
-        result.best_value + skat_value
-    }
-
-    fn update_best_skat(        
-        ret: &mut SolveWithSkatRet,
-        skat_card_1: u32,
-        skat_card_2: u32,
-        game_value: u8,
-        alpha: &mut u8,
-    ) {
-        if game_value > *alpha {
-            ret.best_skat = Some(SolveWithSkatRetLine {
-                skat_card_1,
-                skat_card_2,
-                value: game_value,
-            });
-            *alpha = game_value;
-        }
-    }  
-}
 
 impl Solver {
 
@@ -341,6 +126,55 @@ impl Solver {
     }   
 
     pub fn solve(&mut self) -> SolveRet {
+        self.solve_double_dummy(0, 120, 1)
+    }
+    
+    /// Berechnet die Doppeldummy-Lösung und addiert den Skat-Wert,
+    /// mit speziellem Mapping für Null-Spiele.
+    ///
+    /// Für Null-Spiele:
+    /// - Mappt auf 1, wenn das Spiel verloren wird (solve_double_dummy Ergebnis != 0).
+    /// - Mappt auf 0, wenn das Spiel gewonnen wird (solve_double_dummy Ergebnis == 0).
+    /// Der Skat-Wert wird für dieses Mapping ignoriert.
+    ///
+    /// Für alle anderen Spiele:
+    /// - Addiert den Skat-Wert zum Ergebnis von solve_double_dummy.
+    pub fn solve_and_add_skat(&mut self) -> SolveRet {
+        
+        // Zuerst das Kernproblem lösen.        
+        let mut ret = self.solve_double_dummy(0, 120, 1);
+
+        // Ergebnis von solve_double_dummy speichern, bevor es potenziell verändert wird
+        // oder der skat_value addiert wird. Dies macht die Null-Logik klarer.
+        let double_dummy_result = ret.best_value;
+
+        let skat_value = self.problem.get_skat().__get_value(); // Wert des Skats holen
+
+        // Spieltyp-spezifische Logik für den finalen Wert anwenden
+        match self.problem.game_type() {
+            Game::Null => {
+                // Für Null-Spiele wird das Ergebnis basierend auf dem Roh-Ergebnis gemappt.
+                // 0 Punkte im Nullspiel = Gewinn -> Mapping 0
+                // > 0 Punkte im Nullspiel = Verlust -> Mapping 1
+                if double_dummy_result == 0 {
+                    ret.best_value = 0; // Gewonnen -> 0
+                } else {
+                    ret.best_value = 1; // Verloren -> 1
+                }
+                // Der skat_value wird für die 0/1-Bewertung von Null-Spielen ignoriert.
+            }
+            // TODO: Fügen Sie hier andere Spieltypen hinzu, falls deren Logik vom Standard abweicht.
+            // Z.B. Grand, Farbe, etc.
+            _ => {
+                // Für alle anderen Spieltypen wird der Skat-Wert zum Ergebnis addiert.
+                ret.best_value = double_dummy_result + skat_value;
+            }
+        }
+
+        ret
+    }
+
+    pub fn solve_classic(&mut self) -> SolveRet {
         let state = State::create_initial_state_from_problem(&self.problem);
         let result = self.get(state);
 
