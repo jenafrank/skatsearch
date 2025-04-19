@@ -1,4 +1,4 @@
-use crate::consts::bitboard::ALLCARDS;
+use crate::consts::bitboard::{ALLCARDS, JACKOFCLUBS, JACKOFDIAMONDS, JACKOFHEARTS, JACKOFSPADES};
 use crate::traits::{Augen, StringConverter};
 use crate::types::counter::Counters;
 use crate::types::game::Game;
@@ -216,6 +216,183 @@ pub fn allgames(number_of_samples: usize) -> std::io::Result<()> {
 
     Ok(())
 }
+
+pub fn allgames_battle(number_of_samples: usize) -> std::io::Result<()> {
+    let mut file = File::create(r"data_allgames_battle.txt")?;
+    
+    let allnow = Instant::now();
+    let distros = get_random_card_distros(number_of_samples);
+
+    for (declarer_cards, left_cards, right_cards) in distros {
+        
+        let now = Instant::now();
+        let skat = ALLCARDS ^ declarer_cards ^ left_cards ^ right_cards;        
+        
+        let res1 = Solver::calc_all_games(left_cards, right_cards, declarer_cards, Player::Declarer);
+        let res2 = Solver::calc_all_games(right_cards, declarer_cards, left_cards, Player::Declarer);
+        let res3 = Solver::calc_all_games(declarer_cards, left_cards, right_cards, Player::Declarer);
+
+        println!("\nPlayer A ---------------- ");
+        print_scorecard(declarer_cards, left_cards, right_cards, skat, res1);
+
+        println!("\nPlayer B ---------------- ");
+        print_scorecard(left_cards, right_cards, declarer_cards, skat, res2);
+
+        println!("\nPlayer C ---------------- ");
+        print_scorecard(right_cards, declarer_cards, left_cards, skat, res3);
+    }
+
+    Ok(())
+}
+
+fn print_scorecard(declarer_cards: u32, left_cards: u32, right_cards: u32, skat: u32, res: Result<crate::types::solver::retargs::AllGames, crate::types::solver::allgames::CalculationError>) {
+    match res {
+        Ok(values) => {
+            println!("Declarer  : {}", declarer_cards.__str());
+            println!("Left      : {}", left_cards.__str());
+            println!("Right     : {}", right_cards.__str());
+            println!("Skat      : {}", skat.__str());
+            println!("            {:4} | {:4} | {:4} | {:4} | {:4} | {:4} ","Eich","Grue","Herz","Sche","Grnd","Null");
+            println!(" Mit Skat : {:4} | {:4} | {:4} | {:4} | {:4} | {:4} ",values.eichel_farbe, values.gruen_farbe, values.herz_farbe, values.schell_farbe, values.grand, values.null);
+            println!("     Hand : {:4} | {:4} | {:4} | {:4} | {:4} | {:4} ",values.eichel_hand, values.gruen_hand, values.herz_hand, values.schell_hand, values.grand_hand, values.null_hand);
+
+            let wongames = get_wongames(values, declarer_cards);
+            println!(" WonGames: {:4}", wongames.len());
+
+            for game in &wongames {
+                println!(" {:}, {:}, {:}, {:} ",game.points, game.game, game.value, game.hand);
+            }
+
+            let best: Option<&WonGame> = max_won_game_ref(&wongames);
+
+            match best {
+                Some(best_won_game) => {
+                    println!("Reizwert: {:4} | Spiel: {:} | Wert: {:}", best_won_game.points, best_won_game.game, best_won_game.value);
+                },
+                None => {
+                    println!("Weg");
+                }
+            }
+
+            println!("end---");
+        },
+        Err(_) => todo!(),
+    }
+}
+
+fn max_won_game_ref(games: &[WonGame]) -> Option<&WonGame> {
+    games.iter().max_by_key(|wg| wg.points)
+}
+
+#[derive(Clone, Copy)]
+pub struct WonGame {
+    value: u8,
+    points: u32,
+    game: WonGameType,
+    hand: bool
+}
+
+#[derive(Clone, Copy)]
+pub enum WonGameType {
+    Eichel,
+    Gruen,
+    Herz,
+    Schell,
+    Grand,
+    Null
+}
+
+impl std::fmt::Display for WonGameType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {            
+            WonGameType::Eichel => write!(f, "Eichel"),
+            WonGameType::Gruen => write!(f, "Gruen"),
+            WonGameType::Herz => write!(f, "Herz"),
+            WonGameType::Schell => write!(f, "Schell"),
+            WonGameType::Grand => write!(f, "Grand"),
+            WonGameType::Null => write!(f, "Null"),
+        }
+    }
+}
+
+fn get_wongames(values: crate::types::solver::retargs::AllGames, cards: u32) -> Vec<WonGame> {
+
+    let mut ret: Vec<WonGame> = Vec::new();
+
+    let games = [
+        (values.eichel_farbe, 12, WonGameType::Eichel, false),
+        (values.gruen_farbe, 11, WonGameType::Gruen, false),
+        (values.herz_farbe, 10, WonGameType::Herz, false),
+        (values.schell_farbe, 9,  WonGameType::Schell, false),
+        (values.grand, 24,  WonGameType::Grand, false),
+        (values.eichel_hand, 12, WonGameType::Eichel, true),
+        (values.gruen_hand, 11, WonGameType::Gruen, true),
+        (values.herz_hand, 10, WonGameType::Herz, true),
+        (values.schell_hand, 9,  WonGameType::Schell, true),
+        (values.grand_hand, 24,  WonGameType::Grand, true),        
+    ];
+    
+    for &(value, multiplier, game, hand) in &games {
+        // nur weiter, wenn > 60
+        if value <= 60 {
+            continue;
+        }
+    
+        // Basis‑Faktor
+        let mut factor = get_factor(cards) + 1;
+    
+        // Schneider‑Bonus
+        if value > 89 {
+            factor += 1;
+        }
+
+        // Hand-Bonus
+        if hand {
+            factor += 1;
+        }
+    
+        // Punkte berechnen und pushen
+        let points = factor * multiplier;
+        ret.push(WonGame { 
+            value, 
+            points, 
+            game, 
+            hand 
+        });
+    }
+
+    if values.null == 0 {
+        ret.push(WonGame { value: 0, points: 23, game: WonGameType::Null, hand: false });
+    }
+
+    if values.null_hand == 0 {
+        ret.push(WonGame { value: 0, points: 35, game: WonGameType::Null, hand: true });
+    }
+
+    ret
+}
+
+const JACK_MASKS: [u32; 4] = [
+    JACKOFCLUBS,
+    JACKOFSPADES,
+    JACKOFHEARTS,
+    JACKOFDIAMONDS,
+];
+
+    
+fn get_factor(cards: u32) -> u32 {
+    // Ist der Clubs‑Bube gesetzt?
+    let first_present = cards & JACKOFCLUBS != 0;
+
+    // Zähle, wie viele Jacks von links anfangen,
+    // bei denen (gesetzt? == first_present)
+    // true liefern, und stoppe beim ersten Wechsel.
+    JACK_MASKS
+        .iter()
+        .take_while(|&&mask| (cards & mask != 0) == first_present)
+        .count() as u32
+}
+
 
 fn get_random_card_distros(number_of_distros: usize) -> Vec<(u32, u32, u32)> {
     let mut rand = StdRng::seed_from_u64(223);
