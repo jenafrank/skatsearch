@@ -1,7 +1,7 @@
 use crate::consts::bitboard::{ALLCARDS, JACKOFCLUBS, JACKOFDIAMONDS, JACKOFHEARTS, JACKOFSPADES};
 use crate::traits::{Augen, StringConverter};
 use crate::types::counter::Counters;
-use crate::types::game::Game;
+use crate::types::game::{self, Game};
 use crate::types::player::Player;
 use crate::types::problem::Problem;
 use crate::types::solver::withskat::acceleration_mode::AccelerationMode;
@@ -223,29 +223,77 @@ pub fn allgames_battle(number_of_samples: usize) -> std::io::Result<()> {
     let allnow = Instant::now();
     let distros = get_random_card_distros(number_of_samples);
 
-    for (declarer_cards, left_cards, right_cards) in distros {
+    let mut i=0;
+    let mut results: Vec<(Ply, Option<WonGame>)> = Vec::new();
+
+    for (player_a_cards, player_b_cards, player_c_cards) in distros {
+
+        println!("GAME {i} -----+-+-+-+-+-++---------------------- ");
         
+        let start_pos_a = if i % 3 == 0 { Player::Declarer } else if i % 3 == 1 { Player::Left }     else { Player::Right };
+        let start_pos_b = if i % 3 == 0 { Player::Right }    else if i % 3 == 1 { Player::Declarer } else { Player::Left };
+        let start_pos_c = if i % 3 == 0 { Player::Left }     else if i % 3 == 1 { Player::Right }    else { Player::Declarer };
+
         let now = Instant::now();
-        let skat = ALLCARDS ^ declarer_cards ^ left_cards ^ right_cards;        
+        let skat = ALLCARDS ^ player_a_cards ^ player_b_cards ^ player_c_cards;        
         
-        let res1 = Solver::calc_all_games(left_cards, right_cards, declarer_cards, Player::Declarer);
-        let res2 = Solver::calc_all_games(right_cards, declarer_cards, left_cards, Player::Declarer);
-        let res3 = Solver::calc_all_games(declarer_cards, left_cards, right_cards, Player::Declarer);
+        let res1 = Solver::calc_all_games(player_b_cards, player_c_cards, player_a_cards, start_pos_a);
+        let res2 = Solver::calc_all_games(player_c_cards, player_a_cards, player_b_cards, start_pos_b);
+        let res3 = Solver::calc_all_games(player_a_cards, player_b_cards, player_c_cards, start_pos_c);
+
+        let mut playerWon: Ply = Ply::NA;        
+        let mut won_game: Option<WonGame> = None;
+        let mut best_points: u32 = 0;
 
         println!("\nPlayer A ---------------- ");
-        print_scorecard(declarer_cards, left_cards, right_cards, skat, res1);
+        let playerA = print_scorecard(player_a_cards, player_b_cards, player_c_cards, skat, res1);
+        match playerA {
+            Some(best) => if best.points > best_points {playerWon = Ply::A; won_game = Some(best); best_points = best.points;},
+            None => {},
+        }
 
         println!("\nPlayer B ---------------- ");
-        print_scorecard(left_cards, right_cards, declarer_cards, skat, res2);
+        let playerB = print_scorecard(player_b_cards, player_c_cards, player_a_cards, skat, res2);
+        match playerB {
+            Some(best) => if best.points > best_points {playerWon = Ply::B; won_game = Some(best); best_points = best.points;},
+            None => {},
+        }
 
         println!("\nPlayer C ---------------- ");
-        print_scorecard(right_cards, declarer_cards, left_cards, skat, res3);
+        let playerC = print_scorecard(player_c_cards, player_a_cards, player_b_cards, skat, res3);
+        match playerC {
+            Some(best) => if best.points > best_points {playerWon = Ply::C; won_game = Some(best); best_points = best.points;},
+            None => {},
+        }
+
+        match won_game {
+            Some(game) => println!("{}: {} | {} - Hand: {}",playerWon, game.points, game.game, game.hand),
+            None => println!("EINGEMISCHT"),
+        }
+
+        results.push((playerWon, won_game));
+        
+    }
+
+    // Show all results
+
+
+    println!("");
+    println!(" ------------- FULL RESULTS ----------------- ");
+    println!("");
+
+    for (ply, game) in results {
+        match game {
+            Some(game) => println!("{}: {} | {} - Hand: {}",ply, game.points, game.game, game.hand),
+            None => println!("EINGEMISCHT"),
+        }
     }
 
     Ok(())
 }
 
-fn print_scorecard(declarer_cards: u32, left_cards: u32, right_cards: u32, skat: u32, res: Result<crate::types::solver::retargs::AllGames, crate::types::solver::allgames::CalculationError>) {
+fn print_scorecard(declarer_cards: u32, left_cards: u32, right_cards: u32, skat: u32, res: Result<crate::types::solver::retargs::AllGames, crate::types::solver::allgames::CalculationError>) 
+-> Option<WonGame> {
     match res {
         Ok(values) => {
             println!("Declarer  : {}", declarer_cards.__str());
@@ -275,13 +323,31 @@ fn print_scorecard(declarer_cards: u32, left_cards: u32, right_cards: u32, skat:
             }
 
             println!("end---");
+
+            return best.copied();
         },
-        Err(_) => todo!(),
+        Err(_) => todo!(),        
     }
 }
 
 fn max_won_game_ref(games: &[WonGame]) -> Option<&WonGame> {
     games.iter().max_by_key(|wg| wg.points)
+}
+
+#[derive(Clone, Copy)]
+pub enum Ply {
+    A, B, C, NA
+}
+
+impl std::fmt::Display for Ply {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {            
+            Ply::A => write!(f, " [A] "),
+            Ply::B => write!(f, " [B] "),
+            Ply::C => write!(f, " [C] "),
+            Ply::NA => write!(f, " [NA] "),            
+        }
+    }
 }
 
 #[derive(Clone, Copy)]
@@ -299,18 +365,20 @@ pub enum WonGameType {
     Herz,
     Schell,
     Grand,
-    Null
+    Null,
+    NA
 }
 
 impl std::fmt::Display for WonGameType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {            
+        match self {
             WonGameType::Eichel => write!(f, "Eichel"),
             WonGameType::Gruen => write!(f, "Gruen"),
             WonGameType::Herz => write!(f, "Herz"),
             WonGameType::Schell => write!(f, "Schell"),
             WonGameType::Grand => write!(f, "Grand"),
             WonGameType::Null => write!(f, "Null"),
+            WonGameType::NA => write!(f, "N/A"),
         }
     }
 }

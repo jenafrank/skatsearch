@@ -41,14 +41,14 @@ impl Solver {
 pub fn calc_all_games(
     left_cards: u32,
     right_cards: u32,
-    declarer_cards: u32,
+    my_cards: u32,
     start_player: Player,
 ) -> Result<AllGames, CalculationError> {
     let acc_mode = AccelerationMode::AlphaBetaAccelerating;
 
     // Erstelle das Basis-Problem einmal
     let base_problem_farbe_eichel =
-        Problem::create(declarer_cards, left_cards, right_cards, Game::Farbe, start_player);
+        Problem::create(my_cards, left_cards, right_cards, Game::Farbe, start_player);
 
     // Erstelle die transformierten Probleme (sequenziell, da schnell)
     let problem_farbe_gruen =
@@ -60,9 +60,9 @@ pub fn calc_all_games(
 
     // Erstelle Probleme für Grand und Null
     let problem_grand =
-        Problem::create(declarer_cards, left_cards, right_cards, Game::Grand, start_player);
+        Problem::create(my_cards, left_cards, right_cards, Game::Grand, start_player);
     let problem_null =
-        Problem::create(declarer_cards, left_cards, right_cards, Game::Null, start_player);
+        Problem::create(my_cards, left_cards, right_cards, Game::Null, start_player);
 
 
     // Definiere die Liste der Aufgaben. Jede Aufgabe ist ein Tupel aus
