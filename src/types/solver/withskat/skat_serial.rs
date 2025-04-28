@@ -95,39 +95,39 @@ impl Solver {
     ) -> u8 {
         let mut current_game_state = State::create_initial_state_from_problem(&self.problem);
 
-        match mode {
-            AccelerationMode::AlphaBetaAccelerating => {
-                if alpha > skat_value {
-                    current_game_state.alpha = alpha - skat_value;
+        if game != Game::Null {
+            match mode {
+                AccelerationMode::AlphaBetaAccelerating => {
+                    if alpha > skat_value {
+                        current_game_state.alpha = alpha - skat_value;
+                    }
+                }
+                AccelerationMode::WinningOnly => {
+                    if alpha >= 61 {
+                        return 0; // Early return, Wert spielt hier keine Rolle
+                    }
+                    current_game_state.alpha = 60 - skat_value;
+                    current_game_state.beta = current_game_state.alpha + 1;
+                }
+                AccelerationMode::NotAccelerating => {
+                    // Hier erfolgt keine Änderung an current_game_state
                 }
             }
-            AccelerationMode::WinningOnly => {
-                if alpha >= 61 {
-                    return 0; // Early return, Wert spielt hier keine Rolle
-                }
-                current_game_state.alpha = 60 - skat_value;
-                current_game_state.beta = current_game_state.alpha + 1;
-            }
-            AccelerationMode::NotAccelerating => {
-                // Hier erfolgt keine Änderung an current_game_state
-            }
+        } else {
+            current_game_state.alpha = 0;
+            current_game_state.beta = 1;
         }
 
-        let result = self.solve_double_dummy(current_game_state.alpha, current_game_state.beta, 1);
-
+        let result = match game {            
+            Game::Null => self.solve_double_dummy(0, 1, 1),
+            _ => self.solve_double_dummy(current_game_state.alpha, current_game_state.beta, 1)
+        };
+        
         cnt.add(result.counters);
 
         match game {
-            Game::Null => {
-                if result.best_value == skat_value {
-                    0
-                } else {
-                    1
-                }
-            }
-            _ => {
-                result.best_value + skat_value
-            }
+            Game::Null => result.best_value,
+            _ => result.best_value + skat_value            
         }
     }
 

@@ -3,6 +3,6 @@ use skat_aug23::uncertain::random_series::*;
 fn main() {
   // sample_farbe_declarer_tt_dd_parallel(100).unwrap();
 
-  allgames_battle(48).unwrap();
+  allgames_battle(5).unwrap();
 
 }

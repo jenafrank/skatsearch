@@ -8,3 +8,12 @@ pub enum Player {
     Right = 2,
 }
    
+impl std::fmt::Display for Player {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {            
+            Player::Declarer => write!(f, "Declarer"),
+            Player::Left     => write!(f, "Left"),
+            Player::Right    => write!(f, "Right")
+        }
+    }
+}    

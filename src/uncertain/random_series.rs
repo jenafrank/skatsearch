@@ -228,6 +228,8 @@ pub fn allgames_battle(number_of_samples: usize) -> std::io::Result<()> {
 
     for (player_a_cards, player_b_cards, player_c_cards) in distros {
 
+        i = i + 1;
+
         println!("GAME {i} -----+-+-+-+-+-++---------------------- ");
         
         let start_pos_a = if i % 3 == 0 { Player::Declarer } else if i % 3 == 1 { Player::Left }     else { Player::Right };
@@ -245,21 +247,21 @@ pub fn allgames_battle(number_of_samples: usize) -> std::io::Result<()> {
         let mut won_game: Option<WonGame> = None;
         let mut best_points: u32 = 0;
 
-        println!("\nPlayer A ---------------- ");
+        println!("\nPlayer A ---------------- {} ", start_pos_a);
         let playerA = print_scorecard(player_a_cards, player_b_cards, player_c_cards, skat, res1);
         match playerA {
             Some(best) => if best.points > best_points {playerWon = Ply::A; won_game = Some(best); best_points = best.points;},
             None => {},
         }
 
-        println!("\nPlayer B ---------------- ");
+        println!("\nPlayer B ---------------- {} ", start_pos_b);
         let playerB = print_scorecard(player_b_cards, player_c_cards, player_a_cards, skat, res2);
         match playerB {
             Some(best) => if best.points > best_points {playerWon = Ply::B; won_game = Some(best); best_points = best.points;},
             None => {},
         }
 
-        println!("\nPlayer C ---------------- ");
+        println!("\nPlayer C ---------------- {} ", start_pos_c);
         let playerC = print_scorecard(player_c_cards, player_a_cards, player_b_cards, skat, res3);
         match playerC {
             Some(best) => if best.points > best_points {playerWon = Ply::C; won_game = Some(best); best_points = best.points;},
