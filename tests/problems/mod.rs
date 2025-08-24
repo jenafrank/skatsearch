@@ -1,5 +1,3 @@
-#![allow(dead_code)]
-
 use skat_aug23::types::game::Game;
 use skat_aug23::types::player::Player;
 use skat_aug23::types::problem::Problem;
@@ -96,40 +94,7 @@ pub fn ten_tricks() -> (Problem, u8) {
     (p, 59)
 }
 
-pub fn ten_grand_hard() -> (Problem, u8) {
-    let p = Problem::create(
-        "HJ DJ CA CT CK CQ C9 D9 D8 D7".__bit(),
-        "CJ SJ SA ST SK SQ S9 S8 S7 DA".__bit(),
-        "HA HT HK HQ H9 H8 H7 DT DK DQ".__bit(),
-        Game::Grand,
-        Player::Declarer
-    );
-    (p,38)
-}
-
-pub fn eight_grand_hard() -> (Problem, u8) {
-    let p = Problem::create(
-        "HJ DJ CA CT CK CQ C9 D9".__bit(),
-        "CJ SJ SA ST SK SQ S9 S8".__bit(),
-        "HA HT HK HQ H9 H8 H7 DT".__bit(),
-        Game::Grand,
-        Player::Declarer
-    );
-    (p,42)
-}
-
-pub fn nine_grand_hard() -> (Problem, u8) {
-    let p = Problem::create(
-        "HJ DJ CA CT CK CQ C9 D9 D8".__bit(),
-        "CJ SJ SA ST SK SQ S9 S8 S7".__bit(),
-        "HA HT HK HQ H9 H8 H7 DT DK".__bit(),
-        Game::Grand,
-        Player::Declarer
-    );
-    (p,39)
-}
-
-pub fn null_1() -> (Problem, u8) {   
+pub fn null_1() -> (Problem, u8) {
     let p = Problem::create(
         "SJ C9 C7 ST S9 S8 H9 DT D9 D8".__bit(),
         "HJ DJ CA CT CK C8 SA SK HA H8".__bit(),

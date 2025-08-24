@@ -54,9 +54,6 @@ fn eight_tricks() { assert_solution(problems::eight_tricks()); }
 #[test]
 fn ten_tricks() { assert_solution(problems::ten_tricks()); }
 
-// #[test]
-// fn ten_grand_hard() { assert_solution_all(problems::ten_grand_hard())}}
-
 /// Checks playout capabilities. We do not have access to a principal variation.
 /// Therefore, we play out a game to see sequence of moves w.r.t. best play.
 
