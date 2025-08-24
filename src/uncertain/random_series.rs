@@ -284,9 +284,12 @@ pub fn allgames_battle(number_of_samples: usize) -> std::io::Result<()> {
     println!(" ------------- FULL RESULTS ----------------- ");
     println!("");
 
-    for (ply, game) in results {
+    for (ply, game) in results {        
         match game {
-            Some(game) => println!("{}: {} | {} - Hand: {}",ply, game.points, game.game, game.hand),
+            Some(game) => { 
+                let hand_string = if game.hand { "Hand" } else { "" };
+                println!("{}: {:4} | {:8} {}",ply, game.points, game.game, hand_string)
+            },
             None => println!("EINGEMISCHT"),
         }
     }
