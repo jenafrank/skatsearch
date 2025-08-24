@@ -1,7 +1,7 @@
 use crate::consts::bitboard::{ALLCARDS, JACKOFCLUBS, JACKOFDIAMONDS, JACKOFHEARTS, JACKOFSPADES};
 use crate::traits::{Augen, StringConverter};
 use crate::types::counter::Counters;
-use crate::types::game::{self, Game};
+use crate::types::game::Game;
 use crate::types::player::Player;
 use crate::types::problem::Problem;
 use crate::types::solver::withskat::acceleration_mode::AccelerationMode;
@@ -188,15 +188,11 @@ pub fn sample_farbe_declarer_tt_dd(number_of_samples: usize) -> std::io::Result<
     Ok(())
 }
 
-pub fn allgames(number_of_samples: usize) -> std::io::Result<()> {
-    let mut file = File::create(r"data_allgames.txt")?;
-    
-    let allnow = Instant::now();
+pub fn allgames(number_of_samples: usize) -> std::io::Result<()> {    
     let distros = get_random_card_distros(number_of_samples);
 
-    for (declarer_cards, left_cards, right_cards) in distros {
+    for (declarer_cards, left_cards, right_cards) in distros {        
         
-        let now = Instant::now();
         let skat = ALLCARDS ^ declarer_cards ^ left_cards ^ right_cards;
         let res = Solver::calc_all_games(left_cards, right_cards, declarer_cards, Player::Declarer);
 
@@ -218,9 +214,6 @@ pub fn allgames(number_of_samples: usize) -> std::io::Result<()> {
 }
 
 pub fn allgames_battle(number_of_samples: usize) -> std::io::Result<()> {
-    let mut file = File::create(r"data_allgames_battle.txt")?;
-    
-    let allnow = Instant::now();
     let distros = get_random_card_distros(number_of_samples);
 
     let mut i=0;
@@ -236,44 +229,43 @@ pub fn allgames_battle(number_of_samples: usize) -> std::io::Result<()> {
         let start_pos_b = if i % 3 == 0 { Player::Right }    else if i % 3 == 1 { Player::Declarer } else { Player::Left };
         let start_pos_c = if i % 3 == 0 { Player::Left }     else if i % 3 == 1 { Player::Right }    else { Player::Declarer };
 
-        let now = Instant::now();
         let skat = ALLCARDS ^ player_a_cards ^ player_b_cards ^ player_c_cards;        
         
         let res1 = Solver::calc_all_games(player_b_cards, player_c_cards, player_a_cards, start_pos_a);
         let res2 = Solver::calc_all_games(player_c_cards, player_a_cards, player_b_cards, start_pos_b);
         let res3 = Solver::calc_all_games(player_a_cards, player_b_cards, player_c_cards, start_pos_c);
 
-        let mut playerWon: Ply = Ply::NA;        
+        let mut player_won: Ply = Ply::NA;        
         let mut won_game: Option<WonGame> = None;
         let mut best_points: u32 = 0;
 
         println!("\nPlayer A ---------------- {} ", start_pos_a);
-        let playerA = print_scorecard(player_a_cards, player_b_cards, player_c_cards, skat, res1);
-        match playerA {
-            Some(best) => if best.points > best_points {playerWon = Ply::A; won_game = Some(best); best_points = best.points;},
+        let player_a = print_scorecard(player_a_cards, player_b_cards, player_c_cards, skat, res1);
+        match player_a {
+            Some(best) => if best.points > best_points {player_won = Ply::A; won_game = Some(best); best_points = best.points;},
             None => {},
         }
 
         println!("\nPlayer B ---------------- {} ", start_pos_b);
-        let playerB = print_scorecard(player_b_cards, player_c_cards, player_a_cards, skat, res2);
-        match playerB {
-            Some(best) => if best.points > best_points {playerWon = Ply::B; won_game = Some(best); best_points = best.points;},
+        let player_b = print_scorecard(player_b_cards, player_c_cards, player_a_cards, skat, res2);
+        match player_b {
+            Some(best) => if best.points > best_points {player_won = Ply::B; won_game = Some(best); best_points = best.points;},
             None => {},
         }
 
         println!("\nPlayer C ---------------- {} ", start_pos_c);
-        let playerC = print_scorecard(player_c_cards, player_a_cards, player_b_cards, skat, res3);
-        match playerC {
-            Some(best) => if best.points > best_points {playerWon = Ply::C; won_game = Some(best); best_points = best.points;},
+        let player_c = print_scorecard(player_c_cards, player_a_cards, player_b_cards, skat, res3);
+        match player_c {
+            Some(best) => if best.points > best_points {player_won = Ply::C; won_game = Some(best); best_points = best.points;},
             None => {},
         }
 
         match won_game {
-            Some(game) => println!("{}: {} | {} - Hand: {}",playerWon, game.points, game.game, game.hand),
+            Some(game) => println!("{}: {} | {} - Hand: {}",player_won, game.points, game.game, game.hand),
             None => println!("EINGEMISCHT"),
         }
 
-        results.push((playerWon, won_game));
+        results.push((player_won, won_game));
         
     }
 

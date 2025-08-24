@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use skat_aug23::types::game::Game;
 use skat_aug23::types::player::Player;
 use skat_aug23::types::problem::Problem;

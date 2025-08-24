@@ -6,7 +6,7 @@ use skat_aug23::traits::StringConverter;
 use skat_aug23::types::problem::Problem;
 use skat_aug23::types::solver::Solver;
 
-mod problems;
+pub mod problems;
 
 #[test]
 pub fn null_1() {

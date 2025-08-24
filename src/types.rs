@@ -1,7 +1,6 @@
 pub mod game;
 pub mod player;
 pub mod connections;
-pub mod suit_data;
 
 pub mod tt_flag;
 pub mod tt_entry;
