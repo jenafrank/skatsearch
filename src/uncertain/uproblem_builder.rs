@@ -1,5 +1,9 @@
-use crate::{types::{game::Game, player::Player}, traits::{BitConverter, Augen}, consts::bitboard::ALLCARDS};
-use super::{uncertain_problem::UncertainProblem, facts::Facts};
+use super::{facts::Facts, uncertain_problem::UncertainProblem};
+use crate::{
+    consts::bitboard::ALLCARDS,
+    skat::defs::{Game, Player},
+    traits::{Augen, BitConverter},
+};
 
 pub struct UProblemBuilder {
     game_type: Option<Game>,
@@ -37,7 +41,7 @@ impl UProblemBuilder {
 
     pub fn new_null() -> UProblemBuilder {
         let builder = UProblemBuilder::new(Game::Null);
-        builder.threshold(1)        
+        builder.threshold(1)
     }
 
     pub fn cards(mut self, player: Player, cards: &str) -> UProblemBuilder {
@@ -63,7 +67,11 @@ impl UProblemBuilder {
         self
     }
 
-    pub fn trick_previous_player(mut self, active_suit: u32, trick_previous_player: u32) -> UProblemBuilder {
+    pub fn trick_previous_player(
+        mut self,
+        active_suit: u32,
+        trick_previous_player: u32,
+    ) -> UProblemBuilder {
         self.card_on_table_previous_player = Some(trick_previous_player);
         self.active_suit = Some(active_suit);
         self
@@ -79,20 +87,16 @@ impl UProblemBuilder {
     }
 
     // cards part of the game
-    pub fn remaining_cards(mut self, remaining_cards: &str) -> UProblemBuilder{
+    pub fn remaining_cards(mut self, remaining_cards: &str) -> UProblemBuilder {
         let remaining_cards_bit = remaining_cards.__bit();
         let my_cards_bit = self.my_cards.expect("No own cards found.");
         let cards_on_table = self.cards_on_table();
-        
+
         assert!(remaining_cards_bit & my_cards_bit == 0);
         assert!(remaining_cards_bit & cards_on_table == 0);
         assert!(my_cards_bit & cards_on_table == 0);
-        
-        self.all_cards = Some(
-            remaining_cards_bit | 
-            my_cards_bit |
-            cards_on_table
-        );
+
+        self.all_cards = Some(remaining_cards_bit | my_cards_bit | cards_on_table);
         self
     }
 
@@ -101,16 +105,12 @@ impl UProblemBuilder {
         let missing_cards_bit = missing_cards.__bit();
         let my_cards_bit = self.my_cards.expect("No own cards found.");
         let cards_on_table = self.cards_on_table();
-        
+
         assert!(missing_cards_bit & my_cards_bit == 0);
         assert!(missing_cards_bit & cards_on_table == 0);
         assert!(my_cards_bit & cards_on_table == 0);
-        
-        self.all_cards = Some(
-            (ALLCARDS & !missing_cards_bit) | 
-            my_cards_bit |
-            cards_on_table
-        );
+
+        self.all_cards = Some((ALLCARDS & !missing_cards_bit) | my_cards_bit | cards_on_table);
         self
     }
 
@@ -121,7 +121,6 @@ impl UProblemBuilder {
     }
 
     pub fn build(self) -> UncertainProblem {
-
         self.validate();
 
         let mut uproblem = UncertainProblem::new();
@@ -136,7 +135,7 @@ impl UProblemBuilder {
 
         if let Some(my_cards) = self.my_cards {
             uproblem.set_my_cards(my_cards);
-        }     
+        }
 
         if let Some(card_on_table_previous_player) = self.card_on_table_previous_player {
             uproblem.set_card_on_table_previous_player(card_on_table_previous_player);
@@ -147,12 +146,12 @@ impl UProblemBuilder {
         }
 
         if let Some(all_cards) = self.all_cards {
-            uproblem.set_all_cards(self.cards_on_table() | all_cards);         
-        }       
+            uproblem.set_all_cards(self.cards_on_table() | all_cards);
+        }
 
         if let Some(upper_bound_of_null_window) = self.threshold_upper {
             uproblem.set_threshold_upper(upper_bound_of_null_window);
-        }       
+        }
 
         if let Some(facts) = self.facts_left {
             uproblem.set_facts_left(facts);
@@ -184,18 +183,42 @@ impl UProblemBuilder {
             || self.facts_left.is_none()
             || self.facts_right.is_none()
         {
-            if self.game_type.is_none() { println!("Game Type missing."); }
-            if self.my_player.is_none() { println!("My player missing."); }
-            if self.my_cards.is_none() { println!("My cards missing."); }
-            if self.next_player.is_none() { println!("Next player missing."); }
-            if self.card_on_table_next_player.is_none() { println!("Card on table next player missing."); }
-            if self.card_on_table_previous_player.is_none() { println!("Card on table previous player missing."); }
-            if self.all_cards.is_none() { println!("All cards missing."); }
-            if self.active_suit.is_none() { println!("Active suit missing."); }
-            if self.threshold_upper.is_none() { println!("Upper Threshold missing."); }
-            if self.facts_declarer.is_none() { println!("Facts Declarer missing."); }
-            if self.facts_left.is_none() { println!("Facts Left missing."); }
-            if self.facts_right.is_none() { println!("Facts Right missing."); }
+            if self.game_type.is_none() {
+                println!("Game Type missing.");
+            }
+            if self.my_player.is_none() {
+                println!("My player missing.");
+            }
+            if self.my_cards.is_none() {
+                println!("My cards missing.");
+            }
+            if self.next_player.is_none() {
+                println!("Next player missing.");
+            }
+            if self.card_on_table_next_player.is_none() {
+                println!("Card on table next player missing.");
+            }
+            if self.card_on_table_previous_player.is_none() {
+                println!("Card on table previous player missing.");
+            }
+            if self.all_cards.is_none() {
+                println!("All cards missing.");
+            }
+            if self.active_suit.is_none() {
+                println!("Active suit missing.");
+            }
+            if self.threshold_upper.is_none() {
+                println!("Upper Threshold missing.");
+            }
+            if self.facts_declarer.is_none() {
+                println!("Facts Declarer missing.");
+            }
+            if self.facts_left.is_none() {
+                println!("Facts Left missing.");
+            }
+            if self.facts_right.is_none() {
+                println!("Facts Right missing.");
+            }
 
             panic!("Incomplete build. Can not create uproblem from builder.");
         }
@@ -205,12 +228,13 @@ impl UProblemBuilder {
         let nr_own_cards = self.my_cards.unwrap().count_ones();
         let nr_all_cards = self.all_cards.unwrap().count_ones();
 
-        assert!(nr_all_cards %3 == 0);
+        assert!(nr_all_cards % 3 == 0);
         assert!(nr_all_cards == 3 * nr_own_cards);
     }
 
     fn cards_on_table(&self) -> u32 {
-        self.card_on_table_next_player.unwrap_or(0u32) | self.card_on_table_previous_player.unwrap_or(0u32)
+        self.card_on_table_next_player.unwrap_or(0u32)
+            | self.card_on_table_previous_player.unwrap_or(0u32)
     }
 }
 

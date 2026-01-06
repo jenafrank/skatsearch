@@ -1,8 +1,8 @@
+use crate::skat::builder::GameContextBuilder;
+use crate::skat::context::GameContext;
+use crate::skat::defs::Game;
+use crate::skat::defs::Player;
 use crate::traits::{BitConverter, StringConverter};
-use crate::types::game::Game;
-use crate::types::player::Player;
-use crate::types::problem::Problem;
-use crate::types::problem_builder::ProblemBuilder;
 
 use super::facts::Facts;
 
@@ -47,14 +47,26 @@ impl UncertainProblem {
         println!("DUMPING UNCERTAIN PROBLEM: ");
         println!("-------------------------- ");
         println!("game type = {}", self.game_type.convert_to_string());
-        println!("my player = {}" , self.my_player.str());
+        println!("my player = {}", self.my_player.str());
         println!("my cards = {}", self.my_cards.__str());
-        println!("trick_card_previous_player = {}", self.card_on_table_previous_player.__str());
-        println!("trick_card_next_player = {}", self.card_on_table_next_player.__str());
+        println!(
+            "trick_card_previous_player = {}",
+            self.card_on_table_previous_player.__str()
+        );
+        println!(
+            "trick_card_next_player = {}",
+            self.card_on_table_next_player.__str()
+        );
         println!("all cards = {}", self.all_cards.__str());
         println!("threshold = {}", self.threshold_upper);
-        println!("facts left = {}", self.facts_previous_player.convert_to_string());
-        println!("facts right = {}", self.facts_next_player.convert_to_string());
+        println!(
+            "facts left = {}",
+            self.facts_previous_player.convert_to_string()
+        );
+        println!(
+            "facts right = {}",
+            self.facts_next_player.convert_to_string()
+        );
     }
 }
 
@@ -151,25 +163,35 @@ impl UncertainProblem {
             card_on_table_next_player: 0u32,
             threshold_upper: 1u8,
             facts_previous_player: Facts::zero_fact(),
-            facts_next_player: Facts::zero_fact()
+            facts_next_player: Facts::zero_fact(),
         }
     }
 
-    pub fn generate_concrete_problem(&self) -> Problem {
-        
+    pub fn generate_concrete_problem(&self) -> GameContext {
         self.validate();
 
-        let problem = ProblemBuilder::new(self.game_type)
-        .cards(Player::Declarer, "")
-        .cards(Player::Left, "")
-        .cards(Player::Right, "")
-        .turn(self.my_player)
-        .trick_from_uproblem(self.card_on_table_previous_player, self.card_on_table_next_player)
-        .threshold(self.threshold_upper)
-        .set_cards_for_problem(self.my_cards, self.my_player)
-        .set_cards_for_other_players(self.all_cards, self.card_on_table_previous_player, self.card_on_table_next_player, self.my_cards, self.my_player, self.next_player_facts(), self.previous_player_facts())
-        .build();
-        
+        let problem = GameContextBuilder::new(self.game_type)
+            .cards(Player::Declarer, "")
+            .cards(Player::Left, "")
+            .cards(Player::Right, "")
+            .turn(self.my_player)
+            .trick_from_uproblem(
+                self.card_on_table_previous_player,
+                self.card_on_table_next_player,
+            )
+            .threshold(self.threshold_upper)
+            .set_cards_for_problem(self.my_cards, self.my_player)
+            .set_cards_for_other_players(
+                self.all_cards,
+                self.card_on_table_previous_player,
+                self.card_on_table_next_player,
+                self.my_cards,
+                self.my_player,
+                self.next_player_facts(),
+                self.previous_player_facts(),
+            )
+            .build();
+
         if verify_card_distribution(&problem) {
             return problem;
         } else {
@@ -178,11 +200,11 @@ impl UncertainProblem {
     }
 
     fn next_player_facts(&self) -> Facts {
-       self.facts_next_player
+        self.facts_next_player
     }
 
     fn previous_player_facts(&self) -> Facts {
-      self.facts_previous_player
+        self.facts_previous_player
     }
 
     fn validate(&self) {
@@ -196,10 +218,9 @@ impl UncertainProblem {
         // currently uncertain problems can only be solved before a trick starts:
         assert!(self.all_cards.count_ones() % 3 == 0);
     }
-
 }
 
-fn verify_card_distribution(problem: &Problem) -> bool {
+fn verify_card_distribution(problem: &GameContext) -> bool {
     assert!(problem.declarer_cards() & problem.left_cards() == 0);
     assert!(problem.declarer_cards() & problem.right_cards() == 0);
     assert!(problem.left_cards() & problem.right_cards() == 0);
@@ -212,14 +233,13 @@ fn verify_card_distribution(problem: &Problem) -> bool {
 mod tests {
     use super::UncertainProblem;
     use crate::{
+        skat::defs::{Game, Player},
         traits::{BitConverter, StringConverter},
-        types::{game::Game, player::Player},
-        uncertain::uncertain_problem::Facts
+        uncertain::uncertain_problem::Facts,
     };
 
     #[test]
     fn test_problem_generation() {
-
         let uproblem = UncertainProblem {
             game_type: Game::Farbe,
             all_cards: "CA CT SA ST HA HT DA DT D9".__bit(),
@@ -229,7 +249,7 @@ mod tests {
             my_player: Player::Declarer,
             threshold_upper: 1,
             facts_previous_player: Facts::one_fact(true, false, false, false, false),
-            facts_next_player: Facts::zero_fact()
+            facts_next_player: Facts::zero_fact(),
         };
 
         let problem = uproblem.generate_concrete_problem();
@@ -241,7 +261,6 @@ mod tests {
 
     #[test]
     fn test_inter_trick_problem_generation() {
-
         let uproblem = UncertainProblem {
             game_type: Game::Farbe,
             all_cards: "CA CT SA ST HA HT DA DT D9".__bit(),

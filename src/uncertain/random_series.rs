@@ -1,13 +1,13 @@
 use crate::consts::bitboard::{ALLCARDS, JACKOFCLUBS, JACKOFDIAMONDS, JACKOFHEARTS, JACKOFSPADES};
 use crate::traits::{Augen, StringConverter};
-use crate::types::counter::Counters;
-use crate::types::game::Game;
-use crate::types::player::Player;
-use crate::types::problem::Problem;
-use crate::types::solver::withskat::acceleration_mode::AccelerationMode;
-use crate::types::solver::Solver;
-use crate::types::state::State;
-use crate::types::tt_table::TtTable;
+use crate::skat::counters::Counters;
+use crate::skat::defs::{Game, Player};
+use crate::skat::context::GameContext;
+use crate::extensions::skat_solving::{AccelerationMode, solve_with_skat}; 
+use crate::extensions::all_games::{calc_all_games, AllGames, CalculationError};
+
+use crate::skat::engine::SkatEngine;
+
 use rand::rngs::StdRng;
 use rand::seq::SliceRandom;
 use rand::SeedableRng;
@@ -25,15 +25,25 @@ pub fn sample_farbe_declarer_tt(number_of_samples: usize) -> std::io::Result<()>
 
     for _ in 0..number_of_samples {
         let cards = get_random_card_distribution_with_seed(&mut rand);
-        let p = Problem::create(cards.0, cards.1, cards.2, Game::Grand, Player::Declarer);
+        let p = GameContext::create(cards.0, cards.1, cards.2, Game::Grand, Player::Declarer);
 
-        let s = State::create_initial_state_from_problem(&p);
+        // Position created from context
+        let s = p.create_initial_position();
 
         let now = Instant::now();
-        let mut tt = TtTable::new();
+        // SkatEngine handles tt and counters internally but we want to measure?
+        // SkatEngine::new(context, tt).
+        // Original code created tt and cnt outside and passed to search.
+        // SkatEngine search signature: search(position, counters, alpha, beta).
+        // It uses internal TT.
+        // We can create an engine.
+        let mut engine = SkatEngine::new(p, None); // New empty TT
         let mut cnt = Counters::new();
-
-        let result = p.search(&s, &mut tt, &mut cnt, 0, 120);
+        
+        // Use engine.search which requires public access or wrapper?
+        // engine.search is defined in src/core/engine.rs as delegate to search::search?
+        // In engine.rs: pub fn search(...) -> (u32, u8)
+        let result = engine.search(&s, &mut cnt, 0, 120);
 
         println!(
             "{:5} ms {:9} iters {:3} pnts | D: {} L: {} R: {}",
@@ -67,7 +77,7 @@ pub fn sample_farbe_declarer_tt_dd_parallel(number_of_samples: usize) -> std::io
     distros.into_par_iter().for_each(|(declarer_cards, left_cards, right_cards)| {        
         
         let now = Instant::now();
-        let result = Solver::solve_with_skat(
+        let result = solve_with_skat(
             left_cards, 
             right_cards, 
             declarer_cards, 
@@ -133,6 +143,7 @@ pub fn sample_farbe_declarer_tt_dd_parallel(number_of_samples: usize) -> std::io
 pub fn sample_farbe_declarer_tt_dd(number_of_samples: usize) -> std::io::Result<()> {
     let mut file = File::create(r"data.txt")?;
     
+
     let mut total_wins:u32 = 0;
     let allnow = Instant::now();
     let distros = get_random_card_distros(number_of_samples);
@@ -140,7 +151,7 @@ pub fn sample_farbe_declarer_tt_dd(number_of_samples: usize) -> std::io::Result<
     for (declarer_cards, left_cards, right_cards) in distros {
         
         let now = Instant::now();                        
-        let result = Solver::solve_with_skat(
+        let result = solve_with_skat(
             left_cards, 
             right_cards, 
             declarer_cards, 
@@ -164,7 +175,6 @@ pub fn sample_farbe_declarer_tt_dd(number_of_samples: usize) -> std::io::Result<
             result.counters.collisions,
             (result.counters.collisions as f32)/(result.counters.iters as f32)*1000.,
             best_value,
-            // result.best_skat.unwrap().value,
             declarer_cards.__str(),
             left_cards.__str(),
             right_cards.__str()
@@ -194,7 +204,7 @@ pub fn allgames(number_of_samples: usize) -> std::io::Result<()> {
     for (declarer_cards, left_cards, right_cards) in distros {        
         
         let skat = ALLCARDS ^ declarer_cards ^ left_cards ^ right_cards;
-        let res = Solver::calc_all_games(left_cards, right_cards, declarer_cards, Player::Declarer);
+        let res = calc_all_games(left_cards, right_cards, declarer_cards, Player::Declarer);
 
         match res {
             Ok(values) => {
@@ -231,9 +241,9 @@ pub fn allgames_battle(number_of_samples: usize) -> std::io::Result<()> {
 
         let skat = ALLCARDS ^ player_a_cards ^ player_b_cards ^ player_c_cards;        
         
-        let res1 = Solver::calc_all_games(player_b_cards, player_c_cards, player_a_cards, start_pos_a);
-        let res2 = Solver::calc_all_games(player_c_cards, player_a_cards, player_b_cards, start_pos_b);
-        let res3 = Solver::calc_all_games(player_a_cards, player_b_cards, player_c_cards, start_pos_c);
+        let res1 = calc_all_games(player_b_cards, player_c_cards, player_a_cards, start_pos_a);
+        let res2 = calc_all_games(player_c_cards, player_a_cards, player_b_cards, start_pos_b);
+        let res3 = calc_all_games(player_a_cards, player_b_cards, player_c_cards, start_pos_c);
 
         let mut player_won: Ply = Ply::NA;        
         let mut won_game: Option<WonGame> = None;
@@ -256,7 +266,7 @@ pub fn allgames_battle(number_of_samples: usize) -> std::io::Result<()> {
         println!("\nPlayer C ---------------- {} ", start_pos_c);
         let player_c = print_scorecard(player_c_cards, player_a_cards, player_b_cards, skat, res3);
         match player_c {
-            Some(best) => if best.points > best_points {player_won = Ply::C; won_game = Some(best); best_points = best.points;},
+            Some(best) => if best.points > best_points {player_won = Ply::C; won_game = Some(best); /* best_points = best.points; */},
             None => {},
         }
 
@@ -289,7 +299,7 @@ pub fn allgames_battle(number_of_samples: usize) -> std::io::Result<()> {
     Ok(())
 }
 
-fn print_scorecard(declarer_cards: u32, left_cards: u32, right_cards: u32, skat: u32, res: Result<crate::types::solver::retargs::AllGames, crate::types::solver::allgames::CalculationError>) 
+fn print_scorecard(declarer_cards: u32, left_cards: u32, right_cards: u32, skat: u32, res: Result<AllGames, CalculationError>) 
 -> Option<WonGame> {
     match res {
         Ok(values) => {
@@ -380,7 +390,7 @@ impl std::fmt::Display for WonGameType {
     }
 }
 
-fn get_wongames(values: crate::types::solver::retargs::AllGames, cards: u32) -> Vec<WonGame> {
+fn get_wongames(values: AllGames, cards: u32) -> Vec<WonGame> {
 
     let mut ret: Vec<WonGame> = Vec::new();
 
