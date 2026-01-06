@@ -33,7 +33,7 @@ pub fn sample_farbe_declarer_tt(number_of_samples: usize) -> std::io::Result<()>
         let mut tt = TtTable::new();
         let mut cnt = Counters::new();
 
-        let result = p.search(&s, &mut tt, &mut cnt);
+        let result = p.search(&s, &mut tt, &mut cnt, 0, 120);
 
         println!(
             "{:5} ms {:9} iters {:3} pnts | D: {} L: {} R: {}",

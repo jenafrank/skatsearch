@@ -1,7 +1,7 @@
-use super::Solver;
 use super::retargs::SolveAllCardsRet;
 use super::retargs::SolveRet;
 use super::retargs::SolveWinRet;
+use super::Solver;
 use crate::traits::Augen;
 use crate::types::counter::Counters;
 use crate::types::game::Game;
@@ -19,71 +19,74 @@ use crate::types::state::State;
 /// in the basic search routines.
 
 impl Solver {
-
     /// Investigates all legal moves for a given state and returns an option array
     /// with 0. card under investigation 1. follow-up card from tree search (tree root) and
     /// 2. value of search
     pub fn solve_all_cards(&mut self, alpha: u8, beta: u8) -> SolveAllCardsRet {
-        let initial_state = State::create_initial_state_from_problem(&self.problem);        
+        let initial_state = State::create_initial_state_from_problem(&self.problem);
         self.get_all_cards(initial_state, alpha, beta)
     }
 
     pub fn solve_win(&mut self) -> SolveWinRet {
-        
         let mut cnt = Counters::new();
-        
+
         let mut alpha = self.problem.points_to_win() - 1;
         let mut beta = self.problem.points_to_win();
 
         if self.problem.game_type() == Game::Null {
             alpha = 0;
             beta = 1;
-        } 
+        }
 
-        let state = self.problem.new_state(alpha, beta);
-        let (best_card, value) = self.problem.search(&state, &mut self.tt, &mut cnt);
-        
+        let state = self.problem.new_state();
+        let (best_card, value) = self
+            .problem
+            .search(&state, &mut self.tt, &mut cnt, alpha, beta);
+
         let mut declarer_wins = value > alpha;
-        
+
         if self.problem.game_type() == Game::Null {
             declarer_wins = !declarer_wins;
-        }        
+        }
 
         SolveWinRet {
             best_card,
             declarer_wins,
-            counters: cnt
+            counters: cnt,
         }
     }
 
     // works currently only with 10 cards, since all cards not part of the full deck
     // are considered as skat and thus as points fot the declarer.
     pub fn solve_win_10tricks(&mut self) -> SolveWinRet {
-
         let mut cnt = Counters::new();
 
-        let mut state = State::create_initial_state_from_problem(&self.problem);
+        let state = State::create_initial_state_from_problem(&self.problem);
 
         let skat_value = self.problem.get_skat().__get_value();
 
         let threshold_farbe_and_grand = 60 - skat_value;
+        let mut alpha: u8 = 0;
+        let mut beta: u8 = 120;
 
         match self.problem.game_type() {
             Game::Farbe => {
-                state.alpha = threshold_farbe_and_grand;
-                state.beta = threshold_farbe_and_grand + 1;
+                alpha = threshold_farbe_and_grand;
+                beta = threshold_farbe_and_grand + 1;
             }
             Game::Grand => {
-                state.alpha = threshold_farbe_and_grand;
-                state.beta = threshold_farbe_and_grand + 1;
+                alpha = threshold_farbe_and_grand;
+                beta = threshold_farbe_and_grand + 1;
             }
             Game::Null => {
-                state.alpha = 0;
-                state.beta = 1;
+                alpha = 0;
+                beta = 1;
             }
         }
 
-        let result = self.problem.search(&state, &mut self.tt, &mut cnt);
+        let result = self
+            .problem
+            .search(&state, &mut self.tt, &mut cnt, alpha, beta);
         let val = result.1;
 
         let declarer_wins = if self.problem.game_type() == Game::Null {
@@ -95,40 +98,43 @@ impl Solver {
         SolveWinRet {
             best_card: result.0,
             declarer_wins,
-            counters: cnt
+            counters: cnt,
         }
     }
 
     // unclear, if the right best card is determined. complicated. in search routine we should
     // identify, if any best card has been detected so far
     pub fn solve_double_dummy(&mut self, alpha: u8, beta: u8, width: u8) -> SolveRet {
-        
         let mut cnt = Counters::new();
-        let mut result = (0u32, 0u8);        
-        
+        let mut result = (0u32, 0u8);
+
         let mut current_alpha = alpha;
         while current_alpha < beta {
             let current_beta = std::cmp::min(current_alpha + width, beta);
-            
-            let mut state = State::create_initial_state_from_problem(&self.problem);
-            state.alpha = current_alpha;
-            state.beta = current_beta;
-            result = self.problem.search(&state, &mut self.tt, &mut cnt);
+
+            let state = State::create_initial_state_from_problem(&self.problem);
+            result =
+                self.problem
+                    .search(&state, &mut self.tt, &mut cnt, current_alpha, current_beta);
 
             if result.1 < current_beta {
                 break;
             }
-            
+
             current_alpha = current_beta;
         }
 
-        SolveRet { best_card: result.0, best_value: result.1, counters: cnt }
-    }   
+        SolveRet {
+            best_card: result.0,
+            best_value: result.1,
+            counters: cnt,
+        }
+    }
 
     pub fn solve(&mut self) -> SolveRet {
         self.solve_double_dummy(0, 120, 1)
     }
-    
+
     /// Berechnet die Doppeldummy-Lösung und addiert den Skat-Wert,
     /// mit speziellem Mapping für Null-Spiele.
     ///
@@ -140,8 +146,7 @@ impl Solver {
     /// Für alle anderen Spiele:
     /// - Addiert den Skat-Wert zum Ergebnis von solve_double_dummy.
     pub fn solve_and_add_skat(&mut self) -> SolveRet {
-        
-        // Zuerst das Kernproblem lösen.        
+        // Zuerst das Kernproblem lösen.
         let mut ret = self.solve_double_dummy(0, 120, 1);
 
         // Ergebnis von solve_double_dummy speichern, bevor es potenziell verändert wird
@@ -189,21 +194,22 @@ impl Solver {
 
         result
     }
-
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::{consts::bitboard::SPADES, types::{player::Player, problem_builder::ProblemBuilder, solver::Solver}};
+    use crate::{
+        consts::bitboard::SPADES,
+        types::{player::Player, problem_builder::ProblemBuilder, solver::Solver},
+    };
 
     #[test]
     fn test_solve_win() {
-
         let problem = ProblemBuilder::new_farbspiel()
-        .cards_all("SA SK", "ST SQ", "S9 S8")
-        .turn(Player::Declarer)
-        .threshold(14)
-        .build();
+            .cards_all("SA SK", "ST SQ", "S9 S8")
+            .turn(Player::Declarer)
+            .threshold(14)
+            .build();
 
         let mut solver = Solver::new(problem, None);
         let result = solver.solve_win();
@@ -214,11 +220,11 @@ mod tests {
     #[test]
     fn test_solve_win_intertrick() {
         let problem = ProblemBuilder::new_farbspiel()
-        .cards_all("SA SK", "ST SQ", "S9 S8")
-        .turn(Player::Left)
-        .threshold(3)
-        .trick(SPADES, "SA")
-        .build();
+            .cards_all("SA SK", "ST SQ", "S9 S8")
+            .turn(Player::Left)
+            .threshold(3)
+            .trick(SPADES, "SA")
+            .build();
 
         let mut solver = Solver::new(problem, None);
         let result = solver.solve_win();

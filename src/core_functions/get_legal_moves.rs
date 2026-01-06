@@ -12,9 +12,12 @@ mod tests {
 
     use super::*;
 
-    use crate::types::player::Player;
-    use crate::consts::bitboard::{CLUBS, DIAMONDS, HEARTS, NULL_CLUBS, NULL_DIAMONDS, NULL_HEARTS, NULL_SPADES, SPADES, TRUMP_FARBE, TRUMP_GRAND};
+    use crate::consts::bitboard::{
+        CLUBS, DIAMONDS, HEARTS, NULL_CLUBS, NULL_DIAMONDS, NULL_HEARTS, NULL_SPADES, SPADES,
+        TRUMP_FARBE, TRUMP_GRAND,
+    };
     use crate::traits::BitConverter;
+    use crate::types::player::Player;
     use crate::types::state::{State, StatePayload};
 
     #[test]
@@ -85,13 +88,11 @@ mod tests {
             trick_cards_count: 0,
             augen_future: 0,
             augen_team: 0,
-            alpha: 0,
-            beta: 120,
             is_root_state: false,
         })
     }
 
-    fn get_state_trick_empty() -> State {         
+    fn get_state_trick_empty() -> State {
         State::new(StatePayload {
             player: Player::Declarer,
             played_cards: 0,
@@ -105,9 +106,7 @@ mod tests {
             trick_cards_count: 0,
             augen_future: 0,
             augen_team: 0,
-            alpha: 0,
-            beta: 120,
             is_root_state: false,
-        })         
+        })
     }
 }

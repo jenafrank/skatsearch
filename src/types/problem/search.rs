@@ -46,7 +46,14 @@ impl GameStrategy {
 }
 
 impl Problem {
-    pub fn search(&self, state: &State, tt: &mut TtTable, cnt: &mut Counters) -> (u32, u8) {
+    pub fn search(
+        &self,
+        state: &State,
+        tt: &mut TtTable,
+        cnt: &mut Counters,
+        mut alpha: u8,
+        mut beta: u8,
+    ) -> (u32, u8) {
         cnt.inc_iters();
 
         let strategy = match self.game_type {
@@ -55,12 +62,16 @@ impl Problem {
         };
 
         // BASIC: Termination of recursive search
-        if let Some(x) = apply_termination_criteria(&self, &state) {
+        // Need to pass alpha/beta here? No, termination criteria checked alpha/beta from State previously.
+        // Now 'state' doesn't have them. We must use the local vars.
+        // But the termination helper functions `apply_termination_criteria` used `state.alpha`.
+        // I need to update `apply_termination_criteria` signature too, or inline it.
+        // Let's inline/update it in a separate block if needed, but for now I'll apply changes here.
+        // Actually, `apply_termination_criteria` is defined below. I should update it too.
+        if let Some(x) = apply_termination_criteria(&self, &state, alpha, beta) {
             return (0, x);
         }
 
-        let mut alpha = state.alpha;
-        let mut beta = state.beta;
         let mut optimized_value: (u32, u8) = (0, strategy.initial_value(state.player));
 
         let mut tt_best_card = 0;
@@ -96,10 +107,12 @@ impl Problem {
         // BASIC: Branching loop
         for mov in &moves[0..n] {
             // BASIC: Generate child state
-            let child_state = state.create_child_state(*mov, &self, alpha, beta);
+            // No longer passing alpha/beta
+            let child_state = state.create_child_state(*mov, &self);
 
             // BASIC: Search child state
-            let child_state_value = self.search(&child_state, tt, cnt);
+            // Recursively pass current alpha/beta
+            let child_state_value = self.search(&child_state, tt, cnt, alpha, beta);
 
             // Optimize value
             if strategy.evaluate(child_state_value.1, optimized_value.1, state.player) {
@@ -127,14 +140,14 @@ impl Problem {
 }
 
 #[inline(always)]
-fn apply_termination_criteria(problem: &Problem, state: &State) -> Option<u8> {
+fn apply_termination_criteria(problem: &Problem, state: &State, alpha: u8, beta: u8) -> Option<u8> {
     if state.player_cards == 0 {
         return Some(state.augen_declarer);
     }
 
     match problem.game_type {
         Game::Null => return apply_termination_criteria_null(state),
-        _ => return apply_termination_criteria_standard(problem, state),
+        _ => return apply_termination_criteria_standard(problem, state, alpha, beta),
     };
 }
 
@@ -147,13 +160,18 @@ fn apply_termination_criteria_null(state: &State) -> Option<u8> {
 }
 
 #[inline(always)]
-fn apply_termination_criteria_standard(problem: &Problem, state: &State) -> Option<u8> {
-    if problem.augen_total() - state.augen_team <= state.alpha {
-        return Some(state.alpha);
+fn apply_termination_criteria_standard(
+    problem: &Problem,
+    state: &State,
+    alpha: u8,
+    beta: u8,
+) -> Option<u8> {
+    if problem.augen_total() - state.augen_team <= alpha {
+        return Some(alpha);
     }
 
-    if state.augen_declarer >= state.beta {
-        return Some(state.beta);
+    if state.augen_declarer >= beta {
+        return Some(beta);
     }
     None
 }

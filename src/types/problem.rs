@@ -1,6 +1,6 @@
-mod search;
 mod constructors;
 mod methods;
+mod search;
 mod traits;
 
 use crate::consts::bitboard::{CLUBS, DIAMONDS, HEARTS, SPADES};
@@ -20,13 +20,12 @@ pub struct Problem {
     start_player: Player,
     threshold_upper: u8,
     trick_cards: u32,
-    trick_suit: u32 
+    trick_suit: u32,
 }
 
 // Setters
 
 impl Problem {
-
     pub fn set_declarer_cards(&mut self, declarer_cards: u32) {
         self.declarer_cards = declarer_cards;
     }
@@ -58,7 +57,7 @@ impl Problem {
     pub fn set_trick_suit(&mut self, trick_suit: u32) {
         self.trick_suit = trick_suit;
     }
-    
+
     pub fn create_transformation(p: Problem, switch: ProblemTransformation) -> Problem {
         let switched_declarer_cards = Problem::get_switched_cards(p.declarer_cards, switch);
         let switched_left_cards = Problem::get_switched_cards(p.left_cards, switch);
@@ -77,7 +76,6 @@ impl Problem {
     }
 
     fn get_switched_cards(cards: u32, switch: ProblemTransformation) -> u32 {
-
         let shift = match switch {
             ProblemTransformation::SpadesSwitch => 7usize,
             ProblemTransformation::HeartsSwitch => 14usize,
@@ -108,9 +106,8 @@ impl Problem {
             ret = ret ^ target_card;
         }
 
-        ret        
+        ret
     }
-
 }
 
 // Getters
@@ -146,23 +143,20 @@ impl Problem {
 
     pub fn trick_suit(&self) -> u32 {
         self.trick_suit
-    }  
-
+    }
 }
 
 impl Problem {
-
-    pub fn new_state(&self, alpha: u8, beta: u8) -> State {
-
+    pub fn new_state(&self) -> State {
         let player_cards = match self.start_player {
             Player::Declarer => self.declarer_cards,
             Player::Left => self.left_cards,
             Player::Right => self.right_cards,
         };
 
-        let trick_cards_count = self.trick_cards.count_ones() as u8;       
+        let trick_cards_count = self.trick_cards.count_ones() as u8;
 
-        State::new(StatePayload{
+        State::new(StatePayload {
             player: self.start_player,
             played_cards: self.trick_cards,
             trick_cards: self.trick_cards,
@@ -175,8 +169,6 @@ impl Problem {
             trick_cards_count,
             augen_future: self.augen_total(),
             augen_team: 0,
-            alpha,
-            beta,
             is_root_state: true,
         })
     }

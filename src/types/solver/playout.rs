@@ -1,12 +1,10 @@
+use super::{playout_row::PlayoutLine, retargs::PlayoutAllCardsRetLine, Solver};
+use crate::types::{counter::Counters, state::State};
 use std::time::Instant;
-use crate::types::{state::State, counter::Counters};
-use super::{Solver, playout_row::PlayoutLine, retargs::PlayoutAllCardsRetLine};
 
 impl Solver {
-
-       /// Generates playout.
-       pub fn playout(&mut self) -> Vec<PlayoutLine> {
-        
+    /// Generates playout.
+    pub fn playout(&mut self) -> Vec<PlayoutLine> {
         let mut ret: Vec<PlayoutLine> = Vec::new();
         let mut i: usize = 0;
         let n: usize = self.problem.number_of_cards() as usize;
@@ -23,7 +21,11 @@ impl Solver {
             let mut cnt: Counters = Counters::new();
 
             let now = Instant::now();
-            let res = self.problem.search(&initial_state, &mut self.tt, &mut cnt);
+            let mut alpha = 0;
+            let mut beta = 120;
+            let res = self
+                .problem
+                .search(&initial_state, &mut self.tt, &mut cnt, alpha, beta);
             let time = now.elapsed().as_millis();
 
             let played_card = res.0;
@@ -36,12 +38,7 @@ impl Solver {
             row.cnt_breaks = cnt.breaks;
             row.time = time;
 
-            initial_state = initial_state.create_child_state(
-                played_card,
-                &self.problem,
-                initial_state.alpha,
-                initial_state.beta,
-            );
+            initial_state = initial_state.create_child_state(played_card, &self.problem);
 
             ret.push(row);
             i += 1;
@@ -52,15 +49,13 @@ impl Solver {
 
     /// Generates playout with all values for each card..
     pub fn playout_all_cards(&mut self) -> Vec<PlayoutAllCardsRetLine> {
-
         let mut ret: Vec<PlayoutAllCardsRetLine> = Vec::new();
         let mut i: usize = 0;
         let n: usize = self.problem.number_of_cards() as usize;
-        
+
         let mut state = State::create_initial_state_from_problem(&self.problem);
 
         while i < n {
-
             let mut row: PlayoutAllCardsRetLine = Default::default();
 
             let mut cnt: Counters = Counters::new();
@@ -74,12 +69,7 @@ impl Solver {
             let best_card = res.best_card;
             row.player = state.player;
 
-            state = state.create_child_state(
-                best_card,
-                &self.problem,
-                state.alpha,
-                state.beta,
-            );
+            state = state.create_child_state(best_card, &self.problem);
 
             row.best_card = best_card;
             row.augen_declarer = state.augen_declarer;
@@ -93,5 +83,4 @@ impl Solver {
 
         ret
     }
-
 }

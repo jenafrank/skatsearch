@@ -77,7 +77,11 @@ impl Solver {
                 &mut alpha,
             );
 
-            if (accelerating_mode == AccelerationMode::AlphaBetaAccelerating || accelerating_mode == AccelerationMode::WinningOnly) && game == Game::Null && game_value == 0 {
+            if (accelerating_mode == AccelerationMode::AlphaBetaAccelerating
+                || accelerating_mode == AccelerationMode::WinningOnly)
+                && game == Game::Null
+                && game_value == 0
+            {
                 break;
             }
         }
@@ -93,41 +97,43 @@ impl Solver {
         game: Game,
         cnt: &mut Counters,
     ) -> u8 {
-        let mut current_game_state = State::create_initial_state_from_problem(&self.problem);
+        // Default window
+        let mut lower = 0;
+        let mut upper = 120;
 
         if game != Game::Null {
             match mode {
                 AccelerationMode::AlphaBetaAccelerating => {
                     if alpha > skat_value {
-                        current_game_state.alpha = alpha - skat_value;
+                        lower = alpha - skat_value;
                     }
                 }
                 AccelerationMode::WinningOnly => {
                     if alpha >= 61 {
                         return 0; // Early return, Wert spielt hier keine Rolle
                     }
-                    current_game_state.alpha = 60 - skat_value;
-                    current_game_state.beta = current_game_state.alpha + 1;
+                    lower = 60 - skat_value;
+                    upper = lower + 1;
                 }
                 AccelerationMode::NotAccelerating => {
-                    // Hier erfolgt keine Änderung an current_game_state
+                    // Hier erfolgt keine Änderung
                 }
             }
         } else {
-            current_game_state.alpha = 0;
-            current_game_state.beta = 1;
+            lower = 0;
+            upper = 1;
         }
 
-        let result = match game {            
+        let result = match game {
             Game::Null => self.solve_double_dummy(0, 1, 1),
-            _ => self.solve_double_dummy(current_game_state.alpha, current_game_state.beta, 1)
+            _ => self.solve_double_dummy(lower, upper, 1),
         };
-        
+
         cnt.add(result.counters);
 
         match game {
             Game::Null => result.best_value,
-            _ => result.best_value + skat_value            
+            _ => result.best_value + skat_value,
         }
     }
 
@@ -146,10 +152,10 @@ impl Solver {
                         skat_card_1,
                         skat_card_2,
                         value: game_value,
-                    });      
-                    *alpha = game_value;              
+                    });
+                    *alpha = game_value;
                 }
-            },
+            }
             _ => {
                 if game_value > *alpha || ret.best_skat.is_none() {
                     ret.best_skat = Some(SolveWithSkatRetLine {
@@ -163,4 +169,3 @@ impl Solver {
         }
     }
 }
-

@@ -10,13 +10,7 @@ use crate::types::state::State;
 use super::StatePayload;
 
 impl State {
-    pub fn create_child_state(
-        &self,
-        card: u32,
-        problem: &Problem,
-        alpha_start: u8,
-        beta_start: u8,
-    ) -> State {
+    pub fn create_child_state(&self, card: u32, problem: &Problem) -> State {
         // new_player, may be overwritten after trick calculation !!
         let mut new_player = self.player.inc();
 
@@ -94,8 +88,6 @@ impl State {
             augen_future: new_augen_future,
             player: new_player,
             player_cards: new_player_cards,
-            alpha: alpha_start,
-            beta: beta_start,            
             is_root_state: false,
         })
     }

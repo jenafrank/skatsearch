@@ -23,14 +23,11 @@ pub struct StatePayload {
     pub trick_cards_count: u8,
     pub augen_future: u8,
     pub augen_team: u8,
-    pub alpha: u8,
-    pub beta: u8,
-    pub is_root_state: bool
+    pub is_root_state: bool,
 }
 
 #[derive(PartialEq, Eq, Debug, Clone, Copy)]
 pub struct State {
-
     // Primary values
     pub player: Player,
     pub played_cards: u32,
@@ -48,35 +45,30 @@ pub struct State {
     pub augen_team: u8,
 
     // Additional values
-    pub alpha: u8,
-    pub beta: u8,
     pub is_root_state: bool,
 
     hash: usize,
-
 }
 impl State {
-
     pub fn get_hash(&self) -> usize {
         self.hash
     }
 
-    fn add_hash(mut self) -> State  {        
-        self.hash = self.get_mapped_hash();        
+    fn add_hash(mut self) -> State {
+        self.hash = self.get_mapped_hash();
         self
     }
-
 }
 
 #[cfg(test)]
 mod tests_derived_state {
-    
-    use crate::types::game::Game;
-    use crate::types::state::{State, StatePayload};
-    use crate::types::problem::Problem;
-    use crate::types::player::Player;
+
     use crate::consts::bitboard::TRUMP_FARBE;
     use crate::traits::{Augen, BitConverter};
+    use crate::types::game::Game;
+    use crate::types::player::Player;
+    use crate::types::problem::Problem;
+    use crate::types::state::{State, StatePayload};
 
     #[test]
     fn test_initial_state_from_problem() {
@@ -103,8 +95,6 @@ mod tests_derived_state {
             augen_future: "CJ SJ SA ST CA CT".__bit().__get_value(),
             augen_declarer: 0,
             augen_team: 0,
-            alpha: 0,
-            beta: 120,
             is_root_state: true,
         });
 
@@ -128,7 +118,7 @@ mod tests_derived_state {
             0,
             Player::Right,
             &p,
-            false
+            false,
         );
 
         let y = State::new(StatePayload {
@@ -144,23 +134,20 @@ mod tests_derived_state {
             augen_future: "CJ SJ SA ST CA CT".__bit().__get_value(),
             augen_declarer: 0,
             augen_team: 0,
-            alpha: 0,
-            beta: 120,            
-            is_root_state: false
+            is_root_state: false,
         });
 
         assert_eq!(x, y);
     }
-
 }
 
 #[cfg(test)]
 mod tests_evaluation {
-    use crate::types::game::*;
-    use crate::types::problem::Problem;
-    use crate::types::player::Player;
-    use crate::types::state::State;
     use crate::traits::BitConverter;
+    use crate::types::game::*;
+    use crate::types::player::Player;
+    use crate::types::problem::Problem;
+    use crate::types::state::State;
 
     #[test]
     fn test_trick_evaluation_1() {
@@ -174,34 +161,32 @@ mod tests_evaluation {
 
         let s = State::create_initial_state_from_problem(&p);
 
-        let s1 = s.create_child_state("CJ".__bit(), &p, 0, 120);
-        let s2 = s1.create_child_state("SA".__bit(), &p, 0, 120);
-        let sa = s2.create_child_state("CA".__bit(), &p, 0, 120);
+        let s1 = s.create_child_state("CJ".__bit(), &p);
+        let s2 = s1.create_child_state("SA".__bit(), &p);
+        let sa = s2.create_child_state("CA".__bit(), &p);
 
         let es = State::create("CJ SA CA".__bit(), 0, 0, 24, Player::Declarer, &p, false);
 
         assert_eq!(sa, es);
     }
-
 }
 
 #[cfg(test)]
 mod tests_no_evaluation {
-    use crate::types::problem_builder::ProblemBuilder;
-    use crate::types::state::{State, StatePayload};
-    use crate::types::player::Player;
     use crate::consts::bitboard::TRUMP_FARBE;
     use crate::traits::{Augen, BitConverter};
+    use crate::types::player::Player;
+    use crate::types::problem_builder::ProblemBuilder;
+    use crate::types::state::{State, StatePayload};
 
     #[test]
     fn test_advance_from_trick_beginning() {
-
         let problem = ProblemBuilder::new_farbspiel()
-        .cards_all("CJ ST", "SJ SA", "CA S7")
-        .turn(Player::Declarer)
-        .build();
+            .cards_all("CJ ST", "SJ SA", "CA S7")
+            .turn(Player::Declarer)
+            .build();
 
-        let state = State::new(StatePayload{
+        let state = State::new(StatePayload {
             played_cards: 0,
             declarer_cards: problem.declarer_cards(),
             left_cards: problem.left_cards(),
@@ -214,13 +199,10 @@ mod tests_no_evaluation {
             augen_team: 0,
             player: Player::Declarer,
             player_cards: "[CJ ST]".__bit(),
-            alpha: 0,
-            beta: 120,
-            is_root_state: false
+            is_root_state: false,
         });
 
-
-        let next_state = state.create_child_state("CJ".__bit(),&problem,0,120);
+        let next_state = state.create_child_state("CJ".__bit(), &problem);
 
         let expected_next_state = State::new(StatePayload {
             played_cards: "CJ".__bit(),
@@ -235,9 +217,7 @@ mod tests_no_evaluation {
             augen_future: "CJ ST SJ SA CA S7".__bit().__get_value(),
             player: Player::Left,
             player_cards: "[SJ SA]".__bit(),
-            alpha: 0,
-            beta: 120,
-            is_root_state: false
+            is_root_state: false,
         });
 
         assert_eq!(next_state, expected_next_state);
@@ -245,32 +225,29 @@ mod tests_no_evaluation {
 
     #[test]
     fn test_advance_from_within_trick() {
-
         let problem = ProblemBuilder::new_farbspiel()
-        .cards_all("CJ ST", "SJ SA", "CA S7")
-        .turn(Player::Left)
-        .trick(TRUMP_FARBE, "CJ")
-        .build();
+            .cards_all("CJ ST", "SJ SA", "CA S7")
+            .turn(Player::Left)
+            .trick(TRUMP_FARBE, "CJ")
+            .build();
 
         let state = State::new(StatePayload {
             played_cards: problem.trick_cards(),
-            declarer_cards: problem.declarer_cards(), 
-            left_cards: problem.left_cards(),  
+            declarer_cards: problem.declarer_cards(),
+            left_cards: problem.left_cards(),
             right_cards: problem.right_cards(),
             trick_cards: problem.trick_cards(),
             trick_cards_count: 1,
             trick_suit: problem.trick_suit(),
             augen_future: problem.augen_total(),
             augen_declarer: 0,
-            augen_team: 0, 
+            augen_team: 0,
             player: problem.start_player(),
             player_cards: problem.left_cards(),
-            alpha: 0,
-            beta: 120,           
-            is_root_state: false 
+            is_root_state: false,
         });
 
-        let next_state = state.create_child_state("SA".__bit(), &problem, 0, 120);
+        let next_state = state.create_child_state("SA".__bit(), &problem);
 
         let expected_next_state = State::new(StatePayload {
             played_cards: "[CJ SA]".__bit(),
@@ -285,9 +262,7 @@ mod tests_no_evaluation {
             augen_future: "CJ ST SJ SA CA S7".__bit().__get_value(),
             player: Player::Right,
             player_cards: "[CA S7]".__bit(),
-            alpha: 0,
-            beta: 120,            
-            is_root_state: false
+            is_root_state: false,
         });
 
         assert_eq!(next_state, expected_next_state);
@@ -295,16 +270,15 @@ mod tests_no_evaluation {
 
     #[test]
     fn test_advance_from_within_trick_via_problem_only() {
-
         let problem = ProblemBuilder::new_farbspiel()
-        .cards_all("CJ ST", "SJ SA", "CA S7")
-        .turn(Player::Left)
-        .trick(TRUMP_FARBE, "CJ")
-        .build();
+            .cards_all("CJ ST", "SJ SA", "CA S7")
+            .turn(Player::Left)
+            .trick(TRUMP_FARBE, "CJ")
+            .build();
 
-        let state = problem.new_state(0, 120);
+        let state = problem.new_state();
 
-        let next_state = state.create_child_state("SA".__bit(), &problem, 0, 120);
+        let next_state = state.create_child_state("SA".__bit(), &problem);
 
         let expected_next_state = State::new(StatePayload {
             played_cards: "[CJ SA]".__bit(),
@@ -319,12 +293,9 @@ mod tests_no_evaluation {
             augen_future: "CJ ST SJ SA CA S7".__bit().__get_value(),
             player: Player::Right,
             player_cards: "[CA S7]".__bit(),
-            alpha: 0,
-            beta: 120,         
-            is_root_state: false
+            is_root_state: false,
         });
 
         assert_eq!(next_state, expected_next_state);
     }
-
 }

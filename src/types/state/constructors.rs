@@ -6,7 +6,6 @@ use crate::types::state::State;
 use super::StatePayload;
 
 impl State {
-
     pub fn new(payload: StatePayload) -> Self {
         Self {
             player: payload.player,
@@ -21,11 +20,10 @@ impl State {
             trick_cards_count: payload.trick_cards_count,
             augen_future: payload.augen_future,
             augen_team: payload.augen_team,
-            alpha: payload.alpha,
-            beta: payload.beta,
             is_root_state: payload.is_root_state,
             hash: 0,
-        }.add_hash()
+        }
+        .add_hash()
     }
 
     pub fn create(
@@ -35,10 +33,8 @@ impl State {
         augen_declarer: u8,
         player: Player,
         problem: &Problem,
-        is_root_state: bool
-
+        is_root_state: bool,
     ) -> State {
-
         let declarer_cards: u32 = problem.declarer_cards() & !played_cards;
         let left_cards: u32 = problem.left_cards() & !played_cards;
         let right_cards: u32 = problem.right_cards() & !played_cards;
@@ -51,7 +47,7 @@ impl State {
         let trick_cards_count = trick_cards.count_ones() as u8;
         let augen_team = problem.augen_total() - augen_future - augen_declarer;
 
-        State::new(StatePayload {            
+        State::new(StatePayload {
             // Primary values
             player,
             played_cards,
@@ -69,21 +65,11 @@ impl State {
             augen_team,
 
             // Additional values
-            alpha: 0,
-            beta: 120,            
-            is_root_state
+            is_root_state,
         })
     }
 
     pub fn create_initial_state_from_problem(problem: &Problem) -> State {
-        State::create(
-            0u32, 
-            0u32, 
-            0u32, 
-            0u8, 
-            problem.start_player(), 
-            problem,
-            true)
-    }   
-
+        State::create(0u32, 0u32, 0u32, 0u8, problem.start_player(), problem, true)
+    }
 }
