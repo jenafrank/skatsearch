@@ -1,24 +1,24 @@
+use crate::consts::general::TT_SIZE;
 use crate::types::counter::Counters;
 use crate::types::state::State;
 use crate::types::tt_entry::TtEntry;
 use crate::types::tt_flag::TtFlag;
 use crate::types::tt_table::TtTable;
-use crate::consts::general::TT_SIZE;
 
 impl TtTable {
-    pub fn write(&mut self, 
-        state: &State, 
-        mapped_hash: usize, 
-        alpha: u8, 
-        beta: u8, 
-        value: (u32, u8)) {
-
-        let flag: TtFlag =
-            match value.1 {
-                x if x <= alpha => TtFlag::UPPER,
-                x if x >= beta => TtFlag::LOWER,
-                _ => TtFlag::EXACT
-            };
+    pub fn write(
+        &mut self,
+        state: &State,
+        mapped_hash: usize,
+        alpha: u8,
+        beta: u8,
+        value: (u32, u8),
+    ) {
+        let flag: TtFlag = match value.1 {
+            x if x <= alpha => TtFlag::UPPER,
+            x if x >= beta => TtFlag::LOWER,
+            _ => TtFlag::EXACT,
+        };
 
         let entry = TtEntry {
             occupied: true,
@@ -33,11 +33,21 @@ impl TtTable {
             flag,
         };
 
-        self.data[mapped_hash] = entry;
+        let old = &self.data[mapped_hash];
+        let replace = if !old.occupied {
+            true
+        } else {
+            // New is exact -> Always replace
+            // New is not exact -> Only replace if old is not exact
+            entry.flag == TtFlag::EXACT || old.flag != TtFlag::EXACT
+        };
+
+        if replace {
+            self.data[mapped_hash] = entry;
+        }
     }
 
     pub fn read(&self, state: &State, cnt: &mut Counters) -> Option<&TtEntry> {
-
         let candidate = &self.data[state.get_hash()];
 
         if !candidate.occupied {
