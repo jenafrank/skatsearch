@@ -2,9 +2,7 @@
 
 use skat_aug23::skat::builder::GameContextBuilder;
 use skat_aug23::skat::context::GameContext;
-use skat_aug23::skat::defs::Game;
 use skat_aug23::skat::defs::Player;
-use skat_aug23::traits::BitConverter;
 
 pub fn one_trick_rank_in_one_suit() -> (GameContext, u8) {
     let p = GameContextBuilder::new_farbspiel()
@@ -153,7 +151,7 @@ pub fn eight_tricks() -> (GameContext, u8) {
         .cards(Player::Right, "DJ CT HQ H7 DQ D9 D8 D7")
         .turn(Player::Declarer)
         .build();
-    (p, 59)
+    (p, 60)
 }
 
 pub fn ten_tricks() -> (GameContext, u8) {

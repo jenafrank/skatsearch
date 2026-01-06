@@ -31,10 +31,10 @@ pub fn playout(engine: &mut SkatEngine) -> Vec<PlayoutLine> {
     let mut i: usize = 0;
     // engine.context.number_of_cards()? GameContext doesn't have it?
     // GameContext has cards. total cards = 30? or count?
-    let n = 30; // Standard Skat game has 30 cards in play (32 total - 2 skat).
-                // Or check if incomplete game?
-                // engine.context.declarer_cards.count_ones() * 3?
-                // Let's assume standard game or calculate.
+    let _n = 30; // Standard Skat game has 30 cards in play (32 total - 2 skat).
+                 // Or check if incomplete game?
+                 // engine.context.declarer_cards.count_ones() * 3?
+                 // Let's assume standard game or calculate.
     let n = (engine.context.declarer_cards.count_ones()
         + engine.context.left_cards.count_ones()
         + engine.context.right_cards.count_ones()) as usize;

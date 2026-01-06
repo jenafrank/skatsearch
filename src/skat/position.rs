@@ -48,7 +48,7 @@ impl Position {
         augen_team: u8,
         is_root_position: bool,
     ) -> Self {
-        let mut pos = Self {
+        let pos = Self {
             player,
             played_cards,
             trick_cards,

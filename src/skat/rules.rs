@@ -366,7 +366,7 @@ fn nullmap(card: u32) -> Option<u32> {
     }
 }
 
-pub fn get_trick_limit(game: Game) -> u8 {
+pub fn get_trick_limit(_game: Game) -> u8 {
     // This function was not in my read list but appeared in imports?
     // Wait, get_trick_limit was imported in Position?
     // Let me check. Position imported: `get_trick_limit::get_trick_limit`.
