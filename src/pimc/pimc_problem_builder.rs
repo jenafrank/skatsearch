@@ -1,12 +1,12 @@
-use super::{facts::Facts, uncertain_problem::UncertainProblem};
+use super::{facts::Facts, pimc_problem::PimcProblem};
 use crate::{
     consts::bitboard::ALLCARDS,
     skat::defs::{Game, Player},
     traits::{Augen, BitConverter},
 };
 
-pub struct UProblemBuilder {
-    game_type: Option<Game>,
+pub struct PimcProblemBuilder {
+    game_type: Game,
     my_player: Option<Player>,
     my_cards: Option<u32>,
     next_player: Option<Player>,
@@ -24,44 +24,49 @@ pub struct UProblemBuilder {
     facts_right: Option<Facts>,
 }
 
-impl UProblemBuilder {
-    pub fn new(game: Game) -> UProblemBuilder {
-        let mut builder = UProblemBuilder::default();
-        builder.game_type = Some(game);
-        builder
+impl PimcProblemBuilder {
+    pub fn new(game_type: Game) -> PimcProblemBuilder {
+        PimcProblemBuilder {
+            game_type,
+            ..PimcProblemBuilder::default()
+        }
     }
 
-    pub fn new_farbspiel() -> UProblemBuilder {
-        UProblemBuilder::new(Game::Farbe)
+    pub fn new_farbspiel() -> PimcProblemBuilder {
+        PimcProblemBuilder::new(Game::Farbe)
     }
 
-    pub fn new_grand() -> UProblemBuilder {
-        UProblemBuilder::new(Game::Grand)
+    pub fn new_grand() -> PimcProblemBuilder {
+        PimcProblemBuilder::new(Game::Grand)
     }
 
-    pub fn new_null() -> UProblemBuilder {
-        let builder = UProblemBuilder::new(Game::Null);
-        builder.threshold(1)
+    pub fn new_null() -> PimcProblemBuilder {
+        PimcProblemBuilder::new(Game::Null).threshold(1)
     }
 
-    pub fn cards(mut self, player: Player, cards: &str) -> UProblemBuilder {
+    pub fn cards(mut self, player: Player, cards: &str) -> PimcProblemBuilder {
         self.my_player = Some(player);
         self.next_player = Some(player);
         self.my_cards = Some(cards.__bit());
         self
     }
 
-    pub fn turn(mut self, player: Player) -> UProblemBuilder {
+    pub fn my_player(mut self, player: Player) -> PimcProblemBuilder {
+        self.my_player = Some(player);
+        self
+    }
+
+    pub fn turn(mut self, player: Player) -> PimcProblemBuilder {
         self.next_player = Some(player);
         self
     }
 
-    pub fn threshold(mut self, threshold_upper: u8) -> UProblemBuilder {
+    pub fn threshold(mut self, threshold_upper: u8) -> PimcProblemBuilder {
         self.threshold_upper = Some(threshold_upper);
         self
     }
 
-    pub fn threshold_half(mut self) -> UProblemBuilder {
+    pub fn threshold_half(mut self) -> PimcProblemBuilder {
         let all_cards = self.all_cards.expect("No all cards found.");
         self.threshold_upper = Some((all_cards.__get_value() as u8 / 2) + 1);
         self
@@ -71,13 +76,13 @@ impl UProblemBuilder {
         mut self,
         active_suit: u32,
         trick_previous_player: u32,
-    ) -> UProblemBuilder {
+    ) -> PimcProblemBuilder {
         self.card_on_table_previous_player = Some(trick_previous_player);
         self.active_suit = Some(active_suit);
         self
     }
 
-    pub fn facts(mut self, player: Player, facts: Facts) -> UProblemBuilder {
+    pub fn facts(mut self, player: Player, facts: Facts) -> PimcProblemBuilder {
         match player {
             Player::Declarer => self.facts_declarer = Some(facts),
             Player::Left => self.facts_left = Some(facts),
@@ -87,8 +92,8 @@ impl UProblemBuilder {
     }
 
     // cards part of the game
-    pub fn remaining_cards(mut self, remaining_cards: &str) -> UProblemBuilder {
-        let remaining_cards_bit = remaining_cards.__bit();
+    pub fn remaining_cards(mut self, cards: &str) -> PimcProblemBuilder {
+        let remaining_cards_bit = cards.__bit();
         let my_cards_bit = self.my_cards.expect("No own cards found.");
         let cards_on_table = self.cards_on_table();
 
@@ -101,7 +106,7 @@ impl UProblemBuilder {
     }
 
     // cards not part of the game
-    pub fn missing_cards(mut self, missing_cards: &str) -> UProblemBuilder {
+    pub fn missing_cards(mut self, missing_cards: &str) -> PimcProblemBuilder {
         let missing_cards_bit = missing_cards.__bit();
         let my_cards_bit = self.my_cards.expect("No own cards found.");
         let cards_on_table = self.cards_on_table();
@@ -114,20 +119,18 @@ impl UProblemBuilder {
         self
     }
 
-    pub fn skat_cards(self, skat_cards: &str) -> UProblemBuilder {
+    pub fn skat_cards(mut self, skat_cards: &str) -> PimcProblemBuilder {
         let skat_cards_bit = skat_cards.__bit();
         assert!(skat_cards_bit.count_ones() == 2);
         self.missing_cards(skat_cards)
     }
 
-    pub fn build(self) -> UncertainProblem {
+    pub fn build(self) -> PimcProblem {
         self.validate();
 
-        let mut uproblem = UncertainProblem::new();
+        let mut uproblem = PimcProblem::new();
 
-        if let Some(game_type) = self.game_type {
-            uproblem.set_game_type(game_type);
-        }
+        uproblem.set_game_type(self.game_type);
 
         if let Some(my_player) = self.my_player {
             uproblem.set_my_player(my_player);
@@ -170,8 +173,7 @@ impl UProblemBuilder {
     }
 
     fn validate_nothing_none(&self) {
-        if self.game_type.is_none()
-            || self.my_player.is_none()
+        if self.my_player.is_none()
             || self.my_cards.is_none()
             || self.next_player.is_none()
             || self.card_on_table_next_player.is_none()
@@ -183,9 +185,6 @@ impl UProblemBuilder {
             || self.facts_left.is_none()
             || self.facts_right.is_none()
         {
-            if self.game_type.is_none() {
-                println!("Game Type missing.");
-            }
             if self.my_player.is_none() {
                 println!("My player missing.");
             }
@@ -238,10 +237,10 @@ impl UProblemBuilder {
     }
 }
 
-impl Default for UProblemBuilder {
+impl Default for PimcProblemBuilder {
     fn default() -> Self {
-        UProblemBuilder {
-            game_type: None,
+        PimcProblemBuilder {
+            game_type: Game::Farbe, // Default to a game type, as it's no longer Option
             my_player: None,
             my_cards: None,
             next_player: None,

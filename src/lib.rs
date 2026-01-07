@@ -4,9 +4,9 @@ extern crate core;
 
 pub mod consts;
 pub mod extensions;
+pub mod pimc;
 pub mod skat;
 pub mod traits;
-pub mod uncertain;
 
 // Deprecated modules (removed)
 // pub mod types;

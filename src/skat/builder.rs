@@ -1,9 +1,9 @@
 use crate::skat::context::GameContext;
 use crate::{
+    pimc::facts::Facts,
     skat::defs::*,
     skat::rules::get_all_unplayed_cards,
     traits::{Augen, BitConverter, Bitboard},
-    uncertain::facts::Facts,
 };
 use rand::seq::index::sample;
 

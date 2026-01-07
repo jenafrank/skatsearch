@@ -7,7 +7,7 @@ use crate::traits::{BitConverter, StringConverter};
 use super::facts::Facts;
 
 #[derive(Clone, Copy)]
-pub struct UncertainProblem {
+pub struct PimcProblem {
     game_type: Game,
     my_player: Player,
     my_cards: u32,
@@ -23,8 +23,8 @@ pub struct UncertainProblem {
     facts_next_player: Facts,
 }
 
-impl UncertainProblem {
-    pub fn advance(&self, played_card: String) -> UncertainProblem {
+impl PimcProblem {
+    pub fn advance(&self, played_card: String) -> PimcProblem {
         let mut ret = self.clone();
 
         ret.print_object();
@@ -44,7 +44,7 @@ impl UncertainProblem {
     }
     fn print_object(&self) {
         println!("");
-        println!("DUMPING UNCERTAIN PROBLEM: ");
+        println!("DUMPING PIMC PROBLEM: ");
         println!("-------------------------- ");
         println!("game type = {}", self.game_type.convert_to_string());
         println!("my player = {}", self.my_player.str());
@@ -71,7 +71,7 @@ impl UncertainProblem {
 }
 
 // Gettter
-impl UncertainProblem {
+impl PimcProblem {
     pub fn game_type(&self) -> Game {
         self.game_type
     }
@@ -114,7 +114,7 @@ impl UncertainProblem {
 }
 
 // Setter
-impl UncertainProblem {
+impl PimcProblem {
     pub fn set_game_type(&mut self, game_type: Game) {
         self.game_type = game_type;
     }
@@ -152,9 +152,9 @@ impl UncertainProblem {
     }
 }
 
-impl UncertainProblem {
+impl PimcProblem {
     pub fn new() -> Self {
-        UncertainProblem {
+        PimcProblem {
             game_type: Game::Farbe,
             my_cards: 0u32,
             my_player: Player::Declarer,
@@ -231,16 +231,16 @@ fn verify_card_distribution(problem: &GameContext) -> bool {
 // Unit tests
 #[cfg(test)]
 mod tests {
-    use super::UncertainProblem;
+    use super::PimcProblem;
     use crate::{
+        pimc::pimc_problem::Facts,
         skat::defs::{Game, Player},
         traits::{BitConverter, StringConverter},
-        uncertain::uncertain_problem::Facts,
     };
 
     #[test]
     fn test_problem_generation() {
-        let uproblem = UncertainProblem {
+        let uproblem = PimcProblem {
             game_type: Game::Farbe,
             all_cards: "CA CT SA ST HA HT DA DT D9".__bit(),
             my_cards: "CA CT SA".__bit(),
@@ -261,7 +261,7 @@ mod tests {
 
     #[test]
     fn test_inter_trick_problem_generation() {
-        let uproblem = UncertainProblem {
+        let uproblem = PimcProblem {
             game_type: Game::Farbe,
             all_cards: "CA CT SA ST HA HT DA DT D9".__bit(),
             my_cards: "CA CT SA".__bit(),
@@ -287,7 +287,7 @@ mod tests {
         // Expectation: Left player should NOT have Jacks or Clubs (TRUMP_FARBE).
         use crate::skat::defs::{DIAMONDS, HEARTS, SPADES, TRUMP_FARBE};
 
-        let uproblem = UncertainProblem {
+        let uproblem = PimcProblem {
             game_type: Game::Farbe,
             // Total 6 cards. My=2. Left=2. Right=2.
             // My: SA ST (Non-Trump)
@@ -344,7 +344,7 @@ mod tests {
 
         use crate::skat::defs::TRUMP_FARBE;
 
-        let uproblem = UncertainProblem {
+        let uproblem = PimcProblem {
             game_type: Game::Farbe,
             // Total 6 cards. My=2. Left=2. Right=2.
             // My: HA HT (Hearts - Non-Trump)
@@ -386,7 +386,7 @@ mod tests {
 
         use crate::skat::defs::SPADES;
 
-        let uproblem = UncertainProblem {
+        let uproblem = PimcProblem {
             game_type: Game::Farbe,
             // Total 6 cards. My=2. Left=2. Right=2.
             // My: CA CT (Clubs - Trump)
@@ -442,7 +442,7 @@ mod tests {
         // Left should have no Jacks.
         use crate::skat::defs::JACKS;
 
-        let uproblem = UncertainProblem {
+        let uproblem = PimcProblem {
             game_type: Game::Grand,
             // Total 6 cards. My=2. Left=2. Right=2.
             // My: CA CT (Non-Trump)
@@ -479,7 +479,7 @@ mod tests {
         // Expectation: Left player should NOT have any Club cards (including Jack of Clubs).
         use crate::skat::defs::NULL_CLUBS;
 
-        let uproblem = UncertainProblem {
+        let uproblem = PimcProblem {
             game_type: Game::Null,
             // Total 6 cards. My=2. Left=2. Right=2.
             // My: HA HT (Hearts)
@@ -517,7 +517,7 @@ mod tests {
         // Expectation: Left player should NOT have any Spades (including Jack of Spades).
         use crate::skat::defs::NULL_SPADES;
 
-        let uproblem = UncertainProblem {
+        let uproblem = PimcProblem {
             game_type: Game::Null,
             // Total 6 cards.
             // My: HA HT
@@ -554,7 +554,7 @@ mod tests {
         // Fact: Left player has NO Hearts.
         use crate::skat::defs::NULL_HEARTS;
 
-        let uproblem = UncertainProblem {
+        let uproblem = PimcProblem {
             game_type: Game::Null,
             // Total 6 cards.
             // My: CA CT
@@ -591,7 +591,7 @@ mod tests {
         // Fact: Left player has NO Diamonds.
         use crate::skat::defs::NULL_DIAMONDS;
 
-        let uproblem = UncertainProblem {
+        let uproblem = PimcProblem {
             game_type: Game::Null,
             // Total 6 cards.
             // My: CA CT

@@ -1,19 +1,19 @@
 use std::collections::HashMap;
 
-use super::uncertain_problem::UncertainProblem;
+use super::pimc_problem::PimcProblem;
 use crate::extensions::solver::{solve_all_cards, solve_win};
 use crate::skat::defs::Game;
 use crate::skat::engine::SkatEngine;
 use crate::traits::StringConverter;
 
-pub struct Estimator {
-    pub uproblem: UncertainProblem,
+pub struct PimcSearch {
+    pub uproblem: PimcProblem,
     pub sample_size: u32,
 }
 
-impl Estimator {
-    pub fn new(uproblem: UncertainProblem, sample_size: u32) -> Estimator {
-        Estimator {
+impl PimcSearch {
+    pub fn new(uproblem: PimcProblem, sample_size: u32) -> PimcSearch {
+        PimcSearch {
             uproblem,
             sample_size,
         }
@@ -120,17 +120,17 @@ impl Estimator {
 
 #[cfg(test)]
 mod tests {
-    use crate::{skat::defs::Player, uncertain::uproblem_builder::UProblemBuilder};
+    use crate::{pimc::pimc_problem_builder::PimcProblemBuilder, skat::defs::Player};
 
     #[test]
     fn test_uproblem_three_cards() {
-        let uproblem = UProblemBuilder::new_farbspiel()
+        let uproblem = PimcProblemBuilder::new_farbspiel()
             .cards(Player::Declarer, "SA SK S9")
             .remaining_cards("ST SQ S8 C7 H7 D7")
             .threshold(21)
             .build();
 
-        let estimator = super::Estimator::new(uproblem, 10);
+        let estimator = super::PimcSearch::new(uproblem, 10);
         let (probability, _) = estimator.estimate_win(false);
 
         println!("Probability of win: {}", probability);
@@ -138,13 +138,13 @@ mod tests {
 
     #[test]
     fn test_uproblem_three_cards_with_debug_info() {
-        let uproblem = UProblemBuilder::new_farbspiel()
+        let uproblem = PimcProblemBuilder::new_farbspiel()
             .cards(Player::Declarer, "SA SK S9")
             .remaining_cards("ST SQ S8 C7 H7 D7")
             .threshold(21)
             .build();
 
-        let estimator = super::Estimator::new(uproblem, 1000);
+        let estimator = super::PimcSearch::new(uproblem, 1000);
         let (probability, _) = estimator.estimate_win(true);
 
         println!("Probability of win: {}", probability);

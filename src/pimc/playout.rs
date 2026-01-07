@@ -1,11 +1,11 @@
-use super::estimator::Estimator;
+use super::pimc_search::PimcSearch;
+use crate::pimc::pimc_problem::PimcProblem;
 use crate::traits::StringConverter;
-use crate::uncertain::uncertain_problem::UncertainProblem;
 
-impl Estimator {
-    pub fn playout(initial_problem: UncertainProblem) {
+impl PimcSearch {
+    pub fn playout(initial_problem: PimcProblem) {
         let first_uproblem = initial_problem;
-        let estimator = Estimator::new(first_uproblem, 100);
+        let estimator = PimcSearch::new(first_uproblem, 100);
 
         println!("Start calculating 1...");
         let result = estimator.estimate_probability_of_all_cards(false);
@@ -34,18 +34,18 @@ impl Estimator {
 #[cfg(test)]
 mod tests {
     use crate::{
+        pimc::{pimc_problem_builder::PimcProblemBuilder, pimc_search::PimcSearch},
         skat::defs::Player,
-        uncertain::{estimator::Estimator, uproblem_builder::UProblemBuilder},
     };
 
     #[test]
     pub fn test() {
-        let up = UProblemBuilder::new_farbspiel()
+        let up = PimcProblemBuilder::new_farbspiel()
             .cards(Player::Declarer, "CJ SJ D7")
             .remaining_cards("HJ DJ DA DT H7 H8")
             .threshold_half()
             .build();
 
-        Estimator::playout(up);
+        PimcSearch::playout(up);
     }
 }

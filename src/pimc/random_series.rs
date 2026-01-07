@@ -510,7 +510,7 @@ pub fn get_random_card_distribution_with_seed(rand: &mut StdRng) -> (u32, u32, u
 #[cfg(test)]
 mod tests {
     use crate::traits::StringConverter;
-    use crate::uncertain::random_series::get_random_card_distribution_with_seed;
+    use crate::pimc::random_series::get_random_card_distribution_with_seed;
     use rand::{rngs::StdRng, SeedableRng};
 
     #[test]
