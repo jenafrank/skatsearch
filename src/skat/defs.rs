@@ -16,7 +16,9 @@ pub use crate::consts::bitboard::{
 // PLAYER
 // -----------------------------------------------------------------------------
 
-#[derive(Copy, Clone, Eq, PartialEq, Debug, Hash, Default)]
+use serde::{Deserialize, Serialize};
+
+#[derive(Copy, Clone, Eq, PartialEq, Debug, Hash, Default, Serialize, Deserialize)]
 pub enum Player {
     #[default]
     Declarer = 0,
@@ -72,7 +74,7 @@ impl std::fmt::Display for Player {
 // GAME
 // -----------------------------------------------------------------------------
 
-#[derive(Copy, Clone, Debug, PartialEq)]
+#[derive(Copy, Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub enum Game {
     Suit,
     Grand,

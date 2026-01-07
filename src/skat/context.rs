@@ -193,4 +193,26 @@ impl GameContext {
 
         ret
     }
+
+    pub fn validate(&self) -> Result<(), String> {
+        self.check_equal_card_count()?;
+        // Add more checks here
+        Ok(())
+    }
+
+    fn check_equal_card_count(&self) -> Result<(), String> {
+        if self.trick_cards == 0 {
+            let n_declarer = self.declarer_cards.count_ones();
+            let n_left = self.left_cards.count_ones();
+            let n_right = self.right_cards.count_ones();
+
+            if n_declarer != n_left || n_declarer != n_right {
+                return Err(format!(
+                    "Card counts mismatch: Declarer={}, Left={}, Right={}. They must be equal when no trick is active.",
+                    n_declarer, n_left, n_right
+                ));
+            }
+        }
+        Ok(())
+    }
 }

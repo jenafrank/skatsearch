@@ -1,0 +1,10 @@
+{
+    "declarer_cards": "SJ SA ST",
+    "left_cards": "CJ CT C9",
+    "right_cards": "HJ HT H9",
+    "game_type": "Grand",
+    "start_player": "Declarer",
+    "mode": "Value",
+    "trick_cards": "",
+    "trick_suit": ""
+}

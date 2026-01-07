@@ -119,7 +119,7 @@ impl PimcProblemBuilder {
         self
     }
 
-    pub fn skat_cards(mut self, skat_cards: &str) -> PimcProblemBuilder {
+    pub fn skat_cards(self, skat_cards: &str) -> PimcProblemBuilder {
         let skat_cards_bit = skat_cards.__bit();
         assert!(skat_cards_bit.count_ones() == 2);
         self.missing_cards(skat_cards)
