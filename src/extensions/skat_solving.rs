@@ -8,7 +8,7 @@ use crate::skat::defs::{Game, Player};
 use crate::skat::engine::SkatEngine;
 // use crate::skat::position::Position;
 use crate::extensions::solver::solve_double_dummy;
-use crate::traits::{Augen, Bitboard};
+use crate::traits::{Bitboard, Points};
 
 // -----------------------------------------------------------------------------
 // TYPES
@@ -83,7 +83,7 @@ pub fn solve_with_skat(
 
     for (skat_card_1, skat_card_2) in skat_combinations {
         let skat_bitmask = skat_card_1 | skat_card_2;
-        let skat_value = skat_bitmask.__get_value();
+        let skat_value = skat_bitmask.points();
 
         let player_hand_bitmask = twelve_cards_bitmask ^ skat_bitmask;
 

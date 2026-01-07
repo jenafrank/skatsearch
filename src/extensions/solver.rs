@@ -6,7 +6,7 @@ use crate::skat::counters::Counters;
 use crate::skat::defs::Game;
 use crate::skat::engine::SkatEngine;
 // use crate::skat::position::Position;
-use crate::traits::Augen;
+use crate::traits::Points;
 
 // Return types (formerly retargs)
 pub struct SolveWinRet {
@@ -118,7 +118,7 @@ pub fn solve_and_add_skat(engine: &mut SkatEngine) -> SolveRet {
     let mut ret = solve_double_dummy(engine, 0, 120, 1);
 
     let double_dummy_result = ret.best_value;
-    let skat_value = engine.context.get_skat().__get_value();
+    let skat_value = engine.context.get_skat().points();
 
     match engine.context.game_type() {
         Game::Null => {

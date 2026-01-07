@@ -3,13 +3,13 @@
 //! Contains basic types (`Game`, `Player`) and bitboard constants used throughout the engine.
 pub use crate::consts::bitboard::{
     ACES, ALLCARDS, CARDS, CLUBS, CONNECTION_BREAKER, DIAMONDS, EIGHTOFCLUBS, EIGHTOFDIAMONDS,
-    EIGHTOFHEARTS, EIGHTOFSPADES, EIGHTS, FARB_CONN, FARB_CONN_EQ, GRAND_CONN, GRAND_CONN_EQ,
-    HEARTS, JACKOFCLUBS, JACKOFDIAMONDS, JACKOFHEARTS, JACKOFSPADES, JACKS, KINGOFCLUBS,
-    KINGOFDIAMONDS, KINGOFHEARTS, KINGOFSPADES, KINGS, NINEOFCLUBS, NINEOFDIAMONDS, NINEOFHEARTS,
-    NINEOFSPADES, NINES, NULL_CLUBS, NULL_CONN_EQ, NULL_DIAMONDS, NULL_HEARTS, NULL_SPADES,
-    QUEENOFCLUBS, QUEENOFDIAMONDS, QUEENOFHEARTS, QUEENOFSPADES, QUEENS, RANGE, RANGE_INV,
-    SEVENOFCLUBS, SEVENOFDIAMONDS, SEVENOFHEARTS, SEVENOFSPADES, SEVENS, SPADES, TENOFCLUBS,
-    TENOFDIAMONDS, TENOFHEARTS, TENOFSPADES, TENS, TRUMP_FARBE, TRUMP_GRAND, TRUMP_NULL,
+    EIGHTOFHEARTS, EIGHTOFSPADES, EIGHTS, GRAND_CONN, GRAND_CONN_EQ, HEARTS, JACKOFCLUBS,
+    JACKOFDIAMONDS, JACKOFHEARTS, JACKOFSPADES, JACKS, KINGOFCLUBS, KINGOFDIAMONDS, KINGOFHEARTS,
+    KINGOFSPADES, KINGS, NINEOFCLUBS, NINEOFDIAMONDS, NINEOFHEARTS, NINEOFSPADES, NINES,
+    NULL_CLUBS, NULL_CONN_EQ, NULL_DIAMONDS, NULL_HEARTS, NULL_SPADES, QUEENOFCLUBS,
+    QUEENOFDIAMONDS, QUEENOFHEARTS, QUEENOFSPADES, QUEENS, RANGE, RANGE_INV, SEVENOFCLUBS,
+    SEVENOFDIAMONDS, SEVENOFHEARTS, SEVENOFSPADES, SEVENS, SPADES, SUIT_CONN, SUIT_CONN_EQ,
+    TENOFCLUBS, TENOFDIAMONDS, TENOFHEARTS, TENOFSPADES, TENS, TRUMP_GRAND, TRUMP_NULL, TRUMP_SUIT,
 };
 
 // -----------------------------------------------------------------------------
@@ -74,7 +74,7 @@ impl std::fmt::Display for Player {
 
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub enum Game {
-    Farbe,
+    Suit,
     Grand,
     Null,
 }
@@ -82,7 +82,7 @@ pub enum Game {
 impl Game {
     pub fn convert_to_string(&self) -> String {
         match self {
-            Game::Farbe => "Farbe".to_string(),
+            Game::Suit => "Suit".to_string(),
             Game::Grand => "Grand".to_string(),
             Game::Null => "Null".to_string(),
         }
@@ -90,7 +90,7 @@ impl Game {
 
     pub fn get_trump(&self) -> u32 {
         match self {
-            Game::Farbe => TRUMP_FARBE,
+            Game::Suit => TRUMP_SUIT,
             Game::Grand => TRUMP_GRAND,
             Game::Null => TRUMP_NULL,
         }
@@ -98,7 +98,7 @@ impl Game {
 
     pub fn get_unequal_sequence(&self) -> &[(u32, u8)] {
         match self {
-            Game::Farbe => &FARB_CONN,
+            Game::Suit => &SUIT_CONN,
             Game::Grand => &GRAND_CONN,
             Game::Null => panic!("Not allowed for Null because Null has only equal values."),
         }
@@ -106,7 +106,7 @@ impl Game {
 
     pub fn get_equal_sequence(&self) -> &[u32] {
         match self {
-            Game::Farbe => &FARB_CONN_EQ,
+            Game::Suit => &SUIT_CONN_EQ,
             Game::Grand => &GRAND_CONN_EQ,
             Game::Null => &NULL_CONN_EQ,
         }

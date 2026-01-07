@@ -2,11 +2,11 @@
 //!
 //! Calculates results for all game types (Grand, Null, Suits) in parallel.
 
+use crate::extensions::skat_solving::{solve_with_skat, AccelerationMode, SolveWithSkatRet};
+use crate::extensions::solver::{solve_and_add_skat, SolveRet};
 use crate::skat::context::{GameContext, ProblemTransformation};
 use crate::skat::defs::{Game, Player};
 use crate::skat::engine::SkatEngine;
-use crate::extensions::skat_solving::{solve_with_skat, AccelerationMode, SolveWithSkatRet};
-use crate::extensions::solver::{solve_and_add_skat, SolveRet};
 use rayon::prelude::*;
 
 // -----------------------------------------------------------------------------
@@ -90,7 +90,7 @@ pub fn calc_all_games(
 
     // Create base problem
     let base_problem_farbe_eichel =
-        GameContext::create(my_cards, left_cards, right_cards, Game::Farbe, start_player);
+        GameContext::create(my_cards, left_cards, right_cards, Game::Suit, start_player);
 
     // Create transformed problems
     let problem_farbe_gruen = GameContext::create_transformation(
@@ -115,12 +115,12 @@ pub fn calc_all_games(
         (
             GameKey::Eichel,
             base_problem_farbe_eichel,
-            Game::Farbe,
+            Game::Suit,
             acc_mode,
         ),
-        (GameKey::Gruen, problem_farbe_gruen, Game::Farbe, acc_mode),
-        (GameKey::Herz, problem_farbe_herz, Game::Farbe, acc_mode),
-        (GameKey::Schell, problem_farbe_schell, Game::Farbe, acc_mode),
+        (GameKey::Gruen, problem_farbe_gruen, Game::Suit, acc_mode),
+        (GameKey::Herz, problem_farbe_herz, Game::Suit, acc_mode),
+        (GameKey::Schell, problem_farbe_schell, Game::Suit, acc_mode),
         (GameKey::Grand, problem_grand, Game::Grand, acc_mode),
         (GameKey::Null, problem_null, Game::Null, acc_mode),
     ];

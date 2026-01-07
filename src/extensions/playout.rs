@@ -11,8 +11,8 @@ pub struct PlayoutLine {
     pub right_cards: u32,
     pub player: Player,
     pub card: u32,
-    pub augen_declarer: u8,
-    pub augen_team: u8,
+    pub declarer_points: u8,
+    pub team_points: u8,
     pub cnt_iters: usize,
     pub cnt_breaks: usize,
     pub time: u128,
@@ -22,7 +22,7 @@ pub struct PlayoutLine {
 pub struct PlayoutAllCardsRetLine {
     pub player: Player,
     pub best_card: u32,
-    pub augen_declarer: u8,
+    pub declarer_points: u8,
     pub all_cards: SolveAllCardsRet,
 }
 
@@ -58,8 +58,8 @@ pub fn playout(engine: &mut SkatEngine) -> Vec<PlayoutLine> {
 
         row.player = position.player; // Position has player? Yes.
         row.card = played_card;
-        row.augen_declarer = position.augen_declarer;
-        row.augen_team = position.augen_team;
+        row.declarer_points = position.declarer_points;
+        row.team_points = position.team_points;
         row.cnt_iters = cnt.iters as usize;
         row.cnt_breaks = cnt.breaks as usize;
         row.time = time;
@@ -110,7 +110,7 @@ pub fn playout_all_cards(engine: &mut SkatEngine) -> Vec<PlayoutAllCardsRetLine>
 
         position = position.make_move(best_card, &engine.context);
 
-        row.augen_declarer = position.augen_declarer;
+        row.declarer_points = position.declarer_points;
         row.all_cards = resall;
 
         ret.push(row);

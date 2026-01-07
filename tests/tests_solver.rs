@@ -3,7 +3,7 @@ extern crate skat_aug23;
 use skat_aug23::extensions::skat_solving::{solve_with_skat, AccelerationMode};
 use skat_aug23::extensions::solver::{solve_all_cards, solve_win};
 use skat_aug23::skat::engine::SkatEngine;
-use skat_aug23::traits::{Augen, StringConverter};
+use skat_aug23::traits::{Points, StringConverter};
 use std::time::Instant;
 
 mod problems;
@@ -36,7 +36,7 @@ pub fn solve_win_10tricks() {
 
     // Logic to replicate old solve_win_10tricks behavior:
     // It adjusted threshold based on skat value.
-    let skat_value = problem.get_skat().__get_value();
+    let skat_value = problem.get_skat().points();
     let threshold = 61 - skat_value;
     problem.set_threshold_upper(threshold);
 
@@ -88,7 +88,7 @@ pub fn solve_with_skat_test() {
     println!();
 
     for el in vec {
-        let skat_value = el.skat_card_1.__get_value() + el.skat_card_2.__get_value();
+        let skat_value = el.skat_card_1.points() + el.skat_card_2.points();
         println!(
             "{} {} : {:3} + {:3} = {:3} | {}",
             el.skat_card_1.__str(),

@@ -283,8 +283,8 @@ pub fn get_sorted_by_value(moves: u32) -> ([u32; 10], usize) {
 
 pub fn get_suit_for_card(card: u32, game_type: Game) -> u32 {
     match game_type {
-        Game::Farbe => match card {
-            x if TRUMP_FARBE.__contain(x) => TRUMP_FARBE,
+        Game::Suit => match card {
+            x if TRUMP_SUIT.__contain(x) => TRUMP_SUIT,
             x if SPADES.__contain(x) => SPADES,
             x if HEARTS.__contain(x) => HEARTS,
             x if DIAMONDS.__contain(x) => DIAMONDS,

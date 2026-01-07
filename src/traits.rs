@@ -1,25 +1,24 @@
 pub mod bit_converter;
-pub mod augen;
-pub mod string_converter;
 pub mod bitboard;
+pub mod points;
+pub mod string_converter;
 
 pub trait BitConverter {
     fn __bit(&self) -> u32;
 }
 
-pub trait Augen {
-    fn __get_value(&self) -> u8;
-    fn __get_value_of_three_cards(&self) -> u8;
-    fn __get_number_of_bits(&self) -> u8;
-    fn __get_from_one_card(&self) -> u8;
+pub trait Points {
+    fn points(&self) -> u8;
+    fn trick_points(&self) -> u8;
+    fn card_count(&self) -> u8;
+    fn card_points(&self) -> u8;
 }
 
 pub trait Bitboard {
     fn __contain(&self, card: u32) -> bool;
     fn __is_odd(&self) -> bool;
-    fn __decompose(&self) -> ([u32; 32],usize);
+    fn __decompose(&self) -> ([u32; 32], usize);
     fn __decompose_twelve(&self) -> [u32; 12];
-
 }
 
 pub trait StringConverter {

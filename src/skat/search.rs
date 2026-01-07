@@ -138,22 +138,22 @@ fn apply_termination_criteria(
     beta: u8,
 ) -> Option<u8> {
     if position.player_cards == 0 {
-        return Some(position.augen_declarer);
+        return Some(position.declarer_points);
     }
 
     match context.game_type {
         Game::Null => {
-            if position.augen_declarer > 0 {
+            if position.declarer_points > 0 {
                 return Some(1);
             }
             None
         }
         _ => {
-            if context.augen_total() - position.augen_team <= alpha {
+            if context.total_points() - position.team_points <= alpha {
                 return Some(alpha);
             }
 
-            if position.augen_declarer >= beta {
+            if position.declarer_points >= beta {
                 return Some(beta);
             }
             None
@@ -179,7 +179,7 @@ fn transposition_table_lookup(
     if let Some(tt_entry) = tt.read(position, cnt) {
         *tt_best_card = tt_entry.bestcard;
         // Stored value is REMAINING value. Adding accumulated augen.
-        let value = tt_entry.value + position.augen_declarer;
+        let value = tt_entry.value + position.declarer_points;
         let bestcard = tt_entry.bestcard;
 
         match tt_entry.flag {

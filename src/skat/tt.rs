@@ -103,8 +103,8 @@ impl TranspositionTable {
             declarer_cards: position.declarer_cards,
             trick_cards: position.trick_cards,
 
-            value: if value.1 > position.augen_declarer {
-                value.1 - position.augen_declarer
+            value: if value.1 > position.declarer_points {
+                value.1 - position.declarer_points
             } else {
                 0
             }, // Safety check for subtraction

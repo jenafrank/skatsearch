@@ -28,7 +28,7 @@ fn test_uproblem_ten_cards_grand() {
         .threshold_half()
         .build();
 
-    assert_eq!(uproblem.threshold_upper(), 61);
+    assert_eq!(uproblem.threshold(), 61);
 
     let estimator = PimcSearch::new(uproblem, 100);
     let (probability, _) = estimator.estimate_win(true);

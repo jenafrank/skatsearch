@@ -13,10 +13,10 @@ pub struct PimcProblem {
     my_cards: u32,
 
     // Primary values
-    card_on_table_previous_player: u32,
-    card_on_table_next_player: u32,
+    previous_card: u32,
+    next_card: u32,
     all_cards: u32,
-    threshold_upper: u8,
+    threshold: u8,
 
     // Facts
     facts_previous_player: Facts,
@@ -36,7 +36,7 @@ impl PimcProblem {
         // todo!() assuming no for now
 
         // Add card to trick card
-        ret.card_on_table_previous_player = played_card.__bit();
+        ret.previous_card = played_card.__bit();
 
         ret.print_object();
 
@@ -51,14 +51,11 @@ impl PimcProblem {
         println!("my cards = {}", self.my_cards.__str());
         println!(
             "trick_card_previous_player = {}",
-            self.card_on_table_previous_player.__str()
+            self.previous_card.__str()
         );
-        println!(
-            "trick_card_next_player = {}",
-            self.card_on_table_next_player.__str()
-        );
+        println!("trick_card_next_player = {}", self.next_card.__str());
         println!("all cards = {}", self.all_cards.__str());
-        println!("threshold = {}", self.threshold_upper);
+        println!("threshold = {}", self.threshold);
         println!(
             "facts left = {}",
             self.facts_previous_player.convert_to_string()
@@ -84,24 +81,24 @@ impl PimcProblem {
         self.my_cards
     }
 
-    pub fn card_on_table_previous_player(&self) -> u32 {
-        self.card_on_table_previous_player
+    pub fn previous_card(&self) -> u32 {
+        self.previous_card
     }
 
-    pub fn card_on_table_next_player(&self) -> u32 {
-        self.card_on_table_next_player
+    pub fn next_card(&self) -> u32 {
+        self.next_card
     }
 
     pub fn cards_on_table(&self) -> u32 {
-        self.card_on_table_previous_player | self.card_on_table_next_player
+        self.previous_card | self.next_card
     }
 
     pub fn all_cards(&self) -> u32 {
         self.all_cards
     }
 
-    pub fn threshold_upper(&self) -> u8 {
-        self.threshold_upper
+    pub fn threshold(&self) -> u8 {
+        self.threshold
     }
 
     pub fn facts_previous_player(&self) -> Facts {
@@ -127,20 +124,20 @@ impl PimcProblem {
         self.my_cards = my_cards;
     }
 
-    pub fn set_card_on_table_previous_player(&mut self, card_on_table_previous_player: u32) {
-        self.card_on_table_previous_player = card_on_table_previous_player;
+    pub fn set_previous_card(&mut self, previous_card: u32) {
+        self.previous_card = previous_card;
     }
 
-    pub fn set_card_on_table_next_player(&mut self, card_on_table_next_player: u32) {
-        self.card_on_table_next_player = card_on_table_next_player;
+    pub fn set_next_card(&mut self, next_card: u32) {
+        self.next_card = next_card;
     }
 
     pub fn set_all_cards(&mut self, all_cards: u32) {
         self.all_cards = all_cards;
     }
 
-    pub fn set_threshold_upper(&mut self, threshold_upper: u8) {
-        self.threshold_upper = threshold_upper;
+    pub fn set_threshold(&mut self, threshold: u8) {
+        self.threshold = threshold;
     }
 
     pub fn set_facts_left(&mut self, facts_left: Facts) {
@@ -155,13 +152,13 @@ impl PimcProblem {
 impl PimcProblem {
     pub fn new() -> Self {
         PimcProblem {
-            game_type: Game::Farbe,
+            game_type: Game::Suit,
             my_cards: 0u32,
             my_player: Player::Declarer,
             all_cards: 0u32,
-            card_on_table_previous_player: 0u32,
-            card_on_table_next_player: 0u32,
-            threshold_upper: 1u8,
+            previous_card: 0u32,
+            next_card: 0u32,
+            threshold: 1u8,
             facts_previous_player: Facts::zero_fact(),
             facts_next_player: Facts::zero_fact(),
         }
@@ -175,16 +172,13 @@ impl PimcProblem {
             .cards(Player::Left, "")
             .cards(Player::Right, "")
             .turn(self.my_player)
-            .trick_from_uproblem(
-                self.card_on_table_previous_player,
-                self.card_on_table_next_player,
-            )
-            .threshold(self.threshold_upper)
+            .trick_from_uproblem(self.previous_card, self.next_card)
+            .threshold(self.threshold)
             .set_cards_for_problem(self.my_cards, self.my_player)
             .set_cards_for_other_players(
                 self.all_cards,
-                self.card_on_table_previous_player,
-                self.card_on_table_next_player,
+                self.previous_card,
+                self.next_card,
                 self.my_cards,
                 self.my_player,
                 self.next_player_facts(),
@@ -241,13 +235,13 @@ mod tests {
     #[test]
     fn test_problem_generation() {
         let uproblem = PimcProblem {
-            game_type: Game::Farbe,
+            game_type: Game::Suit,
             all_cards: "CA CT SA ST HA HT DA DT D9".__bit(),
             my_cards: "CA CT SA".__bit(),
-            card_on_table_next_player: 0u32,
-            card_on_table_previous_player: 0u32,
+            next_card: 0u32,
+            previous_card: 0u32,
             my_player: Player::Declarer,
-            threshold_upper: 1,
+            threshold: 1,
             facts_previous_player: Facts::one_fact(true, false, false, false, false),
             facts_next_player: Facts::zero_fact(),
         };
@@ -262,13 +256,13 @@ mod tests {
     #[test]
     fn test_inter_trick_problem_generation() {
         let uproblem = PimcProblem {
-            game_type: Game::Farbe,
+            game_type: Game::Suit,
             all_cards: "CA CT SA ST HA HT DA DT D9".__bit(),
             my_cards: "CA CT SA".__bit(),
             my_player: Player::Declarer,
-            threshold_upper: 1,
-            card_on_table_previous_player: "ST".__bit(),
-            card_on_table_next_player: 0u32,
+            threshold: 1,
+            previous_card: "ST".__bit(),
+            next_card: 0u32,
             facts_previous_player: Facts::zero_fact(),
             facts_next_player: Facts::zero_fact(),
         };
@@ -284,11 +278,11 @@ mod tests {
     fn test_farbe_no_trump_fact() {
         // Game is Farbe (Clubs Trump).
         // Fact: Left player has NO Trump.
-        // Expectation: Left player should NOT have Jacks or Clubs (TRUMP_FARBE).
-        use crate::skat::defs::{DIAMONDS, HEARTS, SPADES, TRUMP_FARBE};
+        // Expectation: Left player should NOT have Jacks or Clubs (TRUMP_SUIT).
+        use crate::skat::defs::{DIAMONDS, HEARTS, SPADES, TRUMP_SUIT};
 
         let uproblem = PimcProblem {
-            game_type: Game::Farbe,
+            game_type: Game::Suit,
             // Total 6 cards. My=2. Left=2. Right=2.
             // My: SA ST (Non-Trump)
             // Available:
@@ -304,9 +298,9 @@ mod tests {
             all_cards: "SA ST CA CT HA HT".__bit(),
             my_cards: "SA ST".__bit(),
             my_player: Player::Declarer,
-            threshold_upper: 1,
-            card_on_table_next_player: 0u32,
-            card_on_table_previous_player: 0u32,
+            threshold: 1,
+            next_card: 0u32,
+            previous_card: 0u32,
             facts_previous_player: Facts::zero_fact(),
             facts_next_player: Facts::one_fact(true, false, false, false, false), // No Trump for Left
         };
@@ -318,7 +312,7 @@ mod tests {
 
             // Left should have NO Trump cards (No Jacks, No Clubs)
             assert_eq!(
-                left_cards & TRUMP_FARBE,
+                left_cards & TRUMP_SUIT,
                 0,
                 "Left player has trump cards despite No Trump fact! Cards: {}",
                 left_cards.__str()
@@ -339,13 +333,13 @@ mod tests {
         // Fact: Left player has NO Clubs.
         // Expectation: Left player should NOT have Cards of the Club Suit (7-A).
         // Since Clubs is Trump, this largely overlaps with No Trump, but technically "No Clubs" fact specifically targets Club suit.
-        // In our engine, No Clubs (fact) in Farbe -> Remove TRUMP_FARBE (Jacks + Clubs).
+        // In our engine, No Clubs (fact) in Farbe -> Remove TRUMP_SUIT (Jacks + Clubs).
         // So they should have no Clubs AND no Jacks.
 
-        use crate::skat::defs::TRUMP_FARBE;
+        use crate::skat::defs::TRUMP_SUIT;
 
         let uproblem = PimcProblem {
-            game_type: Game::Farbe,
+            game_type: Game::Suit,
             // Total 6 cards. My=2. Left=2. Right=2.
             // My: HA HT (Hearts - Non-Trump)
             // Available:
@@ -356,9 +350,9 @@ mod tests {
             all_cards: "HA HT CA CT SA ST".__bit(),
             my_cards: "HA HT".__bit(),
             my_player: Player::Declarer,
-            threshold_upper: 1,
-            card_on_table_next_player: 0u32,
-            card_on_table_previous_player: 0u32,
+            threshold: 1,
+            next_card: 0u32,
+            previous_card: 0u32,
             facts_previous_player: Facts::zero_fact(),
             facts_next_player: Facts::one_fact(false, true, false, false, false), // No Clubs for Left
         };
@@ -369,7 +363,7 @@ mod tests {
 
             // Left should have NO Club suit cards (and no Jacks because logic maps No Clubs -> No Trump in Farbe)
             assert_eq!(
-                left_cards & TRUMP_FARBE,
+                left_cards & TRUMP_SUIT,
                 0,
                 "Left player has Trump cards despite No Clubs fact!"
             );
@@ -387,7 +381,7 @@ mod tests {
         use crate::skat::defs::SPADES;
 
         let uproblem = PimcProblem {
-            game_type: Game::Farbe,
+            game_type: Game::Suit,
             // Total 6 cards. My=2. Left=2. Right=2.
             // My: CA CT (Clubs - Trump)
             // Available:
@@ -403,9 +397,9 @@ mod tests {
             all_cards: "CA CT SA ST SJ HA".__bit(),
             my_cards: "CA CT".__bit(),
             my_player: Player::Declarer,
-            threshold_upper: 1,
-            card_on_table_next_player: 0u32,
-            card_on_table_previous_player: 0u32,
+            threshold: 1,
+            next_card: 0u32,
+            previous_card: 0u32,
             facts_previous_player: Facts::zero_fact(),
             facts_next_player: Facts::one_fact(false, false, true, false, false), // No Spades for Left
         };
@@ -453,9 +447,9 @@ mod tests {
             all_cards: "CA CT CJ SJ SA ST".__bit(),
             my_cards: "CA CT".__bit(),
             my_player: Player::Declarer,
-            threshold_upper: 1,
-            card_on_table_next_player: 0u32,
-            card_on_table_previous_player: 0u32,
+            threshold: 1,
+            next_card: 0u32,
+            previous_card: 0u32,
             facts_previous_player: Facts::zero_fact(),
             facts_next_player: Facts::one_fact(true, false, false, false, false), // No Trump for Left
         };
@@ -490,9 +484,9 @@ mod tests {
             all_cards: "HA HT CA CJ SA ST".__bit(),
             my_cards: "HA HT".__bit(),
             my_player: Player::Declarer,
-            threshold_upper: 1,
-            card_on_table_next_player: 0u32,
-            card_on_table_previous_player: 0u32,
+            threshold: 1,
+            next_card: 0u32,
+            previous_card: 0u32,
             facts_previous_player: Facts::zero_fact(),
             facts_next_player: Facts::one_fact(false, true, false, false, false), // No Clubs for Left
         };
@@ -528,9 +522,9 @@ mod tests {
             all_cards: "HA HT SA SJ DA DT".__bit(),
             my_cards: "HA HT".__bit(),
             my_player: Player::Declarer,
-            threshold_upper: 1,
-            card_on_table_next_player: 0u32,
-            card_on_table_previous_player: 0u32,
+            threshold: 1,
+            next_card: 0u32,
+            previous_card: 0u32,
             facts_previous_player: Facts::zero_fact(),
             facts_next_player: Facts::one_fact(false, false, true, false, false), // No Spades for Left
         };
@@ -565,9 +559,9 @@ mod tests {
             all_cards: "CA CT HA HJ DA DT".__bit(),
             my_cards: "CA CT".__bit(),
             my_player: Player::Declarer,
-            threshold_upper: 1,
-            card_on_table_next_player: 0u32,
-            card_on_table_previous_player: 0u32,
+            threshold: 1,
+            next_card: 0u32,
+            previous_card: 0u32,
             facts_previous_player: Facts::zero_fact(),
             facts_next_player: Facts::one_fact(false, false, false, true, false), // No Hearts for Left
         };
@@ -602,9 +596,9 @@ mod tests {
             all_cards: "CA CT DA DJ SA ST".__bit(),
             my_cards: "CA CT".__bit(),
             my_player: Player::Declarer,
-            threshold_upper: 1,
-            card_on_table_next_player: 0u32,
-            card_on_table_previous_player: 0u32,
+            threshold: 1,
+            next_card: 0u32,
+            previous_card: 0u32,
             facts_previous_player: Facts::zero_fact(),
             facts_next_player: Facts::one_fact(false, false, false, false, true), // No Diamonds for Left
         };

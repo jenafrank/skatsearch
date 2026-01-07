@@ -3,7 +3,7 @@ use crate::{
     pimc::facts::Facts,
     skat::defs::*,
     skat::rules::get_all_unplayed_cards,
-    traits::{Augen, BitConverter, Bitboard},
+    traits::{BitConverter, Bitboard, Points},
 };
 use rand::seq::index::sample;
 
@@ -26,7 +26,7 @@ impl GameContextBuilder {
     }
 
     pub fn new_farbspiel() -> GameContextBuilder {
-        GameContextBuilder::new(Game::Farbe)
+        GameContextBuilder::new(Game::Suit)
     }
 
     pub fn new_grand() -> GameContextBuilder {
@@ -80,7 +80,7 @@ impl GameContextBuilder {
         let right_cards = self.right_cards.expect("No declarer cards have been set.");
 
         let all_cards = get_all_unplayed_cards(declarer_cards, left_cards, right_cards);
-        self.threshold_upper = Some((all_cards.__get_value() / 2) + 1);
+        self.threshold_upper = Some((all_cards.points() / 2) + 1);
         self
     }
 
@@ -321,7 +321,7 @@ fn cancel_cards_with_facts(cards: u32, facts: Facts, game: Game) -> u32 {
 
     if facts.no_trump {
         ret_cards = match game {
-            Game::Farbe => ret_cards & !TRUMP_FARBE,
+            Game::Suit => ret_cards & !TRUMP_SUIT,
             Game::Grand => ret_cards & !TRUMP_GRAND,
             Game::Null => ret_cards & !TRUMP_NULL,
         }
@@ -329,7 +329,7 @@ fn cancel_cards_with_facts(cards: u32, facts: Facts, game: Game) -> u32 {
 
     if facts.no_clubs {
         ret_cards = match game {
-            Game::Farbe => ret_cards & !TRUMP_FARBE,
+            Game::Suit => ret_cards & !TRUMP_SUIT,
             Game::Grand => ret_cards & !CLUBS,
             Game::Null => ret_cards & !NULL_CLUBS,
         }
@@ -337,7 +337,7 @@ fn cancel_cards_with_facts(cards: u32, facts: Facts, game: Game) -> u32 {
 
     if facts.no_spades {
         ret_cards = match game {
-            Game::Farbe => ret_cards & !SPADES,
+            Game::Suit => ret_cards & !SPADES,
             Game::Grand => ret_cards & !SPADES,
             Game::Null => ret_cards & !NULL_SPADES,
         }
@@ -345,7 +345,7 @@ fn cancel_cards_with_facts(cards: u32, facts: Facts, game: Game) -> u32 {
 
     if facts.no_hearts {
         ret_cards = match game {
-            Game::Farbe => ret_cards & !HEARTS,
+            Game::Suit => ret_cards & !HEARTS,
             Game::Grand => ret_cards & !HEARTS,
             Game::Null => ret_cards & !NULL_HEARTS,
         }
@@ -353,7 +353,7 @@ fn cancel_cards_with_facts(cards: u32, facts: Facts, game: Game) -> u32 {
 
     if facts.no_diamonds {
         ret_cards = match game {
-            Game::Farbe => ret_cards & !DIAMONDS,
+            Game::Suit => ret_cards & !DIAMONDS,
             Game::Grand => ret_cards & !DIAMONDS,
             Game::Null => ret_cards & !NULL_DIAMONDS,
         }

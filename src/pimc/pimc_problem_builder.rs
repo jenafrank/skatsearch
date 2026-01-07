@@ -2,7 +2,7 @@ use super::{facts::Facts, pimc_problem::PimcProblem};
 use crate::{
     consts::bitboard::ALLCARDS,
     skat::defs::{Game, Player},
-    traits::{Augen, BitConverter},
+    traits::{BitConverter, Points},
 };
 
 pub struct PimcProblemBuilder {
@@ -12,11 +12,11 @@ pub struct PimcProblemBuilder {
     next_player: Option<Player>,
 
     // Primary values
-    card_on_table_previous_player: Option<u32>,
-    card_on_table_next_player: Option<u32>,
+    previous_card: Option<u32>,
+    next_card: Option<u32>,
     all_cards: Option<u32>,
     active_suit: Option<u32>,
-    threshold_upper: Option<u8>,
+    threshold: Option<u8>,
 
     // Facts
     facts_declarer: Option<Facts>,
@@ -33,7 +33,7 @@ impl PimcProblemBuilder {
     }
 
     pub fn new_farbspiel() -> PimcProblemBuilder {
-        PimcProblemBuilder::new(Game::Farbe)
+        PimcProblemBuilder::new(Game::Suit)
     }
 
     pub fn new_grand() -> PimcProblemBuilder {
@@ -61,14 +61,14 @@ impl PimcProblemBuilder {
         self
     }
 
-    pub fn threshold(mut self, threshold_upper: u8) -> PimcProblemBuilder {
-        self.threshold_upper = Some(threshold_upper);
+    pub fn threshold(mut self, threshold: u8) -> PimcProblemBuilder {
+        self.threshold = Some(threshold);
         self
     }
 
     pub fn threshold_half(mut self) -> PimcProblemBuilder {
         let all_cards = self.all_cards.expect("No all cards found.");
-        self.threshold_upper = Some((all_cards.__get_value() as u8 / 2) + 1);
+        self.threshold = Some((all_cards.points() as u8 / 2) + 1);
         self
     }
 
@@ -77,7 +77,7 @@ impl PimcProblemBuilder {
         active_suit: u32,
         trick_previous_player: u32,
     ) -> PimcProblemBuilder {
-        self.card_on_table_previous_player = Some(trick_previous_player);
+        self.previous_card = Some(trick_previous_player);
         self.active_suit = Some(active_suit);
         self
     }
@@ -140,20 +140,20 @@ impl PimcProblemBuilder {
             uproblem.set_my_cards(my_cards);
         }
 
-        if let Some(card_on_table_previous_player) = self.card_on_table_previous_player {
-            uproblem.set_card_on_table_previous_player(card_on_table_previous_player);
+        if let Some(previous_card) = self.previous_card {
+            uproblem.set_previous_card(previous_card);
         }
 
-        if let Some(card_on_table_next_player) = self.card_on_table_next_player {
-            uproblem.set_card_on_table_next_player(card_on_table_next_player);
+        if let Some(next_card) = self.next_card {
+            uproblem.set_next_card(next_card);
         }
 
         if let Some(all_cards) = self.all_cards {
             uproblem.set_all_cards(self.cards_on_table() | all_cards);
         }
 
-        if let Some(upper_bound_of_null_window) = self.threshold_upper {
-            uproblem.set_threshold_upper(upper_bound_of_null_window);
+        if let Some(upper_bound_of_null_window) = self.threshold {
+            uproblem.set_threshold(upper_bound_of_null_window);
         }
 
         if let Some(facts) = self.facts_left {
@@ -176,11 +176,11 @@ impl PimcProblemBuilder {
         if self.my_player.is_none()
             || self.my_cards.is_none()
             || self.next_player.is_none()
-            || self.card_on_table_next_player.is_none()
-            || self.card_on_table_previous_player.is_none()
+            || self.next_card.is_none()
+            || self.previous_card.is_none()
             || self.all_cards.is_none()
             || self.active_suit.is_none()
-            || self.threshold_upper.is_none()
+            || self.threshold.is_none()
             || self.facts_declarer.is_none()
             || self.facts_left.is_none()
             || self.facts_right.is_none()
@@ -194,10 +194,10 @@ impl PimcProblemBuilder {
             if self.next_player.is_none() {
                 println!("Next player missing.");
             }
-            if self.card_on_table_next_player.is_none() {
+            if self.next_card.is_none() {
                 println!("Card on table next player missing.");
             }
-            if self.card_on_table_previous_player.is_none() {
+            if self.previous_card.is_none() {
                 println!("Card on table previous player missing.");
             }
             if self.all_cards.is_none() {
@@ -206,7 +206,7 @@ impl PimcProblemBuilder {
             if self.active_suit.is_none() {
                 println!("Active suit missing.");
             }
-            if self.threshold_upper.is_none() {
+            if self.threshold.is_none() {
                 println!("Upper Threshold missing.");
             }
             if self.facts_declarer.is_none() {
@@ -232,23 +232,22 @@ impl PimcProblemBuilder {
     }
 
     fn cards_on_table(&self) -> u32 {
-        self.card_on_table_next_player.unwrap_or(0u32)
-            | self.card_on_table_previous_player.unwrap_or(0u32)
+        self.next_card.unwrap_or(0u32) | self.previous_card.unwrap_or(0u32)
     }
 }
 
 impl Default for PimcProblemBuilder {
     fn default() -> Self {
         PimcProblemBuilder {
-            game_type: Game::Farbe, // Default to a game type, as it's no longer Option
+            game_type: Game::Suit, // Default to a game type, as it's no longer Option
             my_player: None,
             my_cards: None,
             next_player: None,
-            card_on_table_next_player: Some(0u32),
-            card_on_table_previous_player: Some(0u32),
+            next_card: Some(0u32),
+            previous_card: Some(0u32),
             all_cards: None,
             active_suit: Some(0),
-            threshold_upper: None,
+            threshold: None,
             facts_declarer: Some(Facts::zero_fact()),
             facts_left: Some(Facts::zero_fact()),
             facts_right: Some(Facts::zero_fact()),

@@ -128,7 +128,7 @@ impl GameContext {
 
     // Derived logic
 
-    pub fn augen_total(&self) -> u8 {
+    pub fn total_points(&self) -> u8 {
         120
     }
 

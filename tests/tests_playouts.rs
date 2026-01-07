@@ -31,7 +31,7 @@ fn playout_test() {
             el.player.str(),
             el.card.__str(),
             el.card,
-            el.augen_declarer,
+            el.declarer_points,
             el.cnt_iters,
             el.cnt_breaks,
             el.time
@@ -58,7 +58,7 @@ fn playout_all_cards_test() {
     for (i, el) in res.iter().enumerate() {
         let card = el.best_card;
         let player = el.player;
-        let pnts = el.augen_declarer;
+        let pnts = el.declarer_points;
         let allvals = &el.all_cards;
 
         if i % 3 != 2 {

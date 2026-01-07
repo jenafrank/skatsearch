@@ -6,7 +6,7 @@
 use crate::skat::context::GameContext;
 use crate::skat::defs::{Game, Player};
 use crate::skat::rules::*;
-use crate::traits::{Augen, Bitboard}; // Check if these traits need moving // renaming Problem->GameContext later
+use crate::traits::{Bitboard, Points}; // Check if these traits need moving // renaming Problem->GameContext later
 
 #[derive(PartialEq, Eq, Debug, Clone, Copy)]
 pub struct Position {
@@ -15,7 +15,7 @@ pub struct Position {
     pub played_cards: u32,
     pub trick_cards: u32,
     pub trick_suit: u32,
-    pub augen_declarer: u8,
+    pub declarer_points: u8,
 
     // Derived (cached) values
     pub declarer_cards: u32,
@@ -23,8 +23,8 @@ pub struct Position {
     pub right_cards: u32,
     pub player_cards: u32,
     pub trick_cards_count: u8,
-    pub augen_future: u8,
-    pub augen_team: u8,
+    pub remaining_points: u8,
+    pub team_points: u8,
 
     // Additional values
     pub is_root_position: bool,
@@ -38,14 +38,14 @@ impl Position {
         played_cards: u32,
         trick_cards: u32,
         trick_suit: u32,
-        augen_declarer: u8,
+        declarer_points: u8,
         declarer_cards: u32,
         left_cards: u32,
         right_cards: u32,
         player_cards: u32,
         trick_cards_count: u8,
-        augen_future: u8,
-        augen_team: u8,
+        remaining_points: u8,
+        team_points: u8,
         is_root_position: bool,
     ) -> Self {
         let pos = Self {
@@ -53,14 +53,14 @@ impl Position {
             played_cards,
             trick_cards,
             trick_suit,
-            augen_declarer,
+            declarer_points,
             declarer_cards,
             left_cards,
             right_cards,
             player_cards,
             trick_cards_count,
-            augen_future,
-            augen_team,
+            remaining_points,
+            team_points,
             is_root_position,
             hash: 0,
         };
@@ -71,7 +71,7 @@ impl Position {
         played_cards: u32,
         trick_cards: u32,
         trick_suit: u32,
-        augen_declarer: u8,
+        declarer_points: u8,
         player: Player,
         game_context: &GameContext,
         is_root_position: bool,
@@ -79,28 +79,28 @@ impl Position {
         let declarer_cards: u32 = game_context.declarer_cards() & !played_cards;
         let left_cards: u32 = game_context.left_cards() & !played_cards;
         let right_cards: u32 = game_context.right_cards() & !played_cards;
-        let augen_future = game_context.augen_total() - (played_cards & !trick_cards).__get_value();
+        let remaining_points = game_context.total_points() - (played_cards & !trick_cards).points();
         let player_cards = match player {
             Player::Declarer => declarer_cards,
             Player::Left => left_cards,
             Player::Right => right_cards,
         };
         let trick_cards_count = trick_cards.count_ones() as u8;
-        let augen_team = game_context.augen_total() - augen_future - augen_declarer;
+        let team_points = game_context.total_points() - remaining_points - declarer_points;
 
         Position::new(
             player,
             played_cards,
             trick_cards,
             trick_suit,
-            augen_declarer,
+            declarer_points,
             declarer_cards,
             left_cards,
             right_cards,
             player_cards,
             trick_cards_count,
-            augen_future,
-            augen_team,
+            remaining_points,
+            team_points,
             is_root_position,
         )
     }
@@ -135,10 +135,10 @@ impl Position {
         let mut new_trick_cards = self.trick_cards ^ card;
         let mut new_trick_cards_count = self.trick_cards_count + 1;
 
-        // new augen
-        let mut new_augen_declarer = self.augen_declarer;
-        let mut new_augen_team = self.augen_team;
-        let mut new_augen_future = self.augen_future;
+        // new points
+        let mut new_declarer_points = self.declarer_points;
+        let mut new_team_points = self.team_points;
+        let mut new_remaining_points = self.remaining_points;
 
         // new cards on hand
         let mut new_declarer_cards = self.declarer_cards;
@@ -154,10 +154,10 @@ impl Position {
 
         // evaluate upon trick completion
         if new_trick_cards_count == 3 {
-            let augen = if game_context.game_type() == Game::Null {
+            let points = if game_context.game_type() == Game::Null {
                 1
             } else {
-                new_trick_cards.__get_value_of_three_cards()
+                new_trick_cards.trick_points()
             };
 
             let winner = self.calculate_trick_winner(new_trick_cards, new_trick_suit, game_context);
@@ -168,11 +168,11 @@ impl Position {
             new_player = winner;
 
             match winner {
-                Player::Declarer => new_augen_declarer += augen,
-                _ => new_augen_team += augen,
+                Player::Declarer => new_declarer_points += points,
+                _ => new_team_points += points,
             }
 
-            new_augen_future -= augen;
+            new_remaining_points -= points;
         }
 
         // Updating current hand cards cache variable
@@ -187,14 +187,14 @@ impl Position {
             new_played_cards,
             new_trick_cards,
             new_trick_suit,
-            new_augen_declarer,
+            new_declarer_points,
             new_declarer_cards,
             new_left_cards,
             new_right_cards,
             new_player_cards,
             new_trick_cards_count,
-            new_augen_future,
-            new_augen_team,
+            new_remaining_points,
+            new_team_points,
             false,
         )
     }
@@ -242,7 +242,7 @@ impl Position {
     pub fn get_reduced_moves(&self, game_context: &GameContext) -> u32 {
         let mut moves = self.get_legal_moves();
         match game_context.game_type() {
-            Game::Farbe | Game::Grand => {
+            Game::Suit | Game::Grand => {
                 moves = self.reduce_unequal(moves, game_context);
                 moves = self.reduce_equal(moves, game_context.game_type());
             }
@@ -267,7 +267,7 @@ impl Position {
         let mut i = 1;
         while connections[i].0 > 0 {
             let repr = connections[i].1;
-            let winner = self.get_forecasted_winner_of_current_trick(repr, game_context);
+            let winner = self.predict_winner(repr, game_context);
 
             if let Some(x) = winner {
                 if x.is_same_team_as(player) {
@@ -291,28 +291,20 @@ impl Position {
         get_reduced_equal_core(moves, all_moves, connection_list)
     }
 
-    pub fn get_forecasted_winner_of_current_trick(
-        &self,
-        card: u32,
-        game_context: &GameContext,
-    ) -> Option<Player> {
+    pub fn predict_winner(&self, card: u32, game_context: &GameContext) -> Option<Player> {
         match self.trick_cards_count {
             2 => Some(self.calculate_trick_winner(
                 self.trick_cards | card,
                 self.trick_suit,
                 game_context,
             )),
-            1 => self.trick_will_be_won_with_one_card_already_on_table(card, game_context),
-            0 => self.trick_will_be_won_with_no_card_already_on_table(card, game_context),
+            1 => self.winner_one_card(card, game_context),
+            0 => self.winner_empty_table(card, game_context),
             _ => panic!("Trick card count invalid: {}.", self.trick_cards_count),
         }
     }
 
-    fn trick_will_be_won_with_no_card_already_on_table(
-        &self,
-        card: u32,
-        game_context: &GameContext,
-    ) -> Option<Player> {
+    fn winner_empty_table(&self, card: u32, game_context: &GameContext) -> Option<Player> {
         let trick_suit = get_suit_for_card(card, game_context.game_type());
         let mut winner_accumulated: Option<Player> = None;
 
@@ -337,11 +329,7 @@ impl Position {
         winner_accumulated
     }
 
-    fn trick_will_be_won_with_one_card_already_on_table(
-        &self,
-        card: u32,
-        game_context: &GameContext,
-    ) -> Option<Player> {
+    fn winner_one_card(&self, card: u32, game_context: &GameContext) -> Option<Player> {
         let trick_suit = self.trick_suit;
         let mut winner_accumulated: Option<Player> = None;
 

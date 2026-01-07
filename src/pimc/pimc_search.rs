@@ -53,7 +53,7 @@ impl PimcSearch {
         for i in 0..self.sample_size {
             let concrete_problem = self.uproblem.generate_concrete_problem();
             let mut solver = SkatEngine::new(concrete_problem, None);
-            let x = self.uproblem.threshold_upper();
+            let x = self.uproblem.threshold();
             let search_result = solve_all_cards(&mut solver, x - 1, x);
             let mut local_dict = HashMap::new();
 
@@ -67,7 +67,7 @@ impl PimcSearch {
                         winvalue = 1;
                     }
                 } else {
-                    if value >= self.uproblem.threshold_upper() {
+                    if value >= self.uproblem.threshold() {
                         winvalue = 1;
                     }
                 }

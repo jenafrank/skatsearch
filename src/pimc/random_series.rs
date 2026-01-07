@@ -1,5 +1,5 @@
 use crate::consts::bitboard::{ALLCARDS, JACKOFCLUBS, JACKOFDIAMONDS, JACKOFHEARTS, JACKOFSPADES};
-use crate::traits::{Augen, StringConverter};
+use crate::traits::{Points, StringConverter};
 use crate::skat::counters::Counters;
 use crate::skat::defs::{Game, Player};
 use crate::skat::context::GameContext;
@@ -49,7 +49,7 @@ pub fn sample_farbe_declarer_tt(number_of_samples: usize) -> std::io::Result<()>
             "{:5} ms {:9} iters {:3} pnts | D: {} L: {} R: {}",
             now.elapsed().as_millis(),
             cnt.iters,
-            result.1 + p.get_skat().__get_value(),
+            result.1 + p.get_skat().points(),
             cards.0.__str(),
             cards.1.__str(),
             cards.2.__str()
@@ -59,7 +59,7 @@ pub fn sample_farbe_declarer_tt(number_of_samples: usize) -> std::io::Result<()>
             "{} {} {} \n",
             now.elapsed().as_millis(),
             cnt.iters,
-            result.1 + p.get_skat().__get_value()
+            result.1 + p.get_skat().points()
         ))?;
     }
 
