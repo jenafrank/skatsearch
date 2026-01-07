@@ -279,4 +279,346 @@ mod tests {
         println!("Left cards    : {}", problem.left_cards().__str());
         println!("Right cards   : {}", problem.right_cards().__str());
     }
+
+    #[test]
+    fn test_farbe_no_trump_fact() {
+        // Game is Farbe (Clubs Trump).
+        // Fact: Left player has NO Trump.
+        // Expectation: Left player should NOT have Jacks or Clubs (TRUMP_FARBE).
+        use crate::skat::defs::{DIAMONDS, HEARTS, SPADES, TRUMP_FARBE};
+
+        let uproblem = UncertainProblem {
+            game_type: Game::Farbe,
+            // Total 6 cards. My=2. Left=2. Right=2.
+            // My: SA ST (Non-Trump)
+            // Available:
+            // 2 Trump: CA CT (Clubs)
+            // 2 Trump: HA HT (Wait! Hearts are NOT Trump in Clubs unless Jack. These are regular cards).
+            // Actually, in `test_hearts_no_trump_fact`, HA HT were Trump because it was Hearts game.
+            // Here it is Clubs game. So HA HT are valid non-trump.
+            // But we want to test that Left (No Trump) avoids Trump.
+            // So we need Trump cards available (CA, CT, CJ, SJ).
+            // Let's use CA CT.
+            // And some Non-Trump (HA, HT).
+            // Left has No Trump -> Must take HA HT.
+            all_cards: "SA ST CA CT HA HT".__bit(),
+            my_cards: "SA ST".__bit(),
+            my_player: Player::Declarer,
+            threshold_upper: 1,
+            card_on_table_next_player: 0u32,
+            card_on_table_previous_player: 0u32,
+            facts_previous_player: Facts::zero_fact(),
+            facts_next_player: Facts::one_fact(true, false, false, false, false), // No Trump for Left
+        };
+
+        // Run multiple times to ensure randomness doesn't accidentally succeed
+        for _ in 0..20 {
+            let problem = uproblem.generate_concrete_problem();
+            let left_cards = problem.left_cards();
+
+            // Left should have NO Trump cards (No Jacks, No Clubs)
+            assert_eq!(
+                left_cards & TRUMP_FARBE,
+                0,
+                "Left player has trump cards despite No Trump fact! Cards: {}",
+                left_cards.__str()
+            );
+
+            // Left SHOULD have valid Non-Trump cards (Hearts in this case)
+            assert_eq!(
+                left_cards & (SPADES | DIAMONDS | HEARTS),
+                left_cards,
+                "Left should only have Non-Trump suits."
+            );
+        }
+    }
+
+    #[test]
+    fn test_farbe_no_clubs_fact() {
+        // Game is Farbe (Clubs Trump).
+        // Fact: Left player has NO Clubs.
+        // Expectation: Left player should NOT have Cards of the Club Suit (7-A).
+        // Since Clubs is Trump, this largely overlaps with No Trump, but technically "No Clubs" fact specifically targets Club suit.
+        // In our engine, No Clubs (fact) in Farbe -> Remove TRUMP_FARBE (Jacks + Clubs).
+        // So they should have no Clubs AND no Jacks.
+
+        use crate::skat::defs::TRUMP_FARBE;
+
+        let uproblem = UncertainProblem {
+            game_type: Game::Farbe,
+            // Total 6 cards. My=2. Left=2. Right=2.
+            // My: HA HT (Hearts - Non-Trump)
+            // Available:
+            // 2 Clubs: CA CT (Trump)
+            // 2 Spades: SA ST (Non-Trump)
+            // Left has No Clubs. So can't take CA CT.
+            // Must take SA ST.
+            all_cards: "HA HT CA CT SA ST".__bit(),
+            my_cards: "HA HT".__bit(),
+            my_player: Player::Declarer,
+            threshold_upper: 1,
+            card_on_table_next_player: 0u32,
+            card_on_table_previous_player: 0u32,
+            facts_previous_player: Facts::zero_fact(),
+            facts_next_player: Facts::one_fact(false, true, false, false, false), // No Clubs for Left
+        };
+
+        for _ in 0..20 {
+            let problem = uproblem.generate_concrete_problem();
+            let left_cards = problem.left_cards();
+
+            // Left should have NO Club suit cards (and no Jacks because logic maps No Clubs -> No Trump in Farbe)
+            assert_eq!(
+                left_cards & TRUMP_FARBE,
+                0,
+                "Left player has Trump cards despite No Clubs fact!"
+            );
+        }
+    }
+
+    #[test]
+    fn test_farbe_no_spades_fact() {
+        // Game is Farbe (Clubs Trump).
+        // Fact: Left player has NO Spades.
+        // Expectation: Left player should have no SPADES suit cards.
+        // BUT they CAN have Jack of Spades (JS), because JS is Trump, not Spades.
+        // The implementation matches `ret_cards & !SPADES`. `SPADES` constant excludes JS.
+
+        use crate::skat::defs::SPADES;
+
+        let uproblem = UncertainProblem {
+            game_type: Game::Farbe,
+            // Total 6 cards. My=2. Left=2. Right=2.
+            // My: CA CT (Clubs - Trump)
+            // Available:
+            // 2 Spades: SA ST
+            // 1 Spade Jack: SJ (Trump)
+            // 1 Heart: HA
+            // Left has No Spades -> Can't take SA ST.
+            // Available non-Spades: SJ, HA.
+            // So Left MUST take SJ and HA.
+            // (SJ is technically a Spade card physically, but logic-wise it's Trump. Does 'No Spades' fact exclude it?)
+            // Usually 'No Spades' means 'Cannot follow Spades lead'. A Spades lead requires Spades suit. JS is Trump.
+            // So 'No Spades' allows JS.
+            all_cards: "CA CT SA ST SJ HA".__bit(),
+            my_cards: "CA CT".__bit(),
+            my_player: Player::Declarer,
+            threshold_upper: 1,
+            card_on_table_next_player: 0u32,
+            card_on_table_previous_player: 0u32,
+            facts_previous_player: Facts::zero_fact(),
+            facts_next_player: Facts::one_fact(false, false, true, false, false), // No Spades for Left
+        };
+
+        for _ in 0..20 {
+            let problem = uproblem.generate_concrete_problem();
+            let left_cards = problem.left_cards();
+
+            // Left should have NO Spades suit cards (defined by SPADES constant)
+            assert_eq!(
+                left_cards & SPADES,
+                0,
+                "Left player has Spades suit cards despite No Spades fact!"
+            );
+
+            // Left SHOULD have SJ (which is 0x0100 in Spades suit technically, but mapped to Jack?)
+            // Wait, card bits are unique. `SPADES` mask usually excludes the Jack bit.
+            // Verify this with the test.
+            // Left SHOULD have SJ.
+            // We can check if SJ is in left_cards by bitwise AND.
+            // Need the bit for SJ.
+            let sj_bit = "SJ".__bit();
+            assert!(
+                left_cards & sj_bit != 0,
+                "Left player should be allowed to have SJ despite No Spades fact."
+            );
+        }
+    }
+
+    #[test]
+    fn test_grand_no_trump_fact() {
+        // Grand Game. Trump is ONLY Jacks.
+        // Fact: No Trump.
+        // Left should have no Jacks.
+        use crate::skat::defs::JACKS;
+
+        let uproblem = UncertainProblem {
+            game_type: Game::Grand,
+            // Total 6 cards. My=2. Left=2. Right=2.
+            // My: CA CT (Non-Trump)
+            // Available:
+            // 2 Jacks: CJ SJ
+            // 2 Non-Jacks: SA ST
+            // Left has No Trump -> Must take SA ST.
+            all_cards: "CA CT CJ SJ SA ST".__bit(),
+            my_cards: "CA CT".__bit(),
+            my_player: Player::Declarer,
+            threshold_upper: 1,
+            card_on_table_next_player: 0u32,
+            card_on_table_previous_player: 0u32,
+            facts_previous_player: Facts::zero_fact(),
+            facts_next_player: Facts::one_fact(true, false, false, false, false), // No Trump for Left
+        };
+
+        for _ in 0..20 {
+            let problem = uproblem.generate_concrete_problem();
+            let left_cards = problem.left_cards();
+
+            assert_eq!(
+                left_cards & JACKS,
+                0,
+                "Left player has Jacks despite No Trump fact in Grand!"
+            );
+        }
+    }
+
+    #[test]
+    fn test_null_no_clubs_fact() {
+        // Game is Null. No Trump. Jacks are part of suits.
+        // Fact: Left player has NO Clubs.
+        // Expectation: Left player should NOT have any Club cards (including Jack of Clubs).
+        use crate::skat::defs::NULL_CLUBS;
+
+        let uproblem = UncertainProblem {
+            game_type: Game::Null,
+            // Total 6 cards. My=2. Left=2. Right=2.
+            // My: HA HT (Hearts)
+            // Available:
+            // 2 Clubs: CA, CJ (Jack is part of Club suit in Null)
+            // 2 Spades: SA, ST
+            // Left has No Clubs -> Must take SA ST.
+            all_cards: "HA HT CA CJ SA ST".__bit(),
+            my_cards: "HA HT".__bit(),
+            my_player: Player::Declarer,
+            threshold_upper: 1,
+            card_on_table_next_player: 0u32,
+            card_on_table_previous_player: 0u32,
+            facts_previous_player: Facts::zero_fact(),
+            facts_next_player: Facts::one_fact(false, true, false, false, false), // No Clubs for Left
+        };
+
+        for _ in 0..20 {
+            let problem = uproblem.generate_concrete_problem();
+            let left_cards = problem.left_cards();
+
+            assert_eq!(
+                left_cards & NULL_CLUBS,
+                0,
+                "Left player has Clubs (or CJ) despite No Clubs fact in Null game! Cards: {}",
+                left_cards.__str()
+            );
+        }
+    }
+
+    #[test]
+    fn test_null_no_spades_fact() {
+        // Game is Null.
+        // Fact: Left player has NO Spades.
+        // Expectation: Left player should NOT have any Spades (including Jack of Spades).
+        use crate::skat::defs::NULL_SPADES;
+
+        let uproblem = UncertainProblem {
+            game_type: Game::Null,
+            // Total 6 cards.
+            // My: HA HT
+            // Available:
+            // 2 Spades: SA, SJ (Jack is Spade)
+            // 2 Diamonds: DA, DT
+            // Left has No Spades -> Must take DA DT.
+            all_cards: "HA HT SA SJ DA DT".__bit(),
+            my_cards: "HA HT".__bit(),
+            my_player: Player::Declarer,
+            threshold_upper: 1,
+            card_on_table_next_player: 0u32,
+            card_on_table_previous_player: 0u32,
+            facts_previous_player: Facts::zero_fact(),
+            facts_next_player: Facts::one_fact(false, false, true, false, false), // No Spades for Left
+        };
+
+        for _ in 0..20 {
+            let problem = uproblem.generate_concrete_problem();
+            let left_cards = problem.left_cards();
+
+            assert_eq!(
+                left_cards & NULL_SPADES,
+                0,
+                "Left player has Spades (or SJ) despite No Spades fact in Null game! Cards: {}",
+                left_cards.__str()
+            );
+        }
+    }
+
+    #[test]
+    fn test_null_no_hearts_fact() {
+        // Game is Null.
+        // Fact: Left player has NO Hearts.
+        use crate::skat::defs::NULL_HEARTS;
+
+        let uproblem = UncertainProblem {
+            game_type: Game::Null,
+            // Total 6 cards.
+            // My: CA CT
+            // Available:
+            // 2 Hearts: HA, HJ
+            // 2 Diamonds: DA, DT
+            // Left has No Hearts -> Must take DA DT.
+            all_cards: "CA CT HA HJ DA DT".__bit(),
+            my_cards: "CA CT".__bit(),
+            my_player: Player::Declarer,
+            threshold_upper: 1,
+            card_on_table_next_player: 0u32,
+            card_on_table_previous_player: 0u32,
+            facts_previous_player: Facts::zero_fact(),
+            facts_next_player: Facts::one_fact(false, false, false, true, false), // No Hearts for Left
+        };
+
+        for _ in 0..20 {
+            let problem = uproblem.generate_concrete_problem();
+            let left_cards = problem.left_cards();
+
+            assert_eq!(
+                left_cards & NULL_HEARTS,
+                0,
+                "Left player has Hearts (or HJ) despite No Hearts fact in Null game! Cards: {}",
+                left_cards.__str()
+            );
+        }
+    }
+
+    #[test]
+    fn test_null_no_diamonds_fact() {
+        // Game is Null.
+        // Fact: Left player has NO Diamonds.
+        use crate::skat::defs::NULL_DIAMONDS;
+
+        let uproblem = UncertainProblem {
+            game_type: Game::Null,
+            // Total 6 cards.
+            // My: CA CT
+            // Available:
+            // 2 Diamonds: DA, DJ
+            // 2 Spades: SA, ST
+            // Left has No Diamonds -> Must take SA ST.
+            all_cards: "CA CT DA DJ SA ST".__bit(),
+            my_cards: "CA CT".__bit(),
+            my_player: Player::Declarer,
+            threshold_upper: 1,
+            card_on_table_next_player: 0u32,
+            card_on_table_previous_player: 0u32,
+            facts_previous_player: Facts::zero_fact(),
+            facts_next_player: Facts::one_fact(false, false, false, false, true), // No Diamonds for Left
+        };
+
+        for _ in 0..20 {
+            let problem = uproblem.generate_concrete_problem();
+            let left_cards = problem.left_cards();
+
+            assert_eq!(
+                left_cards & NULL_DIAMONDS,
+                0,
+                "Left player has Diamonds (or DJ) despite No Diamonds fact in Null game! Cards: {}",
+                left_cards.__str()
+            );
+        }
+    }
 }
