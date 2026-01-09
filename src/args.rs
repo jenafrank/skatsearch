@@ -104,6 +104,9 @@ pub enum Commands {
         /// Calculation mode: "best" or "win"
         #[arg(short, long, default_value = "best")]
         mode: String,
+        /// Optional path to a log file to write sample details to
+        #[arg(long)]
+        log_file: Option<String>,
     },
 }
 

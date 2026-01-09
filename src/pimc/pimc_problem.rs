@@ -502,11 +502,11 @@ impl PimcProblem {
     }
 
     pub fn set_facts_left(&mut self, facts_left: Facts) {
-        self.facts_previous_player = facts_left;
+        self.facts_next_player = facts_left;
     }
 
     pub fn set_facts_right(&mut self, facts_right: Facts) {
-        self.facts_next_player = facts_right;
+        self.facts_previous_player = facts_right;
     }
 
     pub fn set_declarer_start_points(&mut self, points: u8) {

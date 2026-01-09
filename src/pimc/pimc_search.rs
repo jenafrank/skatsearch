@@ -1,4 +1,6 @@
 use std::collections::HashMap;
+use std::fs::OpenOptions;
+use std::io::Write;
 
 use super::pimc_problem::PimcProblem;
 use crate::extensions::solver::{solve_all_cards, solve_win};
@@ -9,13 +11,15 @@ use crate::traits::StringConverter;
 pub struct PimcSearch {
     pub uproblem: PimcProblem,
     pub sample_size: u32,
+    pub log_file: Option<String>,
 }
 
 impl PimcSearch {
-    pub fn new(uproblem: PimcProblem, sample_size: u32) -> PimcSearch {
+    pub fn new(uproblem: PimcProblem, sample_size: u32, log_file: Option<String>) -> PimcSearch {
         PimcSearch {
             uproblem,
             sample_size,
+            log_file,
         }
     }
 
@@ -43,6 +47,35 @@ impl PimcSearch {
             }
 
             sum += search_result.declarer_wins as u32 as f32;
+
+            if let Some(path) = &self.log_file {
+                let mut file = OpenOptions::new()
+                    .create(true)
+                    .append(true)
+                    .open(path)
+                    .unwrap();
+
+                writeln!(file, "Sample {}:", i).unwrap();
+                writeln!(
+                    file,
+                    "Declarer: {}",
+                    solver.context.declarer_cards().__str()
+                )
+                .unwrap();
+                writeln!(file, "Left    : {}", solver.context.left_cards().__str()).unwrap();
+                writeln!(file, "Right   : {}", solver.context.right_cards().__str()).unwrap();
+                writeln!(
+                    file,
+                    "Result  : {}",
+                    if search_result.declarer_wins {
+                        "Win"
+                    } else {
+                        "Loss"
+                    }
+                )
+                .unwrap();
+                writeln!(file, "--------------------------------------------------").unwrap();
+            }
         }
         (sum / self.sample_size as f32, sum as u32)
     }
@@ -76,6 +109,47 @@ impl PimcSearch {
 
                 let entry = global_dict.entry(card).or_insert(0);
                 *entry += winvalue;
+            }
+
+            if let Some(path) = &self.log_file {
+                let mut file = OpenOptions::new()
+                    .create(true)
+                    .append(true)
+                    .open(path)
+                    .unwrap();
+
+                writeln!(file, "Sample {}:", i).unwrap();
+                writeln!(
+                    file,
+                    "Declarer: {}",
+                    solver.context.declarer_cards().__str()
+                )
+                .unwrap();
+                writeln!(file, "Left    : {}", solver.context.left_cards().__str()).unwrap();
+                writeln!(file, "Right   : {}", solver.context.right_cards().__str()).unwrap();
+                let mut wins: Vec<String> = local_dict
+                    .iter()
+                    .filter(|(_, &v)| v > 0)
+                    .map(|(k, _)| k.__str())
+                    .collect();
+                let mut losses: Vec<String> = local_dict
+                    .iter()
+                    .filter(|(_, &v)| v == 0)
+                    .map(|(k, _)| k.__str())
+                    .collect();
+
+                // Sort for consistent output
+                wins.sort();
+                losses.sort();
+
+                writeln!(
+                    file,
+                    "Moves   : WINS: {} | LOSS: {}",
+                    wins.join(" "),
+                    losses.join(" ")
+                )
+                .unwrap();
+                writeln!(file, "--------------------------------------------------").unwrap();
             }
 
             if info {
@@ -130,7 +204,7 @@ mod tests {
             .threshold(21)
             .build();
 
-        let estimator = super::PimcSearch::new(uproblem, 10);
+        let estimator = super::PimcSearch::new(uproblem, 10, None);
         let (probability, _) = estimator.estimate_win(false);
 
         println!("Probability of win: {}", probability);
@@ -144,7 +218,7 @@ mod tests {
             .threshold(21)
             .build();
 
-        let estimator = super::PimcSearch::new(uproblem, 1000);
+        let estimator = super::PimcSearch::new(uproblem, 1000, None);
         let (probability, _) = estimator.estimate_win(true);
 
         println!("Probability of win: {}", probability);

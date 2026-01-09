@@ -648,7 +648,11 @@ fn main() {
                 }
             }
         }
-        args::Commands::PimcCalc { context, mode } => {
+        args::Commands::PimcCalc {
+            context,
+            mode,
+            log_file,
+        } => {
             println!("Reading context file: {}", context);
             let context_content = fs::read_to_string(context).expect("Unable to read context file");
             let input: args::PimcContextInput =
@@ -667,8 +671,8 @@ fn main() {
                 input.game_type.convert_to_string(),
                 input.my_player.str()
             );
-            println!("My Cards: {}", input.my_cards);
-            println!("Remaining: {}", input.remaining_cards);
+            println!("My Cards: {}", input.my_cards.__bit().__str());
+            println!("Remaining: {}", input.remaining_cards.__bit().__str());
             if let Some(_f) = &input.facts {
                 println!("Facts: Present");
             }
@@ -758,7 +762,7 @@ fn main() {
 
             let problem = builder.build();
             let samples = input.samples.unwrap_or(100);
-            let search = PimcSearch::new(problem, samples);
+            let search = PimcSearch::new(problem, samples, log_file);
 
             match mode.to_lowercase().as_str() {
                 "win" => {

@@ -13,7 +13,7 @@ fn test_uproblem_eight_cards() {
         .threshold_half()
         .build();
 
-    let estimator = PimcSearch::new(uproblem, 1000);
+    let estimator = PimcSearch::new(uproblem, 1000, None);
     let (probability, _) = estimator.estimate_win(false);
 
     println!("Probability of win: {}", probability);
@@ -30,7 +30,7 @@ fn test_uproblem_ten_cards_grand() {
 
     assert_eq!(uproblem.threshold(), 61);
 
-    let estimator = PimcSearch::new(uproblem, 100);
+    let estimator = PimcSearch::new(uproblem, 100, None);
     let (probability, _) = estimator.estimate_win(true);
 
     println!("Probability of win: {}", probability);
@@ -45,7 +45,7 @@ fn test_uproblem_ten_cards_null() {
         .turn(Player::Left)
         .build();
 
-    let estimator = PimcSearch::new(uproblem, 100);
+    let estimator = PimcSearch::new(uproblem, 100, None);
     let (probability, _) = estimator.estimate_win(true);
 
     println!("Probability of win: {}", probability);
@@ -59,7 +59,7 @@ fn test_uproblem_ten_cards_null_all_cards() {
         .skat_cards("CA SA")
         .build();
 
-    let estimator = PimcSearch::new(uproblem, 100);
+    let estimator = PimcSearch::new(uproblem, 100, None);
     let res = estimator.estimate_probability_of_all_cards(true);
 
     show_probabilites(res);
@@ -74,7 +74,7 @@ fn test_uproblem_ten_cards_grand_all_cards() {
         .threshold_half()
         .build();
 
-    let estimator = PimcSearch::new(uproblem, 100);
+    let estimator = PimcSearch::new(uproblem, 100, None);
     let res = estimator.estimate_probability_of_all_cards(true);
 
     show_probabilites(res);

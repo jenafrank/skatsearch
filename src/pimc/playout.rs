@@ -121,7 +121,7 @@ pub fn playout(true_context: GameContext, n_samples: u32) {
             "Problem built. Starting Search with {} samples...",
             n_samples
         );
-        let search = PimcSearch::new(problem, n_samples);
+        let search = PimcSearch::new(problem, n_samples, None);
         let result = search.estimate_probability_of_all_cards(false);
         println!("Search complete. Found {} moves.", result.len());
 
