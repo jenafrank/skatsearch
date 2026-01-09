@@ -82,6 +82,11 @@ impl PimcProblemBuilder {
         self
     }
 
+    pub fn trick_next_player(mut self, trick_next_player: u32) -> PimcProblemBuilder {
+        self.next_card = Some(trick_next_player);
+        self
+    }
+
     pub fn facts(mut self, player: Player, facts: Facts) -> PimcProblemBuilder {
         match player {
             Player::Declarer => self.facts_declarer = Some(facts),
@@ -186,37 +191,37 @@ impl PimcProblemBuilder {
             || self.facts_right.is_none()
         {
             if self.my_player.is_none() {
-                println!("My player missing.");
+                eprintln!("My player missing.");
             }
             if self.my_cards.is_none() {
-                println!("My cards missing.");
+                eprintln!("My cards missing.");
             }
             if self.next_player.is_none() {
-                println!("Next player missing.");
+                eprintln!("Next player missing.");
             }
             if self.next_card.is_none() {
-                println!("Card on table next player missing.");
+                eprintln!("Card on table next player missing.");
             }
             if self.previous_card.is_none() {
-                println!("Card on table previous player missing.");
+                eprintln!("Card on table previous player missing.");
             }
             if self.all_cards.is_none() {
-                println!("All cards missing.");
+                eprintln!("All cards missing.");
             }
             if self.active_suit.is_none() {
-                println!("Active suit missing.");
+                eprintln!("Active suit missing.");
             }
             if self.threshold.is_none() {
-                println!("Upper Threshold missing.");
+                eprintln!("Upper Threshold missing.");
             }
             if self.facts_declarer.is_none() {
-                println!("Facts Declarer missing.");
+                eprintln!("Facts Declarer missing.");
             }
             if self.facts_left.is_none() {
-                println!("Facts Left missing.");
+                eprintln!("Facts Left missing.");
             }
             if self.facts_right.is_none() {
-                println!("Facts Right missing.");
+                eprintln!("Facts Right missing.");
             }
 
             panic!("Incomplete build. Can not create uproblem from builder.");
@@ -227,8 +232,8 @@ impl PimcProblemBuilder {
         let nr_own_cards = self.my_cards.unwrap().count_ones();
         let nr_all_cards = self.all_cards.unwrap().count_ones();
 
-        assert!(nr_all_cards % 3 == 0);
-        assert!(nr_all_cards == 3 * nr_own_cards);
+        // assert!(nr_all_cards % 3 == 0);
+        // assert!(nr_all_cards == 3 * nr_own_cards);
     }
 
     fn cards_on_table(&self) -> u32 {

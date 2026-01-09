@@ -40,11 +40,11 @@ fn main() {
                 game_context.set_trick_suit(suit);
             }
 
-            let threshold_upper = match input.mode {
-                args::SearchMode::Win => 61, // Example for win check
-                args::SearchMode::Value => 120,
+            let mut threshold_upper = match input.mode.as_ref() {
+                Some(args::SearchMode::Win) => 61,
+                Some(args::SearchMode::Value) => 120,
+                None => 120,
             };
-            game_context.set_threshold_upper(threshold_upper);
 
             if let Err(e) = game_context.validate() {
                 eprintln!("Validation Error: {}", e);
@@ -53,7 +53,9 @@ fn main() {
 
             let mut engine = SkatEngine::new(game_context, None);
 
-            match input.mode {
+            let mode = input.mode.unwrap_or(args::SearchMode::Value);
+
+            match mode {
                 args::SearchMode::Win => {
                     let result = solve_win(&mut engine);
                     println!(
@@ -71,6 +73,47 @@ fn main() {
                     );
                 }
             }
+        }
+        args::Commands::Playout { context } => {
+            println!("Reading context file: {}", context);
+            let context_content = fs::read_to_string(context).expect("Unable to read context file");
+            println!("Context content read. Parsing JSON...");
+            let input: args::GameContextInput =
+                serde_json::from_str(&context_content).expect("JSON was not well-formatted");
+            println!("JSON parsed successfully.");
+
+            let mut game_context = GameContext::create(
+                input.declarer_cards.__bit(),
+                input.left_cards.__bit(),
+                input.right_cards.__bit(),
+                input.game_type,
+                input.start_player,
+            );
+
+            if let Some(trick_cards_str) = input.trick_cards {
+                game_context.set_trick_cards(trick_cards_str.__bit());
+            }
+
+            if let Some(trick_suit_str) = input.trick_suit {
+                let suit = match trick_suit_str.to_lowercase().as_str() {
+                    "clubs" | "c" => CLUBS,
+                    "spades" | "s" => SPADES,
+                    "hearts" | "h" => HEARTS,
+                    "diamonds" | "d" => DIAMONDS,
+                    _ => 0,
+                };
+                game_context.set_trick_suit(suit);
+            }
+
+            game_context.set_threshold_upper(61);
+
+            if let Err(e) = game_context.validate() {
+                eprintln!("Validation Error: {}", e);
+                std::process::exit(1);
+            }
+
+            println!("Calling skat_aug23::pimc::playout::playout...");
+            skat_aug23::pimc::playout::playout(game_context, 20);
         }
     }
 }

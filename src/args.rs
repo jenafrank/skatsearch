@@ -18,6 +18,12 @@ pub enum Commands {
         #[arg(short, long)]
         context: String,
     },
+    /// Play out a game using PIMC
+    Playout {
+        /// Path to the JSON context file
+        #[arg(short, long)]
+        context: String,
+    },
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -27,7 +33,7 @@ pub struct GameContextInput {
     pub right_cards: String,
     pub game_type: Game,
     pub start_player: Player,
-    pub mode: SearchMode,
+    pub mode: Option<SearchMode>, // Made option to allow missing for Playout if needed, or re-use
     pub trick_cards: Option<String>,
     pub trick_suit: Option<String>,
 }
