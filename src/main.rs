@@ -111,6 +111,10 @@ fn main() {
                 game_context.set_trick_suit(suit);
             }
 
+            if let Some(points) = input.declarer_start_points {
+                game_context.set_declarer_start_points(points);
+            }
+
             game_context.set_threshold_upper(61);
 
             if let Err(e) = game_context.validate() {
@@ -154,6 +158,10 @@ fn main() {
                     _ => 0,
                 };
                 game_context.set_trick_suit(suit);
+            }
+
+            if let Some(points) = input.declarer_start_points {
+                game_context.set_declarer_start_points(points);
             }
 
             // Standard playout uses full information, so threshold might matter less for 'playout' line by line,
@@ -212,6 +220,10 @@ fn main() {
                     _ => 0,
                 };
                 game_context.set_trick_suit(suit);
+            }
+
+            if let Some(points) = input.declarer_start_points {
+                game_context.set_declarer_start_points(points);
             }
 
             game_context.set_threshold_upper(120);
@@ -277,6 +289,10 @@ fn main() {
                     _ => 0,
                 };
                 game_context.set_trick_suit(suit);
+            }
+
+            if let Some(points) = input.declarer_start_points {
+                game_context.set_declarer_start_points(points);
             }
 
             game_context.set_threshold_upper(120);

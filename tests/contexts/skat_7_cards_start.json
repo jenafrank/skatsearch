@@ -1,0 +1,8 @@
+{
+    "declarer_cards": "CJ HJ SA HA DA S9 D9",
+    "left_cards": "SJ DJ CA CK CQ S8 H9",
+    "right_cards": "SK SQ HK HQ DK DQ D8",
+    "game_type": "Grand",
+    "start_player": "Declarer",
+    "declarer_start_points": 22
+}

@@ -79,14 +79,23 @@ impl Position {
         let declarer_cards: u32 = game_context.declarer_cards() & !played_cards;
         let left_cards: u32 = game_context.left_cards() & !played_cards;
         let right_cards: u32 = game_context.right_cards() & !played_cards;
-        let remaining_points = game_context.total_points() - (played_cards & !trick_cards).points();
+        let remaining_points = (declarer_cards | left_cards | right_cards).points();
+        // trick_cards are separate from remaining_points (cards in hand)
+        let trick_points = trick_cards.points();
+        // Total points (120) = Remaining (Hands) + Trick (Table) + Declarer (Won) + Team (Won)
+        // Solved for Team:
+        let team_points = game_context
+            .total_points()
+            .wrapping_sub(remaining_points)
+            .wrapping_sub(declarer_points)
+            .wrapping_sub(trick_points); // wrapping_sub to be safe, but logic should hold
+
         let player_cards = match player {
             Player::Declarer => declarer_cards,
             Player::Left => left_cards,
             Player::Right => right_cards,
         };
         let trick_cards_count = trick_cards.count_ones() as u8;
-        let team_points = game_context.total_points() - remaining_points - declarer_points;
 
         Position::new(
             player,
@@ -110,7 +119,7 @@ impl Position {
             game_context.trick_cards(),
             game_context.trick_cards(),
             game_context.trick_suit(),
-            0u8,
+            game_context.declarer_start_points,
             game_context.start_player(),
             game_context,
             true,
@@ -138,7 +147,9 @@ impl Position {
         // new points
         let mut new_declarer_points = self.declarer_points;
         let mut new_team_points = self.team_points;
-        let mut new_remaining_points = self.remaining_points;
+
+        // Update remaining points: Card leaves hand, so subtract its points immediately.
+        let mut new_remaining_points = self.remaining_points.saturating_sub(card.points());
 
         // new cards on hand
         let mut new_declarer_cards = self.declarer_cards;
@@ -172,7 +183,7 @@ impl Position {
                 _ => new_team_points += points,
             }
 
-            new_remaining_points -= points;
+            // remaining_points already reduced when cards were played.
         }
 
         // Updating current hand cards cache variable

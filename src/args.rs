@@ -72,6 +72,7 @@ pub struct GameContextInput {
     pub mode: Option<SearchMode>, // Made option to allow missing for Playout if needed, or re-use
     pub trick_cards: Option<String>,
     pub trick_suit: Option<String>,
+    pub declarer_start_points: Option<u8>,
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq)]

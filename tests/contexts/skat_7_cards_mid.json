@@ -1,0 +1,10 @@
+{
+    "declarer_cards": "HJ SA HA DA S9 D9",
+    "left_cards": "DJ CA CK CQ S8 H9",
+    "right_cards": "SK SQ HK HQ DK DQ D8",
+    "game_type": "Grand",
+    "start_player": "Right",
+    "declarer_start_points": 22,
+    "trick_cards": "CJ SJ",
+    "trick_suit": "Trump"
+}

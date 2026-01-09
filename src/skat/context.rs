@@ -25,6 +25,7 @@ pub struct GameContext {
     pub threshold_upper: u8,
     pub trick_cards: u32,
     pub trick_suit: u32,
+    pub declarer_start_points: u8,
 }
 
 impl GameContext {
@@ -44,6 +45,7 @@ impl GameContext {
             threshold_upper: 61, // Default
             trick_cards: 0,
             trick_suit: 0,
+            declarer_start_points: 0,
         }
     }
 
@@ -58,6 +60,7 @@ impl GameContext {
             threshold_upper: 61,
             trick_cards: 0,
             trick_suit: 0,
+            declarer_start_points: 0,
         }
     }
 
@@ -91,6 +94,10 @@ impl GameContext {
 
     pub fn set_trick_suit(&mut self, trick_suit: u32) {
         self.trick_suit = trick_suit;
+    }
+
+    pub fn set_declarer_start_points(&mut self, points: u8) {
+        self.declarer_start_points = points;
     }
 
     // Getters
@@ -158,6 +165,7 @@ impl GameContext {
             threshold_upper: p.threshold_upper,
             trick_cards: p.trick_cards,
             trick_suit: p.trick_suit,
+            declarer_start_points: p.declarer_start_points,
         }
     }
 
