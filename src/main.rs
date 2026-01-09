@@ -119,6 +119,43 @@ fn main() {
                 }
             }
         }
+        args::Commands::PimcBestGame {
+            context,
+            samples,
+            log_file,
+        } => {
+            println!("Calculating Best Game for context: {}", context);
+            if let Some(path) = &log_file {
+                println!("Logging detailed sample info to: {}", path);
+                // clear file if exists
+                fs::write(path, "").unwrap_or(());
+            }
+
+            let content = fs::read_to_string(&context).expect("Could not read file");
+            let input: args::PimcBestGameInput =
+                serde_json::from_str(&content).expect("JSON was not well-formatted");
+
+            println!("My Cards: {}", input.my_cards);
+            println!("Start Player: {:?}", input.start_player);
+            println!("Samples per game: {}", samples);
+
+            let results = skat_aug23::pimc::best_game::calculate_best_game(
+                &input.my_cards,
+                input.start_player,
+                samples,
+                log_file.clone(),
+                true,
+            );
+
+            println!("\nBest Game:");
+            println!("--------------------------------------------------");
+            println!("{:<15} | {:<10}", "Game", "Win Prob");
+            println!("--------------------------------------------------");
+            for (game, prob) in results {
+                println!("{:<15} | {:.4}", format!("{:?}", game), prob);
+            }
+            println!("--------------------------------------------------");
+        }
         args::Commands::Playout { context } => {
             println!("Reading context file: {}", context);
             let context_content = fs::read_to_string(context).expect("Unable to read context file");

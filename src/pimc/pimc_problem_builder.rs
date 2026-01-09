@@ -57,6 +57,16 @@ impl PimcProblemBuilder {
         self
     }
 
+    pub fn my_cards_val(mut self, cards: u32) -> PimcProblemBuilder {
+        self.my_cards = Some(cards);
+        self
+    }
+
+    pub fn all_cards_val(mut self, cards: u32) -> PimcProblemBuilder {
+        self.all_cards = Some(cards);
+        self
+    }
+
     pub fn turn(mut self, player: Player) -> PimcProblemBuilder {
         self.next_player = Some(player);
         self

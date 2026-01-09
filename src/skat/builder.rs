@@ -330,15 +330,12 @@ impl GameContextBuilder {
             nr_ambiguous_cards, nr_definite_cards_player_1, nr_definite_cards_player_2, target_p1, target_p2);
 
         let draw_player_1 = random_cards(ambiguous_cards, needed_for_p1);
-
         let proposed_player_1 = definite_cards_player_1 | draw_player_1;
-        // Assign remainder to player 2 (or just what they need?)
-        // If we assign remainder, P2 gets everything else.
-        // If we assign 'needed', we might leave holes?
-        // Standard PIMC assumes all unknown cards are distributed.
-        // So P2 gets (Ambiguous & !P1).
+
+        let remaining_ambiguous = ambiguous_cards & !draw_player_1;
         
-        let proposed_player_2 = definite_cards_player_2 | (ambiguous_cards & !draw_player_1);
+        let draw_player_2 = random_cards(remaining_ambiguous, needed_for_p2);
+        let proposed_player_2 = definite_cards_player_2 | draw_player_2;
 
         (proposed_player_1, proposed_player_2)
     }

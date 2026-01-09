@@ -585,7 +585,8 @@ impl PimcProblem {
         assert!(self.all_cards & self.cards_on_table() == self.cards_on_table());
 
         // currently uncertain problems can only be solved before a trick starts:
-        assert!(self.all_cards.count_ones() % 3 == 0);
+        // Allow 32 cards (start of game with Skat) or divisible by 3 (mid-game clean tricks)
+        assert!(self.all_cards.count_ones() == 32 || self.all_cards.count_ones() % 3 == 0);
     }
 }
 

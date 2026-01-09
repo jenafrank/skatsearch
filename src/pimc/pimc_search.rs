@@ -12,6 +12,7 @@ pub struct PimcSearch {
     pub uproblem: PimcProblem,
     pub sample_size: u32,
     pub log_file: Option<String>,
+    pub verbose_progress: bool,
 }
 
 impl PimcSearch {
@@ -20,12 +21,18 @@ impl PimcSearch {
             uproblem,
             sample_size,
             log_file,
+            verbose_progress: false,
         }
     }
 
     pub fn estimate_win(&self, info: bool) -> (f32, u32) {
         let mut sum: f32 = 0.0;
         for i in 0..self.sample_size {
+            if self.verbose_progress {
+                print!(".");
+                std::io::stdout().flush().unwrap();
+            }
+
             let concrete_problem = self.uproblem.generate_concrete_problem();
             let mut solver = SkatEngine::new(concrete_problem, None);
             let search_result = solve_win(&mut solver);
@@ -56,17 +63,27 @@ impl PimcSearch {
                     .unwrap();
 
                 writeln!(file, "Sample {}:", i).unwrap();
+                writeln!(file, "Game Type: {:?}", solver.context.game_type()).unwrap();
                 writeln!(
                     file,
-                    "Declarer: {}",
+                    "Declarer : {}",
                     solver.context.declarer_cards().__str()
                 )
                 .unwrap();
-                writeln!(file, "Left    : {}", solver.context.left_cards().__str()).unwrap();
-                writeln!(file, "Right   : {}", solver.context.right_cards().__str()).unwrap();
+                writeln!(file, "Left     : {}", solver.context.left_cards().__str()).unwrap();
+                writeln!(file, "Right    : {}", solver.context.right_cards().__str()).unwrap();
+
+                let skat = crate::skat::defs::ALLCARDS
+                    ^ solver.context.declarer_cards()
+                    ^ solver.context.left_cards()
+                    ^ solver.context.right_cards()
+                    ^ solver.context.trick_cards();
+
+                writeln!(file, "Skat     : {}", skat.__str()).unwrap();
+
                 writeln!(
                     file,
-                    "Result  : {}",
+                    "Result   : {}",
                     if search_result.declarer_wins {
                         "Win"
                     } else {

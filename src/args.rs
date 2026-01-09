@@ -111,8 +111,22 @@ pub enum Commands {
         #[arg(short, long)]
         context: String,
         /// Calculation mode: "best" or "win"
-        #[arg(short, long, default_value = "best")]
+        #[arg(short, long, default_value = "win")]
         mode: String,
+        /// Optional path to a log file to write sample details to
+        #[arg(long)]
+        log_file: Option<String>,
+    },
+    /// Calculate best game for a given hand using PIMC.
+    /// It evaluates all valid game announcements and finds the one yielding the highest score or winning chance,
+    /// considering incomplete information through PIMC sampling.
+    PimcBestGame {
+        /// Path to the JSON context file (must contain 12 declarer cards)
+        #[arg(short, long)]
+        context: String,
+        /// Number of PIMC samples to run for each game type evaluation
+        #[arg(short, long, default_value_t = 20)]
+        samples: u32,
         /// Optional path to a log file to write sample details to
         #[arg(long)]
         log_file: Option<String>,
@@ -152,6 +166,14 @@ pub struct PimcPlayerFactsInput {
     pub declarer: Option<PimcFactsInput>,
     pub left: Option<PimcFactsInput>,
     pub right: Option<PimcFactsInput>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct PimcBestGameInput {
+    pub my_cards: String,
+    pub start_player: Player,
+    pub description: Option<String>,
+    pub usage: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]

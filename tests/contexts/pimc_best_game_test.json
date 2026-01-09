@@ -1,0 +1,6 @@
+{
+    "my_cards": "SJ DJ CA CT CK CQ C7 S7 D7 H7",
+    "start_player": "Declarer",
+    "description": "Test context for PIMC Best Game analysis",
+    "usage": "cargo run -- pimc-best-game --context tests/contexts/pimc_best_game_test.json"
+}
