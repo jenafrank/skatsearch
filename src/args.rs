@@ -24,6 +24,12 @@ pub enum Commands {
         #[arg(short, long)]
         context: String,
     },
+    /// Play out a game using Standard Perfect Information
+    StandardPlayout {
+        /// Path to the JSON context file
+        #[arg(short, long)]
+        context: String,
+    },
 }
 
 #[derive(Debug, Serialize, Deserialize)]

@@ -115,5 +115,57 @@ fn main() {
             println!("Calling skat_aug23::pimc::playout::playout...");
             skat_aug23::pimc::playout::playout(game_context, 20);
         }
+        args::Commands::StandardPlayout { context } => {
+            println!("Reading context file: {}", context);
+            let context_content = fs::read_to_string(context).expect("Unable to read context file");
+            let input: args::GameContextInput =
+                serde_json::from_str(&context_content).expect("JSON was not well-formatted");
+
+            let mut game_context = GameContext::create(
+                input.declarer_cards.__bit(),
+                input.left_cards.__bit(),
+                input.right_cards.__bit(),
+                input.game_type,
+                input.start_player,
+            );
+
+            if let Some(trick_cards_str) = input.trick_cards {
+                game_context.set_trick_cards(trick_cards_str.__bit());
+            }
+
+            if let Some(trick_suit_str) = input.trick_suit {
+                let suit = match trick_suit_str.to_lowercase().as_str() {
+                    "clubs" | "c" => CLUBS,
+                    "spades" | "s" => SPADES,
+                    "hearts" | "h" => HEARTS,
+                    "diamonds" | "d" => DIAMONDS,
+                    _ => 0,
+                };
+                game_context.set_trick_suit(suit);
+            }
+
+            // Standard playout uses full information, so threshold might matter less for 'playout' line by line,
+            // but engine needs it.
+            game_context.set_threshold_upper(120);
+
+            if let Err(e) = game_context.validate() {
+                eprintln!("Validation Error: {}", e);
+                std::process::exit(1);
+            }
+
+            let mut engine = SkatEngine::new(game_context, None);
+            println!("Calling skat_aug23::extensions::playout::playout...");
+            let lines = skat_aug23::extensions::playout::playout(&mut engine);
+
+            for line in lines {
+                println!(
+                    "Player {:?} played {}. (Decl: {}, Team: {})",
+                    line.player,
+                    line.card.__str(),
+                    line.declarer_points,
+                    line.team_points
+                );
+            }
+        }
     }
 }
