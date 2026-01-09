@@ -29,14 +29,16 @@ pub fn playout(true_context: GameContext, n_samples: u32) {
             && pos.right_cards == 0
             && pos.trick_cards == 0
         {
+            println!("--------------------------------------------------");
             println!("Game Over.");
             println!("Declarer Points: {}", pos.declarer_points);
             println!("Team Points: {}", pos.team_points);
+            println!("--------------------------------------------------");
             break;
         }
 
         println!(
-            "Round {}: Turn: {:?}, Cards: {}",
+            "Round {}: Turn: {:?} (Cards: {})",
             round,
             turn,
             my_cards.__str()
@@ -52,14 +54,20 @@ pub fn playout(true_context: GameContext, n_samples: u32) {
 
         builder = builder.cards(turn, &my_cards.__str());
 
-        println!("DEBUG: POS: {:?}", pos);
+        // Set Remaining Cards: correct logic is 'All unplayed' MINUS 'My Cards'
+        // (and minus trick cards, but get_all_unplayed_cards usually includes hands only?
+        //  Wait, check Position implementation: yes, declarer_cards | left_cards | right_cards.
+        //  So trick cards are NOT in there. Correct.)
+        let all_unplayed = pos.get_all_unplayed_cards();
+        let remaining = all_unplayed & !my_cards;
+        builder = builder.remaining_cards(&remaining.__str());
+
         // Set Table Cards logic
         let mut prev_card = 0u32;
         let mut next_card = 0u32;
 
         if pos.trick_cards != 0 {
-            println!("DEBUG: CurrentTrick: {:?}", current_trick);
-            // Identify cards from current_trick
+            // Identify cards from current_trick history
             let prev_player = match turn {
                 Player::Declarer => Player::Right,
                 Player::Left => Player::Declarer,
@@ -71,6 +79,7 @@ pub fn playout(true_context: GameContext, n_samples: u32) {
                 Player::Right => Player::Declarer,
             };
 
+            // Note: current_trick contains (Player, Card).
             for &(p, card) in &current_trick {
                 if p == prev_player {
                     prev_card = card;
@@ -79,35 +88,26 @@ pub fn playout(true_context: GameContext, n_samples: u32) {
                 }
             }
 
-            // We must set previous card via builder to set active suit roughly
-            // Although active_suit comes from Lead card.
-            // If prev_card is set, we use it. If prev_card is 0 (maybe I am 2nd player and prev played?),
-            // Wait.
-            // If I am 2nd player. Prev played. Next (3rd) hasn't.
-            // So prev_card valid. next_card 0.
-            // If I am 3rd player. Prev played. Next (1st/Lead) played.
-            // So prev_card valid. next_card valid.
-
-            // Note: trick_previous_player sets `previous_card`.
-            // We use it for ONE of them. The other we set manually.
+            // Apply to builder
+            // Note: trick_previous_player implies the card played by the player *before* me.
+            // trick_next_player implies the card played by the player *after* me (if they played before me? No).
+            // Wait. In standard Skat order:
+            // If I am 2nd: 1st played (prev). 3rd hasn't.
+            // If I am 3rd: 1st played (next?), 2nd played (prev).
+            // Let's resolve 'previous' and 'next' relative to ME.
+            // PimcProblemBuilder::trick_previous_player(card) -> sets card for (my_player - 1)
+            // PimcProblemBuilder::trick_next_player(card) -> sets card for (my_player + 1)
 
             if prev_card != 0 {
+                // If I am D, Prev is R.
                 builder = builder.trick_previous_player(pos.trick_suit, prev_card);
             }
-
             if next_card != 0 {
+                // If I am D, Next is L.
+                // If L has played, it means I am the last player (3rd).
                 builder = builder.trick_next_player(next_card);
             }
         }
-
-        // Set Remaining Cards (All unplayed except mine and table).
-        // Set Remaining Cards (All unplayed except mine and table).
-        let remaining = pos.get_all_unplayed_cards();
-
-        // Check for Impossible Facts
-        // Removed relaxation logic as requested.
-
-        builder = builder.remaining_cards(&remaining.__str());
 
         // Set Facts
         builder = builder.facts(Player::Declarer, facts_declarer);
@@ -117,24 +117,26 @@ pub fn playout(true_context: GameContext, n_samples: u32) {
         let problem = builder.build();
 
         // 2. Search
-        println!(
-            "Problem built. Starting Search with {} samples...",
-            n_samples
-        );
         let search = PimcSearch::new(problem, n_samples, None);
         let result = search.estimate_probability_of_all_cards(false);
-        println!("Search complete. Found {} moves.", result.len());
+
+        // Print Analysis
+        println!("  Analysis:");
+        for (card, val) in &result {
+            println!("    Card: {} -> Win Prob: {:.4}", card.__str(), val);
+        }
 
         if result.is_empty() {
-            println!("No valid moves found? Panic.");
+            println!("  No valid moves found. (Panic?)");
             break;
         }
 
+        // Choose best move (highest win prob)
         let best_move_card = result[0].0;
         let val = result[0].1;
 
         println!(
-            "Player {:?} chose {} (val: {})",
+            "  => Player {:?} plays {} (val: {:.4})\n",
             turn,
             best_move_card.__str(),
             val
@@ -142,13 +144,11 @@ pub fn playout(true_context: GameContext, n_samples: u32) {
 
         // 3. Execution (Apply Move) & Inference
 
-        // Inference Logic
+        // Inference Logic: Check if player failed to follow suit
         if pos.trick_cards != 0 {
             let lead_suit = pos.trick_suit;
-
-            // Check if move follows suit
             if (best_move_card & lead_suit) == 0 {
-                // Failed to follow suit. Infer Void.
+                // Player void in lead_suit
                 let mut facts = match turn {
                     Player::Declarer => facts_declarer,
                     Player::Left => facts_left,
@@ -174,8 +174,7 @@ pub fn playout(true_context: GameContext, n_samples: u32) {
                     Player::Left => facts_left = facts,
                     Player::Right => facts_right = facts,
                 };
-
-                println!("Inferred Fact for {:?}: Void in lead suit.", turn);
+                // println!("  (Inferred: {:?} is void in suit)", turn);
             }
         }
 
@@ -183,9 +182,6 @@ pub fn playout(true_context: GameContext, n_samples: u32) {
         current_trick.push((turn, best_move_card));
 
         // Check if trick will be cleared by this move
-        // Position::make_move handles points and clearing, but we need to update our history.
-        // We can check pos.trick_cards_count.
-        // If count is 2, adding 1 makes 3 -> Clear.
         if pos.trick_cards_count == 2 {
             current_trick.clear();
         }

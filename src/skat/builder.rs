@@ -2,7 +2,7 @@ use crate::skat::context::GameContext;
 use crate::{
     pimc::facts::Facts,
     skat::defs::*,
-    skat::rules::get_all_unplayed_cards,
+    skat::rules::{get_all_unplayed_cards, get_suit_for_card},
     traits::{BitConverter, Bitboard, Points},
 };
 use rand::seq::index::sample;
@@ -101,8 +101,16 @@ impl GameContextBuilder {
         } else {
             trick_card_previous_player
         };
+
+        let game_type = self.game_type.unwrap_or(Game::Grand);
+        let trick_suit = if leading_card != 0 {
+            get_suit_for_card(leading_card, game_type)
+        } else {
+            0
+        };
+
         self.trick_cards = Some(trick_cards);
-        self.trick_suit = Some(leading_card);
+        self.trick_suit = Some(trick_suit);
         self
     }
 

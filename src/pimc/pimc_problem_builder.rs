@@ -179,6 +179,37 @@ impl PimcProblemBuilder {
 
         if let Some(my_player) = self.my_player {
             uproblem.set_my_player(my_player);
+
+            // Dynamically assign facts based on perspective
+            let prev_player = match my_player {
+                Player::Declarer => Player::Right,
+                Player::Left => Player::Declarer,
+                Player::Right => Player::Left,
+            };
+            let next_player = match my_player {
+                Player::Declarer => Player::Left,
+                Player::Left => Player::Right,
+                Player::Right => Player::Declarer,
+            };
+
+            let facts_prev = match prev_player {
+                Player::Declarer => self.facts_declarer,
+                Player::Left => self.facts_left,
+                Player::Right => self.facts_right,
+            };
+
+            let facts_next = match next_player {
+                Player::Declarer => self.facts_declarer,
+                Player::Left => self.facts_left,
+                Player::Right => self.facts_right,
+            };
+
+            if let Some(facts) = facts_prev {
+                uproblem.set_facts_previous_player(facts);
+            }
+            if let Some(facts) = facts_next {
+                uproblem.set_facts_next_player(facts);
+            }
         }
 
         if let Some(my_cards) = self.my_cards {
@@ -199,14 +230,6 @@ impl PimcProblemBuilder {
 
         if let Some(upper_bound_of_null_window) = self.threshold {
             uproblem.set_threshold(upper_bound_of_null_window);
-        }
-
-        if let Some(facts) = self.facts_left {
-            uproblem.set_facts_left(facts);
-        }
-
-        if let Some(facts) = self.facts_right {
-            uproblem.set_facts_right(facts);
         }
 
         if let Some(points) = self.declarer_start_points {

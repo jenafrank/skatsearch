@@ -509,6 +509,14 @@ impl PimcProblem {
         self.facts_previous_player = facts_right;
     }
 
+    pub fn set_facts_previous_player(&mut self, facts: Facts) {
+        self.facts_previous_player = facts;
+    }
+
+    pub fn set_facts_next_player(&mut self, facts: Facts) {
+        self.facts_next_player = facts;
+    }
+
     pub fn set_declarer_start_points(&mut self, points: u8) {
         self.declarer_start_points = points;
     }
