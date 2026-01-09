@@ -299,5 +299,103 @@ fn main() {
                 println!("    Card: {} -> Value: {}", card.__str(), val);
             }
         }
+        args::Commands::SkatCalc { context, mode } => {
+            println!("Reading context file: {}", context);
+            let context_content = fs::read_to_string(context).expect("Unable to read context file");
+            let input: args::GameContextInput =
+                serde_json::from_str(&context_content).expect("JSON was not well-formatted");
+
+            let acc_mode = match mode.to_lowercase().as_str() {
+                "best" => {
+                    skat_aug23::extensions::skat_solving::AccelerationMode::AlphaBetaAccelerating
+                }
+                "all" => skat_aug23::extensions::skat_solving::AccelerationMode::NotAccelerating,
+                "win" => skat_aug23::extensions::skat_solving::AccelerationMode::WinningOnly,
+                _ => {
+                    eprintln!("Invalid mode: {}. Use 'best', 'all', or 'win'.", mode);
+                    std::process::exit(1);
+                }
+            };
+
+            use skat_aug23::traits::BitConverter;
+            let declarer_cards = input.declarer_cards.__bit();
+            let left_cards = input.left_cards.__bit();
+            let right_cards = input.right_cards.__bit();
+            let game_type = input.game_type;
+            let start_player = input.start_player;
+
+            // Basic card count validation for Declarer (12 cards expected)
+            if declarer_cards.count_ones() != 12 {
+                eprintln!(
+                    "Declarer must have 12 cards for SkatCalc. Found: {}",
+                    declarer_cards.count_ones()
+                );
+                std::process::exit(1);
+            }
+
+            println!("Calculating best skat (Mode: {})...", mode);
+            let ret = skat_aug23::extensions::skat_solving::solve_with_skat(
+                left_cards,
+                right_cards,
+                declarer_cards,
+                game_type,
+                start_player,
+                acc_mode,
+            );
+
+            match mode.to_lowercase().as_str() {
+                "best" => {
+                    if let Some(best) = ret.best_skat {
+                        println!(
+                            "Best Skat: {} {}, Value: {}",
+                            best.skat_card_1.__str(),
+                            best.skat_card_2.__str(),
+                            best.value
+                        );
+                    } else {
+                        println!("No skat solution found.");
+                    }
+                }
+                "all" => {
+                    println!("All Skat Combinations:");
+                    let mut sorted = ret.all_skats.clone();
+                    sorted.sort_by(|a, b| b.value.cmp(&a.value));
+                    for line in sorted {
+                        println!(
+                            "Skat: {} {}, Value: {}",
+                            line.skat_card_1.__str(),
+                            line.skat_card_2.__str(),
+                            line.value
+                        );
+                    }
+                }
+                "win" => {
+                    println!("Win/Loss Analysis:");
+
+                    let is_win = |val: u8, game: skat_aug23::skat::defs::Game| -> bool {
+                        match game {
+                            skat_aug23::skat::defs::Game::Null => val == 0,
+                            _ => val >= 61,
+                        }
+                    };
+
+                    if let Some(best) = ret.best_skat {
+                        if is_win(best.value, game_type) {
+                            println!(
+                                "Skat: {} {} -> WIN (Value: {})",
+                                best.skat_card_1.__str(),
+                                best.skat_card_2.__str(),
+                                best.value
+                            );
+                        } else {
+                            println!("LOOSING");
+                        }
+                    } else {
+                        println!("LOOSING");
+                    }
+                }
+                _ => {}
+            }
+        }
     }
 }

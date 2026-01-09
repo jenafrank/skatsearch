@@ -42,6 +42,15 @@ pub enum Commands {
         #[arg(short, long)]
         context: String,
     },
+    /// Calculate the best skat for a declarer hand of 12 cards
+    SkatCalc {
+        /// Path to the JSON context file
+        #[arg(short, long)]
+        context: String,
+        /// Calculation mode: "best", "all", or "win"
+        #[arg(short, long, default_value = "best")]
+        mode: String,
+    },
 }
 
 #[derive(Debug, Serialize, Deserialize)]
