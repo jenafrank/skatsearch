@@ -4,7 +4,25 @@ use serde::{Deserialize, Serialize};
 use skat_aug23::skat::defs::{Game, Player};
 
 #[derive(Parser)]
-#[command(author, version, about, long_about = None)]
+#[command(
+    author,
+    version,
+    about,
+    long_about = "Skat Search Engine - Analysis and Playout Tool
+
+SYNOPSIS:
+    skat_aug23 <COMMAND> --context <JSON_FILE> [OPTIONS]
+
+EXAMPLES:
+    # Calculate exact game value
+    skat_aug23 value-calc --context game_state.json
+
+    # Find best skat discard
+    skat_aug23 skat-calc --context hand_12_cards.json --mode best
+
+    # Analyze win/loss for best game type
+    skat_aug23 best-game --context hand_12_cards.json --mode win"
+)]
 pub struct Cli {
     #[command(subcommand)]
     pub command: Commands,
@@ -12,48 +30,62 @@ pub struct Cli {
 
 #[derive(Subcommand)]
 pub enum Commands {
-    /// Calculate the value of a game
+    /// Calculates the exact value of the game state using the perfect information solver (Alpha-Beta pruning).
+    /// returns the score for the declarer assuming optimal play from all sides. Use this to check if a specific state is won or lost.
     ValueCalc {
         /// Path to the JSON context file
         #[arg(short, long)]
         context: String,
     },
-    /// Play out a game using PIMC
+    /// Simulates the game using Perfect Information Monte Carlo (PIMC).
+    /// It samples possible hidden card distributions to handle incomplete information and plays out the game move-by-move. This is closest to a "real" AI player.
     Playout {
         /// Path to the JSON context file
         #[arg(short, long)]
         context: String,
     },
-    /// Play out a game using Standard Perfect Information
+    /// Plays out the game from the given state using Perfect Information.
+    /// It assumes all cards are known to all players (open hand) and executes the optimal line of play to determine the final score.
     StandardPlayout {
         /// Path to the JSON context file
         #[arg(short, long)]
         context: String,
     },
-    /// Play out a game with full analysis of all moves at each step
+    /// Plays out the game with full analysis at every step.
+    /// Like StandardPlayout, but at EACH move it calculates and prints the value of ALL possible legal moves. Useful for understanding "why" a move was made.
     AnalysisPlayout {
         /// Path to the JSON context file
         #[arg(short, long)]
         context: String,
     },
-    /// Analyze the single initial state (all allowed moves values)
+    /// Performs a single-step analysis of the provided game state.
+    /// It calculates the value (score or win/loss) of every legal move available to the current player. Useful for evaluating a single decision point.
     Analysis {
         /// Path to the JSON context file
         #[arg(short, long)]
         context: String,
     },
-    /// Calculate the best skat for a declarer hand of 12 cards
+    /// Evaluates the best Skat discard for a 12-card hand.
+    /// It iterates through all possible 2-card discards and solves the resulting 10-card game to find the discard that maximizes the game value.
+    /// Modes:
+    /// - "best": Finds the single best discard pair (fastest).
+    /// - "all": Lists all possible discards sorted by value.
+    /// - "win": Checks which discards lead to a win (>= 61 points).
     SkatCalc {
-        /// Path to the JSON context file
+        /// Path to the JSON context file (must contain 12 declarer cards)
         #[arg(short, long)]
         context: String,
         /// Calculation mode: "best", "all", or "win"
         #[arg(short, long, default_value = "best")]
         mode: String,
     },
-    /// Calculate the best possible game (Grand, Null, Suits) for a 12-card hand
+    /// Determines the optimal game contract (Grand, Suit, Null) for a 12-card hand.
+    /// It evaluates all valid game announcements and finds the one yielding the highest score or winning chance.
+    /// Modes:
+    /// - "best": Returns the game configuration that yields the highest point value.
+    /// - "win": Returns the game configuration that guarantees a win (>= 61 points).
     BestGame {
-        /// Path to the JSON context file
+        /// Path to the JSON context file (must contain 12 declarer cards)
         #[arg(short, long)]
         context: String,
         /// Calculation mode: "best" or "win"
