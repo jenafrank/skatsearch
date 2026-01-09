@@ -141,7 +141,7 @@ pub fn calculate_best_game(
                 my_c,
                 *game_type,
                 start_player,
-                AccelerationMode::WinningOnly,
+                AccelerationMode::AlphaBetaAccelerating,
             );
 
             let mut pushed_skat_str = String::new();

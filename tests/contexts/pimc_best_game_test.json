@@ -1,5 +1,5 @@
 {
-    "my_cards": "DJ CA CT CK CQ C9 C7 ST SQ S7",
+    "my_cards": "DJ CA CT CK CQ SA SQ S7 H8 DQ",
     "start_player": "Declarer",
     "description": "Test context for PIMC Best Game analysis",
     "usage": "cargo run -- pimc-best-game --context tests/contexts/pimc_best_game_test.json"
