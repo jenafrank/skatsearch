@@ -58,6 +58,7 @@ pub fn calculate_best_game(
         remaining_vec.shuffle(&mut rng);
 
         // Distributions: 2 Skat, 10 Left, 10 Right
+        let start_time = std::time::Instant::now();
         let skat_vec = &remaining_vec[0..2];
         let left_vec = &remaining_vec[2..12];
         let right_vec = &remaining_vec[12..22];
@@ -143,21 +144,70 @@ pub fn calculate_best_game(
                 AccelerationMode::WinningOnly,
             );
 
+            let mut pushed_skat_str = String::new();
+            let mut hand_str = String::new();
+
             let best_val = if let Some(best) = solve_ret.best_skat {
+                let pushed_load = best.skat_card_1 | best.skat_card_2;
+                pushed_skat_str = pushed_load.__str();
+
+                // The hand we play with is my_cards_with_skat minus pushed cards
+                // Note: if transform is active, we must apply inverse or just use untransformed logic?
+                // `my_cards_with_skat` is untransformed. `my_c` was transformed.
+                // `best.skat_card_1` are relative to the input `my_c`.
+                // So if we transformed `my_c` to Clubs, the returned skat cards are in that space.
+                // We need to transform them back to display correct card names if we transformed.
+
+                // Wait, solve_with_skat returns cards in the same domain as input.
+                // If we passed a transformed context (e.g. Spades -> Clubs), the result cards are "Clubs".
+                // We must untransform them to show real card names.
+
+                // However, `calc_all_games` logic was:
+                // `problem_farbe_gruen` is transformed.
+                // If we use standard `solve_with_skat`, it returns indices/masks.
+
+                // Let's look at `ProblemTransformation`.
+                // We should probably just print the raw result if it's confusing, OR implement reverse transform.
+                // BUT: `GameContext::get_switched_cards` is symmetric for Spades/Hearts/Diamonds switches if they are just swaps.
+                // Checking `context.rs`:
+                // SpadesSwitch: Spades <-> Clubs.
+                // HeartsSwitch: Hearts <-> Clubs.
+                // DiamondsSwitch: Diamonds <-> Clubs.
+                // Yes, they are their own inverses.
+
+                let real_pushed = if let Some(t) = transform {
+                    GameContext::get_switched_cards(pushed_load, *t)
+                } else {
+                    pushed_load
+                };
+
+                pushed_skat_str = real_pushed.__str();
+
+                let real_hand = my_cards_with_skat ^ real_pushed;
+                hand_str = real_hand.__str();
+
                 best.value
             } else {
-                0 // Should not happen if skat combinations exist
+                0
             };
 
             scores.push(best_val);
 
             // Logging
             if let Some(w) = &mut log_writer {
-                writeln!(w, "  {}: {}", name, best_val).unwrap();
+                writeln!(
+                    w,
+                    "  {:<9}: Score {:>3}, Hand: {}, Pushed: {}",
+                    name, best_val, hand_str, pushed_skat_str
+                )
+                .unwrap();
             }
         }
 
+        let duration = start_time.elapsed();
+
         if let Some(w) = &mut log_writer {
+            writeln!(w, "Duration: {:.2?}", duration).unwrap();
             writeln!(w, "--------------------------------------------------").unwrap();
         }
 
