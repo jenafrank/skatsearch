@@ -397,5 +397,146 @@ fn main() {
                 _ => {}
             }
         }
+        args::Commands::BestGame { context, mode } => {
+            println!("Reading context file: {}", context);
+            let context_content = fs::read_to_string(context).expect("Unable to read context file");
+            let input: args::GameContextInput =
+                serde_json::from_str(&context_content).expect("JSON was not well-formatted");
+
+            use skat_aug23::skat::context::ProblemTransformation;
+            use skat_aug23::traits::BitConverter;
+
+            let declarer_cards = input.declarer_cards.__bit();
+            let left_cards = input.left_cards.__bit();
+            let right_cards = input.right_cards.__bit();
+            let start_player = input.start_player;
+
+            if declarer_cards.count_ones() != 12 {
+                eprintln!("Declarer must have 12 cards for BestGame.");
+                std::process::exit(1);
+            }
+
+            let acc_mode = match mode.to_lowercase().as_str() {
+                "best" => {
+                    skat_aug23::extensions::skat_solving::AccelerationMode::AlphaBetaAccelerating
+                }
+                "win" => skat_aug23::extensions::skat_solving::AccelerationMode::WinningOnly,
+                _ => {
+                    eprintln!("Invalid mode: {}. Use 'best' or 'win'.", mode);
+                    std::process::exit(1);
+                }
+            };
+
+            println!("Calculating best game (Mode: {})...", mode);
+
+            let games_to_check = vec![
+                (skat_aug23::skat::defs::Game::Grand, None, "Grand"),
+                (skat_aug23::skat::defs::Game::Null, None, "Null"),
+                (skat_aug23::skat::defs::Game::Suit, None, "Clubs"),
+                (
+                    skat_aug23::skat::defs::Game::Suit,
+                    Some(ProblemTransformation::SpadesSwitch),
+                    "Spades",
+                ),
+                (
+                    skat_aug23::skat::defs::Game::Suit,
+                    Some(ProblemTransformation::HeartsSwitch),
+                    "Hearts",
+                ),
+                (
+                    skat_aug23::skat::defs::Game::Suit,
+                    Some(ProblemTransformation::DiamondsSwitch),
+                    "Diamonds",
+                ),
+            ];
+
+            let mut results = Vec::new();
+
+            for (game_type, transformation, label) in games_to_check {
+                // Apply transformation if needed
+                let d_cards = if let Some(trans) = transformation {
+                    GameContext::get_switched_cards(declarer_cards, trans)
+                } else {
+                    declarer_cards
+                };
+                let l_cards = if let Some(trans) = transformation {
+                    GameContext::get_switched_cards(left_cards, trans)
+                } else {
+                    left_cards
+                };
+                let r_cards = if let Some(trans) = transformation {
+                    GameContext::get_switched_cards(right_cards, trans)
+                } else {
+                    right_cards
+                };
+
+                let ret = skat_aug23::extensions::skat_solving::solve_with_skat(
+                    l_cards,
+                    r_cards,
+                    d_cards,
+                    game_type,
+                    start_player,
+                    acc_mode,
+                );
+
+                if let Some(best) = ret.best_skat {
+                    // Transform skat cards back if needed
+                    let (s1, s2) = if let Some(trans) = transformation {
+                        // Switching back is the same operation (XOR swap logic)
+                        (
+                            GameContext::get_switched_cards(best.skat_card_1, trans),
+                            GameContext::get_switched_cards(best.skat_card_2, trans),
+                        )
+                    } else {
+                        (best.skat_card_1, best.skat_card_2)
+                    };
+
+                    results.push((label, s1, s2, best.value, game_type));
+                }
+            }
+
+            // Output based on mode
+            if mode.to_lowercase() == "win" {
+                println!("Win/Loss Analysis:");
+                results.sort_by(|a, b| b.3.cmp(&a.3)); // Sort by value anyway (high value wins usually)
+
+                let is_win = |val: u8, game: skat_aug23::skat::defs::Game| -> bool {
+                    match game {
+                        skat_aug23::skat::defs::Game::Null => val == 0,
+                        _ => val >= 61,
+                    }
+                };
+
+                let mut found_win = false;
+                for (label, s1, s2, val, g_type) in results {
+                    if is_win(val, g_type) {
+                        println!(
+                            "Game: {:<10} Skat: {} {} -> WIN (Value: {})",
+                            label,
+                            s1.__str(),
+                            s2.__str(),
+                            val
+                        );
+                        found_win = true;
+                    }
+                }
+                if !found_win {
+                    println!("LOOSING (No winning game found)");
+                }
+            } else {
+                // Best mode (default)
+                results.sort_by(|a, b| b.3.cmp(&a.3));
+                println!("Best Games Ranking:");
+                for (label, s1, s2, val, _) in results {
+                    println!(
+                        "Game: {:<10} Skat: {} {} -> Value: {}",
+                        label,
+                        s1.__str(),
+                        s2.__str(),
+                        val
+                    );
+                }
+            }
+        }
     }
 }

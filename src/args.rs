@@ -51,6 +51,15 @@ pub enum Commands {
         #[arg(short, long, default_value = "best")]
         mode: String,
     },
+    /// Calculate the best possible game (Grand, Null, Suits) for a 12-card hand
+    BestGame {
+        /// Path to the JSON context file
+        #[arg(short, long)]
+        context: String,
+        /// Calculation mode: "best" or "win"
+        #[arg(short, long, default_value = "best")]
+        mode: String,
+    },
 }
 
 #[derive(Debug, Serialize, Deserialize)]

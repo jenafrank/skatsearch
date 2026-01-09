@@ -161,7 +161,7 @@ impl GameContext {
         }
     }
 
-    fn get_switched_cards(cards: u32, switch: ProblemTransformation) -> u32 {
+    pub fn get_switched_cards(cards: u32, switch: ProblemTransformation) -> u32 {
         let shift = match switch {
             ProblemTransformation::SpadesSwitch => 7usize,
             ProblemTransformation::HeartsSwitch => 14usize,
