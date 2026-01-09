@@ -100,6 +100,12 @@ fn main() {
                     "spades" | "s" => SPADES,
                     "hearts" | "h" => HEARTS,
                     "diamonds" | "d" => DIAMONDS,
+                    "trump" | "t" => match game_context.game_type() {
+                        skat_aug23::skat::defs::Game::Grand => {
+                            skat_aug23::consts::bitboard::TRUMP_GRAND
+                        }
+                        _ => skat_aug23::consts::bitboard::TRUMP_SUIT,
+                    },
                     _ => 0,
                 };
                 game_context.set_trick_suit(suit);
@@ -139,6 +145,12 @@ fn main() {
                     "spades" | "s" => SPADES,
                     "hearts" | "h" => HEARTS,
                     "diamonds" | "d" => DIAMONDS,
+                    "trump" | "t" => match game_context.game_type() {
+                        skat_aug23::skat::defs::Game::Grand => {
+                            skat_aug23::consts::bitboard::TRUMP_GRAND
+                        }
+                        _ => skat_aug23::consts::bitboard::TRUMP_SUIT,
+                    },
                     _ => 0,
                 };
                 game_context.set_trick_suit(suit);
@@ -191,6 +203,12 @@ fn main() {
                     "spades" | "s" => SPADES,
                     "hearts" | "h" => HEARTS,
                     "diamonds" | "d" => DIAMONDS,
+                    "trump" | "t" => match game_context.game_type() {
+                        skat_aug23::skat::defs::Game::Grand => {
+                            skat_aug23::consts::bitboard::TRUMP_GRAND
+                        }
+                        _ => skat_aug23::consts::bitboard::TRUMP_SUIT,
+                    },
                     _ => 0,
                 };
                 game_context.set_trick_suit(suit);
@@ -250,6 +268,12 @@ fn main() {
                     "spades" | "s" => SPADES,
                     "hearts" | "h" => HEARTS,
                     "diamonds" | "d" => DIAMONDS,
+                    "trump" | "t" => match game_context.game_type() {
+                        skat_aug23::skat::defs::Game::Grand => {
+                            skat_aug23::consts::bitboard::TRUMP_GRAND
+                        }
+                        _ => skat_aug23::consts::bitboard::TRUMP_SUIT,
+                    },
                     _ => 0,
                 };
                 game_context.set_trick_suit(suit);

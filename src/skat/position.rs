@@ -107,9 +107,9 @@ impl Position {
 
     pub fn create_initial_position(game_context: &GameContext) -> Position {
         Position::create(
-            0u32,
-            0u32,
-            0u32,
+            game_context.trick_cards(),
+            game_context.trick_cards(),
+            game_context.trick_suit(),
             0u8,
             game_context.start_player(),
             game_context,

@@ -5,7 +5,8 @@
 
 use crate::skat::defs::{Game, Player, CLUBS, DIAMONDS, HEARTS, SPADES};
 use crate::skat::position::Position;
-use crate::traits::Bitboard; // Need to ensure traits are available or moved
+use crate::skat::rules::get_suit_for_card;
+use crate::traits::{BitConverter, Bitboard}; // Need to ensure traits are available or moved
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum ProblemTransformation {
@@ -196,7 +197,27 @@ impl GameContext {
 
     pub fn validate(&self) -> Result<(), String> {
         self.check_equal_card_count()?;
-        // Add more checks here
+        // Check trick suit
+        if self.trick_cards != 0 {
+            if self.trick_suit == 0 {
+                return Err("Trick cards present but trick suit is 0".to_string());
+            }
+            let (cards, n) = self.trick_cards.__decompose();
+            let mut valid = false;
+            for i in 0..n {
+                let s = get_suit_for_card(cards[i], self.game_type);
+                if s == self.trick_suit {
+                    valid = true;
+                    break;
+                }
+            }
+            if !valid {
+                return Err(format!(
+                    "Trick suit {} is not compatible with any card on the table",
+                    self.trick_suit
+                ));
+            }
+        }
         Ok(())
     }
 
