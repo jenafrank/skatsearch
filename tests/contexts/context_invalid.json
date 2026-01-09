@@ -1,4 +1,7 @@
 {
+    "description": "Invalid context (missing cards) for error handling tests.",
+    "usage": "cargo run -- value-calc --context tests/contexts/context_invalid.json",
+    "expect_failure": true,
     "declarer_cards": "SJ SA ST",
     "left_cards": "CJ CT",
     "right_cards": "HJ HT H9",

@@ -1,4 +1,6 @@
 {
+    "description": "7-card open hand start. Tests value calculation.",
+    "usage": "cargo run -- value-calc --context tests/contexts/skat_7_cards_start.json",
     "declarer_cards": "CJ HJ SA HA DA S9 D9",
     "left_cards": "SJ DJ CA CK CQ S8 H9",
     "right_cards": "SK SQ HK HQ DK DQ D8",

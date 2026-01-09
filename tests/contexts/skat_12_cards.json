@@ -1,4 +1,6 @@
 {
+    "description": "12-card hand for Skat discard calculation or Best Game.",
+    "usage": "cargo run -- skat-calc --context tests/contexts/skat_12_cards.json --mode best",
     "declarer_cards": "CJ HJ SA ST HA HT DA DT C9 C8 S9 D9",
     "left_cards": "SJ DJ CA CT CK CQ C7 S8 S7 H9",
     "right_cards": "SK SQ HK HQ H8 H7 DK DQ D8 D7",

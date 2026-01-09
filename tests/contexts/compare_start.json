@@ -1,4 +1,6 @@
 {
+    "description": "7-card endgame start state for comparison.",
+    "usage": "cargo run -- value-calc --context tests/contexts/compare_start.json",
     "declarer_cards": "CJ SJ C8 S8 H8 D8 C7",
     "left_cards": "HJ DJ HA DA CA SA H7",
     "right_cards": "HK DK CK SK HT DT D7",

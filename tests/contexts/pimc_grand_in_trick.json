@@ -1,9 +1,0 @@
-{
-    "declarer_cards": "SJ C8 S8 H8 D8 C7",
-    "left_cards": "DJ HA DA CA SA H7",
-    "right_cards": "HK DK CK SK HT DT D7",
-    "game_type": "Grand",
-    "start_player": "Right",
-    "trick_cards": "CJ HJ",
-    "trick_suit": "Trump"
-}

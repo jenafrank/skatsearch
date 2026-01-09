@@ -1,4 +1,6 @@
 {
+    "description": "Manual PIMC setup with facts (Right: No Hearts, Left: No Clubs).",
+    "usage": "cargo run -- pimc-calc --context tests/contexts/pimc_test.json --mode best",
     "game_type": "Grand",
     "my_player": "Declarer",
     "my_cards": "CJ HJ SA ST HA HT DA DT S9 D9",

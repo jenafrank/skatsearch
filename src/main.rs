@@ -34,14 +34,34 @@ fn main() {
             }
 
             if let Some(trick_suit_str) = input.trick_suit {
+                eprintln!("DEBUG: ValueCalc Found trick_suit: '{}'", trick_suit_str);
                 let suit = match trick_suit_str.to_lowercase().as_str() {
                     "clubs" | "c" => CLUBS,
                     "spades" | "s" => SPADES,
                     "hearts" | "h" => HEARTS,
                     "diamonds" | "d" => DIAMONDS,
-                    _ => 0, // Or handle error
+                    "trump" | "t" => {
+                        eprintln!(
+                            "DEBUG: ValueCalc Matching Trump. GameType: {:?}",
+                            game_context.game_type()
+                        );
+                        match game_context.game_type() {
+                            skat_aug23::skat::defs::Game::Grand => {
+                                eprintln!("DEBUG: ValueCalc Using TRUMP_GRAND");
+                                skat_aug23::consts::bitboard::TRUMP_GRAND
+                            }
+                            _ => skat_aug23::consts::bitboard::TRUMP_SUIT,
+                        }
+                    }
+                    _ => {
+                        eprintln!("DEBUG: ValueCalc Match Failed for '{}'", trick_suit_str);
+                        0
+                    }
                 };
+                eprintln!("DEBUG: ValueCalc Parsed suit value: {}", suit);
                 game_context.set_trick_suit(suit);
+            } else {
+                eprintln!("DEBUG: ValueCalc No trick_suit in input.");
             }
 
             if let Some(points) = input.declarer_start_points {

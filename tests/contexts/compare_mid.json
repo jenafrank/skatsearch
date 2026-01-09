@@ -1,4 +1,6 @@
 {
+    "description": "7-card endgame mid-trick state for comparison.",
+    "usage": "cargo run -- value-calc --context tests/contexts/compare_mid.json",
     "declarer_cards": "SJ C8 S8 H8 D8 C7",
     "left_cards": "DJ HA DA CA SA H7",
     "right_cards": "HK DK CK SK HT DT D7",

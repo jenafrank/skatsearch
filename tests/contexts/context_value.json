@@ -1,4 +1,6 @@
 {
+    "description": "Simple 3-card endgame for value calculation testing.",
+    "usage": "cargo run -- value-calc --context tests/contexts/context_value.json",
     "declarer_cards": "SJ SA ST",
     "left_cards": "CJ CT C9",
     "right_cards": "HJ HT H9",
