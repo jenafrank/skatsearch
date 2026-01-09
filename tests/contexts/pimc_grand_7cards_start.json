@@ -1,0 +1,10 @@
+{
+    "description": "PIMC test for a 7-card endgame start state. Tests PIMC functionality for partial hands.",
+    "usage": "cargo run -- pimc-calc --context tests/contexts/pimc_grand_7cards_start.json --mode best",
+    "game_type": "Grand",
+    "my_player": "Declarer",
+    "my_cards": "CJ HJ SA HA DA S9 D9",
+    "remaining_cards": "SJ DJ CA CK CQ S8 H9 SK SQ HK HQ DK DQ D8",
+    "declarer_start_points": 22,
+    "samples": 50
+}

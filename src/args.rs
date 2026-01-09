@@ -162,6 +162,10 @@ pub struct PimcContextInput {
     pub remaining_cards: String,
     pub trick_cards: Option<String>,
     pub trick_suit: Option<String>,
+    // PIMC specific optional fields for mid-trick or detailed setup
+    pub previous_card: Option<String>,
+    pub next_card: Option<String>,
+    pub declarer_start_points: Option<u8>,
     pub threshold: Option<u8>,
     pub samples: Option<u32>,
     pub facts: Option<PimcPlayerFactsInput>,

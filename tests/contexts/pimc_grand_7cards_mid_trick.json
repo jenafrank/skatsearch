@@ -1,0 +1,11 @@
+{
+    "description": "PIMC test for a mid-trick state. Declarer led CJ, Left played SJ, Right to move.",
+    "usage": "cargo run -- pimc-calc --context tests/contexts/pimc_grand_7cards_mid_trick.json --mode best",
+    "game_type": "Grand",
+    "my_player": "Right",
+    "my_cards": "SK SQ HK HQ DK DQ D8",
+    "remaining_cards": "HJ SA HA DA S9 D9 DJ CA CK CQ S8 H9",
+    "declarer_start_points": 22,
+    "trick_cards": "SJ CJ",
+    "samples": 50
+}

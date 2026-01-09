@@ -710,24 +710,22 @@ fn main() {
                 }
             }
 
-            if let Some(_trick) = input.trick_cards {
-                // If there are trick cards, we need to handle them.
-                // PimcProblemBuilder has trick_previous_player and trick_next_player.
-                // But it's tricky to map generic "trick_cards" to specific positions without knowing played order.
-                // For simplicity in this first version, we might assume trick handling needs specific logic or specific inputs.
-                // But let's see. If we have 1 card on table, and I am Middlehand, it's prev_player.
-                // If I am Rearhand, it's prev (Lead) and next (Middle).
-                // Let's defer complex trick logic or assume user provides it via specific API later.
-                // For now, if provided, we try to set them if count implies it?
-                // But basic builder just takes "cards on table".
-                // Actually, builder has `trick_previous_player` and `trick_next_player` which take CARD u32.
-                // Input is string.
+            if let Some(trick_str) = &input.trick_cards {
+                let cards: Vec<&str> = trick_str.split_whitespace().collect();
+                if !cards.is_empty() {
+                    let prev = cards[0];
+                    let next = if cards.len() > 1 { cards[1] } else { "" };
+                    builder = builder.trick_from_uproblem(prev.to_string(), next.to_string());
+                }
+            } else if let (Some(prev), Some(next)) = (&input.previous_card, &input.next_card) {
+                // Fallback for individual fields if still present (or remove if desired)
+                builder = builder.trick_from_uproblem(prev.to_string(), next.to_string());
+            } else if let Some(prev) = &input.previous_card {
+                builder = builder.trick_from_uproblem(prev.to_string(), "".to_string());
+            }
 
-                // Simplified: Logic to assign table cards if provided?
-                // Maybe just warn for now if trick_cards provided but not fully parsed.
-                // For accurate PIMC, we need to know WHO played WHAT.
-                // The current PimcContextInput has generic `trick_cards`.
-                println!("Warning: `trick_cards` input in PimcCalc is currently not fully auto-mapped to player positions. Initializing PIMC with hand/remaining only.");
+            if let Some(points) = input.declarer_start_points {
+                builder = builder.declarer_start_points(points);
             }
 
             if let Some(facts_input) = input.facts {

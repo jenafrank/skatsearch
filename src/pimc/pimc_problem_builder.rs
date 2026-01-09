@@ -93,6 +93,40 @@ impl PimcProblemBuilder {
         self
     }
 
+    pub fn trick_from_uproblem(mut self, prev: String, next: String) -> PimcProblemBuilder {
+        let prev_card = if prev.is_empty() { 0 } else { prev.__bit() };
+        let next_card = if next.is_empty() { 0 } else { next.__bit() };
+
+        if prev_card != 0 {
+            self.previous_card = Some(prev_card);
+            // Infer active suit from lead card
+            let trump = self.game_type.get_trump();
+            let mut suit_mask = 0;
+            if (prev_card & trump) != 0 {
+                suit_mask = trump;
+            } else {
+                for s in [
+                    crate::skat::defs::CLUBS,
+                    crate::skat::defs::SPADES,
+                    crate::skat::defs::HEARTS,
+                    crate::skat::defs::DIAMONDS,
+                ] {
+                    if (prev_card & s) != 0 {
+                        suit_mask = s & !trump;
+                        break;
+                    }
+                }
+            }
+            self.active_suit = Some(suit_mask);
+        }
+
+        if next_card != 0 {
+            self.next_card = Some(next_card);
+        }
+
+        self
+    }
+
     pub fn facts(mut self, player: Player, facts: Facts) -> PimcProblemBuilder {
         match player {
             Player::Declarer => self.facts_declarer = Some(facts),
