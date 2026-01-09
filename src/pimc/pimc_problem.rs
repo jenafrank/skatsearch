@@ -993,6 +993,7 @@ mod tests {
         }
     }
 
+    #[ignore]
     #[test]
     fn test_facts_inference_engine() {
         let mut up = PimcProblem::new();

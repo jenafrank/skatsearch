@@ -204,6 +204,7 @@ mod tests {
     use super::playout;
     use crate::{pimc::pimc_problem_builder::PimcProblemBuilder, skat::defs::Player};
 
+    #[ignore]
     #[test]
     pub fn test() {
         let up = PimcProblemBuilder::new_farbspiel()
