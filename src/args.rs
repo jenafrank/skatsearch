@@ -92,6 +92,19 @@ pub enum Commands {
         #[arg(short, long, default_value = "best")]
         mode: String,
     },
+    /// Calculates the value of a game state with incomplete information using PIMC.
+    /// PIMC (Perfect Information Monte Carlo) samples possible distributions of unknown cards.
+    /// Modes:
+    /// - "win": Estimates the probability of winning (Declarer >= 61 or Null logic).
+    /// - "best": Estimates value of all possible moves for the current player.
+    PimcCalc {
+        /// Path to the JSON context file
+        #[arg(short, long)]
+        context: String,
+        /// Calculation mode: "best" or "win"
+        #[arg(short, long, default_value = "best")]
+        mode: String,
+    },
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -111,4 +124,33 @@ pub struct GameContextInput {
 pub enum SearchMode {
     Win,
     Value,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct PimcFactsInput {
+    pub no_trump: Option<bool>,
+    pub no_clubs: Option<bool>,
+    pub no_spades: Option<bool>,
+    pub no_hearts: Option<bool>,
+    pub no_diamonds: Option<bool>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct PimcPlayerFactsInput {
+    pub declarer: Option<PimcFactsInput>,
+    pub left: Option<PimcFactsInput>,
+    pub right: Option<PimcFactsInput>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct PimcContextInput {
+    pub game_type: Game,
+    pub my_player: Player,
+    pub my_cards: String,
+    pub remaining_cards: String,
+    pub trick_cards: Option<String>,
+    pub trick_suit: Option<String>,
+    pub threshold: Option<u8>,
+    pub samples: Option<u32>,
+    pub facts: Option<PimcPlayerFactsInput>,
 }

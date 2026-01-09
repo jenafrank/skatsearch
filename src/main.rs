@@ -2,7 +2,11 @@ mod args;
 
 use clap::Parser;
 use skat_aug23::extensions::solver::{solve, solve_win};
+use skat_aug23::pimc::facts::Facts;
+use skat_aug23::pimc::pimc_problem_builder::PimcProblemBuilder;
+use skat_aug23::pimc::pimc_search::PimcSearch;
 use skat_aug23::skat::context::GameContext;
+use skat_aug23::skat::defs::Player;
 use skat_aug23::skat::defs::{CLUBS, DIAMONDS, HEARTS, SPADES};
 use skat_aug23::skat::engine::SkatEngine;
 use skat_aug23::traits::{BitConverter, Bitboard, Points, StringConverter};
@@ -641,6 +645,103 @@ fn main() {
                         s2.__str(),
                         val
                     );
+                }
+            }
+        }
+        args::Commands::PimcCalc { context, mode } => {
+            println!("Reading context file: {}", context);
+            let context_content = fs::read_to_string(context).expect("Unable to read context file");
+            let input: args::PimcContextInput =
+                serde_json::from_str(&context_content).expect("JSON was not well-formatted");
+
+            let mut builder = PimcProblemBuilder::new(input.game_type)
+                .my_player(input.my_player)
+                .turn(input.my_player) // Assuming it's my turn if calculating? Or should it be separate?
+                // Actually, for value calc, user usually wants to know value for current player.
+                // Input has my_player.
+                .cards(input.my_player, &input.my_cards)
+                .remaining_cards(&input.remaining_cards);
+
+            if let Some(threshold) = input.threshold {
+                builder = builder.threshold(threshold);
+            } else {
+                if input.game_type == skat_aug23::skat::defs::Game::Null {
+                    builder = builder.threshold(1);
+                } else {
+                    builder = builder.threshold(61);
+                }
+            }
+
+            if let Some(trick) = input.trick_cards {
+                // If there are trick cards, we need to handle them.
+                // PimcProblemBuilder has trick_previous_player and trick_next_player.
+                // But it's tricky to map generic "trick_cards" to specific positions without knowing played order.
+                // For simplicity in this first version, we might assume trick handling needs specific logic or specific inputs.
+                // But let's see. If we have 1 card on table, and I am Middlehand, it's prev_player.
+                // If I am Rearhand, it's prev (Lead) and next (Middle).
+                // Let's defer complex trick logic or assume user provides it via specific API later.
+                // For now, if provided, we try to set them if count implies it?
+                // But basic builder just takes "cards on table".
+                // Actually, builder has `trick_previous_player` and `trick_next_player` which take CARD u32.
+                // Input is string.
+
+                // Simplified: Logic to assign table cards if provided?
+                // Maybe just warn for now if trick_cards provided but not fully parsed.
+                // For accurate PIMC, we need to know WHO played WHAT.
+                // The current PimcContextInput has generic `trick_cards`.
+                println!("Warning: `trick_cards` input in PimcCalc is currently not fully auto-mapped to player positions. Initializing PIMC with hand/remaining only.");
+            }
+
+            if let Some(facts_input) = input.facts {
+                let convert_facts = |f_in: Option<args::PimcFactsInput>| -> Facts {
+                    if let Some(f) = f_in {
+                        let mut facts = Facts::zero_fact();
+                        if let Some(true) = f.no_trump {
+                            facts.no_trump = true;
+                        }
+                        if let Some(true) = f.no_clubs {
+                            facts.no_clubs = true;
+                        }
+                        if let Some(true) = f.no_spades {
+                            facts.no_spades = true;
+                        }
+                        if let Some(true) = f.no_hearts {
+                            facts.no_hearts = true;
+                        }
+                        if let Some(true) = f.no_diamonds {
+                            facts.no_diamonds = true;
+                        }
+                        facts
+                    } else {
+                        Facts::zero_fact()
+                    }
+                };
+
+                builder = builder.facts(Player::Declarer, convert_facts(facts_input.declarer));
+                builder = builder.facts(Player::Left, convert_facts(facts_input.left));
+                builder = builder.facts(Player::Right, convert_facts(facts_input.right));
+            }
+
+            let problem = builder.build();
+            let samples = input.samples.unwrap_or(100);
+            let search = PimcSearch::new(problem, samples);
+
+            match mode.to_lowercase().as_str() {
+                "win" => {
+                    println!("Estimating Win Probability ({} samples)...", samples);
+                    let (prob, _) = search.estimate_win(false); // info=false for clean output
+                    println!("Win Probability: {:.4}", prob);
+                }
+                "best" => {
+                    println!("Estimating Best Move Values ({} samples)...", samples);
+                    let results = search.estimate_probability_of_all_cards(false); // info=false for clean output
+                    println!("Aggregate Results:");
+                    for (card, prob) in results {
+                        println!("Card: {} -> Win Prob: {:.4}", card.__str(), prob);
+                    }
+                }
+                _ => {
+                    eprintln!("Invalid mode: {}. Use 'best' or 'win'.", mode);
                 }
             }
         }

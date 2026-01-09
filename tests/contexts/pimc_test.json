@@ -1,0 +1,15 @@
+{
+    "game_type": "Grand",
+    "my_player": "Declarer",
+    "my_cards": "CJ HJ SA ST HA HT DA DT S9 D9",
+    "remaining_cards": "SJ DJ C9 C8 CK CQ C7 S8 S7 H9 SK SQ HK HQ H8 H7 DK DQ D8 D7",
+    "samples": 50,
+    "facts": {
+        "left": {
+            "no_clubs": true
+        },
+        "right": {
+            "no_hearts": true
+        }
+    }
+}
