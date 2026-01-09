@@ -97,6 +97,15 @@ pub enum Commands {
     /// Modes:
     /// - "win": Estimates the probability of winning (Declarer >= 61 or Null logic).
     /// - "best": Estimates value of all possible moves for the current player.
+    /// Calculates the value of a game state with incomplete information using PIMC.
+    /// PIMC (Perfect Information Monte Carlo) samples possible distributions of unknown cards.
+    ///
+    /// ARGS:
+    ///     --context <FILE>    Path to JSON context file (30 cards for auto-skat).
+    ///     --mode <MODE>       "win" (default) or "best".
+    ///                         - "win": Win probability for current state.
+    ///                         - "best": Win probability for each legal move.
+    ///     --log-file <PATH>   Optional. Writes sample details to this file.
     PimcCalc {
         /// Path to the JSON context file
         #[arg(short, long)]
