@@ -142,7 +142,7 @@ impl GameContext {
 
     pub fn get_skat(&self) -> u32 {
         use crate::skat::defs::ALLCARDS;
-        ALLCARDS ^ self.declarer_cards ^ self.left_cards ^ self.right_cards
+        ALLCARDS ^ self.declarer_cards ^ self.left_cards ^ self.right_cards ^ self.trick_cards
     }
 
     pub fn create_initial_position(&self) -> Position {

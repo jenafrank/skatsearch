@@ -5,7 +5,7 @@ use skat_aug23::extensions::solver::{solve, solve_win};
 use skat_aug23::skat::context::GameContext;
 use skat_aug23::skat::defs::{CLUBS, DIAMONDS, HEARTS, SPADES};
 use skat_aug23::skat::engine::SkatEngine;
-use skat_aug23::traits::{BitConverter, StringConverter};
+use skat_aug23::traits::{BitConverter, Bitboard, Points, StringConverter};
 use std::fs;
 
 fn main() {
@@ -38,6 +38,27 @@ fn main() {
                     _ => 0, // Or handle error
                 };
                 game_context.set_trick_suit(suit);
+            }
+
+            if let Some(points) = input.declarer_start_points {
+                game_context.set_declarer_start_points(points);
+            } else {
+                let total_cards = game_context.declarer_cards().count_ones()
+                    + game_context.left_cards().count_ones()
+                    + game_context.right_cards().count_ones()
+                    + game_context.trick_cards().count_ones();
+
+                if total_cards == 30
+                    && game_context.game_type() != skat_aug23::skat::defs::Game::Null
+                {
+                    let skat = game_context.get_skat();
+                    let points = skat.points();
+                    println!(
+                        "Auto-Skat: Determined {} points in Skat. Adding to declarer start points.",
+                        points
+                    );
+                    game_context.set_declarer_start_points(points);
+                }
             }
 
             let mut threshold_upper = match input.mode.as_ref() {
@@ -113,6 +134,23 @@ fn main() {
 
             if let Some(points) = input.declarer_start_points {
                 game_context.set_declarer_start_points(points);
+            } else {
+                let total_cards = game_context.declarer_cards().count_ones()
+                    + game_context.left_cards().count_ones()
+                    + game_context.right_cards().count_ones()
+                    + game_context.trick_cards().count_ones();
+
+                if total_cards == 30
+                    && game_context.game_type() != skat_aug23::skat::defs::Game::Null
+                {
+                    let skat = game_context.get_skat();
+                    let points = skat.points();
+                    println!(
+                        "Auto-Skat: Determined {} points in Skat. Adding to declarer start points.",
+                        points
+                    );
+                    game_context.set_declarer_start_points(points);
+                }
             }
 
             game_context.set_threshold_upper(61);
@@ -162,6 +200,24 @@ fn main() {
 
             if let Some(points) = input.declarer_start_points {
                 game_context.set_declarer_start_points(points);
+            } else {
+                // Check for Auto-Skat-Points
+                let total_cards = game_context.declarer_cards().count_ones()
+                    + game_context.left_cards().count_ones()
+                    + game_context.right_cards().count_ones()
+                    + game_context.trick_cards().count_ones();
+
+                if total_cards == 30
+                    && game_context.game_type() != skat_aug23::skat::defs::Game::Null
+                {
+                    let skat = game_context.get_skat();
+                    let points = skat.points();
+                    println!(
+                        "Auto-Skat: Determined {} points in Skat. Adding to declarer start points.",
+                        points
+                    );
+                    game_context.set_declarer_start_points(points);
+                }
             }
 
             // Standard playout uses full information, so threshold might matter less for 'playout' line by line,
@@ -224,6 +280,23 @@ fn main() {
 
             if let Some(points) = input.declarer_start_points {
                 game_context.set_declarer_start_points(points);
+            } else {
+                let total_cards = game_context.declarer_cards().count_ones()
+                    + game_context.left_cards().count_ones()
+                    + game_context.right_cards().count_ones()
+                    + game_context.trick_cards().count_ones();
+
+                if total_cards == 30
+                    && game_context.game_type() != skat_aug23::skat::defs::Game::Null
+                {
+                    let skat = game_context.get_skat();
+                    let points = skat.points();
+                    println!(
+                        "Auto-Skat: Determined {} points in Skat. Adding to declarer start points.",
+                        points
+                    );
+                    game_context.set_declarer_start_points(points);
+                }
             }
 
             game_context.set_threshold_upper(120);
@@ -293,6 +366,23 @@ fn main() {
 
             if let Some(points) = input.declarer_start_points {
                 game_context.set_declarer_start_points(points);
+            } else {
+                let total_cards = game_context.declarer_cards().count_ones()
+                    + game_context.left_cards().count_ones()
+                    + game_context.right_cards().count_ones()
+                    + game_context.trick_cards().count_ones();
+
+                if total_cards == 30
+                    && game_context.game_type() != skat_aug23::skat::defs::Game::Null
+                {
+                    let skat = game_context.get_skat();
+                    let points = skat.points();
+                    println!(
+                        "Auto-Skat: Determined {} points in Skat. Adding to declarer start points.",
+                        points
+                    );
+                    game_context.set_declarer_start_points(points);
+                }
             }
 
             game_context.set_threshold_upper(120);
