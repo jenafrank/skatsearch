@@ -30,6 +30,18 @@ pub enum Commands {
         #[arg(short, long)]
         context: String,
     },
+    /// Play out a game with full analysis of all moves at each step
+    AnalysisPlayout {
+        /// Path to the JSON context file
+        #[arg(short, long)]
+        context: String,
+    },
+    /// Analyze the single initial state (all allowed moves values)
+    Analysis {
+        /// Path to the JSON context file
+        #[arg(short, long)]
+        context: String,
+    },
 }
 
 #[derive(Debug, Serialize, Deserialize)]

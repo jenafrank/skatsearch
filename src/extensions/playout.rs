@@ -81,10 +81,14 @@ pub fn playout_all_cards(engine: &mut SkatEngine) -> Vec<PlayoutAllCardsRetLine>
     //     + engine.context.left_cards.count_ones()
     //     + engine.context.right_cards.count_ones()) as usize;
 
+    let n = (engine.context.declarer_cards.count_ones()
+        + engine.context.left_cards.count_ones()
+        + engine.context.right_cards.count_ones()) as usize;
+
     let mut position = engine.create_initial_position();
 
-    while i < 30 {
-        // Assuming 30 cards for a full game, as 'n' was removed.
+    while i < n {
+        // Assuming n cards to play.
         let mut row: PlayoutAllCardsRetLine = Default::default();
 
         let mut cnt: Counters = Counters::new();
