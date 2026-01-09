@@ -9,7 +9,7 @@ use skat_aug23::skat::context::GameContext;
 use skat_aug23::skat::defs::Player;
 use skat_aug23::skat::defs::{CLUBS, DIAMONDS, HEARTS, SPADES};
 use skat_aug23::skat::engine::SkatEngine;
-use skat_aug23::traits::{BitConverter, Bitboard, Points, StringConverter};
+use skat_aug23::traits::{BitConverter, Points, StringConverter};
 use std::fs;
 
 fn main() {
@@ -65,7 +65,7 @@ fn main() {
                 }
             }
 
-            let mut threshold_upper = match input.mode.as_ref() {
+            let _threshold_upper = match input.mode.as_ref() {
                 Some(args::SearchMode::Win) => 61,
                 Some(args::SearchMode::Value) => 120,
                 None => 120,
@@ -662,6 +662,40 @@ fn main() {
                 .cards(input.my_player, &input.my_cards)
                 .remaining_cards(&input.remaining_cards);
 
+            println!(
+                "Context: {} - {}",
+                input.game_type.convert_to_string(),
+                input.my_player.str()
+            );
+            println!("My Cards: {}", input.my_cards);
+            println!("Remaining: {}", input.remaining_cards);
+            if let Some(_f) = &input.facts {
+                println!("Facts: Present");
+            }
+
+            // Auto-Skat Logic
+            let my_cards_bit = input.my_cards.__bit();
+            let remaining_cards_bit = input.remaining_cards.__bit();
+            let cards_in_play = my_cards_bit | remaining_cards_bit;
+
+            if cards_in_play.count_ones() == 30 {
+                let skat_cards = skat_aug23::consts::bitboard::ALLCARDS & !cards_in_play;
+                let skat_points = skat_cards.points() as u8;
+                println!("Auto-Skat: {} ({} Points)", skat_cards.__str(), skat_points);
+                builder = builder.declarer_start_points(skat_points);
+            } else if cards_in_play.count_ones() == 32 {
+                // 32 cards? Skat might be in remaining?
+                // Standard PIMC expects "remaining_cards" to be the UNKNOWN pool.
+                // If Skat is unknown, it's just part of the game.
+                // But valid board state for PIMC usually requires divisibility by 3.
+                // 32 is not divisible by 3.
+                // If 32 cards are provided, we assume 2 are Skat and 30 are in hands.
+                // But we don't know WHICH are Skat.
+                // This is a different problem (Hand Distribution inference).
+                // We stick to 30-card auto-skat.
+                println!("Note: 32 cards provided. Assuming Skat is unknown/distributed.");
+            }
+
             if let Some(threshold) = input.threshold {
                 builder = builder.threshold(threshold);
             } else {
@@ -672,7 +706,7 @@ fn main() {
                 }
             }
 
-            if let Some(trick) = input.trick_cards {
+            if let Some(_trick) = input.trick_cards {
                 // If there are trick cards, we need to handle them.
                 // PimcProblemBuilder has trick_previous_player and trick_next_player.
                 // But it's tricky to map generic "trick_cards" to specific positions without knowing played order.

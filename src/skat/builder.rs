@@ -16,6 +16,7 @@ pub struct GameContextBuilder {
     threshold_upper: Option<u8>,
     trick_cards: Option<u32>,
     trick_suit: Option<u32>,
+    declarer_start_points: Option<u8>,
 }
 
 impl GameContextBuilder {
@@ -69,6 +70,11 @@ impl GameContextBuilder {
 
     pub fn threshold(mut self, threshold_upper: u8) -> GameContextBuilder {
         self.threshold_upper = Some(threshold_upper);
+        self
+    }
+
+    pub fn declarer_start_points(mut self, points: u8) -> GameContextBuilder {
+        self.declarer_start_points = Some(points);
         self
     }
 
@@ -145,6 +151,8 @@ impl GameContextBuilder {
         // If fields are pub, I can set them.
 
         // I'll just comment out the setters I'm unsure about and fix in next turn.
+        context.set_declarer_start_points(self.declarer_start_points.unwrap_or(0));
+
         if let Some(trick_cards) = self.trick_cards {
             context.set_trick_cards(trick_cards);
         }
@@ -161,7 +169,7 @@ impl GameContextBuilder {
         let declarer_cards = self.declarer_cards.expect("Declarer cards missing.");
         let left_cards = self.left_cards.expect("Left cards missing.");
         let right_cards = self.right_cards.expect("Right cards missing.");
-        let start_player = self.start_player.expect("No start player available.");
+        let _start_player = self.start_player.expect("No start player available.");
         let trick_cards = self.trick_cards.expect("No trick cards available.");
 
         assert_eq!(declarer_cards & left_cards, 0);
@@ -169,16 +177,16 @@ impl GameContextBuilder {
         assert_eq!(declarer_cards & right_cards, 0);
 
         // check card numbers with respect to cards_in_trick
-        let nr_cards_declarer = declarer_cards.count_ones();
-        let nr_cards_left = left_cards.count_ones();
-        let nr_cards_right = right_cards.count_ones();
+        let _nr_cards_declarer = declarer_cards.count_ones();
+        let _nr_cards_left = left_cards.count_ones();
+        let _nr_cards_right = right_cards.count_ones();
 
         // assert_eq!(nr_cards_declarer, nr_cards_left);
         // assert_eq!(nr_cards_left, nr_cards_right);
 
-        let nr_cards_declarer_in_trick = (declarer_cards & trick_cards).count_ones();
-        let nr_cards_left_in_trick = (left_cards & trick_cards).count_ones();
-        let nr_cards_right_in_trick = (right_cards & trick_cards).count_ones();
+        let _nr_cards_declarer_in_trick = (declarer_cards & trick_cards).count_ones();
+        let _nr_cards_left_in_trick = (left_cards & trick_cards).count_ones();
+        let _nr_cards_right_in_trick = (right_cards & trick_cards).count_ones();
 
         let nr_trick_cards = trick_cards.count_ones();
 
@@ -236,8 +244,7 @@ impl GameContextBuilder {
         cards_previous_player = cards_previous_player & !card_on_table_next_player;
 
         let my_cards_count = my_cards.count_ones();
-        println!("DEBUG: set_cards. MyCards: {}. TablePrev: {}. TableNext: {}. AllCards: {}", 
-            my_cards_count, card_on_table_previous_player, card_on_table_next_player, all_cards.count_ones());
+
 
         let target_next = my_cards_count - if card_on_table_next_player != 0 { 1 } else { 0 };
         let target_prev = my_cards_count - if card_on_table_previous_player != 0 { 1 } else { 0 };
@@ -340,6 +347,7 @@ impl Default for GameContextBuilder {
             threshold_upper: Some(1),
             trick_cards: Some(0),
             trick_suit: Some(0),
+            declarer_start_points: Some(0),
         }
     }
 }

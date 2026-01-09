@@ -21,6 +21,9 @@ pub struct PimcProblem {
     // Facts
     facts_previous_player: Facts,
     facts_next_player: Facts,
+
+    // Score
+    declarer_start_points: u8,
 }
 
 impl PimcProblem {
@@ -41,8 +44,8 @@ impl PimcProblem {
 
         // 3. Update table state + Check Trick Completion
         // Cards on table BEFORE this move:
-        let previous = ret.previous_card;
-        let next = ret.next_card;
+        let _previous = ret.previous_card;
+        let _next = ret.next_card;
 
         // Where was this card played?
         if player == self.my_player.dec() {
@@ -65,7 +68,7 @@ impl PimcProblem {
         // If Right played 'previous', Left played 'next', and I play...
         // Then we have 3 cards.
 
-        let mut table_cards = ret.previous_card | ret.next_card;
+        let _table_cards = ret.previous_card | ret.next_card;
         // If I just played, I'm not in prev/next. Where is my card?
         // Ah, PimcProblem doesn't store "my card on table".
         // It assumes `my_cards` handles my hand.
@@ -119,7 +122,7 @@ impl PimcProblem {
         // We know `played_card` (just played).
         // We need to know if the *third* card is present.
 
-        let trick_full = if player == self.my_player {
+        let _trick_full = if player == self.my_player {
             // I just played. Trick full if Prev and Next are present.
             ret.previous_card != 0 && ret.next_card != 0
         } else if player == self.my_player.dec() {
@@ -505,6 +508,10 @@ impl PimcProblem {
     pub fn set_facts_right(&mut self, facts_right: Facts) {
         self.facts_next_player = facts_right;
     }
+
+    pub fn set_declarer_start_points(&mut self, points: u8) {
+        self.declarer_start_points = points;
+    }
 }
 
 impl PimcProblem {
@@ -519,6 +526,7 @@ impl PimcProblem {
             threshold: 1u8,
             facts_previous_player: Facts::zero_fact(),
             facts_next_player: Facts::zero_fact(),
+            declarer_start_points: 0,
         }
     }
 
@@ -542,6 +550,7 @@ impl PimcProblem {
                 self.next_player_facts(),
                 self.previous_player_facts(),
             )
+            .declarer_start_points(self.declarer_start_points)
             .build();
 
         if verify_card_distribution(&problem) {
@@ -602,6 +611,7 @@ mod tests {
             threshold: 1,
             facts_previous_player: Facts::one_fact(true, false, false, false, false),
             facts_next_player: Facts::zero_fact(),
+            declarer_start_points: 0,
         };
 
         let problem = uproblem.generate_concrete_problem();
@@ -623,6 +633,7 @@ mod tests {
             next_card: 0u32,
             facts_previous_player: Facts::zero_fact(),
             facts_next_player: Facts::zero_fact(),
+            declarer_start_points: 0,
         };
 
         let problem = uproblem.generate_concrete_problem();
@@ -661,6 +672,7 @@ mod tests {
             previous_card: 0u32,
             facts_previous_player: Facts::zero_fact(),
             facts_next_player: Facts::one_fact(true, false, false, false, false), // No Trump for Left
+            declarer_start_points: 0,
         };
 
         // Run multiple times to ensure randomness doesn't accidentally succeed
@@ -713,6 +725,7 @@ mod tests {
             previous_card: 0u32,
             facts_previous_player: Facts::zero_fact(),
             facts_next_player: Facts::one_fact(false, true, false, false, false), // No Clubs for Left
+            declarer_start_points: 0,
         };
 
         for _ in 0..20 {
@@ -760,6 +773,7 @@ mod tests {
             previous_card: 0u32,
             facts_previous_player: Facts::zero_fact(),
             facts_next_player: Facts::one_fact(false, false, true, false, false), // No Spades for Left
+            declarer_start_points: 0,
         };
 
         for _ in 0..20 {
@@ -810,6 +824,7 @@ mod tests {
             previous_card: 0u32,
             facts_previous_player: Facts::zero_fact(),
             facts_next_player: Facts::one_fact(true, false, false, false, false), // No Trump for Left
+            declarer_start_points: 0,
         };
 
         for _ in 0..20 {
@@ -847,6 +862,7 @@ mod tests {
             previous_card: 0u32,
             facts_previous_player: Facts::zero_fact(),
             facts_next_player: Facts::one_fact(false, true, false, false, false), // No Clubs for Left
+            declarer_start_points: 0,
         };
 
         for _ in 0..20 {
@@ -885,6 +901,7 @@ mod tests {
             previous_card: 0u32,
             facts_previous_player: Facts::zero_fact(),
             facts_next_player: Facts::one_fact(false, false, true, false, false), // No Spades for Left
+            declarer_start_points: 0,
         };
 
         for _ in 0..20 {
@@ -922,6 +939,7 @@ mod tests {
             previous_card: 0u32,
             facts_previous_player: Facts::zero_fact(),
             facts_next_player: Facts::one_fact(false, false, false, true, false), // No Hearts for Left
+            declarer_start_points: 0,
         };
 
         for _ in 0..20 {
@@ -959,6 +977,7 @@ mod tests {
             previous_card: 0u32,
             facts_previous_player: Facts::zero_fact(),
             facts_next_player: Facts::one_fact(false, false, false, false, true), // No Diamonds for Left
+            declarer_start_points: 0,
         };
 
         for _ in 0..20 {

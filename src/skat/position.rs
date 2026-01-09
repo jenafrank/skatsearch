@@ -149,7 +149,7 @@ impl Position {
         let mut new_team_points = self.team_points;
 
         // Update remaining points: Card leaves hand, so subtract its points immediately.
-        let mut new_remaining_points = self.remaining_points.saturating_sub(card.points());
+        let new_remaining_points = self.remaining_points.saturating_sub(card.points());
 
         // new cards on hand
         let mut new_declarer_cards = self.declarer_cards;

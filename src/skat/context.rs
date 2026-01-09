@@ -6,7 +6,7 @@
 use crate::skat::defs::{Game, Player, CLUBS, DIAMONDS, HEARTS, SPADES};
 use crate::skat::position::Position;
 use crate::skat::rules::get_suit_for_card;
-use crate::traits::{BitConverter, Bitboard}; // Need to ensure traits are available or moved
+use crate::traits::Bitboard; // Need to ensure traits are available or moved
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum ProblemTransformation {

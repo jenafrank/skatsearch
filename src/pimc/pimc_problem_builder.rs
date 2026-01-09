@@ -17,6 +17,7 @@ pub struct PimcProblemBuilder {
     all_cards: Option<u32>,
     active_suit: Option<u32>,
     threshold: Option<u8>,
+    declarer_start_points: Option<u8>,
 
     // Facts
     facts_declarer: Option<Facts>,
@@ -63,6 +64,11 @@ impl PimcProblemBuilder {
 
     pub fn threshold(mut self, threshold: u8) -> PimcProblemBuilder {
         self.threshold = Some(threshold);
+        self
+    }
+
+    pub fn declarer_start_points(mut self, points: u8) -> PimcProblemBuilder {
+        self.declarer_start_points = Some(points);
         self
     }
 
@@ -169,6 +175,10 @@ impl PimcProblemBuilder {
             uproblem.set_facts_right(facts);
         }
 
+        if let Some(points) = self.declarer_start_points {
+            uproblem.set_declarer_start_points(points);
+        }
+
         uproblem
     }
 
@@ -229,8 +239,8 @@ impl PimcProblemBuilder {
     }
 
     fn validate_number_of_cards(&self) {
-        let nr_own_cards = self.my_cards.unwrap().count_ones();
-        let nr_all_cards = self.all_cards.unwrap().count_ones();
+        let _nr_own_cards = self.my_cards.unwrap().count_ones();
+        let _nr_all_cards = self.all_cards.unwrap().count_ones();
 
         // assert!(nr_all_cards % 3 == 0);
         // assert!(nr_all_cards == 3 * nr_own_cards);
@@ -256,6 +266,7 @@ impl Default for PimcProblemBuilder {
             facts_declarer: Some(Facts::zero_fact()),
             facts_left: Some(Facts::zero_fact()),
             facts_right: Some(Facts::zero_fact()),
+            declarer_start_points: Some(0),
         }
     }
 }
