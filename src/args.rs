@@ -21,7 +21,10 @@ EXAMPLES:
     skat_aug23 skat-calc --context hand_12_cards.json --mode best
 
     # Analyze win/loss for best game type
-    skat_aug23 best-game --context hand_12_cards.json --mode win"
+    skat_aug23 best-game --context hand_12_cards.json --mode win
+
+    # Calculate optimum play (Fast Win / Slow Loss)
+    skat_aug23 value-calc --context game_state.json --optimum-mode all_winning"
 )]
 pub struct Cli {
     #[command(subcommand)]
