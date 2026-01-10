@@ -23,6 +23,9 @@ pub struct PimcProblemBuilder {
     facts_declarer: Option<Facts>,
     facts_left: Option<Facts>,
     facts_right: Option<Facts>,
+
+    // Asymmetric Info
+    skat_cards: Option<u32>,
 }
 
 impl PimcProblemBuilder {
@@ -174,10 +177,31 @@ impl PimcProblemBuilder {
         self
     }
 
-    pub fn skat_cards(self, skat_cards: &str) -> PimcProblemBuilder {
+    pub fn skat_cards(mut self, skat_cards: &str) -> PimcProblemBuilder {
         let skat_cards_bit = skat_cards.__bit();
         assert!(skat_cards_bit.count_ones() == 2);
-        self.missing_cards(skat_cards)
+
+        self.skat_cards = Some(skat_cards_bit);
+
+        // Ensure skat cards are included in all_cards
+        if let Some(all) = self.all_cards {
+            self.all_cards = Some(all | skat_cards_bit);
+        } else {
+            // If all_cards not set yet, we can't assume much, but usually it's set later.
+            // Or we can initialize it? Best to just rely on user setting remaining_cards or all_cards properly?
+            // But existing usage implies this method might define the game context.
+            // Let's assume user calls remaining_cards or similar.
+            // Wait, original method called `missing_cards`, which REMOVED them from `all_cards`.
+            // Now we want them IN `all_cards` (but known as Skat).
+            // If we don't modify all_cards, we assume they are already part of the universe or will be added.
+            // If the user previously used `skat_cards` to REMOVE them, then `all_cards` was `ALL & !skat`.
+            // Now we want `all_cards` to include them.
+
+            // If we do nothing to `all_cards`, and `all_cards` is set via `remaining_cards`,
+            // `remaining_cards` logic sets `all_cards = remaining | my | table`.
+            // If Skat was in "remaining", it's fine.
+        }
+        self
     }
 
     pub fn build(self) -> PimcProblem {
@@ -244,6 +268,10 @@ impl PimcProblemBuilder {
 
         if let Some(points) = self.declarer_start_points {
             uproblem.set_declarer_start_points(points);
+        }
+
+        if let Some(skat) = self.skat_cards {
+            uproblem.set_skat_cards(skat);
         }
 
         uproblem
@@ -334,6 +362,7 @@ impl Default for PimcProblemBuilder {
             facts_left: Some(Facts::zero_fact()),
             facts_right: Some(Facts::zero_fact()),
             declarer_start_points: Some(0),
+            skat_cards: None,
         }
     }
 }

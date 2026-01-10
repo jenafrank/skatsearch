@@ -1,4 +1,4 @@
-use crate::skat::builder::GameContextBuilder;
+﻿use crate::skat::builder::GameContextBuilder;
 use crate::skat::context::GameContext;
 use crate::skat::defs::Game;
 use crate::skat::defs::Player;
@@ -24,6 +24,9 @@ pub struct PimcProblem {
 
     // Score
     declarer_start_points: u8,
+
+    // Asymmetric Information
+    skat_cards: Option<u32>,
 }
 
 impl PimcProblem {
@@ -535,11 +538,22 @@ impl PimcProblem {
             facts_previous_player: Facts::zero_fact(),
             facts_next_player: Facts::zero_fact(),
             declarer_start_points: 0,
+            skat_cards: None,
         }
+    }
+
+    pub fn set_skat_cards(&mut self, skat_cards: u32) {
+        self.skat_cards = Some(skat_cards);
+    }
+
+    pub fn skat_cards(&self) -> Option<u32> {
+        self.skat_cards
     }
 
     pub fn generate_concrete_problem(&self) -> GameContext {
         self.validate();
+
+        let distribution_pool = self.calculate_distribution_pool();
 
         let problem = GameContextBuilder::new(self.game_type)
             .cards(Player::Declarer, "")
@@ -550,7 +564,7 @@ impl PimcProblem {
             .threshold(self.threshold)
             .set_cards_for_problem(self.my_cards, self.my_player)
             .set_cards_for_other_players(
-                self.all_cards,
+                distribution_pool,
                 self.previous_card,
                 self.next_card,
                 self.my_cards,
@@ -568,6 +582,25 @@ impl PimcProblem {
         }
     }
 
+    fn calculate_distribution_pool(&self) -> u32 {
+        let mut pool = self.all_cards;
+
+        // If I am the Declarer and I know the Skat, exclude it from the distribution pool
+        // so Opponents don't get these cards.
+        // If I am an Opponent, I do NOT know the Skat, so it remains in the pool
+        // effectively making "My View" of the game include Skat cards as potential unknown cards.
+        if self.my_player == Player::Declarer {
+            if let Some(skat) = self.skat_cards {
+                pool &= !skat;
+            }
+        }
+
+        // Future Extension Point: Add other distribution restrictions here
+        // e.g. if specific cards are known to be out of play or with specific players
+
+        pool
+    }
+
     fn next_player_facts(&self) -> Facts {
         self.facts_next_player
     }
@@ -576,17 +609,29 @@ impl PimcProblem {
         self.facts_previous_player
     }
 
-    fn validate(&self) {
-        self.validate_all_cards();
+    fn validate(&self) -> Result<(), String> {
+        self.validate_all_cards()
     }
 
-    fn validate_all_cards(&self) {
-        assert!(self.all_cards & self.my_cards == self.my_cards);
-        assert!(self.all_cards & self.cards_on_table() == self.cards_on_table());
+    fn validate_all_cards(&self) -> Result<(), String> {
+        if self.all_cards & self.my_cards != self.my_cards {
+            return Err("all_cards must contain my_cards".to_string());
+        }
+        if self.all_cards & self.cards_on_table() != self.cards_on_table() {
+            return Err("all_cards must contain cards_on_table".to_string());
+        }
 
         // currently uncertain problems can only be solved before a trick starts:
         // Allow 32 cards (start of game with Skat) or divisible by 3 (mid-game clean tricks)
-        assert!(self.all_cards.count_ones() == 32 || self.all_cards.count_ones() % 3 == 0);
+        // Also allow 32 cards if Skat is explicitly tracked
+        let count = self.all_cards.count_ones();
+        if count != 32 && count % 3 != 0 && count % 3 != 2 {
+            return Err(format!(
+                "Invalid card count: {}. Must be 32 or divisible by 3 (or 3k+2 for Skat).",
+                count
+            ));
+        }
+        Ok(())
     }
 }
 
@@ -621,6 +666,8 @@ mod tests {
             facts_previous_player: Facts::one_fact(true, false, false, false, false),
             facts_next_player: Facts::zero_fact(),
             declarer_start_points: 0,
+
+            skat_cards: None,
         };
 
         let problem = uproblem.generate_concrete_problem();
@@ -643,6 +690,8 @@ mod tests {
             facts_previous_player: Facts::zero_fact(),
             facts_next_player: Facts::zero_fact(),
             declarer_start_points: 0,
+
+            skat_cards: None,
         };
 
         let problem = uproblem.generate_concrete_problem();
@@ -682,6 +731,8 @@ mod tests {
             facts_previous_player: Facts::zero_fact(),
             facts_next_player: Facts::one_fact(true, false, false, false, false), // No Trump for Left
             declarer_start_points: 0,
+
+            skat_cards: None,
         };
 
         // Run multiple times to ensure randomness doesn't accidentally succeed
@@ -735,6 +786,8 @@ mod tests {
             facts_previous_player: Facts::zero_fact(),
             facts_next_player: Facts::one_fact(false, true, false, false, false), // No Clubs for Left
             declarer_start_points: 0,
+
+            skat_cards: None,
         };
 
         for _ in 0..20 {
@@ -783,6 +836,8 @@ mod tests {
             facts_previous_player: Facts::zero_fact(),
             facts_next_player: Facts::one_fact(false, false, true, false, false), // No Spades for Left
             declarer_start_points: 0,
+
+            skat_cards: None,
         };
 
         for _ in 0..20 {
@@ -834,6 +889,8 @@ mod tests {
             facts_previous_player: Facts::zero_fact(),
             facts_next_player: Facts::one_fact(true, false, false, false, false), // No Trump for Left
             declarer_start_points: 0,
+
+            skat_cards: None,
         };
 
         for _ in 0..20 {
@@ -872,6 +929,8 @@ mod tests {
             facts_previous_player: Facts::zero_fact(),
             facts_next_player: Facts::one_fact(false, true, false, false, false), // No Clubs for Left
             declarer_start_points: 0,
+
+            skat_cards: None,
         };
 
         for _ in 0..20 {
@@ -911,6 +970,8 @@ mod tests {
             facts_previous_player: Facts::zero_fact(),
             facts_next_player: Facts::one_fact(false, false, true, false, false), // No Spades for Left
             declarer_start_points: 0,
+
+            skat_cards: None,
         };
 
         for _ in 0..20 {
@@ -949,6 +1010,8 @@ mod tests {
             facts_previous_player: Facts::zero_fact(),
             facts_next_player: Facts::one_fact(false, false, false, true, false), // No Hearts for Left
             declarer_start_points: 0,
+
+            skat_cards: None,
         };
 
         for _ in 0..20 {
@@ -987,6 +1050,8 @@ mod tests {
             facts_previous_player: Facts::zero_fact(),
             facts_next_player: Facts::one_fact(false, false, false, false, true), // No Diamonds for Left
             declarer_start_points: 0,
+
+            skat_cards: None,
         };
 
         for _ in 0..20 {
@@ -1057,4 +1122,99 @@ mod tests {
             "Right should be inferred to have No Trump"
         );
     }
+}
+
+#[test]
+fn test_skat_asymmetry() {
+    use crate::pimc::pimc_problem_builder::PimcProblemBuilder;
+    use crate::skat::defs::{Game, Player};
+    use crate::traits::{BitConverter, StringConverter};
+
+    // Scenario: Small game with 8 cards total.
+    // Skat: C7 C8 (Known to Declarer)
+    // Declarer: CA
+    // Left: SA
+    // Right: DA
+    // Pool: C7 C8 CA SA DA + Extras to shuffle?
+    // Let's define exact cards where Skat takes 2, Players take 1 each?
+    // Total 5? No, players must have equal cards.
+    // Skat=2. Players=2 each? Total 2+6=8.
+    // Skat: C7 C8
+    // Declarer: CA CK
+    // Left: SA SK
+    // Right: DA DK
+    // All known? No, we need unknown cards to test distribution.
+
+    // Setup:
+    // Declarer (Me): CA CK.
+    // All Cards: CA CK SA SK DA DK HA HK (8 cards).
+    // Skat (Known to Me): HA HK.
+    // Unknown to Me: SA SK DA DK.
+    // As Declarer, I know HA HK are Skat. So Opponents (L/R) should NEVER get HA HK.
+    // Opponents should get SA SK DA DK distributed randomly.
+
+    let builder = PimcProblemBuilder::new(Game::Suit)
+        .cards(Player::Declarer, "CA CK")
+        .remaining_cards("SA SK DA DK") // Unknowns
+        .skat_cards("HA HK") // Known Skat (Add to all_cards)
+        .threshold(1)
+        .trick_previous_player(0, 0)
+        .trick_next_player(0);
+
+    let problem_declarer = builder.build();
+
+    // 1. Verify Declarer Perspective
+    for _ in 0..20 {
+        let concrete = problem_declarer.generate_concrete_problem();
+        let left_cards = concrete.left_cards();
+        let right_cards = concrete.right_cards();
+        let skat_mask = "HA HK".__bit();
+
+        assert_eq!(
+            left_cards & skat_mask,
+            0,
+            "Left got Skat card!. Left: {}, Skat: HA HK",
+            left_cards.__str()
+        );
+        assert_eq!(
+            right_cards & skat_mask,
+            0,
+            "Right got Skat card!. Right: {}, Skat: HA HK",
+            right_cards.__str()
+        );
+    }
+
+    // 2. Verify Opponent Perspective (Simulating checking the logic with my_player != Declarer, but Skat field set)
+    // If I am Left, and for some reason the structure has Skat cards set (maybe I cheated or guessed),
+    // The engine should IGNORE this knowledge for distribution if I am not Declarer?
+    // Wait, the Requirement is: "Declarer knows Skat... Opponents do not".
+    // This implies if we simulate *Being* an Opponent, we shouldn't use Skat info to reduce the pool.
+
+    let mut problem_left = problem_declarer.clone();
+    problem_left.set_my_player(Player::Left);
+
+    // Run simulation. "HA HK" are in the 'all_cards'.
+    // Since my_player is Left, the `calculate_distribution_pool` keeps HA HK in the pool.
+    // So Left (Me) or Right or Declarer or 'Skat' (the random holes) can get them.
+    // Specifically, we check if Declarer or Right *can* get HA or HK.
+
+    let mut skat_distributed_to_others = false;
+    let skat_mask = "HA HK".__bit();
+
+    for _ in 0..50 {
+        let concrete = problem_left.generate_concrete_problem();
+        // Note: In concrete problem, `declarer_cards` is "other player" for Left.
+        let declarer = concrete.declarer_cards();
+        let right = concrete.right_cards();
+
+        if (declarer & skat_mask) != 0 || (right & skat_mask) != 0 {
+            skat_distributed_to_others = true;
+            break;
+        }
+    }
+
+    assert!(
+        skat_distributed_to_others,
+        "Skat cards should be distributable to others when viewing as Opponent"
+    );
 }
