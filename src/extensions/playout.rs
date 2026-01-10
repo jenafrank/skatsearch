@@ -51,9 +51,17 @@ pub fn playout(engine: &mut SkatEngine) -> Vec<PlayoutLine> {
         let mut cnt: Counters = Counters::new();
 
         let now = Instant::now();
-        let alpha = 0;
-        let beta = 120;
-        let (played_card, _) = engine.search(&position, &mut cnt, alpha, beta);
+        // Use Optimum Search logic (BestValue) for Playout
+        let played_card = crate::extensions::solver::solve_optimum_from_position(
+            engine,
+            &position,
+            crate::extensions::solver::OptimumMode::BestValue,
+        )
+        .unwrap_or_else(|_| {
+            // Fallback
+            let (c, _) = engine.search(&position, &mut cnt, 0, 120);
+            c
+        });
         let time = now.elapsed().as_millis();
 
         row.player = position.player; // Position has player? Yes.

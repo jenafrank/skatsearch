@@ -1,0 +1,10 @@
+{
+    "description": "Null Game: Slow Loss. Declarer 'HA' wins trick 1 (Immediate Loss, Depth 1). 'C7' loses trick 1 and 2, but Declarer forced to take Trick 3 with 'HA' (Loss, Depth 3). Optimum should prefer 'C7' (Slower Loss).",
+    "usage": "cargo run -- value-calc --context tests/contexts/optimum_null_slow_loss.json --optimum-mode all_winning",
+    "declarer_cards": "HA, C7, D7",
+    "left_cards": "H7, C8, D8",
+    "right_cards": "H8, C9, D9",
+    "game_type": "Null",
+    "start_player": "Declarer",
+    "mode": "Value"
+}

@@ -1,7 +1,7 @@
 mod args;
 
 use clap::Parser;
-use skat_aug23::extensions::solver::{solve, solve_win};
+use skat_aug23::extensions::solver::{solve, solve_optimum, solve_win, OptimumMode};
 use skat_aug23::pimc::facts::Facts;
 use skat_aug23::pimc::pimc_problem_builder::PimcProblemBuilder;
 use skat_aug23::pimc::pimc_search::PimcSearch;
@@ -16,7 +16,10 @@ fn main() {
     let output = args::Cli::parse();
 
     match output.command {
-        args::Commands::ValueCalc { context } => {
+        args::Commands::ValueCalc {
+            context,
+            optimum_mode,
+        } => {
             let context_content = fs::read_to_string(context).expect("Unable to read context file");
             let input: args::GameContextInput =
                 serde_json::from_str(&context_content).expect("JSON was not well-formatted");
@@ -98,24 +101,43 @@ fn main() {
 
             let mut engine = SkatEngine::new(game_context, None);
 
-            let mode = input.mode.unwrap_or(args::SearchMode::Value);
-
-            match mode {
-                args::SearchMode::Win => {
-                    let result = solve_win(&mut engine);
-                    println!(
-                        "Declarer Wins: {}, Best Card: {}",
-                        result.declarer_wins,
-                        result.best_card.__str()
-                    );
+            if let Some(opt_str) = optimum_mode {
+                let opt_mode = match opt_str.to_lowercase().as_str() {
+                    "best_value" => OptimumMode::BestValue,
+                    "all_winning" => OptimumMode::AllWinning,
+                    _ => {
+                        eprintln!(
+                            "Invalid optimum mode: {}. Use 'best_value' or 'all_winning'.",
+                            opt_str
+                        );
+                        std::process::exit(1);
+                    }
+                };
+                println!("Running Optimum Search (Mode: {:?})...", opt_mode);
+                match solve_optimum(&mut engine, opt_mode) {
+                    Ok(best) => println!("Optimum Best Move: {}", best.__str()),
+                    Err(e) => println!("Optimum Search Failed: {}", e),
                 }
-                args::SearchMode::Value => {
-                    let result = solve(&mut engine);
-                    println!(
-                        "Value: {}, Best Card: {}",
-                        result.best_value,
-                        result.best_card.__str()
-                    );
+            } else {
+                let mode = input.mode.unwrap_or(args::SearchMode::Value);
+
+                match mode {
+                    args::SearchMode::Win => {
+                        let result = solve_win(&mut engine);
+                        println!(
+                            "Declarer Wins: {}, Best Card: {}",
+                            result.declarer_wins,
+                            result.best_card.__str()
+                        );
+                    }
+                    args::SearchMode::Value => {
+                        let result = solve(&mut engine);
+                        println!(
+                            "Value: {}, Best Card: {}",
+                            result.best_value,
+                            result.best_card.__str()
+                        );
+                    }
                 }
             }
         }

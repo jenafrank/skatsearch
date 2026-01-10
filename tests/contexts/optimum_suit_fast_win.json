@@ -1,0 +1,12 @@
+{
+    "description": "Suit Game: Fast Win vs Slow Win. Decl needs 11 pts (start 50). 'CA' wins immediately (11pts). 'S7' loses trick, but Decl wins next trick with 'CA'. 'CA' is Depth 1, 'S7' is Depth 2. Optimum Mode should pick 'CA'.",
+    "usage": "cargo run -- value-calc --context tests/contexts/optimum_suit_fast_win.json --optimum-mode all_winning",
+    "declarer_cards": "CA, S7",
+    "left_cards": "C9, S9",
+    "right_cards": "C8, D7",
+    "declarer_start_points": 50,
+    "game_type": "Suit",
+    "trick_suit": "Clubs",
+    "start_player": "Declarer",
+    "mode": "Value"
+}

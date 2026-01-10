@@ -36,6 +36,9 @@ pub enum Commands {
         /// Path to the JSON context file
         #[arg(short, long)]
         context: String,
+        /// Optimum mode: "best_value" or "all_winning"
+        #[arg(long)]
+        optimum_mode: Option<String>,
     },
     /// Simulates the game using Perfect Information Monte Carlo (PIMC).
     /// It samples possible hidden card distributions to handle incomplete information and plays out the game move-by-move. This is closest to a "real" AI player.
