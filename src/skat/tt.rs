@@ -36,7 +36,7 @@ pub struct TranspositionEntry {
     pub trick_cards: u32, // Used for collision check
 
     // value
-    pub value: u8,
+    pub value: i16,
 
     // for alpha-beta functions
     pub flag: TranspositionFlag,
@@ -95,6 +95,14 @@ impl TranspositionTable {
             _ => TranspositionFlag::Exact,
         };
 
+        // SAFETY: u8 fits in i16
+        // Logic: Store Remaining Value (Total - Accumulated)
+        let stored_val = if value.1 > position.declarer_points {
+            (value.1 - position.declarer_points) as i16
+        } else {
+            0
+        };
+
         let entry = TranspositionEntry {
             occupied: true,
             player: position.player,
@@ -102,20 +110,7 @@ impl TranspositionTable {
             right_cards: position.right_cards,
             declarer_cards: position.declarer_cards,
             trick_cards: position.trick_cards,
-
-            value: if value.1 > position.declarer_points {
-                value.1 - position.declarer_points
-            } else {
-                0
-            }, // Safety check for subtraction
-            // Wait, original logic was: value.1 - state.augen_declarer.
-            // value passed to write is (best_card, best_value_absolute).
-            // State augen is accumulated so far.
-            // Stored value is REMAINING value?
-            // Let's re-verify the original logic.
-            // Original: value: value.1 - state.augen_declarer
-            // If value.1 is absolute total score, and augen_declarer is score so far, then YES, stored value is remaining score.
-            // I'll keep it as is, but assuming u8 > 0.
+            value: stored_val,
             bestcard: value.0,
             flag,
         };
@@ -124,8 +119,6 @@ impl TranspositionTable {
         let replace = if !old.occupied {
             true
         } else {
-            // New is exact -> Always replace
-            // New is not exact -> Only replace if old is not exact
             entry.flag == TranspositionFlag::Exact || old.flag != TranspositionFlag::Exact
         };
 
@@ -135,7 +128,6 @@ impl TranspositionTable {
     }
 
     pub fn read(&self, position: &Position, cnt: &mut Counters) -> Option<&TranspositionEntry> {
-        // Position has get_hash()
         let candidate = &self.data[position.get_hash()];
 
         if !candidate.occupied {
@@ -149,11 +141,62 @@ impl TranspositionTable {
         }
     }
 
+    // New methods for Optimum Search (Score based i16)
+    pub fn write_optimum(
+        &mut self,
+        position: &Position,
+        mapped_hash: usize,
+        alpha: i16,
+        beta: i16,
+        value: (u32, i16),
+    ) {
+        // optimum mode uses i16 scores directly
+        let flag = match value.1 {
+            x if x <= alpha => TranspositionFlag::Upper,
+            x if x >= beta => TranspositionFlag::Lower,
+            _ => TranspositionFlag::Exact,
+        };
+
+        // For Optimum Search, score is position-dependent (depth included in score),
+        // but 'depth' is fixed for a given card configuration in Skat.
+        // So we can store absolute score.
+        let entry = TranspositionEntry {
+            occupied: true,
+            player: position.player,
+            left_cards: position.left_cards,
+            right_cards: position.right_cards,
+            declarer_cards: position.declarer_cards,
+            trick_cards: position.trick_cards,
+            value: value.1,
+            bestcard: value.0,
+            flag,
+        };
+
+        let old = &self.data[mapped_hash];
+        let replace = if !old.occupied {
+            true
+        } else {
+            entry.flag == TranspositionFlag::Exact || old.flag != TranspositionFlag::Exact
+        };
+
+        if replace {
+            self.data[mapped_hash] = entry;
+        }
+    }
+
+    pub fn read_optimum(
+        &self,
+        position: &Position,
+        cnt: &mut Counters,
+    ) -> Option<&TranspositionEntry> {
+        // Re-use standard read matching
+        self.read(position, cnt)
+    }
+
     pub fn get_occupied_slots(&self) -> usize {
         self.data.iter().filter(|e| e.occupied).count()
     }
 
-    // Original had add_entries for parallel merging?
     pub fn add_entries(&mut self, other: TranspositionTable) {
         for i in 0..TT_SIZE {
             if !self.data[i].occupied && other.data[i].occupied {

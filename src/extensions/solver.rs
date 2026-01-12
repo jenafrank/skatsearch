@@ -154,7 +154,10 @@ pub enum OptimumMode {
     AllWinning,
 }
 
-pub fn solve_optimum(engine: &mut SkatEngine, mode: OptimumMode) -> Result<u32, &'static str> {
+pub fn solve_optimum(
+    engine: &mut SkatEngine,
+    mode: OptimumMode,
+) -> Result<(u32, i16, u8), &'static str> {
     let position = engine.create_initial_position();
     solve_optimum_from_position(engine, &position, mode)
 }
@@ -163,7 +166,7 @@ pub fn solve_optimum_from_position(
     engine: &mut SkatEngine,
     position: &Position,
     mode: OptimumMode,
-) -> Result<u32, &'static str> {
+) -> Result<(u32, i16, u8), &'static str> {
     // Phase 1: Get all outcomes (Exact values)
     let phase1_results = solve_all_cards_from_position(engine, position, 0, 120);
 
@@ -305,6 +308,7 @@ pub fn solve_optimum_from_position(
     }
 
     let mut cnt = Counters::new(); // Local counters for phase 2
+    let mut tt = crate::skat::tt::TranspositionTable::new();
     let is_declarer = position.player == Player::Declarer;
 
     // Use i16::MIN/MAX for score tracking
@@ -321,6 +325,7 @@ pub fn solve_optimum_from_position(
         let (_, score) = search_optimum(
             &engine.context,
             &child_pos,
+            &mut tt,
             &mut cnt,
             i16::MIN + 1,
             i16::MAX - 1,
@@ -340,5 +345,13 @@ pub fn solve_optimum_from_position(
         }
     }
 
-    Ok(best_move)
+    // Find the original game value for the best move
+    let best_val = phase1_results
+        .results
+        .iter()
+        .find(|(m, _, _)| *m == best_move)
+        .map(|(_, _, v)| *v)
+        .unwrap_or(0);
+
+    Ok((best_move, best_score_so_far, best_val))
 }

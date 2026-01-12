@@ -115,7 +115,12 @@ fn main() {
                 };
                 println!("Running Optimum Search (Mode: {:?})...", opt_mode);
                 match solve_optimum(&mut engine, opt_mode) {
-                    Ok(best) => println!("Optimum Best Move: {}", best.__str()),
+                    Ok((best, score, val)) => println!(
+                        "Optimum Best Move: {}, Score: {}, Value: {}",
+                        best.__str(),
+                        score,
+                        val
+                    ),
                     Err(e) => println!("Optimum Search Failed: {}", e),
                 }
             } else {

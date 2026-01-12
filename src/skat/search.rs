@@ -178,8 +178,10 @@ fn transposition_table_lookup(
 
     if let Some(tt_entry) = tt.read(position, cnt) {
         *tt_best_card = tt_entry.bestcard;
-        // Stored value is REMAINING value. Adding accumulated augen.
-        let value = tt_entry.value + position.declarer_points;
+        // Stored value is REMAINING value (i16).
+        // Convert i16 back to u8.
+        let val_remaining = tt_entry.value as u8;
+        let value = val_remaining + position.declarer_points;
         let bestcard = tt_entry.bestcard;
 
         match tt_entry.flag {
@@ -271,6 +273,7 @@ fn shrink_alpha_beta_window(
 pub fn search_optimum(
     game_context: &GameContext,
     position: &Position,
+    tt: &mut TranspositionTable,
     cnt: &mut Counters,
     mut alpha: i16,
     mut beta: i16,
@@ -289,35 +292,41 @@ pub fn search_optimum(
         return (0, evaluate_terminal_node(game_context, position, depth));
     }
 
-    // Determine current player's objective
-    // Suits/Grand: Declarer wants MAX, Defenders want MIN.
-    // Null: Declarer wants MIN (0), Defenders want MAX (1).
-    let is_declarer = position.player == Player::Declarer;
+    // TT LOOKUP
+    let mut tt_best_card = 0;
+    if let Some(x) = transposition_table_lookup_optimum(
+        tt,
+        position,
+        &mut alpha,
+        &mut beta,
+        cnt,
+        &mut tt_best_card,
+    ) {
+        return x;
+    }
+    let alphaorig = alpha;
+    let betaorig = beta;
 
-    // For Null game, we map values: Declarer Loss = 0, Declarer Win = 1?
-    // In standard search: Null Declarer Win = 1 (Max), Loss = 0 (Min)?
-    // Wait, let's check `initial_value`:
-    // Null: Declarer init=1 (wants MIN?), Defenders init=0 (want MAX?).
-    // GameStrategy::Null verify:
-    // (player == Player::Declarer && a < b) => Declarer minimizes?
-    // "Declarer init=1". Yes. If child is 0 (Loss for Opponent/Win for Decl?), 0 < 1.
-    // So usually Null: Declarer wants 0 (No tricks taken? No simply 'Win').
-    // Let's standardise on "Score relative to Declarer".
-    // Score > 0 => Declarer Win. Score < 0 => Declarer Loss.
+    // Determine current player's objective
+    let is_declarer = position.player == Player::Declarer;
 
     // Move Generation
     let moves_word = position.get_reduced_moves(game_context);
-    let (moves, n) = get_sorted_by_value(moves_word);
+    let (mut moves, n) = get_sorted_by_value(moves_word);
+
+    // TT Move Ordering
+    if tt_best_card > 0 {
+        for i in 0..n {
+            if moves[i] == tt_best_card {
+                moves.swap(0, i);
+                break;
+            }
+        }
+    }
 
     let mut best_move = moves[0];
     let mut best_score;
 
-    // Let's define Score Viewpoint always from DECLARER perspective.
-    // Suit/Grand: Declarer wants MAX. Opponents want MIN.
-    // Null: Declarer wants WIN.
-    //   If we define Win = Positive, Loss = Negative.
-    //   Then Declarer always wants MAX. Opponents always want MIN.
-    //   This simplifies everything.
     best_score = if is_declarer {
         i16::MIN + 1
     } else {
@@ -326,8 +335,15 @@ pub fn search_optimum(
 
     for mov in &moves[0..n] {
         let child_position = position.make_move(*mov, game_context);
-        let (_, child_score) =
-            search_optimum(game_context, &child_position, cnt, alpha, beta, depth + 1);
+        let (_, child_score) = search_optimum(
+            game_context,
+            &child_position,
+            tt,
+            cnt,
+            alpha,
+            beta,
+            depth + 1,
+        );
 
         if is_declarer {
             if child_score > best_score {
@@ -350,7 +366,69 @@ pub fn search_optimum(
         }
     }
 
+    transposition_table_write_optimum(
+        tt,
+        position,
+        alphaorig,
+        betaorig,
+        (best_move, best_score),
+        cnt,
+    );
+
     (best_move, best_score)
+}
+
+#[inline(always)]
+fn transposition_table_lookup_optimum(
+    tt: &TranspositionTable,
+    position: &Position,
+    alpha: &mut i16,
+    beta: &mut i16,
+    cnt: &mut Counters,
+    tt_best_card: &mut u32,
+) -> Option<(u32, i16)> {
+    if !is_tt_compatible(position) {
+        return None;
+    }
+
+    if let Some(tt_entry) = tt.read_optimum(position, cnt) {
+        *tt_best_card = tt_entry.bestcard;
+        let value = tt_entry.value; // Store absolute i16 score
+        let bestcard = tt_entry.bestcard;
+
+        match tt_entry.flag {
+            TranspositionFlag::Exact => {
+                cnt.inc_exactreads();
+                return Some((bestcard, value));
+            }
+            TranspositionFlag::Lower => {
+                *alpha = cmp::max(*alpha, value);
+            }
+            TranspositionFlag::Upper => {
+                *beta = cmp::min(*beta, value);
+            }
+        }
+        if *alpha >= *beta {
+            return Some((bestcard, value));
+        }
+    }
+
+    None
+}
+
+#[inline(always)]
+fn transposition_table_write_optimum(
+    tt: &mut TranspositionTable,
+    position: &Position,
+    alphaorig: i16,
+    betaorig: i16,
+    value: (u32, i16),
+    cnt: &mut Counters,
+) {
+    if is_tt_compatible(position) {
+        cnt.inc_writes();
+        tt.write_optimum(position, position.get_hash(), alphaorig, betaorig, value);
+    }
 }
 
 fn evaluate_terminal_node(context: &GameContext, position: &Position, depth: i16) -> i16 {

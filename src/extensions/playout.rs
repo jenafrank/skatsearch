@@ -57,6 +57,7 @@ pub fn playout(engine: &mut SkatEngine) -> Vec<PlayoutLine> {
             &position,
             crate::extensions::solver::OptimumMode::BestValue,
         )
+        .map(|(c, _, _)| c)
         .unwrap_or_else(|_| {
             // Fallback
             let (c, _) = engine.search(&position, &mut cnt, 0, 120);

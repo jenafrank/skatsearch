@@ -1,2 +1,6 @@
 /target
 *.log
+debug_jsons/*
+temp_analysis_context.json
+skat_pickup_realistic_log.txt
+pimc-best-game.txt
