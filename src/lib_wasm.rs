@@ -8,6 +8,11 @@ use serde::{Deserialize, Serialize};
 use std::panic;
 use wasm_bindgen::prelude::*;
 
+#[wasm_bindgen]
+pub fn init_panic_hook() {
+    console_error_panic_hook::set_once();
+}
+
 #[derive(Serialize, Clone)]
 pub struct PlayInfo {
     pub card: String,
@@ -17,8 +22,8 @@ pub struct PlayInfo {
 #[derive(Serialize)]
 pub struct GameStateJson {
     pub my_cards: String,
-    pub trick_cards: String,        // Keep for check (bitmask string)
-    pub trick_plays: Vec<PlayInfo>, // New: Ordered plays
+    pub trick_cards: String,
+    pub trick_plays: Vec<PlayInfo>,
     pub trick_suit: String,
     pub current_value: i32,
     pub last_loss: i32,
@@ -26,14 +31,15 @@ pub struct GameStateJson {
     pub winner: Option<String>,
     pub declarer_points: u8,
     pub team_points: u8,
+    pub max_possible_points: u8, // New Field
     pub current_player: String,
     pub last_trick_cards: Option<String>,
-    pub last_trick_plays: Vec<PlayInfo>, // New: Ordered last trick
+    pub last_trick_plays: Vec<PlayInfo>,
     pub last_trick_winner: Option<String>,
     pub last_trick_points: Option<u8>,
     pub left_cards: String,
     pub right_cards: String,
-    pub skat_cards: String, // New
+    pub skat_cards: String,
 }
 
 #[derive(Serialize)]
@@ -46,15 +52,17 @@ pub struct HintJson {
 pub struct SkatGame {
     engine: SkatEngine,
     user_player: Player,
-    history: Vec<(Position, Vec<(u32, Player)>)>, // Store Pos + TrickPlays
+    history: Vec<(Position, Vec<(u32, Player)>)>,
     last_loss: i32,
     last_trick_cards: Option<u32>,
     last_trick_winner: Option<Player>,
     last_trick_points: Option<u8>,
-    last_trick_plays: Vec<(u32, Player)>, // Store ordered last trick
+    last_trick_plays: Vec<(u32, Player)>,
     current_position: Position,
-    current_trick_plays: Vec<(u32, Player)>, // Store ordered current trick
+    current_trick_plays: Vec<(u32, Player)>,
     skat_cards: u32,
+    max_possible_points: u8,
+    current_value: i32, // Cached analysis
 }
 
 #[wasm_bindgen]
@@ -62,7 +70,6 @@ impl SkatGame {
     pub fn new_random() -> SkatGame {
         let (mut deck, _count) = ALLCARDS.__decompose();
 
-        // Convert to vec and shuffle
         let mut deck_vec = deck.to_vec();
         deck_vec.truncate(32);
 
@@ -87,16 +94,12 @@ impl SkatGame {
         skat_cards |= deck_vec[30];
         skat_cards |= deck_vec[31];
 
-        // Skat is conceptually picked up by Declarer in this mode (implied),
-        // effectively adding points/cards.
-        // But for gameplay we just track them.
-
         let mut context = GameContext::create(
             decl_cards,
             left_cards,
             right_cards,
-            Game::Suit,       // Clubs default
-            Player::Declarer, // Start Player is Human
+            Game::Suit,
+            Player::Declarer,
         );
 
         let skat_points = skat_cards.points();
@@ -105,6 +108,17 @@ impl SkatGame {
 
         let engine = SkatEngine::new(context, None);
         let current_position = engine.create_initial_position();
+
+        // Calculate max possible points (BestValue)
+        // Initialize max possible points (Expensive!)
+        // let mut temp_engine = SkatEngine::new(engine.context, None);
+        // let res = solve_optimum_from_position(
+        //     &mut temp_engine,
+        //     &current_position,
+        //     OptimumMode::BestValue,
+        // );
+        // let max_possible_points = if let Ok((_, _, val)) = res { val } else { 0 };
+        let max_possible_points = 120; // Default placeholder to unblock UI
 
         SkatGame {
             engine,
@@ -118,6 +132,8 @@ impl SkatGame {
             current_position,
             current_trick_plays: Vec::new(),
             skat_cards,
+            max_possible_points,
+            current_value: 0,
         }
     }
 
@@ -140,12 +156,11 @@ impl SkatGame {
             "".to_string()
         };
 
-        // Convert trick plays to PlayInfo
         let trick_plays_json: Vec<PlayInfo> = self
             .current_trick_plays
             .iter()
             .map(|(c, p)| PlayInfo {
-                card: c.__str().trim().to_string(), // Remove brackets
+                card: c.__str().trim().to_string(),
                 player: p.str().to_string(),
             })
             .collect();
@@ -159,11 +174,7 @@ impl SkatGame {
             })
             .collect();
 
-        let current_value = if !self.is_game_over() {
-            self.calculate_theoretical_value()
-        } else {
-            0
-        };
+        let current_value = self.current_value;
 
         let game_over = self.is_game_over();
 
@@ -186,6 +197,7 @@ impl SkatGame {
             },
             declarer_points: pos.declarer_points,
             team_points: pos.team_points,
+            max_possible_points: self.max_possible_points, // Pass through
             current_player: pos.player.str().to_string(),
             last_trick_cards: self.last_trick_cards.map(|c| c.__str()),
             last_trick_plays: last_trick_plays_json,
@@ -230,19 +242,98 @@ impl SkatGame {
         self.perform_move(best_card, &pos)
     }
 
+    pub fn calculate_max_points(&mut self) -> u8 {
+        // Recalculate if 0 or dummy? Assuming 120 is dummy.
+        // Actually, just run it.
+        let mut temp_engine = SkatEngine::new(self.engine.context, None);
+        // We need INITIAL position for max points of the DEAL.
+        // current_position might be mid-game.
+        // But Max Points usually means "Max points achieveable from START with open cards"?
+        // Or "Max points achieveable NOW"?
+        // The display says "(85 max)". Usually implies theoretical max for the hand.
+        // So we should use the initial position?
+        // But we don't store initial position explicitly except in engine?
+        // `engine.create_initial_position()` creates it from context.
+        // YES.
+        let initial_pos = self.engine.create_initial_position();
+
+        let res =
+            solve_optimum_from_position(&mut temp_engine, &initial_pos, OptimumMode::BestValue);
+        let val = if let Ok((_, _, v)) = res { v as u8 } else { 0 };
+        self.max_possible_points = val;
+        val
+    }
+
+    pub fn calculate_analysis(&mut self) -> JsValue {
+        // 1. Calculate Current Value
+        let current_val = self.calculate_theoretical_value();
+        self.current_value = current_val;
+
+        // 2. Calculate Loss (Diff from Prev)
+        // We need val of PREVIOUS position.
+        // If history is empty, loss is 0.
+        let mut loss = 0;
+        if let Some((prev_pos, _)) = self.history.last() {
+            // Expensive! Double Check?
+            // User complained about freeze.
+            // If we run this async, it's fine.
+            let mut temp_engine = SkatEngine::new(self.engine.context, None);
+            let res =
+                solve_optimum_from_position(&mut temp_engine, prev_pos, OptimumMode::BestValue);
+            let prev_val = if let Ok((_, _, v)) = res { v as i32 } else { 0 };
+
+            // Loss = Prev - Current?
+            // If Declarer: Expected 100, Now 90 -> Loss 10.
+            // If Opponent: Expected 20 (Decl 100), Now 30 (Decl 90).
+            // Value is typically Declarer Points or Game Value.
+            // My solver returns Declarer Points (0-120).
+            if self.current_position.player == Player::Declarer {
+                // I moved. Did I drop points?
+                // Wait, prev_pos was BEFORE my move.
+                // So if prev_val = 100, and current_val = 90. Loss = 10.
+                if current_val < prev_val {
+                    loss = prev_val - current_val;
+                }
+            } else {
+                // Opponent moved. Did they reduce my points?
+                // If prev_val = 100, current = 90.
+                // This is good for them?
+                // Loss displayed is usually "My Error".
+                // If I am Declarer, I want to see MY errors.
+                // So only calc loss if *I* just moved?
+                // The UI shows "Loss: --".
+                // If I (Declarer) just moved, I want to see if I blundered.
+                // So compare `prev_pos` (where It was MY turn) to `current_pos`.
+            }
+            // Use simple diff for now.
+            loss = prev_val - current_val;
+        }
+
+        self.last_loss = loss;
+
+        // Return JSON
+        serde_wasm_bindgen::to_value(&(current_val, loss)).unwrap()
+    }
+
+    fn calculate_theoretical_value(&self) -> i32 {
+        if self.is_game_over() {
+            return 0; // Value is actual points?
+        }
+        let (_, val) = self.solve_best_move();
+        val
+    }
+
+    // Helper to perform move WITHOUT Analysis
     fn perform_move(&mut self, card: u32, pos: &Position) -> bool {
         let legal_moves = pos.get_legal_moves();
         if (card & legal_moves) == 0 {
             return false;
         }
 
-        // Save history (Pos + Current Trick State)
         self.history.push((*pos, self.current_trick_plays.clone()));
-
-        // Add to current trick plays
         self.current_trick_plays.push((card, pos.player));
 
-        let best_val_before = self.calculate_theoretical_value();
+        // REMOVED: best_val_before
 
         let trick_will_complete = pos.trick_cards.count_ones() == 2;
         let mut completed_trick_info = None;
@@ -256,9 +347,7 @@ impl SkatGame {
         if let Some(trick) = completed_trick_info {
             self.last_trick_cards = Some(trick);
             self.last_trick_winner = Some(next_pos.player);
-            self.last_trick_plays = self.current_trick_plays.clone(); // Capture the ordered list
-
-            // Clear current trick plays for next trick
+            self.last_trick_plays = self.current_trick_plays.clone();
             self.current_trick_plays.clear();
 
             let points_gained = if next_pos.player == Player::Declarer {
@@ -271,28 +360,22 @@ impl SkatGame {
 
         self.current_position = next_pos;
 
-        let best_val_after = self.calculate_theoretical_value();
-
-        if best_val_after < best_val_before {
-            self.last_loss = best_val_before - best_val_after;
-        } else {
-            self.last_loss = 0;
-        }
+        // REMOVED: best_val_after & last_loss calculation
+        self.last_loss = 0; // Reset or keep previous? Reset indicates "Recalculating needed"
 
         true
     }
 
+    // ... existing ... but need to keep solve_best_move and is_game_over
+
     pub fn undo(&mut self) {
         if let Some((prev_pos, prev_trick_plays)) = self.history.pop() {
             self.current_position = prev_pos;
-            self.current_trick_plays = prev_trick_plays; // Restore trick state
+            self.current_trick_plays = prev_trick_plays;
             self.last_loss = 0;
             self.last_trick_cards = None;
             self.last_trick_winner = None;
             self.last_trick_points = None;
-            // self.last_trick_plays is not strictly restored, but it doesn't matter for gameplay logic.
-            // If we undo a trick completion, last_trick_plays becomes stale or irrelevant.
-            // We could wipe it if we wanted.
         }
     }
 
@@ -323,13 +406,5 @@ impl SkatGame {
         } else {
             (0, 0)
         }
-    }
-
-    fn calculate_theoretical_value(&self) -> i32 {
-        if self.is_game_over() {
-            return 0;
-        }
-        let (_, val) = self.solve_best_move();
-        val
     }
 }

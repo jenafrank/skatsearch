@@ -74,6 +74,31 @@ header {
     display: flex;
     justify-content: center;
     align-items: center;
+    position: relative;
+    /* Anchor for pile */
+    overflow: visible !important;
+    /* Ensure pile visible */
+}
+
+.opponent-points-pile {
+    position: absolute;
+    /* Move to the RIGHT of the hand (inner side) */
+    right: -70px;
+    top: 10px;
+    width: 60px;
+    height: 90px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 5px;
+    border: 1px dashed rgba(255, 255, 255, 0.3);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.opponent-card-back {
+    /* Additional specific styles if needed */
+    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.3);
+    /* Shadow for stack depth */
 }
 
 /* Table Area - Circular */
@@ -83,12 +108,12 @@ header {
     align-items: center;
     margin: 10px 0;
     position: relative;
-    /* Anchor for Skat Display */
 }
 
 #game-table {
-    width: 300px;
-    height: 300px;
+    width: 450px;
+    /* Larger Table */
+    height: 450px;
     background-color: #35654d;
     /* Darker Felt */
     border-radius: 50%;
@@ -103,11 +128,9 @@ header {
 
 #trick-cards {
     display: flex;
-    /* No gap because we handle overlap manually/via margin */
     justify-content: center;
     align-items: center;
     transform: translateY(-10px);
-    /* Visual tweak */
 }
 
 /* New: Skat Display */
@@ -115,7 +138,6 @@ header {
     position: absolute;
     top: 10px;
     left: 20px;
-    /* Adjust as needed */
     display: flex;
     gap: 5px;
     align-items: center;
@@ -123,6 +145,68 @@ header {
     background: rgba(0, 0, 0, 0.2);
     padding: 10px;
     border-radius: 10px;
+}
+
+/* Game Over Overlay */
+#game-over-overlay {
+    position: absolute;
+    /* Centered in table */
+    width: 70%;
+    background: rgba(0, 0, 0, 0.9);
+    padding: 20px;
+    border-radius: 15px;
+    border: 2px solid #f1c40f;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+    pointer-events: none;
+    /* Let clicks pass? No, blocking interaction is good. */
+}
+
+#game-result-message {
+    font-size: 24px;
+    font-weight: bold;
+    color: #f1c40f;
+    margin-bottom: 20px;
+    text-shadow: 2px 2px 4px #000;
+}
+
+#game-result-score {
+    font-size: 36px;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    align-items: center;
+    justify-content: center;
+}
+
+.score-line {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.score-own {
+    color: #2ecc71;
+    text-shadow: 0 0 10px #2ecc71, 0 0 20px #2ecc71;
+    font-weight: bold;
+}
+
+.score-opp {
+    color: #e74c3c;
+    text-shadow: 0 0 10px #e74c3c, 0 0 20px #e74c3c;
+    font-weight: bold;
+}
+
+.score-max {
+    font-size: 16px;
+    color: #ccc;
+    margin-left: 10px;
+    text-shadow: none;
 }
 
 /* Player Hand */
