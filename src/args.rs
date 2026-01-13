@@ -24,7 +24,10 @@ EXAMPLES:
     skat_aug23 best-game --context hand_12_cards.json --mode win
 
     # Calculate optimum play (Fast Win / Slow Loss)
-    skat_aug23 value-calc --context game_state.json --optimum-mode all_winning"
+    skat_aug23 value-calc --context game_state.json --optimum-mode all_winning
+
+    # PIMC Playout with custom sample size
+    skat_aug23 playout --context game.json --samples 50"
 )]
 pub struct Cli {
     #[command(subcommand)]
@@ -49,6 +52,9 @@ pub enum Commands {
         /// Path to the JSON context file
         #[arg(short, long)]
         context: String,
+        /// Number of PIMC samples to run per move (default: 20, or from JSON)
+        #[arg(short, long)]
+        samples: Option<u32>,
     },
     /// Plays out the game from the given state using Perfect Information.
     /// It assumes all cards are known to all players (open hand) and executes the optimal line of play to determine the final score.
@@ -150,6 +156,7 @@ pub struct GameContextInput {
     pub trick_cards: Option<String>,
     pub trick_suit: Option<String>,
     pub declarer_start_points: Option<u8>,
+    pub samples: Option<u32>,
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq)]

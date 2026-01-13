@@ -183,7 +183,7 @@ fn main() {
             }
             println!("--------------------------------------------------");
         }
-        args::Commands::Playout { context } => {
+        args::Commands::Playout { context, samples } => {
             println!("Reading context file: {}", context);
             let context_content = fs::read_to_string(context).expect("Unable to read context file");
             println!("Context content read. Parsing JSON...");
@@ -248,8 +248,12 @@ fn main() {
                 std::process::exit(1);
             }
 
-            println!("Calling skat_aug23::pimc::playout::playout...");
-            skat_aug23::pimc::playout::playout(game_context, 20);
+            let n_samples = samples.or(input.samples).unwrap_or(20);
+            println!(
+                "Calling skat_aug23::pimc::playout::playout with {} samples...",
+                n_samples
+            );
+            skat_aug23::pimc::playout::playout(game_context, n_samples);
         }
         args::Commands::StandardPlayout { context } => {
             println!("Reading context file: {}", context);

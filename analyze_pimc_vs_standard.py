@@ -104,14 +104,18 @@ def run_playout_full(context, command):
 
 def main():
     N = 10
+    SAMPLES = 20
+    
     if len(sys.argv) > 1:
         N = int(sys.argv[1])
+    if len(sys.argv) > 2:
+        SAMPLES = int(sys.argv[2])
 
     # Clear log file
     with open(LOG_FILE, "w", encoding="utf-8") as f:
         f.write("")
     
-    log(f"Starting Analysis PIMC vs Standard over {N} games...")
+    log(f"Starting Analysis PIMC vs Standard over {N} games (Samples: {SAMPLES})...")
     log("-" * 60)
 
     # Create debug directory
@@ -130,6 +134,7 @@ def main():
             sys.stdout.flush()
             
         ctx = generate_random_game()
+        ctx["samples"] = SAMPLES
         
         # 1. Check if winning game (Perfect Info > 60)
         # Suppress logging for value-calc during search
