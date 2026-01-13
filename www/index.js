@@ -54,42 +54,34 @@ async function gameLoop() {
     }
 
     // Detect Completed Trick to Await Animation
-    // We use last_trick_cards string as ID since it changes every trick
     if (state.last_trick_cards && state.last_trick_cards !== lastTrickId) {
         lastTrickId = state.last_trick_cards;
 
-        // Render the completed trick on the table
-        renderTable(state.last_trick_cards);
+        // Render the completed trick using ordered plays
+        renderTable(state.last_trick_plays);
 
-        // Wait for user to see it (1s)
         await new Promise(r => setTimeout(r, 1000));
 
-        // Clear trick (animation would go here)
         document.getElementById('trick-cards').innerHTML = '';
 
         await new Promise(r => setTimeout(r, 200));
 
-        // Update Points Badges
         updatePoints(state);
     }
 
-    // Refresh state
     state = game.get_state_json();
-    const currentPlayer = state.current_player; // "D", "L", "R"
+    const currentPlayer = state.current_player;
 
     if (currentPlayer !== "D" && !state.game_over) {
         document.getElementById('game-status').textContent = `Status: ${currentPlayer === 'L' ? 'Left' : 'Right'} AI thinking...`;
 
-        // Delay before AI moves (Increased to 800ms)
         await new Promise(r => setTimeout(r, 800));
 
         const moved = game.make_ai_move();
         if (moved) {
             updateUI();
-            // Loop again quickly to check for next move or trick completion
             setTimeout(gameLoop, 50);
         } else {
-            // AI failed to move? Should not happen in God Mode unless game over
             console.log("AI refused to move?");
         }
     } else if (currentPlayer === "D") {
@@ -100,7 +92,7 @@ async function gameLoop() {
 function playCard(cardStr) {
     if (!game) return;
 
-    const state = game.get_state_json();
+    let state = game.get_state_json();
     if (state.current_player !== "D") {
         console.log("Not your turn");
         return;
@@ -108,8 +100,14 @@ function playCard(cardStr) {
 
     const res = game.play_card_str(cardStr);
     if (res) {
-        updateUI();
-        gameLoop();
+        const newState = game.get_state_json();
+        // If trick just completed (empty plays now), let gameLoop handle animation
+        if (newState.trick_plays.length === 0 && newState.last_trick_cards) {
+            gameLoop();
+        } else {
+            updateUI();
+            gameLoop();
+        }
     } else {
         console.log("Invalid move");
     }
@@ -118,8 +116,6 @@ function playCard(cardStr) {
 function undoMove() {
     if (game) {
         game.undo();
-        // If undoing into a previous trick state, reset ID so we don't think it's new?
-        // Or just nullify it so if we replay it, it shows again?
         lastTrickId = null;
         updateUI();
         gameLoop();
@@ -129,10 +125,6 @@ function undoMove() {
 function showHint() {
     if (game) {
         const hint = game.get_hint_json();
-        const el = document.getElementById('analysis');
-        // Prepend hint or append?
-        // Let's create a hint element if not exists or update.
-        console.log("Hint:", hint);
         alert(`Bester Zug: ${hint.best_card} (Wert: ${hint.value})`);
     }
 }
@@ -144,27 +136,16 @@ function updateUI() {
     renderHand(state.my_cards);
     renderOpponents(state);
 
-    // If a trick is currently being animated (lastTrickId matched state), logic handles table.
-    // If normal play, render state.trick_cards.
-    // However, if we just finished a trick, state.trick_cards is empty.
-    // We rely on gameLoop to render the last_trick_cards.
-    // So if state.trick_cards is NOT empty, render it.
-    if (state.trick_cards && state.trick_cards.length > 0) {
-        renderTable(state.trick_cards);
+    // Skat Rendering
+    renderSkat(state.skat_cards);
+
+    // Trick Rendering
+    // If trick_plays has content, render it.
+    // If empty, clear (unless waiting for animation, effectively handled by loop logic)
+    if (state.trick_plays && state.trick_plays.length > 0) {
+        renderTable(state.trick_plays);
     } else {
-        // If empty, do NOT clear immediately if we are waiting for animation.
-        // But updateUI is called after playCard.
-        // If playCard finished trick, trick_cards is empty.
-        // gameLoop will see last_trick_cards and render it.
-        // So we can safely clear here?
-        // If we clear here, the table flashes empty before gameLoop renders last trick.
-        // Better: Don't clear if last_trick_cards is set and we haven't animated it yet?
-        // Simplify: Just clear. The flash is 50ms.
-        // Or check:
-        // if (!state.trick_cards && state.last_trick_cards && state.last_trick_cards !== lastTrickId) { ... }
-        if (!state.trick_cards) {
-            // Don't clear if loop is about to handle it?
-            // Safe to clear if we accept flash.
+        if (!state.trick_plays || state.trick_plays.length === 0) {
             document.getElementById('trick-cards').innerHTML = '';
         }
     }
@@ -173,46 +154,68 @@ function updateUI() {
     updatePoints(state);
 }
 
+function renderSkat(skatStr) {
+    // Container for Skat? 
+    // We need to inject it into HTML if not present, or assume it exists.
+    // I will add <div id="skat-display"> to HTML later.
+    let skatDiv = document.getElementById('skat-display');
+    if (!skatDiv) return;
+
+    if (cheatMode && skatStr) {
+        skatDiv.style.display = 'flex';
+        skatDiv.innerHTML = '';
+        const cleanStr = skatStr.replace(/\[|\]/g, '').trim();
+        const cards = cleanStr.split(/\s+/);
+        cards.forEach(c => {
+            const el = createCardElement(c);
+            // Make skat cards smaller?
+            el.style.transform = "scale(0.8)";
+            el.style.margin = "0 5px";
+            skatDiv.appendChild(el);
+        });
+        // Add label?
+        const label = document.createElement('div');
+        label.textContent = "Skat";
+        label.style.position = "absolute";
+        label.style.top = "-20px";
+        label.style.color = "#fff";
+        label.style.fontSize = "12px";
+        skatDiv.appendChild(label);
+    } else {
+        skatDiv.style.display = 'none';
+        skatDiv.innerHTML = '';
+    }
+}
+
 function renderOpponents(state) {
-    // Left
     const leftContainer = document.getElementById('hand-left');
-    // Right
     const rightContainer = document.getElementById('hand-right');
 
-    if (!leftContainer || !rightContainer) return; // safety
+    if (!leftContainer || !rightContainer) return;
 
     if (cheatMode) {
-        // Render open cards
         renderOpponentHand(leftContainer, state.left_cards, 'left');
         renderOpponentHand(rightContainer, state.right_cards, 'right');
     } else {
-        // Render Back if not present
-        // Check if back exists
         renderBack(leftContainer, 'left-points');
         renderBack(rightContainer, 'right-points');
     }
 }
 
 function renderBack(container, badgeId) {
-    // If we are switching from cheat mode, we need to restore the back div
     if (!container.querySelector('.hand-back')) {
-        // Note: Resetting point value visibility might be tricky. 
-        // We ensure updatePoints is called frequently.
         container.innerHTML = `
             <div class="hand-back">
                 <div class="points-badge" id="${badgeId}" style="display:none">0</div>
             </div>
         `;
     }
-    // If it exists, ensure badge exists (might have been overwritten if we did something else)
 }
 
 function renderOpponentHand(container, cardsStr, side) {
-    // We replace the container content with cards.
-    // Add "opponent" class context or side?
     container.innerHTML = '';
 
-    if (!cardsStr) return; // Should be empty string if empty
+    if (!cardsStr) return;
     const cleanStr = cardsStr.replace(/\[|\]/g, '').trim();
     if (cleanStr.length === 0) return;
 
@@ -226,8 +229,6 @@ function renderOpponentHand(container, cardsStr, side) {
 function updatePoints(state) {
     const myPile = document.getElementById('my-tricks-pile');
     const myBadge = document.getElementById('my-points');
-
-    // We need to find left/right points badges, which might be recreated by renderBack
     const leftBadge = document.getElementById('left-points');
     const rightBadge = document.getElementById('right-points');
 
@@ -281,23 +282,31 @@ function renderHand(cards) {
     });
 }
 
-function renderTable(cardsStr) {
+function renderTable(trickPlays) {
+    // trickPlays is Array<{ card: string, player: string }>
     const tableDiv = document.getElementById('trick-cards');
     tableDiv.innerHTML = '';
 
-    if (!cardsStr) return;
-    const cleanStr = cardsStr.replace(/\[|\]/g, '').trim();
-    if (cleanStr.length === 0) return;
+    if (!trickPlays || trickPlays.length === 0) return;
 
-    const cardList = cleanStr.split(/\s+/);
-
-    cardList.forEach(cStr => {
-        const el = createCardElement(cStr);
+    trickPlays.forEach((play, index) => {
+        const el = createCardElement(play.card, play.player);
+        // Overlap logic:
+        // Use index to offset.
+        // If we use flex with negative margins? or absolute?
+        // Let's use negative margins for overlap simplicity, assuming container handles it.
+        // We'll class them 'trick-card-item' and styles handle visuals?
+        el.classList.add('trick-card-item');
+        el.style.zIndex = index; // Ensure correct stack order
+        if (index > 0) {
+            el.style.marginLeft = "-40px"; // Overlap
+            el.style.marginBottom = `${index * 5}px`; // Slight vertical fan?
+        }
         tableDiv.appendChild(el);
     });
 }
 
-function createCardElement(shortStr) {
+function createCardElement(shortStr, owner) {
     const suit = shortStr[0];
     let rank = shortStr[1];
     if (rank === 'T') rank = '10';
@@ -307,10 +316,16 @@ function createCardElement(shortStr) {
 
     const suitChar = SUIT_CHARS[suit] || '?';
 
+    let tokenHtml = '';
+    if (owner) {
+        tokenHtml = `<div class="owner-token">${owner}</div>`;
+    }
+
     div.innerHTML = `
         <div class="card-corner"><span>${rank}</span><span>${suitChar}</span></div>
         <div class="card-center">${suitChar}</div>
         <div class="card-corner" style="transform: rotate(180deg)"><span>${rank}</span><span>${suitChar}</span></div>
+        ${tokenHtml}
     `;
     return div;
 }

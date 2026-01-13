@@ -8,10 +8,17 @@ use serde::{Deserialize, Serialize};
 use std::panic;
 use wasm_bindgen::prelude::*;
 
+#[derive(Serialize, Clone)]
+pub struct PlayInfo {
+    pub card: String,
+    pub player: String,
+}
+
 #[derive(Serialize)]
 pub struct GameStateJson {
     pub my_cards: String,
-    pub trick_cards: String,
+    pub trick_cards: String,        // Keep for check (bitmask string)
+    pub trick_plays: Vec<PlayInfo>, // New: Ordered plays
     pub trick_suit: String,
     pub current_value: i32,
     pub last_loss: i32,
@@ -21,10 +28,12 @@ pub struct GameStateJson {
     pub team_points: u8,
     pub current_player: String,
     pub last_trick_cards: Option<String>,
+    pub last_trick_plays: Vec<PlayInfo>, // New: Ordered last trick
     pub last_trick_winner: Option<String>,
     pub last_trick_points: Option<u8>,
     pub left_cards: String,
     pub right_cards: String,
+    pub skat_cards: String, // New
 }
 
 #[derive(Serialize)]
@@ -37,12 +46,15 @@ pub struct HintJson {
 pub struct SkatGame {
     engine: SkatEngine,
     user_player: Player,
-    history: Vec<Position>,
+    history: Vec<(Position, Vec<(u32, Player)>)>, // Store Pos + TrickPlays
     last_loss: i32,
     last_trick_cards: Option<u32>,
     last_trick_winner: Option<Player>,
     last_trick_points: Option<u8>,
+    last_trick_plays: Vec<(u32, Player)>, // Store ordered last trick
     current_position: Position,
+    current_trick_plays: Vec<(u32, Player)>, // Store ordered current trick
+    skat_cards: u32,
 }
 
 #[wasm_bindgen]
@@ -75,6 +87,10 @@ impl SkatGame {
         skat_cards |= deck_vec[30];
         skat_cards |= deck_vec[31];
 
+        // Skat is conceptually picked up by Declarer in this mode (implied),
+        // effectively adding points/cards.
+        // But for gameplay we just track them.
+
         let mut context = GameContext::create(
             decl_cards,
             left_cards,
@@ -98,7 +114,10 @@ impl SkatGame {
             last_trick_cards: None,
             last_trick_winner: None,
             last_trick_points: None,
+            last_trick_plays: Vec::new(),
             current_position,
+            current_trick_plays: Vec::new(),
+            skat_cards,
         }
     }
 
@@ -111,15 +130,34 @@ impl SkatGame {
             "".to_string()
         };
 
-        // Always expose opponent cards for Cheat Mode (frontend decides visibility)
         let left_str = pos.left_cards.__str();
         let right_str = pos.right_cards.__str();
+        let skat_str = self.skat_cards.__str();
 
         let trick_str = if pos.trick_cards != 0 {
             pos.trick_cards.__str()
         } else {
             "".to_string()
         };
+
+        // Convert trick plays to PlayInfo
+        let trick_plays_json: Vec<PlayInfo> = self
+            .current_trick_plays
+            .iter()
+            .map(|(c, p)| PlayInfo {
+                card: c.__str().trim().to_string(), // Remove brackets
+                player: p.str().to_string(),
+            })
+            .collect();
+
+        let last_trick_plays_json: Vec<PlayInfo> = self
+            .last_trick_plays
+            .iter()
+            .map(|(c, p)| PlayInfo {
+                card: c.__str().trim().to_string(),
+                player: p.str().to_string(),
+            })
+            .collect();
 
         let current_value = if !self.is_game_over() {
             self.calculate_theoretical_value()
@@ -132,6 +170,7 @@ impl SkatGame {
         let state = GameStateJson {
             my_cards: display_cards,
             trick_cards: trick_str,
+            trick_plays: trick_plays_json,
             trick_suit: format!("{}", pos.trick_suit),
             current_value,
             last_loss: self.last_loss,
@@ -147,12 +186,14 @@ impl SkatGame {
             },
             declarer_points: pos.declarer_points,
             team_points: pos.team_points,
-            current_player: pos.player.str().to_string(), // "D", "L", "R"
+            current_player: pos.player.str().to_string(),
             last_trick_cards: self.last_trick_cards.map(|c| c.__str()),
+            last_trick_plays: last_trick_plays_json,
             last_trick_winner: self.last_trick_winner.map(|p| p.str().to_string()),
             last_trick_points: self.last_trick_points,
             left_cards: left_str,
             right_cards: right_str,
+            skat_cards: skat_str,
         };
 
         serde_wasm_bindgen::to_value(&state).unwrap()
@@ -175,13 +216,12 @@ impl SkatGame {
     pub fn make_ai_move(&mut self) -> bool {
         let pos = self.current_position;
         if pos.player == self.user_player {
-            return false; // Human turn
+            return false;
         }
         if self.is_game_over() {
             return false;
         }
 
-        // God Mode Solve
         let (best_card, _) = self.solve_best_move();
         if best_card == 0 {
             return false;
@@ -196,12 +236,14 @@ impl SkatGame {
             return false;
         }
 
-        // Save history (Position)
-        self.history.push(*pos);
+        // Save history (Pos + Current Trick State)
+        self.history.push((*pos, self.current_trick_plays.clone()));
+
+        // Add to current trick plays
+        self.current_trick_plays.push((card, pos.player));
 
         let best_val_before = self.calculate_theoretical_value();
 
-        // Check for trick completion
         let trick_will_complete = pos.trick_cards.count_ones() == 2;
         let mut completed_trick_info = None;
         if trick_will_complete {
@@ -209,23 +251,24 @@ impl SkatGame {
             completed_trick_info = Some(full_trick);
         }
 
-        // Make move using Full Context (stored in engine.context)
         let next_pos = pos.make_move(card, &self.engine.context);
 
         if let Some(trick) = completed_trick_info {
             self.last_trick_cards = Some(trick);
-            self.last_trick_winner = Some(next_pos.player); // winner starts next
+            self.last_trick_winner = Some(next_pos.player);
+            self.last_trick_plays = self.current_trick_plays.clone(); // Capture the ordered list
+
+            // Clear current trick plays for next trick
+            self.current_trick_plays.clear();
 
             let points_gained = if next_pos.player == Player::Declarer {
                 next_pos.declarer_points.saturating_sub(pos.declarer_points)
             } else {
                 next_pos.team_points.saturating_sub(pos.team_points)
             };
-
             self.last_trick_points = Some(points_gained);
         }
 
-        // Update current position (GameContext is NOT modulated)
         self.current_position = next_pos;
 
         let best_val_after = self.calculate_theoretical_value();
@@ -233,8 +276,6 @@ impl SkatGame {
         if best_val_after < best_val_before {
             self.last_loss = best_val_before - best_val_after;
         } else {
-            // Trick change often results in value jump if heuristic isn't perfect,
-            // but in God Mode solve it should be stable or decrease.
             self.last_loss = 0;
         }
 
@@ -242,12 +283,16 @@ impl SkatGame {
     }
 
     pub fn undo(&mut self) {
-        if let Some(prev_pos) = self.history.pop() {
+        if let Some((prev_pos, prev_trick_plays)) = self.history.pop() {
             self.current_position = prev_pos;
+            self.current_trick_plays = prev_trick_plays; // Restore trick state
             self.last_loss = 0;
             self.last_trick_cards = None;
             self.last_trick_winner = None;
             self.last_trick_points = None;
+            // self.last_trick_plays is not strictly restored, but it doesn't matter for gameplay logic.
+            // If we undo a trick completion, last_trick_plays becomes stale or irrelevant.
+            // We could wipe it if we wanted.
         }
     }
 
@@ -269,11 +314,8 @@ impl SkatGame {
     }
 
     fn solve_best_move(&self) -> (u32, i32) {
-        // Create temp engine using Full Context (kept in self.engine.context)
         let mut temp_engine = SkatEngine::new(self.engine.context, None);
         let pos = self.current_position;
-
-        // Solve from current position using temp engine
         let res = solve_optimum_from_position(&mut temp_engine, &pos, OptimumMode::BestValue);
 
         if let Ok((card, _score, val)) = res {
