@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skat AI (WASM)</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div id="app">
+        <header>
+            <h1>Skat AI vs God Mode</h1>
+            <div id="game-status">Loading WASM...</div>
+        </header>
+
+        <main id="game-board">
+            <!-- Opponents (Top) -->
+            <div id="opponents-area">
+                <div class="opponent" id="opponent-left">
+                    <div class="hand-container" id="hand-left">
+                        <div class="hand-back">
+                            <div class="points-badge" id="left-points" style="display:none">0</div>
+                        </div>
+                    </div>
+                    <span>Left (AI)</span>
+                </div>
+                <div class="opponent" id="opponent-right">
+                    <div class="hand-container" id="hand-right">
+                        <div class="hand-back">
+                            <div class="points-badge" id="right-points" style="display:none">0</div>
+                        </div>
+                    </div>
+                    <span>Right (AI)</span>
+                </div>
+            </div>
+
+            <!-- Table (Center) -->
+            <div id="table-area">
+                <div id="game-table">
+                    <div id="trick-cards"></div>
+                </div>
+            </div>
+
+            <!-- Player (Bottom) -->
+            <div id="player-area">
+                <div id="player-info">
+                    <span>Declarer (You)</span>
+                    <div id="my-tricks-pile" class="hand-back" style="display:none; margin-left: 10px;">
+                        <div class="points-badge" id="my-points">0</div>
+                    </div>
+                </div>
+                <div id="my-hand"></div>
+            </div>
+        </main>
+
+        <!-- Controls -->
+        <div id="controls-area">
+            <button id="btn-new-game">New Game</button>
+            <button id="btn-cheat">Cheat (Show Cards)</button>
+            <button id="btn-hint">Hint</button>
+            <button id="btn-undo">Undo</button>
+        </div>
+
+        <aside id="info-panel">
+            <div id="analysis">
+                <h3>Analysis</h3>
+                <div>Value: --</div>
+                <div>Loss: --</div>
+                <hr>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Load WASM -->
+    <script type="module" src="index.js"></script>
+</body>
+
+</html>

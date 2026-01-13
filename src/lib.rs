@@ -4,6 +4,7 @@ extern crate core;
 
 pub mod consts;
 pub mod extensions;
+pub mod lib_wasm;
 pub mod pimc;
 pub mod skat;
 pub mod traits;
