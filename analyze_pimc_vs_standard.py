@@ -106,16 +106,31 @@ def main():
     N = 10
     SAMPLES = 20
     
-    if len(sys.argv) > 1:
-        N = int(sys.argv[1])
-    if len(sys.argv) > 2:
-        SAMPLES = int(sys.argv[2])
+    args = sys.argv[1:]
+    god_mode_players = []
+    
+    # Parse --god=... argument
+    remaining_args = []
+    for arg in args:
+        if arg.startswith("--god="):
+            val = arg.split("=", 1)[1]
+            god_mode_players = [p.strip() for p in val.split(",")]
+        else:
+            remaining_args.append(arg)
+            
+    if len(remaining_args) > 0:
+        N = int(remaining_args[0])
+    if len(remaining_args) > 1:
+        SAMPLES = int(remaining_args[1])
 
     # Clear log file
     with open(LOG_FILE, "w", encoding="utf-8") as f:
         f.write("")
     
-    log(f"Starting Analysis PIMC vs Standard over {N} games (Samples: {SAMPLES})...")
+    log_msg = f"Starting Analysis PIMC vs Standard over {N} games (Samples: {SAMPLES})"
+    if god_mode_players:
+        log_msg += f" [God Mode: {', '.join(god_mode_players)}]"
+    log(log_msg)
     log("-" * 60)
 
     # Create debug directory
@@ -135,6 +150,8 @@ def main():
             
         ctx = generate_random_game()
         ctx["samples"] = SAMPLES
+        if god_mode_players:
+            ctx["god_players"] = god_mode_players
         
         # 1. Check if winning game (Perfect Info > 60)
         # Suppress logging for value-calc during search

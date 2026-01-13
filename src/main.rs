@@ -183,7 +183,11 @@ fn main() {
             }
             println!("--------------------------------------------------");
         }
-        args::Commands::Playout { context, samples } => {
+        args::Commands::Playout {
+            context,
+            samples,
+            god,
+        } => {
             println!("Reading context file: {}", context);
             let context_content = fs::read_to_string(context).expect("Unable to read context file");
             println!("Context content read. Parsing JSON...");
@@ -249,11 +253,37 @@ fn main() {
             }
 
             let n_samples = samples.or(input.samples).unwrap_or(20);
+
+            // Determine God Players
+            let mut god_players = Vec::new();
+            let mut god_strings = Vec::new();
+
+            // CLI overrides JSON
+            if let Some(g_str) = god {
+                god_strings = g_str.split(',').map(|s| s.trim().to_string()).collect();
+            } else if let Some(g_vec) = input.god_players {
+                god_strings = g_vec;
+            }
+
+            for s in god_strings {
+                match s.to_lowercase().as_str() {
+                    "declarer" | "decl" => {
+                        god_players.push(skat_aug23::skat::defs::Player::Declarer)
+                    }
+                    "left" => god_players.push(skat_aug23::skat::defs::Player::Left),
+                    "right" => god_players.push(skat_aug23::skat::defs::Player::Right),
+                    _ => eprintln!("Warning: Unknown God Player '{}'", s),
+                }
+            }
+
             println!(
                 "Calling skat_aug23::pimc::playout::playout with {} samples...",
                 n_samples
             );
-            skat_aug23::pimc::playout::playout(game_context, n_samples);
+            if !god_players.is_empty() {
+                println!("  God Mode Active for: {:?}", god_players);
+            }
+            skat_aug23::pimc::playout::playout(game_context, n_samples, &god_players);
         }
         args::Commands::StandardPlayout { context } => {
             println!("Reading context file: {}", context);

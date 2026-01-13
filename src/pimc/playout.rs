@@ -1,12 +1,14 @@
 use super::facts::Facts;
+use crate::extensions::solver::solve_all_cards_from_position;
 use crate::skat::context::GameContext;
+use crate::skat::engine::SkatEngine;
 
 use super::pimc_problem_builder::PimcProblemBuilder;
 use super::pimc_search::PimcSearch;
 use crate::skat::defs::{Player, CLUBS, DIAMONDS, HEARTS, SPADES};
 use crate::traits::{Bitboard, StringConverter};
 
-pub fn playout(true_context: GameContext, n_samples: u32) {
+pub fn playout(true_context: GameContext, n_samples: u32, god_players: &[Player]) {
     println!("Starting Playout...");
 
     // 2. Create Initial Position
@@ -138,15 +140,66 @@ pub fn playout(true_context: GameContext, n_samples: u32) {
 
         // Log Facts
         println!("  Facts:");
-        println!("    Decl:  {}", facts_declarer.convert_to_string());
-        println!("    Left:  {}", facts_left.convert_to_string());
         println!("    Right: {}", facts_right.convert_to_string());
 
-        let problem = builder.build();
+        let result: Vec<(u32, f32)>;
+        let mut best_move_card = 0;
+        let mut val_debug: f32 = 0.0;
 
-        // 2. Search
-        let search = PimcSearch::new(problem, n_samples, None);
-        let result = search.estimate_probability_of_all_cards(false);
+        // GOD MODE CHECK
+        if god_players.contains(&turn) {
+            println!("  [GOD MODE] Player {:?} has perfect info.", turn);
+            // Create temporary engine to solve
+            let mut temp_engine = SkatEngine::new(true_context.clone(), None);
+            // We use solve_all_cards_from_position
+            let solve_res = solve_all_cards_from_position(&mut temp_engine, &pos, 0, 120);
+
+            // The result is Vec<(card, response, value)>
+            // We want the BEST card.
+            // If Declarer: Max Value.
+            // If Defender: Min Value.
+            // (Assuming 'Value' is declarer points)
+
+            // Note: 'solve_all_cards' assumes optimal counter-play.
+            // So we just pick the card that leads to the best outcome for the current player.
+
+            if solve_res.results.is_empty() {
+                println!("  [GOD MODE] No moves found? Panic.");
+                break;
+            }
+
+            // Sort by value
+            let mut moves = solve_res.results.clone();
+
+            if turn == Player::Declarer {
+                // Declarer wants to MAXIMIZE points (or win condition)
+                // For now assuming Points Game or simple win.
+                // Just picking Max Value.
+                moves.sort_by(|a, b| b.2.cmp(&a.2)); // Descending
+            } else {
+                // Opponent wants to MINIMIZE declarer points.
+                moves.sort_by(|a, b| a.2.cmp(&b.2)); // Ascending
+            }
+
+            best_move_card = moves[0].0;
+            let best_val = moves[0].2; // u8
+            val_debug = best_val as f32;
+
+            // Mock result for printing
+            result = vec![(best_move_card, val_debug)];
+        } else {
+            // STANDARD PIMC
+            let problem = builder.build();
+
+            // 2. Search
+            let search = PimcSearch::new(problem, n_samples, None);
+            result = search.estimate_probability_of_all_cards(false);
+
+            if !result.is_empty() {
+                best_move_card = result[0].0;
+                val_debug = result[0].1;
+            }
+        }
 
         // Print Analysis
         println!("  Analysis:");
@@ -159,9 +212,8 @@ pub fn playout(true_context: GameContext, n_samples: u32) {
             break;
         }
 
-        // Choose best move (highest win prob)
-        let best_move_card = result[0].0;
-        let val = result[0].1;
+        // Chosen above
+        let val = val_debug;
 
         println!(
             "  => Player {:?} plays {} (val: {:.4})\n",
@@ -240,6 +292,6 @@ mod tests {
         // Need to create a game context from problem to playout
         // But PimcProblem is partial.
         // We use generate_concrete_problem to get a starting 'True' context.
-        playout(up.generate_concrete_problem(), 20);
+        playout(up.generate_concrete_problem(), 20, &[]);
     }
 }

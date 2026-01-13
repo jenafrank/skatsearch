@@ -67,13 +67,14 @@ pub fn playout(engine: &mut SkatEngine) -> Vec<PlayoutLine> {
 
         row.player = position.player; // Position has player? Yes.
         row.card = played_card;
-        row.declarer_points = position.declarer_points;
-        row.team_points = position.team_points;
         row.cnt_iters = cnt.iters as usize;
         row.cnt_breaks = cnt.breaks as usize;
         row.time = time;
 
         position = position.make_move(played_card, &engine.context);
+
+        row.declarer_points = position.declarer_points;
+        row.team_points = position.team_points;
 
         ret.push(row);
         i += 1;

@@ -55,6 +55,9 @@ pub enum Commands {
         /// Number of PIMC samples to run per move (default: 20, or from JSON)
         #[arg(short, long)]
         samples: Option<u32>,
+        /// Players who have perfect information (comma-separated: "declarer,left,right")
+        #[arg(short, long)]
+        god: Option<String>,
     },
     /// Plays out the game from the given state using Perfect Information.
     /// It assumes all cards are known to all players (open hand) and executes the optimal line of play to determine the final score.
@@ -157,6 +160,7 @@ pub struct GameContextInput {
     pub trick_suit: Option<String>,
     pub declarer_start_points: Option<u8>,
     pub samples: Option<u32>,
+    pub god_players: Option<Vec<String>>,
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
