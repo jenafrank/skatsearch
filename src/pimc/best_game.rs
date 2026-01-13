@@ -149,7 +149,7 @@ pub fn calculate_best_game(
 
             let best_val = if let Some(best) = solve_ret.best_skat {
                 let pushed_load = best.skat_card_1 | best.skat_card_2;
-                pushed_skat_str = pushed_load.__str();
+                // pushed_skat_str = pushed_load.__str();
 
                 // The hand we play with is my_cards_with_skat minus pushed cards
                 // Note: if transform is active, we must apply inverse or just use untransformed logic?

@@ -178,7 +178,9 @@ pub struct PimcPlayerFactsInput {
 pub struct PimcBestGameInput {
     pub my_cards: String,
     pub start_player: Player,
+    #[allow(dead_code)]
     pub description: Option<String>,
+    #[allow(dead_code)]
     pub usage: Option<String>,
 }
 

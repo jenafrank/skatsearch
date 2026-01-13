@@ -4,7 +4,7 @@ use crate::skat::context::GameContext;
 use super::pimc_problem_builder::PimcProblemBuilder;
 use super::pimc_search::PimcSearch;
 use crate::skat::defs::{Player, CLUBS, DIAMONDS, HEARTS, SPADES};
-use crate::traits::StringConverter;
+use crate::traits::{Bitboard, StringConverter};
 
 pub fn playout(true_context: GameContext, n_samples: u32) {
     println!("Starting Playout...");
@@ -17,6 +17,29 @@ pub fn playout(true_context: GameContext, n_samples: u32) {
     let mut facts_right = Facts::zero_fact();
 
     let mut current_trick: Vec<(Player, u32)> = Vec::new();
+
+    // Reconstruct current_trick from pos.trick_cards if starting mid-trick
+    if pos.trick_cards != 0 && current_trick.is_empty() {
+        let count = pos.trick_cards.count_ones();
+        if count == 1 {
+            // Assume 1 card = Previous Player
+            let prev_player = match pos.player {
+                Player::Declarer => Player::Right,
+                Player::Left => Player::Declarer,
+                Player::Right => Player::Left,
+            };
+            // Extract single card
+            let (cards, _) = pos.trick_cards.__decompose();
+            let card = cards[0];
+            current_trick.push((prev_player, card));
+            println!(
+                "Context: Reconstructed history: {:?} played {}",
+                prev_player,
+                card.__str()
+            );
+        }
+    }
+
     let mut round = 1;
 
     loop {
@@ -37,11 +60,19 @@ pub fn playout(true_context: GameContext, n_samples: u32) {
             break;
         }
 
+        let stich_num = (round - 1) / 3 + 1;
+        let sub_stich = (round - 1) % 3 + 1;
+
         println!(
-            "Round {}: Turn: {:?} (Cards: {})",
-            round,
+            "Stich {}.{} : Turn: {:?} (Cards: {})",
+            stich_num,
+            sub_stich,
             turn,
             my_cards.__str()
+        );
+        println!(
+            "  Scores -> Decl: {}, Team: {}",
+            pos.declarer_points, pos.team_points
         );
 
         // 1. Determine Move using PIMC
@@ -50,6 +81,7 @@ pub fn playout(true_context: GameContext, n_samples: u32) {
         let mut builder = PimcProblemBuilder::new(true_context.game_type())
             .my_player(turn)
             .turn(turn)
+            .declarer_start_points(pos.declarer_points)
             .threshold(true_context.threshold_upper);
 
         builder = builder.cards(turn, &my_cards.__str());
@@ -88,16 +120,6 @@ pub fn playout(true_context: GameContext, n_samples: u32) {
                 }
             }
 
-            // Apply to builder
-            // Note: trick_previous_player implies the card played by the player *before* me.
-            // trick_next_player implies the card played by the player *after* me (if they played before me? No).
-            // Wait. In standard Skat order:
-            // If I am 2nd: 1st played (prev). 3rd hasn't.
-            // If I am 3rd: 1st played (next?), 2nd played (prev).
-            // Let's resolve 'previous' and 'next' relative to ME.
-            // PimcProblemBuilder::trick_previous_player(card) -> sets card for (my_player - 1)
-            // PimcProblemBuilder::trick_next_player(card) -> sets card for (my_player + 1)
-
             if prev_card != 0 {
                 // If I am D, Prev is R.
                 builder = builder.trick_previous_player(pos.trick_suit, prev_card);
@@ -113,6 +135,12 @@ pub fn playout(true_context: GameContext, n_samples: u32) {
         builder = builder.facts(Player::Declarer, facts_declarer);
         builder = builder.facts(Player::Left, facts_left);
         builder = builder.facts(Player::Right, facts_right);
+
+        // Log Facts
+        println!("  Facts:");
+        println!("    Decl:  {}", facts_declarer.convert_to_string());
+        println!("    Left:  {}", facts_left.convert_to_string());
+        println!("    Right: {}", facts_right.convert_to_string());
 
         let problem = builder.build();
 
@@ -174,7 +202,7 @@ pub fn playout(true_context: GameContext, n_samples: u32) {
                     Player::Left => facts_left = facts,
                     Player::Right => facts_right = facts,
                 };
-                // println!("  (Inferred: {:?} is void in suit)", turn);
+                println!("  (Inferred: {:?} is void in suit)", turn);
             }
         }
 

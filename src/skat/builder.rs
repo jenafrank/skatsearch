@@ -272,8 +272,8 @@ impl GameContextBuilder {
             target_prev
         );
 
-        cards_next_player = proposed_draw.0;
-        cards_previous_player = proposed_draw.1;
+        cards_next_player = proposed_draw.0 | card_on_table_next_player;
+        cards_previous_player = proposed_draw.1 | card_on_table_previous_player;
 
         self.set_cards_for_problem_core(cards_next_player, my_player.inc());
         self.set_cards_for_problem_core(cards_previous_player, my_player.dec());

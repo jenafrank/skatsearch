@@ -551,7 +551,7 @@ impl PimcProblem {
     }
 
     pub fn generate_concrete_problem(&self) -> GameContext {
-        self.validate();
+        let _ = self.validate();
 
         let distribution_pool = self.calculate_distribution_pool();
 
