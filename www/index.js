@@ -26,7 +26,7 @@ function bindEvents() {
 function toggleCheatMode() {
     cheatMode = !cheatMode;
     const btn = document.getElementById('btn-cheat');
-    btn.textContent = cheatMode ? "Hide Cards" : "Cheat (Show Cards)";
+    btn.textContent = cheatMode ? "Karten verbergen" : "Karten zeigen";
     updateUI();
 }
 
@@ -85,6 +85,7 @@ async function gameLoop() {
         await new Promise(r => setTimeout(r, 100));
 
         updatePoints(state);
+        triggerAnalysis(); // Update history logic
     }
 
     // Re-fetch state
@@ -112,6 +113,8 @@ async function gameLoop() {
         }
     } else if (currentPlayer === "D") {
         document.getElementById('game-status').textContent = "Your Turn (Declarer)";
+        // Ensure analysis is up to date if we just arrived here via trick clear
+        triggerAnalysis();
     }
 }
 
@@ -209,7 +212,7 @@ function playCard(cardStr) {
         const newState = game.get_state_json();
         // If trick just completed (empty plays now), let gameLoop handle animation
         if (newState.trick_plays.length === 0 && newState.last_trick_cards) {
-            renderHand(newState.my_cards); // Update hand immediately (remove played card)
+            renderHand(newState.my_cards, newState.legal_moves); // Update hand immediately (remove played card)
             gameLoop();
         } else {
             updateUI();
@@ -233,8 +236,23 @@ function undoMove() {
 
 function showHint() {
     if (game) {
-        const hint = game.get_hint_json();
-        alert(`Bester Zug: ${hint.best_card} (Wert: ${hint.value})`);
+        const btn = document.getElementById('btn-hint');
+        const originalText = btn.textContent;
+        btn.textContent = "Berechne...";
+        btn.disabled = true;
+
+        setTimeout(() => {
+            try {
+                const hint = game.get_hint_json();
+                alert(`Bester Zug: ${hint.best_card} (Wert: ${hint.value})`);
+            } catch (e) {
+                console.error("Hint failed", e);
+                alert("Konnte keinen Tipp berechnen.");
+            } finally {
+                btn.textContent = originalText;
+                btn.disabled = false;
+            }
+        }, 50);
     }
 }
 
@@ -242,7 +260,7 @@ function updateUI() {
     if (!game) return;
     const state = game.get_state_json();
 
-    renderHand(state.my_cards);
+    renderHand(state.my_cards, state.legal_moves);
     renderOpponents(state);
     renderSkat(state.skat_cards);
 
@@ -374,7 +392,7 @@ function renderOpponentHand(container, cardsStr, side) {
     if (cleanStr.length === 0) return;
     const cardList = cleanStr.split(/\s+/);
     cardList.forEach(cStr => {
-        const el = createCardElement(cStr);
+        const el = createCardElement(cStr, null, true); // Use simplified mode
         container.appendChild(el);
     });
 }
@@ -406,16 +424,32 @@ function renderSkat(skatStr) {
     }
 }
 
-function renderHand(cards) {
+function renderHand(cards, legalMoves) {
     const handDiv = document.getElementById('my-hand');
     handDiv.innerHTML = '';
     if (!cards) return;
     const cleanStr = cards.replace(/\[|\]/g, '').trim();
     if (cleanStr.length === 0) return;
     const cardList = cleanStr.split(/\s+/);
+
+    // Normalize legal moves for comparison (trim strings)
+    const legalSet = new Set(legalMoves ? legalMoves.map(m => m.trim()) : []);
+    // If legalMoves is empty/null (e.g. game over or not turn), maybe disable all? 
+    // Or if turn is not ours?
+    // Let's rely on passed legalMoves. If empty, everything disabled?
+    // If legalMoves is null (old state?), allow all.
+    // If legalMoves is [], means no moves possible (wait).
+
     cardList.forEach(cStr => {
         const el = createCardElement(cStr);
-        el.onclick = () => playCard(cStr);
+        if (legalMoves && !legalSet.has(cStr)) {
+            el.classList.add('card-disabled');
+            // Remove click handler or make it no-op?
+            // Better to keep onclick and check, or just visual.
+            // visual is enough, click handler validates in Rust anyway or we can guard.
+        } else {
+            el.onclick = () => playCard(cStr);
+        }
         handDiv.appendChild(el);
     });
 }
@@ -438,37 +472,134 @@ function updatePoints(state) {
     }
 }
 
+
 function renderInfo(state) {
     const analysisDiv = document.getElementById('analysis');
-    analysisDiv.innerHTML = `
-        <h3>Analysis</h3>
-        <div>Max: ${state.max_possible_points}</div>
-        <div>Value: ${state.current_value}</div>
-        <div>Loss: ${state.last_loss}</div>
-        <hr>
-    `;
+
+    // Create structure if not present
+    if (!document.getElementById('analysis-header')) {
+        analysisDiv.innerHTML = `
+            <h3 id="analysis-header" style="margin-bottom: 5px;">Analysis</h3>
+            <div id="move-history"></div>
+        `;
+    }
+
+    // Update History (and integrated stats)
+    renderHistory(state.move_history, state);
 }
 
-const SUIT_CHARS = { 'C': '♣', 'S': '♠', 'H': '♥', 'D': '♦' };
+const SUIT_SYMBOL = { 'C': '♣', 'S': '♠', 'H': '♥', 'D': '♦' };
 
-function createCardElement(shortStr, owner) {
+function renderHistory(history, state) {
+    const container = document.getElementById('move-history');
+    if (!container || !history) return;
+
+    container.innerHTML = '';
+
+    // 0. Start / Max Value Header
+    const startDiv = document.createElement('div');
+    startDiv.className = 'history-start-row';
+    startDiv.innerHTML = `
+        <span>Start (Max)</span>
+        <span class="history-val">${state.max_possible_points}</span>
+    `;
+    container.appendChild(startDiv);
+
+    history.forEach((entry, idx) => {
+        // Trick Header
+        if (idx % 3 === 0) {
+            const trickNum = Math.floor(idx / 3) + 1;
+            const header = document.createElement('div');
+            header.className = 'history-trick-header';
+            header.textContent = `Trick ${trickNum}`;
+            container.appendChild(header);
+        }
+
+        const div = document.createElement('div');
+        div.className = 'history-item';
+
+        // Format Card
+        let cardStr = entry.card;
+        if (cardStr.length === 2) {
+            const suit = cardStr[0];
+            const rank = cardStr[1] === 'T' ? '10' : cardStr[1];
+            cardStr = (SUIT_SYMBOL[suit] || suit) + rank;
+        }
+
+        // Delta Logic
+        let deltaStr = '';
+        let deltaClass = 'delta-neutral';
+
+        if (entry.delta !== undefined && entry.delta !== null) {
+            const d = entry.delta;
+            if (d > 0) {
+                deltaStr = '+' + d;
+                deltaClass = 'delta-pos';
+            } else if (d < 0) {
+                deltaStr = '' + d;
+                deltaClass = 'delta-neg';
+            } else {
+                deltaStr = '0';
+            }
+        } else {
+            // Pending
+            deltaStr = '';
+        }
+
+        // Value Logic
+        let valStr = (entry.value_after !== undefined && entry.value_after !== null) ? entry.value_after : '';
+
+        div.innerHTML = `
+            <span class="history-card ${'suit-' + entry.card[0]}">${cardStr}</span>
+            <span class="history-player">${entry.player.substring(0, 3)}</span>
+            <span class="history-delta ${deltaClass}">${deltaStr}</span>
+            <span class="history-val">${valStr}</span>
+        `;
+        container.appendChild(div);
+    });
+
+    // Result Footer
+    // Only show if we have points or game is over? Always show "Current"
+    const resultDiv = document.createElement('div');
+    resultDiv.className = 'history-result-row';
+    // User points (Declarer)
+    const points = state.declarer_points;
+    resultDiv.innerHTML = `
+        <span>Result</span>
+        <span class="history-val">${points}</span>
+    `;
+    container.appendChild(resultDiv);
+
+    // Auto-scroll
+    container.scrollTop = container.scrollHeight;
+}
+
+function createCardElement(shortStr, owner, simplified = false) {
     const suit = shortStr[0];
     let rank = shortStr[1];
     if (rank === 'T') rank = '10';
     const div = document.createElement('div');
-    div.className = `card suit-${suit}`;
+    div.className = `card suit-${suit} ${simplified ? 'simplified' : ''}`;
     div.dataset.card = shortStr;
-    const suitChar = SUIT_CHARS[suit] || '?';
+    const suitChar = SUIT_SYMBOL[suit] || '?';
     let tokenHtml = '';
     if (owner) {
         tokenHtml = `<div class="owner-token">${owner}</div>`;
     }
-    div.innerHTML = `
-        <div class="card-corner"><span>${rank}</span><span>${suitChar}</span></div>
-        <div class="card-center">${suitChar}</div>
-        <div class="card-corner" style="transform: rotate(180deg)"><span>${rank}</span><span>${suitChar}</span></div>
-        ${tokenHtml}
-    `;
+
+    if (simplified) {
+        div.innerHTML = `
+            <div class="simplified-center">${suitChar}${rank}</div>
+            ${tokenHtml}
+        `;
+    } else {
+        div.innerHTML = `
+            <div class="card-corner"><span>${rank}</span><span>${suitChar}</span></div>
+            <div class="card-center">${suitChar}</div>
+            <div class="card-corner" style="transform: rotate(180deg)"><span>${rank}</span><span>${suitChar}</span></div>
+            ${tokenHtml}
+        `;
+    }
     return div;
 }
 

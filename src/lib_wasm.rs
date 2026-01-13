@@ -20,6 +20,15 @@ pub struct PlayInfo {
 }
 
 #[derive(Serialize)]
+pub struct MoveLogEntry {
+    pub card: String,
+    pub player: String,
+    pub value_before: Option<i32>,
+    pub value_after: Option<i32>,
+    pub delta: Option<i32>,
+}
+
+#[derive(Serialize)]
 pub struct GameStateJson {
     pub my_cards: String,
     pub trick_cards: String,
@@ -40,6 +49,8 @@ pub struct GameStateJson {
     pub left_cards: String,
     pub right_cards: String,
     pub skat_cards: String,
+    pub move_history: Vec<MoveLogEntry>, // New Log
+    pub legal_moves: Vec<String>,
 }
 
 #[derive(Serialize)]
@@ -63,6 +74,11 @@ pub struct SkatGame {
     skat_cards: u32,
     max_possible_points: u8,
     current_value: i32, // Cached analysis
+
+    // History Analysis
+    move_sequence: Vec<(u32, Player)>,
+    analysis_values: Vec<Option<i32>>, // values[i] is value BEFORE move i (or after move i-1).
+                                       // values[0] = Start. values[k] = After k moves.
 }
 
 #[wasm_bindgen]
@@ -134,6 +150,8 @@ impl SkatGame {
             skat_cards,
             max_possible_points,
             current_value: 0,
+            move_sequence: Vec::new(),
+            analysis_values: vec![None], // Initial state (index 0) is unknown yet
         }
     }
 
@@ -206,9 +224,63 @@ impl SkatGame {
             left_cards: left_str,
             right_cards: right_str,
             skat_cards: skat_str,
+            move_history: self.get_move_history_json(),
+            legal_moves: self.get_legal_moves_strings(),
         };
 
         serde_wasm_bindgen::to_value(&state).unwrap()
+    }
+
+    fn get_legal_moves_strings(&self) -> Vec<String> {
+        let pos = self.current_position;
+        // Only relevant if it's user's turn (Declarer)
+        if pos.player != self.user_player {
+            return Vec::new(); // Or all? Usually UI only cares for user.
+        }
+
+        let legal_mask = pos.get_legal_moves();
+        let mut legal_strs = Vec::new();
+        for i in 0..32 {
+            let card_bit = 1 << i;
+            if (legal_mask & card_bit) != 0 {
+                legal_strs.push(card_bit.__str());
+            }
+        }
+        legal_strs
+    }
+
+    fn get_move_history_json(&self) -> Vec<MoveLogEntry> {
+        let mut log = Vec::new();
+        // move_sequence has N items (moves 1..N).
+        // analysis_values has N+1 items (indices 0..N).
+        for (i, (card, player)) in self.move_sequence.iter().enumerate() {
+            // Move i connects State i -> State i+1.
+            let val_before = if i < self.analysis_values.len() {
+                self.analysis_values[i]
+            } else {
+                None
+            };
+            let val_after = if i + 1 < self.analysis_values.len() {
+                self.analysis_values[i + 1]
+            } else {
+                None
+            };
+
+            let delta = if let (Some(v1), Some(v2)) = (val_before, val_after) {
+                Some(v2 - v1)
+            } else {
+                None
+            };
+
+            log.push(MoveLogEntry {
+                card: card.__str(),
+                player: player.str().to_string(),
+                value_before: val_before,
+                value_after: val_after,
+                delta,
+            });
+        }
+        log
     }
 
     pub fn play_card_str(&mut self, card_str: &str) -> bool {
@@ -265,54 +337,64 @@ impl SkatGame {
     }
 
     pub fn calculate_analysis(&mut self) -> JsValue {
-        // 1. Calculate Current Value
-        let current_val = self.calculate_theoretical_value();
-        self.current_value = current_val;
+        // 1. Ensure Analysis History is up to date
+        // Iterate through all history states and calculate value if missing.
+        // self.history contains previous states in order.
+        // self.history[i] is state BEFORE move i+1?
+        // Let's verify.
+        // perform_move pushes `(*pos, plays)` into `self.history`.
+        // Then it updates `self.current_position`.
+        // So `self.history[k]` corresponds to the position at step k.
 
-        // 2. Calculate Loss (Diff from Prev)
-        // We need val of PREVIOUS position.
-        // If history is empty, loss is 0.
-        let mut loss = 0;
-        if let Some((prev_pos, _)) = self.history.last() {
-            // Expensive! Double Check?
-            // User complained about freeze.
-            // If we run this async, it's fine.
-            let mut temp_engine = SkatEngine::new(self.engine.context, None);
-            let res =
-                solve_optimum_from_position(&mut temp_engine, prev_pos, OptimumMode::BestValue);
-            let prev_val = if let Ok((_, _, v)) = res { v as i32 } else { 0 };
+        // We have `analysis_values` which should map 1:1 to `history` + `current`.
+        // We want `analysis_values[k]` for state k.
 
-            // Loss = Prev - Current?
-            // If Declarer: Expected 100, Now 90 -> Loss 10.
-            // If Opponent: Expected 20 (Decl 100), Now 30 (Decl 90).
-            // Value is typically Declarer Points or Game Value.
-            // My solver returns Declarer Points (0-120).
-            if self.current_position.player == Player::Declarer {
-                // I moved. Did I drop points?
-                // Wait, prev_pos was BEFORE my move.
-                // So if prev_val = 100, and current_val = 90. Loss = 10.
-                if current_val < prev_val {
-                    loss = prev_val - current_val;
-                }
-            } else {
-                // Opponent moved. Did they reduce my points?
-                // If prev_val = 100, current = 90.
-                // This is good for them?
-                // Loss displayed is usually "My Error".
-                // If I am Declarer, I want to see MY errors.
-                // So only calc loss if *I* just moved?
-                // The UI shows "Loss: --".
-                // If I (Declarer) just moved, I want to see if I blundered.
-                // So compare `prev_pos` (where It was MY turn) to `current_pos`.
-            }
-            // Use simple diff for now.
-            loss = prev_val - current_val;
+        // Loop through all available states (history + current)
+        // Total states = history.len() + 1 (current).
+
+        let total_states = self.history.len() + 1;
+
+        // Extend analysis_values if needed
+        while self.analysis_values.len() < total_states {
+            self.analysis_values.push(None); // Should match history growth
+        }
+        if self.analysis_values.len() < total_states {
+            self.analysis_values.resize(total_states, None);
         }
 
-        self.last_loss = loss;
+        // Now iterate and fill missing
+        for i in 0..total_states {
+            if self.analysis_values[i].is_none() {
+                // Get position for index i
+                // If i < history.len(), it's in history[i].0
+                // If i == history.len(), it's current_position
 
-        // Return JSON
-        serde_wasm_bindgen::to_value(&(current_val, loss)).unwrap()
+                let pos_to_solve = if i < self.history.len() {
+                    self.history[i].0
+                } else {
+                    self.current_position
+                };
+
+                // Solve
+                let mut temp_engine = SkatEngine::new(self.engine.context, None);
+                let res = solve_optimum_from_position(
+                    &mut temp_engine,
+                    &pos_to_solve,
+                    OptimumMode::BestValue,
+                );
+                if let Ok((_, _, v)) = res {
+                    self.analysis_values[i] = Some(v as i32);
+                }
+            }
+        }
+
+        // Update cached current value
+        if let Some(Some(v)) = self.analysis_values.last() {
+            self.current_value = *v;
+        }
+
+        // Return a simple ack, the UI will pull get_state_json
+        JsValue::TRUE
     }
 
     fn calculate_theoretical_value(&self) -> i32 {
@@ -332,6 +414,10 @@ impl SkatGame {
 
         self.history.push((*pos, self.current_trick_plays.clone()));
         self.current_trick_plays.push((card, pos.player));
+
+        // Track History
+        self.move_sequence.push((card, pos.player));
+        self.analysis_values.push(None); // Placeholder for next state
 
         // REMOVED: best_val_before
 
@@ -376,6 +462,10 @@ impl SkatGame {
             self.last_trick_cards = None;
             self.last_trick_winner = None;
             self.last_trick_points = None;
+
+            // Pop history
+            self.move_sequence.pop();
+            self.analysis_values.pop();
         }
     }
 

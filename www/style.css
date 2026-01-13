@@ -314,10 +314,31 @@ header {
     /* For tokens */
 }
 
+.card.simplified {
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+}
+
+.simplified-center {
+    font-size: 24px;
+    font-weight: bold;
+    line-height: 1;
+    text-align: center;
+}
+
 .card:hover {
     transform: translateY(-20px);
     z-index: 50 !important;
     /* Override stack order on hover */
+}
+
+.card-disabled {
+    filter: grayscale(100%);
+    opacity: 0.6;
+    cursor: not-allowed !important;
+    transform: none !important;
+    /* Prevent hover lift */
 }
 
 /* New: Owner Token */
@@ -395,4 +416,104 @@ button:hover {
     font-size: 0.9em;
     border-bottom: 1px solid #7f8c8d;
     padding: 2px 0;
+}
+
+/* History Log */
+#move-history {
+    flex: 1;
+    overflow-y: auto;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 5px;
+    padding: 5px;
+    font-family: monospace;
+    font-size: 14px;
+    /* Larger base */
+    margin-top: 10px;
+}
+
+.history-trick-header {
+    background: rgba(255, 255, 255, 0.1);
+    color: #f1c40f;
+    font-weight: bold;
+    padding: 2px 5px;
+    margin-top: 5px;
+    margin-bottom: 2px;
+    border-radius: 3px;
+    font-size: 0.85em;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.history-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 2px 5px;
+    /* More padding */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    align-items: center;
+}
+
+.history-card {
+    font-weight: bold;
+    width: 40px;
+    /* Wider */
+    font-size: 1.2em;
+    /* Larger Card Text */
+}
+
+.history-player {
+    color: #bdc3c7;
+    width: 30px;
+    font-size: 0.9em;
+}
+
+.history-val {
+    width: 50px;
+    text-align: right;
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+.history-delta {
+    width: 40px;
+    text-align: right;
+    font-weight: bold;
+}
+
+.delta-pos {
+    color: #2ecc71;
+}
+
+.delta-neg {
+    color: #e74c3c;
+}
+
+.delta-neutral {
+    color: #95a5a6;
+    opacity: 0.5;
+}
+
+.history-start-row,
+.history-result-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 3px;
+    font-weight: bold;
+    margin: 5px 0;
+}
+
+.history-start-row {
+    color: #f39c12;
+    /* Gold for Max */
+    border-bottom: 1px dotted rgba(255, 255, 255, 0.2);
+}
+
+.history-result-row {
+    color: #2ecc71;
+    /* Green for Result */
+    border-top: 1px double rgba(255, 255, 255, 0.4);
+    margin-top: 10px;
+    font-size: 1.1em;
 }
