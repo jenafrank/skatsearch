@@ -209,6 +209,7 @@ function playCard(cardStr) {
         const newState = game.get_state_json();
         // If trick just completed (empty plays now), let gameLoop handle animation
         if (newState.trick_plays.length === 0 && newState.last_trick_cards) {
+            renderHand(newState.my_cards); // Update hand immediately (remove played card)
             gameLoop();
         } else {
             updateUI();
