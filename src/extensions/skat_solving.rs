@@ -212,3 +212,89 @@ pub fn generate_skat_combinations(cards: &[u32]) -> Vec<(u32, u32)> {
     }
     combinations
 }
+
+use crate::skat::context::ProblemTransformation;
+
+#[derive(Clone, Debug)]
+pub struct BestGameResultInfo {
+    pub label: String,
+    pub skat_1: u32,
+    pub skat_2: u32,
+    pub value: u8,
+    pub game_type: Game,
+    pub transformation: Option<ProblemTransformation>,
+}
+
+pub fn solve_best_game_all_variants(
+    declarer_cards: u32,
+    left_cards: u32,
+    right_cards: u32,
+    start_player: Player,
+    mode: AccelerationMode,
+) -> Vec<BestGameResultInfo> {
+    let games_to_check = vec![
+        (Game::Grand, None, "Grand"),
+        (Game::Null, None, "Null"),
+        (Game::Suit, None, "Clubs"),
+        (
+            Game::Suit,
+            Some(ProblemTransformation::SpadesSwitch),
+            "Spades",
+        ),
+        (
+            Game::Suit,
+            Some(ProblemTransformation::HeartsSwitch),
+            "Hearts",
+        ),
+        (
+            Game::Suit,
+            Some(ProblemTransformation::DiamondsSwitch),
+            "Diamonds",
+        ),
+    ];
+
+    let mut results = Vec::new();
+
+    for (game_type, transformation, label) in games_to_check {
+        // Apply transformation if needed
+        let d_cards = if let Some(trans) = transformation {
+            GameContext::get_switched_cards(declarer_cards, trans)
+        } else {
+            declarer_cards
+        };
+        let l_cards = if let Some(trans) = transformation {
+            GameContext::get_switched_cards(left_cards, trans)
+        } else {
+            left_cards
+        };
+        let r_cards = if let Some(trans) = transformation {
+            GameContext::get_switched_cards(right_cards, trans)
+        } else {
+            right_cards
+        };
+
+        let ret = solve_with_skat(l_cards, r_cards, d_cards, game_type, start_player, mode);
+
+        if let Some(best) = ret.best_skat {
+            // Transform skat cards back if needed
+            let (s1, s2) = if let Some(trans) = transformation {
+                (
+                    GameContext::get_switched_cards(best.skat_card_1, trans),
+                    GameContext::get_switched_cards(best.skat_card_2, trans),
+                )
+            } else {
+                (best.skat_card_1, best.skat_card_2)
+            };
+
+            results.push(BestGameResultInfo {
+                label: label.to_string(),
+                skat_1: s1,
+                skat_2: s2,
+                value: best.value,
+                game_type,
+                transformation,
+            });
+        }
+    }
+    results
+}

@@ -657,71 +657,28 @@ fn main() {
 
             println!("Calculating best game (Mode: {})...", mode);
 
-            let games_to_check = vec![
-                (skat_aug23::skat::defs::Game::Grand, None, "Grand"),
-                (skat_aug23::skat::defs::Game::Null, None, "Null"),
-                (skat_aug23::skat::defs::Game::Suit, None, "Clubs"),
-                (
-                    skat_aug23::skat::defs::Game::Suit,
-                    Some(ProblemTransformation::SpadesSwitch),
-                    "Spades",
-                ),
-                (
-                    skat_aug23::skat::defs::Game::Suit,
-                    Some(ProblemTransformation::HeartsSwitch),
-                    "Hearts",
-                ),
-                (
-                    skat_aug23::skat::defs::Game::Suit,
-                    Some(ProblemTransformation::DiamondsSwitch),
-                    "Diamonds",
-                ),
-            ];
+            let results_info = skat_aug23::extensions::skat_solving::solve_best_game_all_variants(
+                declarer_cards,
+                left_cards,
+                right_cards,
+                start_player,
+                acc_mode,
+            );
 
-            let mut results = Vec::new();
-
-            for (game_type, transformation, label) in games_to_check {
-                // Apply transformation if needed
-                let d_cards = if let Some(trans) = transformation {
-                    GameContext::get_switched_cards(declarer_cards, trans)
-                } else {
-                    declarer_cards
-                };
-                let l_cards = if let Some(trans) = transformation {
-                    GameContext::get_switched_cards(left_cards, trans)
-                } else {
-                    left_cards
-                };
-                let r_cards = if let Some(trans) = transformation {
-                    GameContext::get_switched_cards(right_cards, trans)
-                } else {
-                    right_cards
-                };
-
-                let ret = skat_aug23::extensions::skat_solving::solve_with_skat(
-                    l_cards,
-                    r_cards,
-                    d_cards,
-                    game_type,
-                    start_player,
-                    acc_mode,
-                );
-
-                if let Some(best) = ret.best_skat {
-                    // Transform skat cards back if needed
-                    let (s1, s2) = if let Some(trans) = transformation {
-                        // Switching back is the same operation (XOR swap logic)
-                        (
-                            GameContext::get_switched_cards(best.skat_card_1, trans),
-                            GameContext::get_switched_cards(best.skat_card_2, trans),
-                        )
-                    } else {
-                        (best.skat_card_1, best.skat_card_2)
-                    };
-
-                    results.push((label, s1, s2, best.value, game_type));
-                }
-            }
+            // Convert to tuple format for existing printing logic (temporary adapter)
+            // Or better, update printing logic. Let's update printing logic below.
+            let mut results: Vec<_> = results_info
+                .iter()
+                .map(|info| {
+                    (
+                        info.label.clone(),
+                        info.skat_1,
+                        info.skat_2,
+                        info.value,
+                        info.game_type,
+                    )
+                })
+                .collect();
 
             // Output based on mode
             if mode.to_lowercase() == "win" {

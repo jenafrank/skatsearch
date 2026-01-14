@@ -1,5 +1,5 @@
 use crate::extensions::solver::{solve_optimum_from_position, OptimumMode};
-use crate::skat::context::GameContext;
+use crate::skat::context::{GameContext, ProblemTransformation};
 use crate::skat::defs::{Game, Player, ALLCARDS};
 use crate::skat::engine::SkatEngine;
 use crate::skat::position::Position;
@@ -62,8 +62,8 @@ pub struct HintJson {
 #[derive(Serialize)]
 pub struct BestGameResult {
     pub game: String,
-    pub win_rate: f32,
-    pub value: i32,
+    pub win_rate: f32, // Deprecated name, reused for consistency
+    pub value: u8,
     pub skat: Vec<String>,
 }
 
@@ -123,6 +123,9 @@ pub struct SkatGame {
     // History Analysis
     move_sequence: Vec<(u32, Player)>,
     analysis_values: Vec<Option<i32>>,
+
+    // Transposition
+    active_transformation: Option<ProblemTransformation>,
 }
 
 #[wasm_bindgen]
@@ -220,6 +223,7 @@ impl SkatGame {
             analysis_values: vec![None],
             game_selection_phase: true,
             initial_deal: Some(initial_deal_context),
+            active_transformation: None,
         }
     }
 
@@ -231,88 +235,33 @@ impl SkatGame {
         // Reconstruct 12 cards for declarer
         let my_12_cards = deal.declarer_cards | self.skat_cards;
 
-        use crate::extensions::skat_solving::{solve_with_skat, AccelerationMode};
-        use crate::skat::context::ProblemTransformation;
+        use crate::extensions::skat_solving::{solve_best_game_all_variants, AccelerationMode};
         use crate::skat::defs::Game;
 
-        let games_to_check = vec![
-            (Game::Grand, None, "Grand"),
-            (Game::Null, None, "Null"),
-            (Game::Suit, None, "Clubs"),
-            (
-                Game::Suit,
-                Some(ProblemTransformation::SpadesSwitch),
-                "Spades",
-            ),
-            (
-                Game::Suit,
-                Some(ProblemTransformation::HeartsSwitch),
-                "Hearts",
-            ),
-            (
-                Game::Suit,
-                Some(ProblemTransformation::DiamondsSwitch),
-                "Diamonds",
-            ),
-        ];
+        let results_info = solve_best_game_all_variants(
+            my_12_cards, // We pass 12 cards as declarer_cards
+            deal.left_cards,
+            deal.right_cards,
+            Player::Declarer,
+            AccelerationMode::AlphaBetaAccelerating,
+        );
 
         let mut results_list = Vec::new();
 
-        // Use AlphaBetaAccelerating for Best Value calculation, mirroring CLI "Best" mode
-        let mode = AccelerationMode::AlphaBetaAccelerating;
-
-        for (game_type, transformation, label) in games_to_check {
-            // Transform setup
-            let d_cards = if let Some(trans) = transformation {
-                GameContext::get_switched_cards(my_12_cards, trans)
-            } else {
-                my_12_cards
-            };
-            let l_cards = if let Some(trans) = transformation {
-                GameContext::get_switched_cards(deal.left_cards, trans)
-            } else {
-                deal.left_cards
-            };
-            let r_cards = if let Some(trans) = transformation {
-                GameContext::get_switched_cards(deal.right_cards, trans)
-            } else {
-                deal.right_cards
+        for info in results_info {
+            // Calculate "Win Rate" (for Null 0 is Win, for others >= 61)
+            // We'll normalize to 1.0 = Win, 0.0 = Loss for UI consistency
+            let is_win = match info.game_type {
+                Game::Null => info.value == 0,
+                _ => info.value >= 61,
             };
 
-            let ret = solve_with_skat(
-                l_cards,
-                r_cards,
-                d_cards, // 12 cards passed here!
-                game_type,
-                Player::Declarer,
-                mode,
-            );
-
-            if let Some(best) = ret.best_skat {
-                // Calculate "Win Rate" (for Null 0 is Win, for others >= 61)
-                // We'll normalize to 1.0 = Win, 0.0 = Loss for UI consistency with PIMC
-                let is_win = match game_type {
-                    Game::Null => best.value == 0,
-                    _ => best.value >= 61,
-                };
-
-                // Back-transform Skat for display
-                let (s1, s2) = if let Some(trans) = transformation {
-                    (
-                        GameContext::get_switched_cards(best.skat_card_1, trans),
-                        GameContext::get_switched_cards(best.skat_card_2, trans),
-                    )
-                } else {
-                    (best.skat_card_1, best.skat_card_2)
-                };
-
-                results_list.push(BestGameResult {
-                    game: label.to_string(),
-                    win_rate: if is_win { 1.0 } else { 0.0 }, // Binary result for Perfect Info
-                    value: best.value as i32,
-                    skat: vec![s1.__str(), s2.__str()],
-                });
-            }
+            results_list.push(BestGameResult {
+                game: info.label,
+                win_rate: if is_win { 1.0 } else { 0.0 },
+                value: info.value, // It's u8 now
+                skat: vec![info.skat_1.__str(), info.skat_2.__str()],
+            });
         }
 
         // Sort: Wins first, then by Value descending
@@ -334,57 +283,66 @@ impl SkatGame {
             return false;
         }
 
+        use crate::skat::context::ProblemTransformation;
         use crate::skat::defs::Game;
 
-        // Parse Game Type
+        // Parse Game Type and Transformation
         let (game_type, transform) = match game_type_str {
             "Grand" => (Game::Grand, None),
             "Null" => (Game::Null, None),
-            "Clubs" => (Game::Suit, None), // No transform needed (Clubs is default Suit)
-            "Spades" => (
-                Game::Suit,
-                Some(crate::skat::context::ProblemTransformation::SpadesSwitch),
-            ),
-            "Hearts" => (
-                Game::Suit,
-                Some(crate::skat::context::ProblemTransformation::HeartsSwitch),
-            ),
-            "Diamonds" => (
-                Game::Suit,
-                Some(crate::skat::context::ProblemTransformation::DiamondsSwitch),
-            ),
+            "Clubs" => (Game::Suit, None),
+            "Spades" => (Game::Suit, Some(ProblemTransformation::SpadesSwitch)),
+            "Hearts" => (Game::Suit, Some(ProblemTransformation::HeartsSwitch)),
+            "Diamonds" => (Game::Suit, Some(ProblemTransformation::DiamondsSwitch)),
             _ => (Game::Suit, None), // Default
         };
 
-        // Parse Discarded Skat
-        let deck_skat_bits = discard_skat_str.trim().__bit();
-        if deck_skat_bits.count_ones() != 2 {
-            // Error handling?
-            return false;
-        }
+        // Store the active transformation
+        self.active_transformation = transform;
 
-        if self.initial_deal.is_none() {
-            return false;
-        }
+        // 1. Get initial deal info
         let deal = self.initial_deal.unwrap();
+        // Since `initial_deal` was created with declarer_cards = 12 (check new_random logic again)
+        // In new_random: decl_cards | skat_cards. So yes, 12 cards.
+        let my_12 = deal.declarer_cards;
 
-        let my_12 = deal.declarer_cards | self.skat_cards;
+        // 2. Parse User Skat Selection
+        let mut user_skat = 0u32;
+        for s in discard_skat_str.split_whitespace() {
+            let c = s.trim();
+            if !c.is_empty() {
+                user_skat |= c.__bit();
+            }
+        }
 
-        // Verify skat cards are in my_12
-        if (my_12 & deck_skat_bits) != deck_skat_bits {
+        // Ensure user selected exactly 2 cards from their 12
+        if user_skat.count_ones() != 2 {
+            // Fallback: use default skat if something is wrong? Or return false?
+            // Since UI enforces it, we might trust it or fallback.
+            // Fallback to random 2 cards from hand? No, return false to indicate error.
             return false;
         }
 
-        let my_10 = my_12 ^ deck_skat_bits;
+        // 3. Determine Hand (10 cards)
+        // Hand = 12 cards AND NOT Skat
+        let my_10 = my_12 & !user_skat;
 
-        // Apply Transformation to Context
-        // Note: Skat Engine works internally with CLUBS as base for Suit games.
-        // If user selected SPADES, we switch cards so Spades become Clubs (internally).
+        if my_10.count_ones() != 10 {
+            // Something wrong (skat card was not in hand?)
+            return false;
+        }
 
+        // 4. Apply Transformation to Hand, Skat, and Opponents
         let final_declarer = if let Some(t) = transform {
             GameContext::get_switched_cards(my_10, t)
         } else {
             my_10
+        };
+
+        let final_skat = if let Some(t) = transform {
+            GameContext::get_switched_cards(user_skat, t)
+        } else {
+            user_skat
         };
 
         let final_left = if let Some(t) = transform {
@@ -399,7 +357,7 @@ impl SkatGame {
             deal.right_cards
         };
 
-        // Create new Engine Context
+        // 5. Create new Engine Context
         let mut context = GameContext::create(
             final_declarer,
             final_left,
@@ -409,18 +367,16 @@ impl SkatGame {
         );
 
         // Points Calculation
-        // Skat points count towards declarer? Usually yes.
-        // In Null game? No.
         if game_type != Game::Null {
-            context.set_declarer_start_points(deck_skat_bits.points());
+            context.set_declarer_start_points(final_skat.points());
             context.set_threshold_upper(120);
         } else {
-            context.set_threshold_upper(1); // Or 0?
+            context.set_threshold_upper(1);
         }
 
         self.engine = SkatEngine::new(context, None);
         self.current_position = self.engine.create_initial_position();
-        self.skat_cards = deck_skat_bits; // The pushed skat
+        self.skat_cards = final_skat; // Store in Engine Representation
         self.game_selection_phase = false;
 
         // Calc Max Points for playing phase
@@ -430,10 +386,20 @@ impl SkatGame {
     }
 
     pub fn get_state_json(&self) -> JsValue {
-        // If selection phase, we show 12 cards in "my_cards" and others empty/hidden
+        // Wrapper to handle transformations
+        // If transformation active, we need to deserialize, transform relevant fields, and re-serialize?
+        // OR better: modify `get_internal_state_json` to take an optional transform.
+        // Let's refactor `get_state_json` logic directly here.
+
+        self.build_state_json_with_transform()
+    }
+
+    fn build_state_json_with_transform(&self) -> JsValue {
+        // If selection phase, show 12 cards (raw, no transform)
         if self.game_selection_phase {
-            let my_12 = self.initial_deal.unwrap().declarer_cards | self.skat_cards;
-            let display_cards = my_12.__str();
+            let deal = self.initial_deal.unwrap();
+            // Note: initial_deal has 12 cards in declarer_cards
+            let display_cards = deal.declarer_cards.__str();
 
             let state = GameStateJson {
                 my_cards: display_cards,
@@ -452,64 +418,94 @@ impl SkatGame {
                 last_trick_plays: vec![],
                 last_trick_winner: None,
                 last_trick_points: None,
-                left_cards: "".to_string(),  // Hidden
-                right_cards: "".to_string(), // Hidden
-                skat_cards: "".to_string(),  // Merged into hand
+                left_cards: "".to_string(),
+                right_cards: "".to_string(),
+                skat_cards: "".to_string(),
                 move_history: vec![],
-                legal_moves: vec![], // All 12? Or handled by UI selection
+                legal_moves: vec![],
             };
             return serde_wasm_bindgen::to_value(&state).unwrap();
         }
 
         let pos = self.current_position;
+        let trans = self.active_transformation;
+
+        // Helper to transform back to UI
+        let to_ui = |cards: u32| -> String {
+            if let Some(t) = trans {
+                GameContext::get_switched_cards(cards, t).__str()
+            } else {
+                cards.__str()
+            }
+        };
+
+        // Helper to transform play info
+        let to_ui_play = |(c, p): &(u32, Player)| -> PlayInfo {
+            let ui_card = if let Some(t) = trans {
+                GameContext::get_switched_cards(*c, t)
+            } else {
+                *c
+            };
+            PlayInfo {
+                card: ui_card.__str().trim().to_string(),
+                player: p.str().to_string(),
+            }
+        };
 
         let display_cards = if self.user_player == Player::Declarer {
-            pos.declarer_cards.__str()
+            // Use sorted display string!
+            let gtype = if let Some(deal) = self.initial_deal {
+                deal.game_type
+            } else {
+                Game::Suit
+            };
+            self.get_sorted_hand_display_string(pos.declarer_cards, gtype)
         } else {
             "".to_string()
         };
 
-        let left_str = pos.left_cards.__str();
-        let right_str = pos.right_cards.__str();
-        let skat_str = self.skat_cards.__str();
+        // Skat cards (stored as engine bits) -> transform back
+        let skat_str = to_ui(self.skat_cards);
 
         let trick_str = if pos.trick_cards != 0 {
-            pos.trick_cards.__str()
+            to_ui(pos.trick_cards)
         } else {
             "".to_string()
         };
 
-        let trick_plays_json: Vec<PlayInfo> = self
-            .current_trick_plays
-            .iter()
-            .map(|(c, p)| PlayInfo {
-                card: c.__str().trim().to_string(),
-                player: p.str().to_string(),
-            })
-            .collect();
+        let trick_plays_json: Vec<PlayInfo> =
+            self.current_trick_plays.iter().map(to_ui_play).collect();
 
-        let last_trick_plays_json: Vec<PlayInfo> = self
-            .last_trick_plays
-            .iter()
-            .map(|(c, p)| PlayInfo {
-                card: c.__str().trim().to_string(),
-                player: p.str().to_string(),
-            })
-            .collect();
+        let last_trick_plays_json: Vec<PlayInfo> =
+            self.last_trick_plays.iter().map(to_ui_play).collect();
 
-        let current_value = self.current_value;
+        let last_trick_cards_str = self.last_trick_cards.map(|c| to_ui(c));
 
-        let game_over = self.is_game_over();
+        // Trick Suit logic?
+        // Engine knows trick suit (e.g. Clubs).
+        // UI wants to see Spades if Spades game.
+        // We probably need to transform the suit too?
+        // Since `trick_suit` is stored as u32 mask in JSON? No, string.
+        // `pos.trick_suit` is just a u32 suit mask (e.g. CLUBS).
+
+        // The original code used `format!("{}", pos.trick_suit)`.
+        // The instruction's provided code also uses `format!("{}", pos.trick_suit)`.
+        // This implies `pos.trick_suit` is expected to be displayed as an integer or
+        // has a `Display` implementation that handles it.
+        // No transformation is applied to `trick_suit` in the provided instruction.
+        let trick_suit_str = format!("{}", pos.trick_suit);
+
+        let legal_strs = self.get_legal_moves_strings_transformed(); // New helper needed
 
         let state = GameStateJson {
             my_cards: display_cards,
             trick_cards: trick_str,
             trick_plays: trick_plays_json,
-            trick_suit: format!("{}", pos.trick_suit),
-            current_value,
+            trick_suit: trick_suit_str, // Debug mainly
+            current_value: self.current_value,
             last_loss: self.last_loss,
-            game_over,
-            winner: if game_over {
+            game_over: self.is_game_over(),
+            winner: if self.is_game_over() {
                 Some(if pos.declarer_points > 60 {
                     "Declarer".to_string()
                 } else {
@@ -520,46 +516,52 @@ impl SkatGame {
             },
             declarer_points: pos.declarer_points,
             team_points: pos.team_points,
-            max_possible_points: self.max_possible_points, // Pass through
+            max_possible_points: self.max_possible_points,
             current_player: pos.player.str().to_string(),
-            last_trick_cards: self.last_trick_cards.map(|c| c.__str()),
+            last_trick_cards: last_trick_cards_str,
             last_trick_plays: last_trick_plays_json,
             last_trick_winner: self.last_trick_winner.map(|p| p.str().to_string()),
             last_trick_points: self.last_trick_points,
-            left_cards: left_str,
-            right_cards: right_str,
+            left_cards: "".to_string(),  // Hidden
+            right_cards: "".to_string(), // Hidden
             skat_cards: skat_str,
-            move_history: self.get_move_history_json(),
-            legal_moves: self.get_legal_moves_strings(),
+            move_history: self.get_move_history_json_transformed(), // New helper needed
+            legal_moves: legal_strs,
         };
 
         serde_wasm_bindgen::to_value(&state).unwrap()
     }
 
-    fn get_legal_moves_strings(&self) -> Vec<String> {
+    fn get_legal_moves_strings_transformed(&self) -> Vec<String> {
         let pos = self.current_position;
         // Only relevant if it's user's turn (Declarer)
         if pos.player != self.user_player {
-            return Vec::new(); // Or all? Usually UI only cares for user.
+            return Vec::new();
         }
 
         let legal_mask = pos.get_legal_moves();
         let mut legal_strs = Vec::new();
+        let trans = self.active_transformation;
+
         for i in 0..32 {
             let card_bit = 1 << i;
             if (legal_mask & card_bit) != 0 {
-                legal_strs.push(card_bit.__str());
+                let ui_card = if let Some(t) = trans {
+                    GameContext::get_switched_cards(card_bit, t)
+                } else {
+                    card_bit
+                };
+                legal_strs.push(ui_card.__str().trim().to_string());
             }
         }
         legal_strs
     }
 
-    fn get_move_history_json(&self) -> Vec<MoveLogEntry> {
+    fn get_move_history_json_transformed(&self) -> Vec<MoveLogEntry> {
         let mut log = Vec::new();
-        // move_sequence has N items (moves 1..N).
-        // analysis_values has N+1 items (indices 0..N).
+        let trans = self.active_transformation;
+
         for (i, (card, player)) in self.move_sequence.iter().enumerate() {
-            // Move i connects State i -> State i+1.
             let val_before = if i < self.analysis_values.len() {
                 self.analysis_values[i]
             } else {
@@ -577,8 +579,14 @@ impl SkatGame {
                 None
             };
 
+            let ui_card = if let Some(t) = trans {
+                GameContext::get_switched_cards(*card, t)
+            } else {
+                *card
+            };
+
             log.push(MoveLogEntry {
-                card: card.__str(),
+                card: ui_card.__str().trim().to_string(),
                 player: player.str().to_string(),
                 value_before: val_before,
                 value_after: val_after,
@@ -589,8 +597,8 @@ impl SkatGame {
     }
 
     pub fn play_card_str(&mut self, card_str: &str) -> bool {
-        let card = card_str.trim().__bit();
-        if card == 0 {
+        let ui_card_bit = card_str.trim().__bit();
+        if ui_card_bit == 0 {
             return false;
         }
 
@@ -599,7 +607,14 @@ impl SkatGame {
             return false;
         }
 
-        self.perform_move(card, &pos)
+        // Transform UI card to Engine card
+        let engine_card = if let Some(t) = self.active_transformation {
+            GameContext::get_switched_cards(ui_card_bit, t)
+        } else {
+            ui_card_bit
+        };
+
+        self.perform_move(engine_card, &pos)
     }
 
     pub fn make_ai_move(&mut self) -> bool {
@@ -611,12 +626,152 @@ impl SkatGame {
             return false;
         }
 
+        // This is safe because `solve_best_move` creates its own mutable engine copy or uses &self.
+        // Wait, solve_best_move might need &mut self?
+        // `solve_best_move` calls `solve_optimum_from_position` which takes `&mut engine`.
+        // So `self.solve_best_move()` needs `&mut self`?
+        // Yes, likely.
         let (best_card, _) = self.solve_best_move();
         if best_card == 0 {
             return false;
         }
 
         self.perform_move(best_card, &pos)
+    }
+
+    // Helper to get sorted cards string
+    fn get_sorted_hand_display_string(&self, cards_mask: u32, game_type: Game) -> String {
+        use crate::consts::bitboard::*;
+
+        let trans = self.active_transformation;
+        let mut sorted_str = Vec::new();
+
+        // 1. Jacks (Fixed Order: C, S, H, D)
+        let jacks = [JACKOFCLUBS, JACKOFSPADES, JACKOFHEARTS, JACKOFDIAMONDS];
+        for &j in &jacks {
+            // Note: `cards_mask` is INTERNAL (Engine) mask.
+            // If Engine Game is "Clubs" (Transformed from Spades):
+            // Internal JACKOFCLUBS is Best Trump.
+            // Internal JACKOFSPADES is 2nd Best.
+            // We check if `cards_mask` has these.
+            if (cards_mask & j) != 0 {
+                // Transform to UI card
+                let ui_card = if let Some(t) = trans {
+                    GameContext::get_switched_cards(j, t)
+                } else {
+                    j
+                };
+                sorted_str.push(ui_card.__str().trim().to_string());
+            }
+        }
+
+        // 2. Suits
+        // Decide Suit Order based on *UI Game Type* (not Engine Game Type).
+        // If Engine Game is Clubs (due to Spades Switch).
+        // UI Game is Spades.
+        // We want Spades first.
+        // But we iterate INTERNAL cards.
+        // If we want to show UI Spades first.
+        // UI Spades map to Internal Clubs (if transformed).
+        // So we should iterate Internal Clubs first.
+
+        // Determine Internal Trump Suit
+        // Default (Suit/Grand/Null)
+        // If Suit Game: Engine uses CLUBS base (usually).
+        // If we used `solve_best_game_all_variants` logic:
+        // Spades Game -> ProblemTransformation::SpadesSwitch.
+        // Engine Game Type = Suit (Clubs).
+        // So Internal Trump Suit is CLUBS.
+
+        // Iteration order of suits (Internal):
+        // Trump Suit (Clubs) -> Others
+        // Order of Others: Spades, Hearts, Diamonds.
+
+        // Suits constants (excluding Jacks)
+        // Need arrays of bits for each suit (A..7)
+        // bitboard.rs doesn't provide arrays, just masks.
+        // I can generate them.
+        // Order: A, 10, K, Q, 9, 8, 7.
+        // CLUBS (0..7): 0=7, 1=8, ..., 7=A.
+        // SPADES (8..15): 8=7, ..., 15=A.
+        // HEARTS (16..23): 16=7.
+        // DIAMONDS (24..31): 24=7.
+
+        // Helper to get bits for a suit index (0=C, 1=S, 2=H, 3=D) in Descending Value (A..7)
+        // A is high bit in the byte.
+        // Clubs: 7 (A), 6 (10)? No.
+        // bitboard.rs: ACEOFCLUBS = 1 << 6? No.
+        // ACEOFCLUBS = 0b...1000000.. (Line 76).
+        // CLUB_7 = 1 << 0.
+        // So bits are 0..6 (7 cards). Jack is separate.
+        // Order A, 10, K, Q, 9, 8, 7 corresponds to bits 6, 5, 4, 3, 2, 1, 0 (relative to suit start).
+
+        let get_suit_bits = |suit_idx: u32| -> Vec<u32> {
+            let offset = suit_idx * 7; // Wait, 7 cards?
+                                       // bitboard.rs uses 0..6 for Clubs. 7 is unused? No.
+                                       // Let's check bitboard.rs again.
+                                       // CLUB_7 = 1 << 0.
+                                       // ACEOFCLUBS = 1 << 6.
+                                       // So 7 cards per suit (Jacks excluded). 7 * 4 = 28 cards. Jacks = 4. Total 32.
+                                       // But offsets?
+                                       // Clubs: 0..6?
+                                       // Spades: ?
+                                       // Let's check SPADES constant. 1 << 7 is missing?
+                                       // SPADES mask: 0b0000_0000000_1111111...
+                                       // It suggests 7 bits width.
+                                       // So Clubs: 0..6. Spades: 7..13. Hearts: 14..20. Diamonds: 21..27. Jacks: 28..31.
+                                       // Need to verify this packing.
+
+            // Assuming this packing based on standard dense bitboards (no gaps).
+            let base = suit_idx * 7;
+            let mut bits = Vec::new();
+            for i in (0..7).rev() {
+                // 6 down to 0 (A..7)
+                bits.push(1 << (base + i));
+            }
+            bits
+        };
+
+        // Suit Indices (Internal):
+        // 0=Clubs, 1=Spades, 2=Hearts, 3=Diamonds.
+
+        let suit_order = if game_type == Game::Null {
+            // Null: No trump. Order by suit usually: C, S, H, D?
+            // Or A..7 within suit.
+            vec![0, 1, 2, 3]
+        } else if game_type == Game::Grand {
+            // Grand: Only Jacks (handled). Suits C, S, H, D.
+            vec![0, 1, 2, 3]
+        } else {
+            // Suit Game (Internal is CLUBS)
+            // Order: Clubs (Trump), Spades, Hearts, Diamonds.
+            vec![0, 1, 2, 3]
+        };
+
+        for &s_idx in &suit_order {
+            let bits = get_suit_bits(s_idx);
+            for b in bits {
+                if (cards_mask & b) != 0 {
+                    let ui_card = if let Some(t) = trans {
+                        GameContext::get_switched_cards(b, t)
+                    } else {
+                        b
+                    };
+                    sorted_str.push(ui_card.__str().trim().to_string());
+                }
+            }
+        }
+
+        let mut res = String::new();
+        res.push('[');
+        for (i, s) in sorted_str.iter().enumerate() {
+            if i > 0 {
+                res.push(' ');
+            }
+            res.push_str(s);
+        }
+        res.push(']');
+        res
     }
 
     pub fn calculate_max_points(&mut self) -> u8 {
