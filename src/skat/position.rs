@@ -267,7 +267,7 @@ impl Position {
     fn reduce_unequal(&self, moves: u32, game_context: &GameContext) -> u32 {
         let mut ret = 0u32;
         let player = self.player;
-        let all_moves = self.left_cards | self.right_cards | self.declarer_cards;
+        let all_moves = self.left_cards | self.right_cards | self.declarer_cards | self.trick_cards;
 
         let connections = get_connections(
             moves,

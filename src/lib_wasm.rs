@@ -491,10 +491,61 @@ impl SkatGame {
         let pos = self.current_position;
         let res = solve_optimum_from_position(&mut temp_engine, &pos, OptimumMode::BestValue);
 
-        if let Ok((card, _score, val)) = res {
+        if let Ok((card, score, val)) = res {
             (card, val as i32)
         } else {
             (0, 0)
         }
     }
+
+    pub fn get_move_analysis_json(&self) -> JsValue {
+        let pos = self.current_position;
+        if pos.player != self.user_player || self.is_game_over() {
+            return JsValue::NULL;
+        }
+
+        // 1. Get Best Value (Global Optimum)
+        let (best_card_mask, best_val) = self.solve_best_move();
+
+        let mut results = Vec::new();
+        let legal_mask = pos.get_legal_moves();
+
+        let mut temp_engine = SkatEngine::new(self.engine.context, None);
+
+        for i in 0..32 {
+            let card_bit = 1 << i;
+            if (legal_mask & card_bit) != 0 {
+                let next_pos = pos.make_move(card_bit, &self.engine.context);
+
+                let res = solve_optimum_from_position(
+                    &mut temp_engine,
+                    &next_pos,
+                    OptimumMode::BestValue,
+                );
+
+                let val = if let Ok((_, _, v)) = res { v as i32 } else { 0 };
+
+                // Delta: best_val (our perspective) vs val (result of move).
+                // Usually matching.
+                let delta = val - best_val;
+
+                results.push(MoveAnalysis {
+                    card: card_bit.__str(),
+                    value: val,
+                    delta,
+                    is_best: delta == 0,
+                });
+            }
+        }
+
+        serde_wasm_bindgen::to_value(&results).unwrap()
+    }
+}
+
+#[derive(Serialize)]
+pub struct MoveAnalysis {
+    pub card: String,
+    pub value: i32,
+    pub delta: i32,
+    pub is_best: bool,
 }

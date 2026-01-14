@@ -225,10 +225,32 @@ function playCard(cardStr) {
 
 function undoMove() {
     if (game) {
+        // 1. Undo at least one step (the user's last action decision point is in the past)
         game.undo();
+
+        // 2. Continue undoing until it is the User's turn (Declarer)
+        // or we reached the start of the game.
+        let state = game.get_state_json();
+        let attempts = 0;
+
+        // We look for 'D' (Declarer) as current player.
+        // Also check history length to avoid infinite loop at start.
+        while (state.current_player !== "D" && state.move_history.length > 0 && attempts < 20) {
+            game.undo();
+            state = game.get_state_json();
+            attempts++;
+        }
+
         lastTrickId = null;
         lastTrickSize = 0;
         document.getElementById('game-over-overlay').style.display = 'none';
+        document.getElementById('trick-cards').innerHTML = '';
+
+
+        // Reset analysis
+        document.querySelectorAll('.hint-overlay').forEach(e => e.remove());
+        document.querySelectorAll('.card-optimal').forEach(e => e.classList.remove('card-optimal'));
+
         updateUI();
         gameLoop();
     }
@@ -243,11 +265,39 @@ function showHint() {
 
         setTimeout(() => {
             try {
-                const hint = game.get_hint_json();
-                alert(`Bester Zug: ${hint.best_card} (Wert: ${hint.value})`);
+                const analysis = game.get_move_analysis_json();
+                if (!analysis) {
+                    alert("Kein Tipp verfügbar.");
+                    return;
+                }
+
+                // Clear previous hints
+                document.querySelectorAll('.hint-overlay').forEach(e => e.remove());
+                document.querySelectorAll('.card-optimal').forEach(e => e.classList.remove('card-optimal'));
+
+                // Apply new hints
+                analysis.forEach(entry => {
+                    const cardEl = document.querySelector(`.card[data-card="${entry.card}"]`);
+                    if (cardEl) {
+                        const delta = entry.delta;
+                        const isBest = entry.is_best;
+
+                        const overlay = document.createElement('div');
+                        overlay.className = 'hint-overlay';
+                        if (isBest) {
+                            overlay.classList.add('hint-best');
+                            overlay.textContent = "0"; // or "Opt"
+                            cardEl.classList.add('card-optimal');
+                        } else {
+                            overlay.classList.add('hint-bad');
+                            overlay.textContent = delta; // e.g. -5
+                        }
+                        cardEl.appendChild(overlay);
+                    }
+                });
             } catch (e) {
                 console.error("Hint failed", e);
-                alert("Konnte keinen Tipp berechnen.");
+                alert("Fehler bei der Berechnung.");
             } finally {
                 btn.textContent = originalText;
                 btn.disabled = false;

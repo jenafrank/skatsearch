@@ -1,0 +1,11 @@
+{
+    "description": "Bugfix 1.",
+    "usage": "cargo run -- value-calc --context tests/contexts/compare_start.json",
+    "declarer_cards": "HJ CA CT CQ C8",
+    "left_cards": "DJ DA DK DQ D7",
+    "right_cards": "HQ H9 H8 H7 D9",
+    "game_type": "Suit",
+    "start_player": "Left",
+    "trick_cards": null,
+    "trick_suit": null
+}
