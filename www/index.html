@@ -76,6 +76,59 @@
                 <hr>
             </div>
         </aside>
+
+        <!-- Game Selection Modal -->
+        <div id="game-selection-modal" class="modal-overlay">
+            <div class="modal-content">
+                <h2>Game Setup (12 Cards)</h2>
+                <div id="selection-hand-container">
+                    <!-- Hand Cards -->
+                </div>
+
+                <p style="margin-top:0; color:#ccc; font-size:0.9em;">Click to move to Skat (Max 2)</p>
+
+                <div id="selection-skat-container">
+                    <!-- Skat Cards -->
+                    <span style="color:#aaa; font-style:italic;">Empty Skat</span>
+                </div>
+
+                <div class="selection-controls">
+                    <!-- <p>Select 2 cards to discard into Skat.</p> REMOVED, implied by UI -->
+                    <!-- <div id="selected-skat-display">Skat: [ ] [ ]</div> REMOVED -->
+
+                    <div class="game-type-selector">
+                        <fieldset id="game-type-radios">
+                            <legend>Game Type</legend>
+                            <label><input type="radio" name="game-type" value="Grand"> Grand</label>
+                            <label><input type="radio" name="game-type" value="Clubs" checked> Clubs</label>
+                            <label><input type="radio" name="game-type" value="Spades"> Spades</label>
+                            <label><input type="radio" name="game-type" value="Hearts"> Hearts</label>
+                            <label><input type="radio" name="game-type" value="Diamonds"> Diamonds</label>
+                            <label><input type="radio" name="game-type" value="Null"> Null</label>
+                        </fieldset>
+                    </div>
+
+                    <button id="btn-calc-best">Calculate Best Game</button>
+                    <button id="btn-start-game" disabled>Start Game</button>
+                </div>
+
+                <div id="best-game-results" style="display:none; margin-top: 15px;">
+                    <h3>Best Game Analysis</h3>
+                    <table id="best-game-table">
+                        <thead>
+                            <tr>
+                                <th>Game</th>
+                                <th>Win?</th>
+                                <th>Value</th>
+                                <th>Skat</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Load WASM -->

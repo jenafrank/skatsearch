@@ -249,3 +249,272 @@ pub fn calculate_best_game(
     results_vec.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap());
     results_vec
 }
+
+pub fn calculate_best_game_from_12(
+    my_12_cards_str: &str,
+    start_player: Player,
+    samples: u32,
+    log_file: Option<String>,
+    verbose: bool,
+) -> Vec<(String, f32)> {
+    let my_12_cards = my_12_cards_str.__bit();
+
+    // Validate we have 12 cards
+    if my_12_cards.count_ones() != 12 {
+        eprintln!("Error: Expected 12 cards, got {}", my_12_cards.count_ones());
+        return vec![];
+    }
+
+    let all_cards_mask = ALLCARDS;
+    let remaining_mask = all_cards_mask ^ my_12_cards;
+    let (remaining_cards, count) = remaining_mask.__decompose();
+    let mut remaining_vec: Vec<u32> = remaining_cards[0..count].to_vec();
+
+    // Check if we have 20 cards remaining
+    if count != 20 {
+        eprintln!("Error: Expected 20 remaining cards, got {}", count);
+        // return vec![]; // Let's proceed, maybe partial deck? Logic expects 10/10.
+        // Actually skat_solving expects full deck usually.
+    }
+
+    let mut wins_clubs = 0;
+    let mut wins_spades = 0;
+    let mut wins_hearts = 0;
+    let mut wins_diamonds = 0;
+    let mut wins_grand = 0;
+    let mut wins_null = 0;
+
+    let mut log_writer = if let Some(path) = &log_file {
+        Some(
+            std::fs::OpenOptions::new()
+                .create(true)
+                .append(true)
+                .open(path)
+                .expect("Could not open log file"),
+        )
+    } else {
+        None
+    };
+
+    if let Some(w) = &mut log_writer {
+        writeln!(w, "Best Game Analysis (12 Cards - Discard Optimization)").unwrap();
+        writeln!(w, "My 12 Cards: {}", my_12_cards_str).unwrap();
+        writeln!(w, "Samples: {}", samples).unwrap();
+        writeln!(w, "--------------------------------------------------").unwrap();
+    }
+
+    let mut rng = thread_rng();
+
+    for i in 0..samples {
+        remaining_vec.shuffle(&mut rng);
+
+        // Distributions: 10 Left, 10 Right (No Skat, as I have 12)
+        let start_time = std::time::Instant::now();
+        let left_vec = &remaining_vec[0..10];
+        let right_vec = &remaining_vec[10..20];
+
+        let mut left_mask = 0;
+        for &c in left_vec {
+            left_mask |= c;
+        }
+
+        let mut right_mask = 0;
+        for &c in right_vec {
+            right_mask |= c;
+        }
+
+        // We pass my_12_cards as "declarer_cards".
+        // solve_with_skat will treat the 2 extra cards as Skat candidates.
+
+        if verbose {
+            print!(".");
+            io::stdout().flush().unwrap();
+        }
+
+        if let Some(w) = &mut log_writer {
+            writeln!(w, "Sample {}:", i).unwrap();
+            writeln!(w, "Left: {}", left_mask.__str()).unwrap();
+            writeln!(w, "Right: {}", right_mask.__str()).unwrap();
+            writeln!(w, "Results:").unwrap();
+        }
+
+        let game_configs = [
+            ("Clubs", Game::Suit, None),
+            (
+                "Spades",
+                Game::Suit,
+                Some(ProblemTransformation::SpadesSwitch),
+            ),
+            (
+                "Hearts",
+                Game::Suit,
+                Some(ProblemTransformation::HeartsSwitch),
+            ),
+            (
+                "Diamonds",
+                Game::Suit,
+                Some(ProblemTransformation::DiamondsSwitch),
+            ),
+            ("Grand", Game::Grand, None),
+            ("Null", Game::Null, None),
+        ];
+
+        let mut scores = Vec::new();
+
+        for (_, (name, game_type, transform)) in game_configs.iter().enumerate() {
+            // Apply transformations to my_12_cards and opponents
+            let my_c = if let Some(t) = transform {
+                GameContext::get_switched_cards(my_12_cards, *t)
+            } else {
+                my_12_cards
+            };
+            let left_c = if let Some(t) = transform {
+                GameContext::get_switched_cards(left_mask, *t)
+            } else {
+                left_mask
+            };
+            let right_c = if let Some(t) = transform {
+                GameContext::get_switched_cards(right_mask, *t)
+            } else {
+                right_mask
+            };
+
+            // solve_with_skat logic:
+            // It assumes declarer has 10 cards + there are 2 skat cards hidden.
+            // But we pass 12 cards as declarer_cards.
+            // Inside solve_with_skat: `skatcards_bitmask` will be 0.
+            // `twelve_cards_bitmask` = 0 | my_c = my_c.
+            // `generate_skat_combinations` will gen all pairs from my_c.
+            // Then it tests each pair as Skat.
+            // This is exactly what we want!
+
+            let solve_ret = solve_with_skat(
+                left_c,
+                right_c,
+                my_c,
+                *game_type,
+                start_player,
+                AccelerationMode::AlphaBetaAccelerating,
+            );
+
+            let best_val = if let Some(best) = solve_ret.best_skat {
+                let pushed_load = best.skat_card_1 | best.skat_card_2;
+                let real_pushed = if let Some(t) = transform {
+                    GameContext::get_switched_cards(pushed_load, *t)
+                } else {
+                    pushed_load
+                };
+                if let Some(w) = &mut log_writer {
+                    writeln!(
+                        w,
+                        "  {:<9}: Score {:>3}, Pushed: {}",
+                        name,
+                        best.value,
+                        real_pushed.__str()
+                    )
+                    .unwrap();
+                }
+                best.value
+            } else {
+                0
+            };
+            scores.push(best_val);
+        }
+
+        let duration = start_time.elapsed();
+        if let Some(w) = &mut log_writer {
+            writeln!(w, "Duration: {:.2?}", duration).unwrap();
+            writeln!(w, "--------------------------------------------------").unwrap();
+        }
+
+        // Logic for score accumulation and win counting
+        // Win threshold usually 61.
+        // For Null, winning is 0 points (but solve_with_skat returns points? No, Null returns 0 if lost, 1 if won?
+        // Let's check solve_with_skat for Null.
+        // solve_with_skat:
+        // if game == Null: alpha=1.
+        // result = solve_double_dummy(..., 0, 1, 1).
+        // Returns result.best_value.
+        // So 1 means won (valid null), 0 means lost.
+        // Wait, normally Null value is fixed (23, 35 etc). But the solver just checks feasibility.
+        // The return value is boolean (0 or 1).
+
+        // Scores array: [Clubs, Spades, Hearts, Diamonds, Grand, Null]
+
+        if scores[0] > 60 {
+            wins_clubs += 1;
+        }
+        if scores[1] > 60 {
+            wins_spades += 1;
+        }
+        if scores[2] > 60 {
+            wins_hearts += 1;
+        }
+        if scores[3] > 60 {
+            wins_diamonds += 1;
+        }
+        if scores[4] > 60 {
+            wins_grand += 1;
+        }
+        // For Null: 0 is Win (success), >0 is Loss.
+        if scores[5] == 0 {
+            wins_null += 1;
+        }
+    }
+
+    if verbose {
+        println!();
+    }
+
+    let f_samples = samples as f32;
+    // Return average score for Suit/Grand, and Win Rate for Null?
+    // Or just Win Rate for all?
+    // User requested "winning games".
+    // Returning Win % is probably best.
+
+    // Note: Previous function calculate_best_game returned Win %.
+    // But for Null it did `if scores[5] == 0 { wins_null += 1 }`.
+    // Wait. In calculate_best_game (lines 230-231):
+    // if scores[5] == 0 { wins_null += 1; }
+    // This implies 0 is WIN for Null?
+    // Let's re-verify `solve_with_skat` behavior for Null.
+    // Line 169: `Game::Null => result.best_value`.
+    // `solve_double_dummy` returns `best_value`.
+    // Double dummy for Null: `solve_double_dummy(..., 0, 1, 1)`.
+    // If it finds a path with 0 points (valid null), does it return 0 or 1?
+    // Usually double dummy returns max points obtainable by Declarer.
+    // In Null, Declarer wants 0 points.
+    // DOES `solve_double_dummy` know it's Null?
+    // `engine` knows.
+    // `search` knows.
+    // If `search` returns points taken.
+    // In Null, `search` returns points taken.
+    // Ideally 0.
+    // So if `best_value` is 0, it's a win for Null.
+    // If `best_value` > 0, it's a loss.
+    // So `if scores[5] == 0` is correct for WIN.
+
+    // BUT! I saw `alpha=1` in `solve_with_skat` (Line 79).
+    // `solve_double_dummy(..., 0, 1, 1)`.
+    // If it returns 0, it means it found a line with <= 0 pts (so 0).
+    // If it returns 1, it means it couldn't keep it under 1 (so >0).
+    // So YES, 0 is WIN. 1 is LOSS.
+
+    // My code above for Null: `if scores[5] == 1 { wins_null += 1; }` -> WRONG.
+    // Should be `if scores[5] == 0`.
+
+    // Also, for Suit/Grand, I collected `score_clubs` etc. I can use this for tie-breaking or exposing Expected Value.
+    // But result type is `Vec<(String, f32)>`. PIMC usually compares Win Rates.
+
+    let mut results_vec = vec![
+        ("Clubs".to_string(), wins_clubs as f32 / f_samples),
+        ("Spades".to_string(), wins_spades as f32 / f_samples),
+        ("Hearts".to_string(), wins_hearts as f32 / f_samples),
+        ("Diamonds".to_string(), wins_diamonds as f32 / f_samples),
+        ("Grand".to_string(), wins_grand as f32 / f_samples),
+        ("Null".to_string(), wins_null as f32 / f_samples), // Note: Need to fix logic above first
+    ];
+
+    results_vec.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap());
+    results_vec
+}

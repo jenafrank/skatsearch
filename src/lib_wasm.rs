@@ -59,6 +59,47 @@ pub struct HintJson {
     pub value: i32,
 }
 
+#[derive(Serialize)]
+pub struct BestGameResult {
+    pub game: String,
+    pub win_rate: f32,
+    pub value: i32,
+    pub skat: Vec<String>,
+}
+
+#[wasm_bindgen]
+pub fn calc_best_game_12(my_12_cards_str: &str, samples: u32) -> JsValue {
+    // Deprecated? User wants Perfect Info now.
+    // Keeping for compatibility or we can redirect to perfect info if samples provided?
+    // User said "Do not use PIMC".
+    // But this function takes "my_12_cards_str". If we use perfect info we need OTHER cards too.
+    // If this function is called from UI with JUST 12 cards, we can't do perfect info (we don't know opponent cards).
+    // UNLESS we assume "SkatGame" context where we DO know.
+    // So this function might be useless for "Perfect Info" mode unless we pass the full deal.
+    // But let's leave it as is for now or use the helper if we can.
+
+    // For now, I will leave the old implementation here but usage might shift to SkatGame method.
+    let results = crate::pimc::best_game::calculate_best_game_from_12(
+        my_12_cards_str,
+        Player::Declarer,
+        samples,
+        None,
+        false,
+    );
+
+    let json_results: Vec<BestGameResult> = results
+        .into_iter()
+        .map(|(game, win_rate)| BestGameResult {
+            game,
+            win_rate,
+            value: 0,
+            skat: vec![],
+        }) // Placeholder for PIMC
+        .collect();
+
+    serde_wasm_bindgen::to_value(&json_results).unwrap()
+}
+
 #[wasm_bindgen]
 pub struct SkatGame {
     engine: SkatEngine,
@@ -75,10 +116,13 @@ pub struct SkatGame {
     max_possible_points: u8,
     current_value: i32, // Cached analysis
 
+    // Game Selection Phase
+    game_selection_phase: bool,
+    initial_deal: Option<GameContext>,
+
     // History Analysis
     move_sequence: Vec<(u32, Player)>,
-    analysis_values: Vec<Option<i32>>, // values[i] is value BEFORE move i (or after move i-1).
-                                       // values[0] = Start. values[k] = After k moves.
+    analysis_values: Vec<Option<i32>>,
 }
 
 #[wasm_bindgen]
@@ -90,13 +134,34 @@ impl SkatGame {
         deck_vec.truncate(32);
 
         use rand::seq::SliceRandom;
+        // Initialize Random Deal
+        // For game selection phase, we want to give the user ALL 12 cards (Hand + Skat)
+        // effectively merging them into `declarer_cards` for the "initial deal" context
+        // OR we just assume `skat_cards` is separate but we expose it.
+
+        // But the user says "There are only 10 cards in total".
+        // My previous logic: `game_selection_phase: true, initial_deal: Some(...)`
+        // stored 10 in decl_cards and 2 in skat_cards.
+        // And `get_state_json` does: `let my_12 = self.initial_deal.unwrap().declarer_cards | self.skat_cards;`
+        // So `my_12` SHOULD be 12 cards.
+
+        // Let's verify `skat_cards` is truly populating.
+        // The lines below set `skat_cards |= deck_vec[30]` etc. which is correct.
+
+        // I will double check `new_random` logic to ensure no cards are lost.
+        // Actually, let's explicitely verify the bitwise OR in `get_state_json` is working on valid data.
+
         let mut rng = rand::thread_rng();
+        let mut deck_vec = Vec::with_capacity(32);
+        for i in 0..32 {
+            deck_vec.push(1u32 << i);
+        }
         deck_vec.shuffle(&mut rng);
 
-        let mut decl_cards = 0u32;
-        let mut left_cards = 0u32;
-        let mut right_cards = 0u32;
-        let mut skat_cards = 0u32;
+        let mut decl_cards: u32 = 0;
+        let mut left_cards: u32 = 0;
+        let mut right_cards: u32 = 0;
+        let mut skat_cards: u32 = 0;
 
         for i in 0..10 {
             decl_cards |= deck_vec[i];
@@ -110,8 +175,21 @@ impl SkatGame {
         skat_cards |= deck_vec[30];
         skat_cards |= deck_vec[31];
 
-        let mut context = GameContext::create(
-            decl_cards,
+        // Create context with 10 cards for now, we'll merge for UI display
+        let initial_deal_context = GameContext::create(
+            decl_cards | skat_cards, // Ensure decl_cards includes skat_cards for the selection phase context
+            left_cards,
+            right_cards,
+            Game::Suit,
+            Player::Declarer,
+        );
+
+        // For Game Selection Phase, we give Declarer 12 Cards (Hand + Skat)
+        // And we don't start the engine in playing mode yet strictly speaking,
+        // but we can initialize a dummy context.
+
+        let context = GameContext::create(
+            decl_cards, // Start with 10, logic handles 12 separately or we merge now?
             left_cards,
             right_cards,
             Game::Suit,
@@ -119,22 +197,10 @@ impl SkatGame {
         );
 
         let skat_points = skat_cards.points();
-        context.set_declarer_start_points(skat_points);
-        context.set_threshold_upper(120);
+        // context.set_declarer_start_points(skat_points); // Not yet, Skat not pressed
 
         let engine = SkatEngine::new(context, None);
         let current_position = engine.create_initial_position();
-
-        // Calculate max possible points (BestValue)
-        // Initialize max possible points (Expensive!)
-        // let mut temp_engine = SkatEngine::new(engine.context, None);
-        // let res = solve_optimum_from_position(
-        //     &mut temp_engine,
-        //     &current_position,
-        //     OptimumMode::BestValue,
-        // );
-        // let max_possible_points = if let Ok((_, _, val)) = res { val } else { 0 };
-        let max_possible_points = 120; // Default placeholder to unblock UI
 
         SkatGame {
             engine,
@@ -148,14 +214,253 @@ impl SkatGame {
             current_position,
             current_trick_plays: Vec::new(),
             skat_cards,
-            max_possible_points,
+            max_possible_points: 0, // Unknown yet
             current_value: 0,
             move_sequence: Vec::new(),
-            analysis_values: vec![None], // Initial state (index 0) is unknown yet
+            analysis_values: vec![None],
+            game_selection_phase: true,
+            initial_deal: Some(initial_deal_context),
         }
     }
 
+    pub fn calculate_best_game_perfect_info(&self) -> JsValue {
+        if self.initial_deal.is_none() {
+            return JsValue::NULL;
+        }
+        let deal = self.initial_deal.unwrap();
+        // Reconstruct 12 cards for declarer
+        let my_12_cards = deal.declarer_cards | self.skat_cards;
+
+        use crate::extensions::skat_solving::{solve_with_skat, AccelerationMode};
+        use crate::skat::context::ProblemTransformation;
+        use crate::skat::defs::Game;
+
+        let games_to_check = vec![
+            (Game::Grand, None, "Grand"),
+            (Game::Null, None, "Null"),
+            (Game::Suit, None, "Clubs"),
+            (
+                Game::Suit,
+                Some(ProblemTransformation::SpadesSwitch),
+                "Spades",
+            ),
+            (
+                Game::Suit,
+                Some(ProblemTransformation::HeartsSwitch),
+                "Hearts",
+            ),
+            (
+                Game::Suit,
+                Some(ProblemTransformation::DiamondsSwitch),
+                "Diamonds",
+            ),
+        ];
+
+        let mut results_list = Vec::new();
+
+        // Use AlphaBetaAccelerating for Best Value calculation, mirroring CLI "Best" mode
+        let mode = AccelerationMode::AlphaBetaAccelerating;
+
+        for (game_type, transformation, label) in games_to_check {
+            // Transform setup
+            let d_cards = if let Some(trans) = transformation {
+                GameContext::get_switched_cards(my_12_cards, trans)
+            } else {
+                my_12_cards
+            };
+            let l_cards = if let Some(trans) = transformation {
+                GameContext::get_switched_cards(deal.left_cards, trans)
+            } else {
+                deal.left_cards
+            };
+            let r_cards = if let Some(trans) = transformation {
+                GameContext::get_switched_cards(deal.right_cards, trans)
+            } else {
+                deal.right_cards
+            };
+
+            let ret = solve_with_skat(
+                l_cards,
+                r_cards,
+                d_cards, // 12 cards passed here!
+                game_type,
+                Player::Declarer,
+                mode,
+            );
+
+            if let Some(best) = ret.best_skat {
+                // Calculate "Win Rate" (for Null 0 is Win, for others >= 61)
+                // We'll normalize to 1.0 = Win, 0.0 = Loss for UI consistency with PIMC
+                let is_win = match game_type {
+                    Game::Null => best.value == 0,
+                    _ => best.value >= 61,
+                };
+
+                // Back-transform Skat for display
+                let (s1, s2) = if let Some(trans) = transformation {
+                    (
+                        GameContext::get_switched_cards(best.skat_card_1, trans),
+                        GameContext::get_switched_cards(best.skat_card_2, trans),
+                    )
+                } else {
+                    (best.skat_card_1, best.skat_card_2)
+                };
+
+                results_list.push(BestGameResult {
+                    game: label.to_string(),
+                    win_rate: if is_win { 1.0 } else { 0.0 }, // Binary result for Perfect Info
+                    value: best.value as i32,
+                    skat: vec![s1.__str(), s2.__str()],
+                });
+            }
+        }
+
+        // Sort: Wins first, then by Value descending
+        results_list.sort_by(|a, b| {
+            // First compare win_rate (descending)
+            let win_cmp = b.win_rate.partial_cmp(&a.win_rate).unwrap();
+            if win_cmp != std::cmp::Ordering::Equal {
+                return win_cmp;
+            }
+            // Then value (descending)
+            b.value.cmp(&a.value)
+        });
+
+        serde_wasm_bindgen::to_value(&results_list).unwrap()
+    }
+
+    pub fn finalize_game_selection(&mut self, game_type_str: &str, discard_skat_str: &str) -> bool {
+        if !self.game_selection_phase {
+            return false;
+        }
+
+        use crate::skat::defs::Game;
+
+        // Parse Game Type
+        let (game_type, transform) = match game_type_str {
+            "Grand" => (Game::Grand, None),
+            "Null" => (Game::Null, None),
+            "Clubs" => (Game::Suit, None), // No transform needed (Clubs is default Suit)
+            "Spades" => (
+                Game::Suit,
+                Some(crate::skat::context::ProblemTransformation::SpadesSwitch),
+            ),
+            "Hearts" => (
+                Game::Suit,
+                Some(crate::skat::context::ProblemTransformation::HeartsSwitch),
+            ),
+            "Diamonds" => (
+                Game::Suit,
+                Some(crate::skat::context::ProblemTransformation::DiamondsSwitch),
+            ),
+            _ => (Game::Suit, None), // Default
+        };
+
+        // Parse Discarded Skat
+        let deck_skat_bits = discard_skat_str.trim().__bit();
+        if deck_skat_bits.count_ones() != 2 {
+            // Error handling?
+            return false;
+        }
+
+        if self.initial_deal.is_none() {
+            return false;
+        }
+        let deal = self.initial_deal.unwrap();
+
+        let my_12 = deal.declarer_cards | self.skat_cards;
+
+        // Verify skat cards are in my_12
+        if (my_12 & deck_skat_bits) != deck_skat_bits {
+            return false;
+        }
+
+        let my_10 = my_12 ^ deck_skat_bits;
+
+        // Apply Transformation to Context
+        // Note: Skat Engine works internally with CLUBS as base for Suit games.
+        // If user selected SPADES, we switch cards so Spades become Clubs (internally).
+
+        let final_declarer = if let Some(t) = transform {
+            GameContext::get_switched_cards(my_10, t)
+        } else {
+            my_10
+        };
+
+        let final_left = if let Some(t) = transform {
+            GameContext::get_switched_cards(deal.left_cards, t)
+        } else {
+            deal.left_cards
+        };
+
+        let final_right = if let Some(t) = transform {
+            GameContext::get_switched_cards(deal.right_cards, t)
+        } else {
+            deal.right_cards
+        };
+
+        // Create new Engine Context
+        let mut context = GameContext::create(
+            final_declarer,
+            final_left,
+            final_right,
+            game_type,
+            Player::Declarer,
+        );
+
+        // Points Calculation
+        // Skat points count towards declarer? Usually yes.
+        // In Null game? No.
+        if game_type != Game::Null {
+            context.set_declarer_start_points(deck_skat_bits.points());
+            context.set_threshold_upper(120);
+        } else {
+            context.set_threshold_upper(1); // Or 0?
+        }
+
+        self.engine = SkatEngine::new(context, None);
+        self.current_position = self.engine.create_initial_position();
+        self.skat_cards = deck_skat_bits; // The pushed skat
+        self.game_selection_phase = false;
+
+        // Calc Max Points for playing phase
+        self.calculate_max_points();
+
+        true
+    }
+
     pub fn get_state_json(&self) -> JsValue {
+        // If selection phase, we show 12 cards in "my_cards" and others empty/hidden
+        if self.game_selection_phase {
+            let my_12 = self.initial_deal.unwrap().declarer_cards | self.skat_cards;
+            let display_cards = my_12.__str();
+
+            let state = GameStateJson {
+                my_cards: display_cards,
+                trick_cards: "".to_string(),
+                trick_plays: vec![],
+                trick_suit: "".to_string(),
+                current_value: 0,
+                last_loss: 0,
+                game_over: false,
+                winner: None,
+                declarer_points: 0,
+                team_points: 0,
+                max_possible_points: 0,
+                current_player: "D".to_string(),
+                last_trick_cards: None,
+                last_trick_plays: vec![],
+                last_trick_winner: None,
+                last_trick_points: None,
+                left_cards: "".to_string(),  // Hidden
+                right_cards: "".to_string(), // Hidden
+                skat_cards: "".to_string(),  // Merged into hand
+                move_history: vec![],
+                legal_moves: vec![], // All 12? Or handled by UI selection
+            };
+            return serde_wasm_bindgen::to_value(&state).unwrap();
+        }
+
         let pos = self.current_position;
 
         let display_cards = if self.user_player == Player::Declarer {

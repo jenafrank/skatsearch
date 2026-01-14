@@ -16,11 +16,19 @@ async function run() {
     startNewGame();
 }
 
+// Game Selection State
+let selectedSkatCards = new Set();
+let selectionPhase = false;
+
 function bindEvents() {
     document.getElementById('btn-new-game').onclick = startNewGame;
     document.getElementById('btn-hint').onclick = showHint;
     document.getElementById('btn-undo').onclick = undoMove;
     document.getElementById('btn-cheat').onclick = toggleCheatMode;
+
+    // Selection Modal events
+    document.getElementById('btn-calc-best').onclick = calculateBestGame;
+    document.getElementById('btn-start-game').onclick = finishSelection;
 }
 
 function toggleCheatMode() {
@@ -33,22 +41,11 @@ function toggleCheatMode() {
 function startNewGame() {
     lastTrickId = null;
     lastTrickSize = 0;
+    selectedSkatCards.clear();
+    selectionPhase = true;
 
-    // Create new game
+    // Create new game (initialized in selection phase)
     game = SkatGame.new_random();
-
-    // Trigger async calculation of Max Points (if available)
-    setTimeout(() => {
-        if (game && game.calculate_max_points) {
-            console.log("Calculating Max Points Async...");
-            try {
-                game.calculate_max_points(); // updates internal state
-                updateUI(); // Reflect new max points
-            } catch (e) {
-                console.error("Max points calc failed", e);
-            }
-        }
-    }, 500);
 
     document.getElementById('left-points').style.display = 'none';
     document.getElementById('my-tricks-pile').style.display = 'none';
@@ -56,8 +53,210 @@ function startNewGame() {
     document.getElementById('left-points').textContent = '0';
     document.getElementById('game-over-overlay').style.display = 'none';
 
-    updateUI();
-    gameLoop();
+    // Show Selection Modal
+    const modal = document.getElementById('game-selection-modal');
+    modal.style.display = 'flex';
+    document.getElementById('best-game-results').style.display = 'none';
+    document.getElementById('best-game-table').querySelector('tbody').innerHTML = '';
+
+    renderSelectionUI();
+}
+
+function renderSelectionUI() {
+    if (!game) return;
+    const state = game.get_state_json();
+    const handContainer = document.getElementById('selection-hand-container');
+    const skatContainer = document.getElementById('selection-skat-container');
+
+    handContainer.innerHTML = '';
+    skatContainer.innerHTML = '';
+
+    if (!state.my_cards) {
+        handContainer.innerHTML = '<div style="color:red">Error: No cards returned from WASM</div>';
+        return;
+    }
+
+    const cleanStr = state.my_cards.replace(/\[|\]/g, '').trim();
+    if (!cleanStr) return;
+
+    // Use Set to track all cards to ensure we don't duplicate or lose them
+    // Original cards from WASM (all 12)
+    const allCards = cleanStr.split(/\s+/);
+
+    // Check if we need to initialize selectedSkatCards (if first load)
+    // Actually selectedSkatCards is global state managed by us
+
+    // Iterate all cards. If in skat set, render in Skat. Else in Hand.
+
+    // Sort cards slightly? 
+    // They come from WASM sorted usually. Skat selection preserves them in Set.
+    // We should keep hand order stable if possible.
+
+    allCards.forEach(cStr => {
+        if (selectedSkatCards.has(cStr)) {
+            // Render in Skat
+            const el = createCardElement(cStr);
+            el.onclick = () => toggleSkatSelection(cStr); // Click to remove
+            skatContainer.appendChild(el);
+        } else {
+            // Render in Hand
+            const el = createCardElement(cStr);
+            el.onclick = () => toggleSkatSelection(cStr); // Click to add
+            handContainer.appendChild(el);
+        }
+    });
+
+    if (skatContainer.children.length === 0) {
+        skatContainer.innerHTML = '<span style="color:#aaa; font-style:italic;">Empty Skat</span>';
+    }
+
+    updateSelectionControls();
+}
+
+function toggleSkatSelection(cardStr) {
+    if (selectedSkatCards.has(cardStr)) {
+        selectedSkatCards.delete(cardStr);
+    } else {
+        if (selectedSkatCards.size >= 2) {
+            // Optional: Shake animation or alert?
+            return;
+        }
+        selectedSkatCards.add(cardStr);
+    }
+    renderSelectionUI();
+}
+
+function updateSelectionControls() {
+    const arr = Array.from(selectedSkatCards);
+    // Skat display text removed from UI, so we only update button
+    const btnStart = document.getElementById('btn-start-game');
+    if (btnStart) {
+        if (arr.length === 2) {
+            btnStart.disabled = false;
+            btnStart.textContent = "Start Game";
+        } else {
+            btnStart.disabled = true;
+            btnStart.textContent = `Select ${2 - arr.length} more`;
+        }
+    }
+}
+
+async function calculateBestGame() {
+    if (!game) return;
+    const btn = document.getElementById('btn-calc-best');
+    const originalText = btn.textContent;
+    btn.textContent = "Calculating...";
+    btn.disabled = true;
+
+    // Yield to UI
+    await new Promise(r => setTimeout(r, 10));
+
+    try {
+        const results = game.calculate_best_game_perfect_info();
+        renderBestGameResults(results);
+    } catch (e) {
+        console.error("Best Game Calc Failed", e);
+        alert("Calculation Failed");
+    } finally {
+        btn.textContent = originalText;
+        btn.disabled = false;
+    }
+}
+
+function renderBestGameResults(results) {
+    const tableBody = document.getElementById('best-game-table').querySelector('tbody');
+    tableBody.innerHTML = '';
+    document.getElementById('best-game-results').style.display = 'block';
+
+    if (!results || results.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="5">No results found</td></tr>';
+        return;
+    }
+
+    results.forEach(res => {
+        const row = document.createElement('tr');
+        const isWin = res.win_rate > 0.5;
+        const winClass = isWin ? 'win-yes' : 'win-no';
+        const winText = isWin ? 'WIN' : 'LOSS';
+
+        let skatStr = "";
+        if (res.skat && res.skat.length > 0) {
+            // Clean skat strings too just in case
+            skatStr = res.skat.map(s => s.replace(/\[|\]/g, '')).join(", ");
+        }
+
+        // Action Button
+        const applyBtn = document.createElement('button');
+        applyBtn.textContent = "Select";
+        applyBtn.style.padding = "4px 10px";
+        applyBtn.style.fontSize = "12px";
+        applyBtn.style.cursor = "pointer";
+        applyBtn.onclick = () => applyBestGameSelection(res);
+
+        row.innerHTML = `
+            <td style="font-weight:bold;">${res.game}</td>
+            <td class="${winClass}" style="font-weight:bold;">${winText}</td>
+            <td>${res.value}</td>
+            <td style="font-family:monospace;">${skatStr}</td>
+        `;
+        const tdAction = document.createElement('td');
+        tdAction.appendChild(applyBtn);
+        row.appendChild(tdAction);
+
+        tableBody.appendChild(row);
+    });
+}
+
+function applyBestGameSelection(res) {
+    // 1. Set Game Type (Radio)
+    const g = res.game; // "Null", "Grand", "Clubs", "Spades", ...
+
+    const radios = document.getElementsByName('game-type');
+    for (const r of radios) {
+        if (r.value === g) {
+            r.checked = true;
+            break;
+        }
+    }
+
+    // 2. Set Skat Cards
+    selectedSkatCards.clear();
+    if (res.skat) {
+        // Skat strings might need trimming
+        res.skat.forEach(c => selectedSkatCards.add(c.replace(/\[|\]/g, '').trim()));
+    }
+    renderSelectionUI();
+}
+
+function finishSelection() {
+    if (selectedSkatCards.size !== 2) return;
+
+    // Get Radio Value
+    let gameType = "Suit"; // Default
+    const radios = document.getElementsByName('game-type');
+    for (const r of radios) {
+        if (r.checked) {
+            gameType = r.value;
+            break;
+        }
+    }
+
+    const skatArr = Array.from(selectedSkatCards);
+    const skatStr = skatArr.join(" ");
+
+    const success = game.finalize_game_selection(gameType, skatStr);
+    if (success) {
+        document.getElementById('game-selection-modal').style.display = 'none';
+        selectionPhase = false;
+
+        // Setup UI for playing
+        gameLoop();
+
+        // Trigger generic analysis
+        setTimeout(() => triggerAnalysis(), 500);
+    } else {
+        alert("Failed to start game. Check selection.");
+    }
 }
 
 async function gameLoop() {
