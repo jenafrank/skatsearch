@@ -396,41 +396,22 @@ impl SkatGame {
     }
 
     fn build_state_json_with_transform(&self) -> JsValue {
-        // If selection phase, show 12 cards (raw, no transform)
-        if self.game_selection_phase {
-            let deal = self.initial_deal.unwrap();
-            // Note: initial_deal has 12 cards in declarer_cards
-            let display_cards = deal.declarer_cards.__str();
+        // If selection phase, show 12 cards using dynamic sorting
+        // We do NOT return early anymore, we want the dynamic sorting logic below to run.
+        // We just need to ensure `pos` reflects the cards we want to show.
+        // During selection, `self.current_position` is updated by `update_game_type`.
+        // So we can just let it fall through.
 
-            let state = GameStateJson {
-                my_cards: display_cards,
-                trick_cards: "".to_string(),
-                trick_plays: vec![],
-                trick_suit: "".to_string(),
-                current_value: 0,
-                last_loss: 0,
-                game_over: false,
-                winner: None,
-                declarer_points: 0,
-                team_points: 0,
-                max_possible_points: 0,
-                current_player: "D".to_string(),
-                last_trick_cards: None,
-                last_trick_plays: vec![],
-                last_trick_winner: None,
-                last_trick_points: None,
-                left_cards: "".to_string(),
-                right_cards: "".to_string(),
-                skat_cards: "".to_string(),
-                move_history: vec![],
-                legal_moves: vec![],
-                debug_info: "Selection Phase".to_string(),
-            };
-            return serde_wasm_bindgen::to_value(&state).unwrap();
-        }
+        // HOWEVER, `debug_info` would need to be handled.
 
         let pos = self.current_position;
         let trans = self.active_transformation;
+
+        let debug_info_str = if self.game_selection_phase {
+            "Selection Phase".to_string()
+        } else {
+            self.get_game_label()
+        };
 
         // Helper to transform back to UI
         let to_ui = |cards: u32| -> String {
@@ -456,12 +437,15 @@ impl SkatGame {
 
         let display_cards = if self.user_player == Player::Declarer {
             // Use sorted display string!
-            let gtype = if let Some(deal) = self.initial_deal {
-                deal.game_type
-            } else {
-                Game::Suit
-            };
-            self.get_sorted_hand_display_string(pos.declarer_cards, gtype)
+            let gtype = self.engine.context.game_type;
+
+            // In selection phase, we want to show ALL 12 cards (Hand + Skat) sorted together
+            let mut cards_mask = pos.declarer_cards;
+            if self.game_selection_phase {
+                cards_mask |= self.skat_cards;
+            }
+
+            self.get_sorted_hand_display_string(cards_mask, gtype)
         } else {
             "".to_string()
         };
@@ -531,7 +515,7 @@ impl SkatGame {
             skat_cards: skat_str,
             move_history: self.get_move_history_json_transformed(), // New helper needed
             legal_moves: legal_strs,
-            debug_info: self.get_game_label(),
+            debug_info: debug_info_str,
         };
 
         serde_wasm_bindgen::to_value(&state).unwrap()
@@ -661,75 +645,176 @@ impl SkatGame {
 
     // Helper to get sorted cards string
     // Helper to get sorted cards string
+    #[wasm_bindgen]
+    pub fn update_game_type(&mut self, game_type_str: &str) {
+        use crate::skat::context::ProblemTransformation::*;
+
+        // 1. Determine New Game Type and Transformation
+        let (new_game_type, new_trans) = match game_type_str {
+            "Spades" => (Game::Suit, Some(SpadesSwitch)),
+            "Hearts" => (Game::Suit, Some(HeartsSwitch)),
+            "Diamonds" => (Game::Suit, Some(DiamondsSwitch)),
+            "Clubs" => (Game::Suit, None),
+            "Grand" => (Game::Grand, None),
+            "Null" => (Game::Null, None),
+            _ => (Game::Suit, None),
+        };
+
+        // 2. Preserve UI Identity of Cards
+        // Helper to apply/unapply trans (XOR swap is its own inverse)
+        let apply_trans =
+            |cards: u32, t: Option<crate::skat::context::ProblemTransformation>| -> u32 {
+                if let Some(tr) = t {
+                    GameContext::get_switched_cards(cards, tr)
+                } else {
+                    cards
+                }
+            };
+
+        // Get current UI cards
+        let current_trans = self.active_transformation;
+        let ui_declarer = apply_trans(self.engine.context.declarer_cards, current_trans);
+        let ui_left = apply_trans(self.engine.context.left_cards, current_trans);
+        let ui_right = apply_trans(self.engine.context.right_cards, current_trans);
+        let ui_skat = apply_trans(self.skat_cards, current_trans);
+
+        // Calculate new Internal cards
+        let new_declarer = apply_trans(ui_declarer, new_trans);
+        let new_left = apply_trans(ui_left, new_trans);
+        let new_right = apply_trans(ui_right, new_trans);
+        let new_skat = apply_trans(ui_skat, new_trans);
+
+        // 3. Update State
+        self.engine.context.game_type = new_game_type;
+        self.active_transformation = new_trans;
+
+        self.engine.context.declarer_cards = new_declarer;
+        self.engine.context.left_cards = new_left;
+        self.engine.context.right_cards = new_right;
+        self.skat_cards = new_skat;
+
+        // Update Position
+        self.current_position = self.engine.create_initial_position();
+    }
+
     fn get_sorted_hand_display_string(&self, cards_mask: u32, game_type: Game) -> String {
         use crate::consts::bitboard::*;
+        use crate::skat::context::ProblemTransformation::*;
 
         let trans = self.active_transformation;
         let mut sorted_str = Vec::new();
 
-        // 1. Jacks (Fixed Order: C, S, H, D -> Best to Worst)
-        let jacks = [JACKOFCLUBS, JACKOFSPADES, JACKOFHEARTS, JACKOFDIAMONDS];
-        for &j in &jacks {
-            if (cards_mask & j) != 0 {
-                let ui_card = if let Some(t) = trans {
+        if game_type == Game::Null {
+            // Null Sort: Suits (C, S, H, D) -> Ranks (A, K, Q, J, 10, 9, 8, 7)
+            // Iterate Suits: Clubs, Spades, Hearts, Diamonds
+            let suits_data = [
+                (JACKOFCLUBS, 21),   // Clubs
+                (JACKOFSPADES, 14),  // Spades
+                (JACKOFHEARTS, 7),   // Hearts
+                (JACKOFDIAMONDS, 0), // Diamonds
+            ];
+
+            for (jack_mask, offset) in suits_data.iter() {
+                // Rank Order for Null: A(6), K(4), Q(3), J, 10(5), 9(2), 8(1), 7(0)
+                let rank_offsets = [
+                    (6, "A"),
+                    (4, "K"),
+                    (3, "Q"),
+                    (99, "J"), // Pseudo offset for Jack
+                    (5, "10"),
+                    (2, "9"),
+                    (1, "8"),
+                    (0, "7"),
+                ];
+
+                for (r_off, _) in rank_offsets.iter() {
+                    let bit = if *r_off == 99 {
+                        *jack_mask
+                    } else {
+                        1 << (offset + r_off)
+                    };
+
+                    if (cards_mask & bit) != 0 {
+                        // Null: identity preservation ensures we just display the bitstring
+                        sorted_str.push(bit.__str().trim().to_string());
+                    }
+                }
+            }
+        } else {
+            // Standard Suit/Grand Sorting
+            // 1. Jacks (Fixed Order: C, S, H, D -> Best to Worst)
+            // Jacks are always Trump.
+            let jacks = [JACKOFCLUBS, JACKOFSPADES, JACKOFHEARTS, JACKOFDIAMONDS];
+            for &j in &jacks {
+                // Check if internal cards contain this UI Jack
+                // Internal = trans(UI)
+                let internal_bit = if let Some(t) = trans {
                     GameContext::get_switched_cards(j, t)
                 } else {
                     j
                 };
-                sorted_str.push(ui_card.__str().trim().to_string());
-            }
-        }
 
-        // 2. Trump Suit (Non-Jacks)
-        if game_type == Game::Suit {
-            // Internal Trump is always CLUBS (Bits 21..27)
-            let clubs_offset = 21;
-
-            // Iterate A..7 (6 down to 0 + offset)
-            for i in (0..7).rev() {
-                let bit = 1 << (clubs_offset + i);
-                if (cards_mask & bit) != 0 {
-                    let ui_card = if let Some(t) = trans {
-                        GameContext::get_switched_cards(bit, t)
-                    } else {
-                        bit
-                    };
-                    sorted_str.push(ui_card.__str().trim().to_string());
+                if (cards_mask & internal_bit) != 0 {
+                    // Display UI card
+                    sorted_str.push(j.__str().trim().to_string());
                 }
             }
-        }
 
-        // 3. Other Suits
-        // Order: Spades, Hearts, Diamonds
-        // Offsets: Spades=14, Hearts=7, Diamonds=0
+            // Define UI Suits Order: Clubs, Spades, Hearts, Diamonds
+            // Offsets for the 7 card (base of the suit)
+            let ui_suits = [
+                (21, "Clubs"),
+                (14, "Spades"),
+                (7, "Hearts"),
+                (0, "Diamonds"),
+            ];
 
-        // Mapped order based on UI: Spades, Hearts, Diamonds
-        let other_suits_offsets = [14, 7, 0];
+            // Determine UI Trump Suit Offset (if any)
+            let ui_trump_offset = match (game_type, trans) {
+                (Game::Grand, _) => None,
+                (Game::Suit, None) => Some(21), // Clubs
+                (Game::Suit, Some(SpadesSwitch)) => Some(14),
+                (Game::Suit, Some(HeartsSwitch)) => Some(7),
+                (Game::Suit, Some(DiamondsSwitch)) => Some(0),
+                _ => Some(21), // Fallback
+            };
 
-        for &offset in &other_suits_offsets {
-            for i in (0..7).rev() {
-                let bit = 1 << (offset + i);
-                if (cards_mask & bit) != 0 {
-                    let ui_card = if let Some(t) = trans {
-                        GameContext::get_switched_cards(bit, t)
+            // Helper to iterate a suit's cards (A..7, skipping Jacks)
+            let mut process_suit = |base_offset: u8| {
+                // Ranks: A(6) .. 7(0). Jacks handled separately.
+                for r in (0..7).rev() {
+                    let ui_bit = 1 << (base_offset + r);
+                    let internal_bit = if let Some(t) = trans {
+                        GameContext::get_switched_cards(ui_bit, t)
                     } else {
-                        bit
+                        ui_bit
                     };
-                    sorted_str.push(ui_card.__str().trim().to_string());
+
+                    if (cards_mask & internal_bit) != 0 {
+                        sorted_str.push(ui_bit.__str().trim().to_string());
+                    }
                 }
+            };
+
+            // 2. Trump Suit Body (if applicable)
+            if let Some(trump_off) = ui_trump_offset {
+                process_suit(trump_off);
+            }
+
+            // 3. Other Suits (in fixed C-S-H-D order)
+            for &(suit_off, _) in &ui_suits {
+                // Skip if it is the trump suit
+                if let Some(trump_off) = ui_trump_offset {
+                    if suit_off == trump_off {
+                        continue;
+                    }
+                }
+                process_suit(suit_off);
             }
         }
 
-        let mut res = String::new();
-        res.push('[');
-        for (i, s) in sorted_str.iter().enumerate() {
-            if i > 0 {
-                res.push(' ');
-            }
-            res.push_str(s);
-        }
-        res.push(']');
-        res
+        // Return space-separated
+        sorted_str.join(" ")
     }
 
     pub fn calculate_max_points(&mut self) -> u8 {

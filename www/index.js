@@ -30,6 +30,25 @@ function bindEvents() {
     // Selection Modal events
     document.getElementById('btn-calc-best').onclick = calculateBestGame;
     document.getElementById('btn-start-game').onclick = finishSelection;
+
+    // Radio Button Listeners for Dynamic Sorting
+    const radios = document.getElementsByName('game-type');
+    console.log("Found radios:", radios.length);
+    radios.forEach(r => {
+        r.addEventListener('change', (e) => {
+            console.log("Radio changed:", e.target.value);
+            // Visual Debug
+            const statusbar = document.getElementById('game-status');
+            if (statusbar) statusbar.textContent = "Switching to " + e.target.value + "...";
+
+            if (game && e.target.checked) {
+                game.update_game_type(e.target.value);
+                console.log("Updated game type in WASM");
+                renderSelectionUI();
+                if (statusbar) statusbar.textContent = "Mode: " + e.target.value;
+            }
+        });
+    });
 }
 
 function toggleCheatMode() {
@@ -66,6 +85,8 @@ function startNewGame() {
 function renderSelectionUI() {
     if (!game) return;
     const state = game.get_state_json();
+    console.log("WASM State Debug Info:", state.debug_info);
+    console.log("WASM My Cards:", state.my_cards);
     const handContainer = document.getElementById('selection-hand-container');
     const skatContainer = document.getElementById('selection-skat-container');
 
@@ -209,24 +230,25 @@ function renderBestGameResults(results) {
 }
 
 function applyBestGameSelection(res) {
-    // 1. Set Game Type (Radio)
+    // 1. Set Skat Cards (Update first so render logic sees them)
+    selectedSkatCards.clear();
+    if (res.skat) {
+        // Skat strings might need trimming
+        res.skat.forEach(c => selectedSkatCards.add(c.replace(/\[|\]/g, '').trim()));
+    }
+
+    // 2. Set Game Type (Radio) and Trigger Event
     const g = res.game; // "Null", "Grand", "Clubs", "Spades", ...
 
     const radios = document.getElementsByName('game-type');
     for (const r of radios) {
         if (r.value === g) {
             r.checked = true;
+            // Dispatch event to ensure WASM updates and UI resorts
+            r.dispatchEvent(new Event('change'));
             break;
         }
     }
-
-    // 2. Set Skat Cards
-    selectedSkatCards.clear();
-    if (res.skat) {
-        // Skat strings might need trimming
-        res.skat.forEach(c => selectedSkatCards.add(c.replace(/\[|\]/g, '').trim()));
-    }
-    renderSelectionUI();
 }
 
 function finishSelection() {
