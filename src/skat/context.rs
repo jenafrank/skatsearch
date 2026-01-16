@@ -3,7 +3,10 @@
 //! Defined the static parameters of a game instance (cards distribution, game type, etc.)
 //! Formerly `Problem`.
 
-use crate::skat::defs::{Game, Player, CLUBS, DIAMONDS, HEARTS, SPADES};
+use crate::skat::defs::{
+    Game, Player, CLUBS, DIAMONDS, HEARTS, JACKOFCLUBS, JACKOFDIAMONDS, JACKOFHEARTS, JACKOFSPADES,
+    SPADES,
+};
 use crate::skat::position::Position;
 use crate::skat::rules::get_suit_for_card;
 use crate::traits::Bitboard; // Need to ensure traits are available or moved
@@ -182,6 +185,13 @@ impl GameContext {
             ProblemTransformation::DiamondsSwitch => DIAMONDS,
         };
 
+        // Determine which Jack to swap with Club Jack
+        let (target_jack, _jack_shift) = match switch {
+            ProblemTransformation::SpadesSwitch => (JACKOFSPADES, 1),
+            ProblemTransformation::HeartsSwitch => (JACKOFHEARTS, 2),
+            ProblemTransformation::DiamondsSwitch => (JACKOFDIAMONDS, 3),
+        };
+
         let mut ret = 0u32;
         let decomposed_cards = cards.__decompose();
 
@@ -189,15 +199,20 @@ impl GameContext {
             let current_card = decomposed_cards.0[i];
             let mut target_card = current_card;
 
+            // 1. Handle Suits
             if current_card & CLUBS > 0 {
                 target_card = target_card >> shift;
-            }
-
-            if current_card & switch_suit > 0 {
+            } else if current_card & switch_suit > 0 {
                 target_card = target_card << shift;
             }
+            // 2. Handle Jacks (Swap Club Jack <-> Target Suit Jack)
+            else if current_card == JACKOFCLUBS {
+                target_card = target_jack;
+            } else if current_card == target_jack {
+                target_card = JACKOFCLUBS;
+            }
 
-            ret = ret ^ target_card;
+            ret |= target_card;
         }
 
         ret
@@ -243,5 +258,53 @@ impl GameContext {
             }
         }
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::consts::bitboard::{ACEOFCLUBS, ACEOFSPADES};
+
+    #[test]
+    fn test_spades_switch_jacks() {
+        // Test Jack Swap
+        let club_jack = JACKOFCLUBS;
+        let spade_jack = JACKOFSPADES;
+
+        let switched_cj =
+            GameContext::get_switched_cards(club_jack, ProblemTransformation::SpadesSwitch);
+        assert_eq!(
+            switched_cj, spade_jack,
+            "Club Jack should become Spade Jack"
+        );
+
+        let switched_sj =
+            GameContext::get_switched_cards(spade_jack, ProblemTransformation::SpadesSwitch);
+        assert_eq!(switched_sj, club_jack, "Spade Jack should become Club Jack");
+    }
+
+    #[test]
+    fn test_spades_switch_suits() {
+        // Test Suit Swap
+        let club_ace = ACEOFCLUBS;
+        let spade_ace = ACEOFSPADES;
+
+        let switched_ca =
+            GameContext::get_switched_cards(club_ace, ProblemTransformation::SpadesSwitch);
+        assert_eq!(switched_ca, spade_ace, "Club Ace should become Spade Ace");
+
+        let switched_sa =
+            GameContext::get_switched_cards(spade_ace, ProblemTransformation::SpadesSwitch);
+        assert_eq!(switched_sa, club_ace, "Spade Ace should become Club Ace");
+    }
+
+    #[test]
+    fn test_mixed_hand_swap() {
+        let hand = JACKOFCLUBS | ACEOFCLUBS | JACKOFSPADES | ACEOFSPADES;
+        let expected = JACKOFSPADES | ACEOFSPADES | JACKOFCLUBS | ACEOFCLUBS;
+
+        let switched = GameContext::get_switched_cards(hand, ProblemTransformation::SpadesSwitch);
+        assert_eq!(switched, expected, "Mixed hand should swap completely");
     }
 }

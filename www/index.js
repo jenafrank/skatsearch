@@ -11,7 +11,8 @@ async function run() {
     await init();
     init_panic_hook();
     console.log("WASM Initialized.");
-    document.getElementById('game-status').textContent = "Game: Clubs (Declarer)";
+    // Initial status
+    document.getElementById('game-status').textContent = "Waiting for game...";
     bindEvents();
     startNewGame();
 }
@@ -311,11 +312,17 @@ async function gameLoop() {
             console.log("AI refused to move?");
         }
     } else if (currentPlayer === "D") {
-        document.getElementById('game-status').textContent = "Your Turn (Declarer)";
-        // Ensure analysis is up to date if we just arrived here via trick clear
-        triggerAnalysis();
+        // Status updated in updateUI mostly, but here for turn notification
+        // We use the debug info from state if available
+        // document.getElementById('game-status').textContent = "Your Turn"; 
     }
 }
+
+// ... existing triggerAnalysis ...
+
+// Update UI:
+// We need to inject the status update in updateUI to ensure it persists
+
 
 async function triggerAnalysis() {
     if (!game || !game.calculate_analysis) return;
@@ -519,6 +526,16 @@ function updateUI() {
 
     renderInfo(state);
     updatePoints(state);
+
+    // Status Bar Update
+    let statusText = state.debug_info || "Game Running";
+    if (state.game_over) {
+        statusText += ` | Game Over (${state.winner})`;
+    } else {
+        const turn = state.current_player === "D" ? "Your Turn" : (state.current_player === "L" ? "Left Thinking" : "Right Thinking");
+        statusText += ` | ${turn}`;
+    }
+    document.getElementById('game-status').textContent = statusText;
 
     // Trigger Async Analysis
     triggerAnalysis();

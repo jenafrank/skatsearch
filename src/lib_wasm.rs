@@ -51,6 +51,7 @@ pub struct GameStateJson {
     pub skat_cards: String,
     pub move_history: Vec<MoveLogEntry>, // New Log
     pub legal_moves: Vec<String>,
+    pub debug_info: String, // Debug/Mode Info
 }
 
 #[derive(Serialize)]
@@ -423,6 +424,7 @@ impl SkatGame {
                 skat_cards: "".to_string(),
                 move_history: vec![],
                 legal_moves: vec![],
+                debug_info: "Selection Phase".to_string(),
             };
             return serde_wasm_bindgen::to_value(&state).unwrap();
         }
@@ -522,11 +524,14 @@ impl SkatGame {
             last_trick_plays: last_trick_plays_json,
             last_trick_winner: self.last_trick_winner.map(|p| p.str().to_string()),
             last_trick_points: self.last_trick_points,
-            left_cards: "".to_string(),  // Hidden
-            right_cards: "".to_string(), // Hidden
+            left_cards: self
+                .get_sorted_hand_display_string(pos.left_cards, self.engine.context.game_type),
+            right_cards: self
+                .get_sorted_hand_display_string(pos.right_cards, self.engine.context.game_type),
             skat_cards: skat_str,
             move_history: self.get_move_history_json_transformed(), // New helper needed
             legal_moves: legal_strs,
+            debug_info: self.get_game_label(),
         };
 
         serde_wasm_bindgen::to_value(&state).unwrap()
@@ -639,6 +644,22 @@ impl SkatGame {
         self.perform_move(best_card, &pos)
     }
 
+    fn get_game_label(&self) -> String {
+        use crate::skat::context::ProblemTransformation::*;
+        use crate::skat::defs::Game;
+
+        match (self.engine.context.game_type, self.active_transformation) {
+            (Game::Grand, _) => "Grand".to_string(),
+            (Game::Null, _) => "Null".to_string(),
+            (Game::Suit, None) => "Clubs".to_string(),
+            (Game::Suit, Some(SpadesSwitch)) => "Spades".to_string(),
+            (Game::Suit, Some(HeartsSwitch)) => "Hearts".to_string(),
+            (Game::Suit, Some(DiamondsSwitch)) => "Diamonds".to_string(),
+            _ => "Unknown".to_string(),
+        }
+    }
+
+    // Helper to get sorted cards string
     // Helper to get sorted cards string
     fn get_sorted_hand_display_string(&self, cards_mask: u32, game_type: Game) -> String {
         use crate::consts::bitboard::*;
@@ -646,16 +667,10 @@ impl SkatGame {
         let trans = self.active_transformation;
         let mut sorted_str = Vec::new();
 
-        // 1. Jacks (Fixed Order: C, S, H, D)
+        // 1. Jacks (Fixed Order: C, S, H, D -> Best to Worst)
         let jacks = [JACKOFCLUBS, JACKOFSPADES, JACKOFHEARTS, JACKOFDIAMONDS];
         for &j in &jacks {
-            // Note: `cards_mask` is INTERNAL (Engine) mask.
-            // If Engine Game is "Clubs" (Transformed from Spades):
-            // Internal JACKOFCLUBS is Best Trump.
-            // Internal JACKOFSPADES is 2nd Best.
-            // We check if `cards_mask` has these.
             if (cards_mask & j) != 0 {
-                // Transform to UI card
                 let ui_card = if let Some(t) = trans {
                     GameContext::get_switched_cards(j, t)
                 } else {
@@ -665,97 +680,40 @@ impl SkatGame {
             }
         }
 
-        // 2. Suits
-        // Decide Suit Order based on *UI Game Type* (not Engine Game Type).
-        // If Engine Game is Clubs (due to Spades Switch).
-        // UI Game is Spades.
-        // We want Spades first.
-        // But we iterate INTERNAL cards.
-        // If we want to show UI Spades first.
-        // UI Spades map to Internal Clubs (if transformed).
-        // So we should iterate Internal Clubs first.
+        // 2. Trump Suit (Non-Jacks)
+        if game_type == Game::Suit {
+            // Internal Trump is always CLUBS (Bits 21..27)
+            let clubs_offset = 21;
 
-        // Determine Internal Trump Suit
-        // Default (Suit/Grand/Null)
-        // If Suit Game: Engine uses CLUBS base (usually).
-        // If we used `solve_best_game_all_variants` logic:
-        // Spades Game -> ProblemTransformation::SpadesSwitch.
-        // Engine Game Type = Suit (Clubs).
-        // So Internal Trump Suit is CLUBS.
-
-        // Iteration order of suits (Internal):
-        // Trump Suit (Clubs) -> Others
-        // Order of Others: Spades, Hearts, Diamonds.
-
-        // Suits constants (excluding Jacks)
-        // Need arrays of bits for each suit (A..7)
-        // bitboard.rs doesn't provide arrays, just masks.
-        // I can generate them.
-        // Order: A, 10, K, Q, 9, 8, 7.
-        // CLUBS (0..7): 0=7, 1=8, ..., 7=A.
-        // SPADES (8..15): 8=7, ..., 15=A.
-        // HEARTS (16..23): 16=7.
-        // DIAMONDS (24..31): 24=7.
-
-        // Helper to get bits for a suit index (0=C, 1=S, 2=H, 3=D) in Descending Value (A..7)
-        // A is high bit in the byte.
-        // Clubs: 7 (A), 6 (10)? No.
-        // bitboard.rs: ACEOFCLUBS = 1 << 6? No.
-        // ACEOFCLUBS = 0b...1000000.. (Line 76).
-        // CLUB_7 = 1 << 0.
-        // So bits are 0..6 (7 cards). Jack is separate.
-        // Order A, 10, K, Q, 9, 8, 7 corresponds to bits 6, 5, 4, 3, 2, 1, 0 (relative to suit start).
-
-        let get_suit_bits = |suit_idx: u32| -> Vec<u32> {
-            let offset = suit_idx * 7; // Wait, 7 cards?
-                                       // bitboard.rs uses 0..6 for Clubs. 7 is unused? No.
-                                       // Let's check bitboard.rs again.
-                                       // CLUB_7 = 1 << 0.
-                                       // ACEOFCLUBS = 1 << 6.
-                                       // So 7 cards per suit (Jacks excluded). 7 * 4 = 28 cards. Jacks = 4. Total 32.
-                                       // But offsets?
-                                       // Clubs: 0..6?
-                                       // Spades: ?
-                                       // Let's check SPADES constant. 1 << 7 is missing?
-                                       // SPADES mask: 0b0000_0000000_1111111...
-                                       // It suggests 7 bits width.
-                                       // So Clubs: 0..6. Spades: 7..13. Hearts: 14..20. Diamonds: 21..27. Jacks: 28..31.
-                                       // Need to verify this packing.
-
-            // Assuming this packing based on standard dense bitboards (no gaps).
-            let base = suit_idx * 7;
-            let mut bits = Vec::new();
+            // Iterate A..7 (6 down to 0 + offset)
             for i in (0..7).rev() {
-                // 6 down to 0 (A..7)
-                bits.push(1 << (base + i));
-            }
-            bits
-        };
-
-        // Suit Indices (Internal):
-        // 0=Clubs, 1=Spades, 2=Hearts, 3=Diamonds.
-
-        let suit_order = if game_type == Game::Null {
-            // Null: No trump. Order by suit usually: C, S, H, D?
-            // Or A..7 within suit.
-            vec![0, 1, 2, 3]
-        } else if game_type == Game::Grand {
-            // Grand: Only Jacks (handled). Suits C, S, H, D.
-            vec![0, 1, 2, 3]
-        } else {
-            // Suit Game (Internal is CLUBS)
-            // Order: Clubs (Trump), Spades, Hearts, Diamonds.
-            vec![0, 1, 2, 3]
-        };
-
-        for &s_idx in &suit_order {
-            let bits = get_suit_bits(s_idx);
-            for b in bits {
-                if (cards_mask & b) != 0 {
+                let bit = 1 << (clubs_offset + i);
+                if (cards_mask & bit) != 0 {
                     let ui_card = if let Some(t) = trans {
-                        GameContext::get_switched_cards(b, t)
+                        GameContext::get_switched_cards(bit, t)
                     } else {
-                        b
+                        bit
+                    };
+                    sorted_str.push(ui_card.__str().trim().to_string());
+                }
+            }
+        }
+
+        // 3. Other Suits
+        // Order: Spades, Hearts, Diamonds
+        // Offsets: Spades=14, Hearts=7, Diamonds=0
+
+        // Mapped order based on UI: Spades, Hearts, Diamonds
+        let other_suits_offsets = [14, 7, 0];
+
+        for &offset in &other_suits_offsets {
+            for i in (0..7).rev() {
+                let bit = 1 << (offset + i);
+                if (cards_mask & bit) != 0 {
+                    let ui_card = if let Some(t) = trans {
+                        GameContext::get_switched_cards(bit, t)
+                    } else {
+                        bit
                     };
                     sorted_str.push(ui_card.__str().trim().to_string());
                 }
