@@ -185,13 +185,6 @@ impl GameContext {
             ProblemTransformation::DiamondsSwitch => DIAMONDS,
         };
 
-        // Determine which Jack to swap with Club Jack
-        let (target_jack, _jack_shift) = match switch {
-            ProblemTransformation::SpadesSwitch => (JACKOFSPADES, 1),
-            ProblemTransformation::HeartsSwitch => (JACKOFHEARTS, 2),
-            ProblemTransformation::DiamondsSwitch => (JACKOFDIAMONDS, 3),
-        };
-
         let mut ret = 0u32;
         let decomposed_cards = cards.__decompose();
 
@@ -199,18 +192,16 @@ impl GameContext {
             let current_card = decomposed_cards.0[i];
             let mut target_card = current_card;
 
-            // 1. Handle Suits
+            // 1. Handle Suits: Only swap non-Jack cards
             if current_card & CLUBS > 0 {
                 target_card = target_card >> shift;
             } else if current_card & switch_suit > 0 {
                 target_card = target_card << shift;
             }
-            // 2. Handle Jacks (Swap Club Jack <-> Target Suit Jack)
-            else if current_card == JACKOFCLUBS {
-                target_card = target_jack;
-            } else if current_card == target_jack {
-                target_card = JACKOFCLUBS;
-            }
+            // 2. Jacks: DO NOT SWAP.
+            // Jacks are Trumps in all suit games and preserve their absolute hierarchy (C > S > H > D).
+            // A "Spades" game means Spades Suit cards become "Clubs" (Engine Trump),
+            // but the Jacks are already Trumps and handled by the Engine correctly as is.
 
             ret |= target_card;
         }
@@ -267,21 +258,21 @@ mod tests {
     use crate::consts::bitboard::{ACEOFCLUBS, ACEOFSPADES};
 
     #[test]
-    fn test_spades_switch_jacks() {
-        // Test Jack Swap
+    fn test_spades_switch_jacks_identity() {
+        // Jacks should NOT swap identity
         let club_jack = JACKOFCLUBS;
         let spade_jack = JACKOFSPADES;
 
         let switched_cj =
             GameContext::get_switched_cards(club_jack, ProblemTransformation::SpadesSwitch);
-        assert_eq!(
-            switched_cj, spade_jack,
-            "Club Jack should become Spade Jack"
-        );
+        assert_eq!(switched_cj, club_jack, "Club Jack should remain Club Jack");
 
         let switched_sj =
             GameContext::get_switched_cards(spade_jack, ProblemTransformation::SpadesSwitch);
-        assert_eq!(switched_sj, club_jack, "Spade Jack should become Club Jack");
+        assert_eq!(
+            switched_sj, spade_jack,
+            "Spade Jack should remain Spade Jack"
+        );
     }
 
     #[test]
@@ -301,10 +292,14 @@ mod tests {
 
     #[test]
     fn test_mixed_hand_swap() {
+        // Jacks stay, Suits swap
         let hand = JACKOFCLUBS | ACEOFCLUBS | JACKOFSPADES | ACEOFSPADES;
-        let expected = JACKOFSPADES | ACEOFSPADES | JACKOFCLUBS | ACEOFCLUBS;
+        let expected = JACKOFCLUBS | ACEOFSPADES | JACKOFSPADES | ACEOFCLUBS;
 
         let switched = GameContext::get_switched_cards(hand, ProblemTransformation::SpadesSwitch);
-        assert_eq!(switched, expected, "Mixed hand should swap completely");
+        assert_eq!(
+            switched, expected,
+            "Mixed hand should swap suits but keep jacks"
+        );
     }
 }
