@@ -1,0 +1,12 @@
+{
+  "game_type": "Grand",
+  "start_player": "Declarer",
+  "declarer_cards": "ST, DJ, HK, H8, S8, HT, H9, DT, HA, HJ",
+  "left_cards": "C8, S7, DQ, CA, HQ, CK, S9, SJ, DA, D8",
+  "right_cards": "C9, SQ, DK, H7, CQ, D7, C7, CJ, D9, CT",
+  "mode": "Value",
+  "samples": 40,
+  "god_players": [
+    "declarer"
+  ]
+}

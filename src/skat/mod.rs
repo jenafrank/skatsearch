@@ -6,4 +6,5 @@ pub mod engine;
 pub mod position;
 pub mod rules;
 pub mod search;
+pub mod signature;
 pub mod tt;

@@ -146,6 +146,55 @@ pub enum Commands {
         #[arg(long)]
         log_file: Option<String>,
     },
+    /// Analyzes Grand Hand scenarios to find the probability of winning based on hand features.
+    /// Generates random hands and calculates the "Signature" of the hand (Jacks, Aces, Tens), then runs PIMC simulations.
+    /// Outputs the results to CSV format.
+    AnalyzeGrand {
+        /// Number of random hands to generate and analyze
+        #[arg(short, long, default_value_t = 100)]
+        count: u32,
+        /// Number of PIMC samples per hand
+        #[arg(short, long, default_value_t = 100)]
+        samples: u32,
+        /// Output CSV file path (Optional, prints to stdout if not provided)
+        #[arg(short, long)]
+        output: Option<String>,
+        /// Play Grand Hand (without picking up Skat). Default is playing with Skat pickup.
+        #[arg(long, default_value_t = false)]
+        hand: bool,
+        /// Analyze the hand AFTER discard (optimal hand).
+        #[arg(long, default_value_t = false)]
+        post_discard: bool,
+    },
+    GenerateJson {
+        /// Number of valid JSONs to find
+        #[arg(short, long, default_value_t = 10)]
+        count: u32,
+        /// Minimum win probability to qualify as a "winner" (0.0-1.0)
+        #[arg(long, default_value_t = 0.8)]
+        min_win: f32,
+        /// Output directory for files
+        #[arg(long, default_value = "generated_scenarios")]
+        output_dir: String,
+    },
+    /// Analyzes Suit Game scenarios (Defaults to Clubs).
+    AnalyzeSuit {
+        /// Number of random hands to generate and analyze
+        #[arg(short, long, default_value_t = 100)]
+        count: u32,
+        /// Number of PIMC samples per hand
+        #[arg(short, long, default_value_t = 100)]
+        samples: u32,
+        /// Output CSV file path (Optional, prints to stdout if not provided)
+        #[arg(short, long)]
+        output: Option<String>,
+        /// Play Suit Hand (without picking up Skat). Default is playing with Skat pickup.
+        #[arg(long, default_value_t = false)]
+        hand: bool,
+        /// Analyze the hand AFTER discard (optimal hand).
+        #[arg(long, default_value_t = false)]
+        post_discard: bool,
+    },
 }
 
 #[derive(Debug, Serialize, Deserialize)]

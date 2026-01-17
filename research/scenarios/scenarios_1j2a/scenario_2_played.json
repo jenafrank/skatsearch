@@ -1,0 +1,9 @@
+{
+    "declarer_cards": "[CJ DJ HA H8 DA DT DQ D9 D8 D7]",
+    "left_cards": "[HJ CA CT CK CQ C8 C7 ST S7 HK]",
+    "right_cards": "[SJ SA SQ S9 S8 HT HQ H9 H7 DK]",
+    "game_type": "Grand",
+    "start_player": "Declarer",
+    "mode": "Win",
+    "samples": 100
+}

@@ -1,0 +1,12 @@
+{
+  "game_type": "Suit",
+  "start_player": "Declarer",
+  "declarer_cards": "DJ, C7, CA, SK, S8, C8, HJ, C9, D8, SA",
+  "left_cards": "DT, CT, H8, CQ, D7, ST, DK, HK, CJ, H7",
+  "right_cards": "DA, DQ, D9, SQ, CK, S9, HQ, HT, SJ, S7",
+  "mode": "Value",
+  "samples": 40,
+  "god_players": [
+    "declarer"
+  ]
+}

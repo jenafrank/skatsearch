@@ -1,3 +1,4 @@
+pub mod analysis;
 pub mod best_game;
 pub mod facts;
 pub mod pimc_problem;

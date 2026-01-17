@@ -1,7 +1,9 @@
 mod args;
 
 use clap::Parser;
+use rand::seq::SliceRandom;
 use skat_aug23::extensions::solver::{solve, solve_optimum, solve_win, OptimumMode};
+use skat_aug23::pimc::analysis::{analyze_hand, analyze_hand_with_pickup};
 use skat_aug23::pimc::facts::Facts;
 use skat_aug23::pimc::pimc_problem_builder::PimcProblemBuilder;
 use skat_aug23::pimc::pimc_search::PimcSearch;
@@ -9,8 +11,10 @@ use skat_aug23::skat::context::GameContext;
 use skat_aug23::skat::defs::Player;
 use skat_aug23::skat::defs::{CLUBS, DIAMONDS, HEARTS, SPADES};
 use skat_aug23::skat::engine::SkatEngine;
+use skat_aug23::skat::signature::HandSignature;
 use skat_aug23::traits::{BitConverter, Points, StringConverter};
 use std::fs;
+use std::io::Write;
 
 fn main() {
     let output = args::Cli::parse();
@@ -146,6 +150,357 @@ fn main() {
                 }
             }
         }
+        args::Commands::AnalyzeGrand {
+            count,
+            samples,
+            output,
+            hand,
+            post_discard,
+        } => {
+            if hand {
+                println!(
+                    "Analyzing Grand Hand (Count: {}, Samples: {})...",
+                    count, samples
+                );
+            } else if post_discard {
+                println!(
+                    "Analyzing Grand Post-Discard (Count: {}, Samples: {})...",
+                    count, samples
+                );
+            } else {
+                println!(
+                    "Analyzing Grand with Pickup (Count: {}, Samples: {})...",
+                    count, samples
+                );
+            }
+
+            let mut writer: Box<dyn Write> = if let Some(path) = output {
+                let file = std::fs::File::create(path).expect("Could not create output file");
+                Box::new(file)
+            } else {
+                Box::new(std::io::stdout())
+            };
+
+            writeln!(writer, "{}", HandSignature::to_csv_header()).unwrap();
+
+            let mut rng = rand::thread_rng();
+            // We need 10 cards from 32.
+            // Loop count times
+
+            let mut vec: Vec<usize> = (0..32).collect();
+
+            use std::time::Instant;
+
+            let start_time = Instant::now();
+
+            for i in 0..count {
+                vec.shuffle(&mut rng);
+
+                let mut my_hand = 0u32;
+                for el in &vec[0..10] {
+                    my_hand |= 1u32 << *el;
+                }
+
+                let mut skat = 0u32;
+                for el in &vec[10..12] {
+                    skat |= 1u32 << *el;
+                }
+
+                let (sig, prob) = if hand {
+                    analyze_hand(my_hand, samples)
+                } else {
+                    analyze_hand_with_pickup(my_hand, skat, samples, post_discard)
+                };
+
+                writeln!(writer, "{}", sig.to_csv_row(my_hand, skat, prob)).unwrap();
+
+                // Progress update every 10 iterations or if count is small
+                if (i + 1) % 10 == 0 || i + 1 == count {
+                    let elapsed = start_time.elapsed();
+                    let completed = i + 1;
+                    let rate = completed as f64 / elapsed.as_secs_f64(); // items per second
+                    let remaining_items = count - completed;
+                    let eta_secs = if rate > 0.0 {
+                        remaining_items as f64 / rate
+                    } else {
+                        0.0
+                    };
+
+                    let elapsed_str = format!(
+                        "{:02}:{:02}:{:02}",
+                        elapsed.as_secs() / 3600,
+                        (elapsed.as_secs() % 3600) / 60,
+                        elapsed.as_secs() % 60
+                    );
+
+                    let eta_str = format!(
+                        "{:02}:{:02}:{:02}",
+                        (eta_secs as u64) / 3600,
+                        ((eta_secs as u64) % 3600) / 60,
+                        (eta_secs as u64) % 60
+                    );
+
+                    let percent = (completed as f64 / count as f64) * 100.0;
+
+                    print!("\rProgress: {:3.1}% | {}/{} | Elapsed: {} | ETA: {} | Rate: {:.2} games/s   ", 
+                        percent, completed, count, elapsed_str, eta_str, rate);
+                    std::io::stdout().flush().unwrap();
+                }
+            }
+            println!("\nAnalysis complete.");
+        }
+        args::Commands::GenerateJson {
+            count,
+            min_win,
+            output_dir,
+        } => {
+            println!(
+                "Searching for {} winning scenarios (1 Jack + 2 Aces, Win > {:.2})...",
+                count, min_win
+            );
+            fs::create_dir_all(&output_dir).expect("Could not create output directory");
+
+            let mut rng = rand::thread_rng();
+            let mut vec: Vec<usize> = (0..32).collect();
+            let mut found = 0;
+            let mut attempts = 0;
+
+            use skat_aug23::pimc::analysis::analyze_hand_with_pickup;
+            use skat_aug23::pimc::pimc_problem_builder::PimcProblemBuilder;
+            use skat_aug23::skat::context::GameContext;
+            use skat_aug23::skat::signature::HandSignature;
+
+            while found < count {
+                attempts += 1;
+                vec.shuffle(&mut rng);
+
+                let mut my_hand = 0u32;
+                for el in &vec[0..10] {
+                    my_hand |= 1u32 << *el;
+                }
+
+                let mut skat = 0u32;
+                for el in &vec[10..12] {
+                    skat |= 1u32 << *el;
+                }
+
+                // Check signature: 1 Jack, 2 Aces
+                let sig = HandSignature::from_hand(my_hand);
+
+                // Count Jacks
+                let jacks_count = (sig.jacks.count_ones());
+
+                if jacks_count == 1 && sig.aces == 2 {
+                    // Potential candidate, run analysis
+                    let (_, prob) = analyze_hand_with_pickup(my_hand, skat, 20, false); // Fast check
+
+                    if prob >= min_win {
+                        // Double check with more samples
+                        let (_, prob_refined) = analyze_hand_with_pickup(my_hand, skat, 100, false);
+
+                        if prob_refined >= min_win {
+                            found += 1;
+                            println!(
+                                "Found scenario #{}: Win {:.1}% (Attempts: {})",
+                                found,
+                                prob_refined * 100.0,
+                                attempts
+                            );
+
+                            // Reconstruct full context
+                            let mut left = 0u32;
+                            for el in &vec[12..22] {
+                                left |= 1u32 << *el;
+                            }
+                            let mut right = 0u32;
+                            for el in &vec[22..32] {
+                                right |= 1u32 << *el;
+                            }
+
+                            // Create PimcContextInput (compatible with web/standard playout)
+                            use skat_aug23::traits::StringConverter;
+
+                            let context = args::GameContextInput {
+                                declarer_cards: my_hand.__str(),
+                                left_cards: left.__str(),
+                                right_cards: right.__str(),
+                                game_type: skat_aug23::skat::defs::Game::Grand,
+                                start_player: skat_aug23::skat::defs::Player::Declarer,
+                                mode: Some(args::SearchMode::Win),
+                                trick_cards: None,
+                                trick_suit: None,
+                                declarer_start_points: None,
+                                samples: Some(100),
+                                god_players: None,
+                            };
+
+                            let filename = format!(
+                                "{}/scenario_{}_win_{:.0}.json",
+                                output_dir,
+                                found,
+                                prob_refined * 100.0
+                            );
+                            let json = serde_json::to_string_pretty(&context).unwrap();
+                            fs::write(&filename, json).expect("Unable to write file");
+
+                            // Also write a little .txt info file about the Skat
+                            let skat_str = skat.__str();
+                            fs::write(
+                                format!("{}/scenario_{}_info.txt", output_dir, found),
+                                format!("Skat Cards: {}\nWin Prob: {:.2}", skat_str, prob_refined),
+                            )
+                            .expect("Unable to write info file");
+                        }
+                    }
+                }
+            }
+        }
+        args::Commands::AnalyzeSuit {
+            count,
+            samples,
+            output,
+            hand,
+            post_discard,
+        } => {
+            // Assume Clubs (0) for now as requested.
+            // Future improvement: allow specifying suit.
+            let suit_id = 0; // Clubs
+            println!(
+                "Analyzing Suit (Clubs) (Count: {}, Samples: {}, Hand: {}, Post-Discard: {})...",
+                count, samples, hand, post_discard
+            );
+
+            use std::time::Instant;
+            let start_time = Instant::now();
+
+            use std::io::Write;
+            let mut writer: Box<dyn Write> = if let Some(path) = output {
+                let file = std::fs::File::create(path).expect("Could not create output file");
+                Box::new(file)
+            } else {
+                Box::new(std::io::stdout())
+            };
+
+            // Header
+            // Header
+            writeln!(
+                writer,
+                "{},PlayedCards,DiscardedCards,PostJacksMask,PostTrumpCount,PostAces,PostTens,PostAttachedTens,PostTenKingSmall,PostSkatFulls",
+                HandSignature::to_csv_header()
+            )
+            .unwrap();
+
+            let mut found = 0;
+            while found < count {
+                // Generate random hand
+                let mut my_hand_val: u32 = 0;
+                let mut skat_val: u32 = 0;
+                {
+                    let mut rng = rand::thread_rng();
+                    let mut all_cards_lists = (0..32).collect::<Vec<u8>>();
+                    all_cards_lists.shuffle(&mut rng);
+
+                    for i in 0..10 {
+                        my_hand_val |= 1 << all_cards_lists[i];
+                    }
+                    // Skat for pickup
+                    skat_val |= 1 << all_cards_lists[10];
+                    skat_val |= 1 << all_cards_lists[11];
+                }
+
+                if hand {
+                    // Hand game (no pickup) - behavior unchanged, Post cols will be 0/Empty
+                    let (sig, prob) =
+                        skat_aug23::pimc::analysis::analyze_suit(my_hand_val, suit_id, samples);
+
+                    use skat_aug23::traits::StringConverter;
+                    writeln!(
+                        writer,
+                        "{},{},{},-,-,-,-,-,-,-",
+                        sig.to_csv_row(my_hand_val, skat_val, prob),
+                        my_hand_val.__str(),
+                        ""
+                    )
+                    .unwrap();
+                } else {
+                    let (pre_sig, post_sig, prob, played, discarded) =
+                        skat_aug23::pimc::analysis::analyze_suit_with_pickup(
+                            my_hand_val,
+                            skat_val,
+                            suit_id,
+                            samples,
+                            post_discard,
+                        );
+
+                    use skat_aug23::traits::StringConverter;
+                    let played_str = played.__str();
+                    let discarded_str = discarded.__str();
+
+                    // Pre-Sig row + played cards + Post-Sig details
+
+                    // We extract Post Sig details manually or via helper?
+                    // HandSignature doesn't have a "to_csv_partial" method, it has "to_csv_row" which includes Cards and WinProb.
+                    // We only want the fields: JacksMask, TrumpCount, Aces, Tens, AttachedTens, TenKingSmall, SkatFulls
+
+                    let post_row = format!(
+                        "{},{},{},{},{},{},{}",
+                        post_sig.jacks_string(),
+                        post_sig.trump_count,
+                        post_sig.aces,
+                        post_sig.tens,
+                        post_sig.attached_tens,
+                        post_sig.ten_king_small,
+                        post_sig.skat_fulls
+                    );
+
+                    writeln!(
+                        writer,
+                        "{},{},{},{}",
+                        pre_sig.to_csv_row(my_hand_val, skat_val, prob),
+                        played_str,
+                        discarded_str,
+                        post_row
+                    )
+                    .unwrap();
+                }
+
+                found += 1;
+                // Progress update
+                if found % 10 == 0 || found == count {
+                    let elapsed = start_time.elapsed();
+                    let completed = found;
+                    let rate = completed as f64 / elapsed.as_secs_f64(); // items per second
+                    let remaining_items = count - completed;
+                    let eta_secs = if rate > 0.0 {
+                        remaining_items as f64 / rate
+                    } else {
+                        0.0
+                    };
+
+                    let elapsed_str = format!(
+                        "{:02}:{:02}:{:02}",
+                        elapsed.as_secs() / 3600,
+                        (elapsed.as_secs() % 3600) / 60,
+                        elapsed.as_secs() % 60
+                    );
+
+                    let eta_str = format!(
+                        "{:02}:{:02}:{:02}",
+                        (eta_secs as u64) / 3600,
+                        ((eta_secs as u64) % 3600) / 60,
+                        (eta_secs as u64) % 60
+                    );
+
+                    let percent = (completed as f64 / count as f64) * 100.0;
+
+                    print!("\rProgress: {:3.1}% | {}/{} | Elapsed: {} | ETA: {} | Rate: {:.2} games/s   ", 
+                        percent, completed, count, elapsed_str, eta_str, rate);
+                    std::io::stdout().flush().unwrap();
+                }
+            }
+            println!(" Analysis Complete");
+        }
+
         args::Commands::PimcBestGame {
             context,
             samples,
