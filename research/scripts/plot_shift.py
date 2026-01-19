@@ -8,7 +8,7 @@ import numpy as np
 
 def plot_shift():
     # Load data
-    csv_file = "../data/suit_combined_2000.csv"
+    csv_file = "../data/suit_large_10k.csv"
     try:
         df = pd.read_csv(csv_file)
         print(f"Loaded {len(df)} rows from {csv_file}")
@@ -41,8 +41,9 @@ def plot_shift():
 
         aces = get_val("Aces")
         att_tens = get_val("AttachedTens")
+        skat_fulls = get_val("SkatFulls")
         
-        y = aces + att_tens
+        y = aces + att_tens + skat_fulls
         
         trump_col = f"{suffix}TrumpCount" if suffix else "TrumpCount"
         trump_count = row[trump_col] if trump_col in row else 0
@@ -151,14 +152,14 @@ def plot_shift():
         plot_on_ax(axes[0], pre_subset, f"Pre-Discard Prob ({target_trumps} Trümpfe)", (cx_pre, cy_pre))
         plot_on_ax(axes[1], post_subset, f"Post-Discard Prob ({target_trumps} Trümpfe)", (cx_post, cy_post))
         
-        filename = f"suit_2k_prob_{target_trumps}_trumps.png"
+        filename = f"../plots/suit_10k_prob_{target_trumps}_trumps.png"
         plt.tight_layout()
         plt.savefig(filename)
         print(f"  Saved {filename}")
         plt.close(fig)
 
-    # Generate for 5, 6, 7
-    for t in [5, 6, 7]:
+    # Generate for 4 (User Request)
+    for t in [4]:
         generate_plot_for_trumps(t)
 
 if __name__ == "__main__":
