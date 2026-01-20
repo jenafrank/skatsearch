@@ -2,8 +2,11 @@ mod args;
 
 use clap::Parser;
 use rand::seq::SliceRandom;
+use skat_aug23::consts::bitboard::{ACES, TENS};
 use skat_aug23::extensions::solver::{solve, solve_optimum, solve_win, OptimumMode};
-use skat_aug23::pimc::analysis::{analyze_hand, analyze_hand_with_pickup};
+use skat_aug23::pimc::analysis::{
+    analyze_general_pre_discard, analyze_hand, analyze_hand_with_pickup,
+};
 use skat_aug23::pimc::facts::Facts;
 use skat_aug23::pimc::pimc_problem_builder::PimcProblemBuilder;
 use skat_aug23::pimc::pimc_search::PimcSearch;
@@ -206,8 +209,9 @@ fn main() {
                     skat |= 1u32 << *el;
                 }
 
-                let (sig, prob) = if hand {
-                    analyze_hand(my_hand, samples)
+                let (sig, prob, _) = if hand {
+                    let (s, p) = analyze_hand(my_hand, samples);
+                    (s, p, 0) // analyze_hand returns 2 values
                 } else {
                     analyze_hand_with_pickup(my_hand, skat, samples, post_discard)
                 };
@@ -248,6 +252,128 @@ fn main() {
                 }
             }
             println!("\nAnalysis complete.");
+        }
+        args::Commands::AnalyzeGeneral {
+            count,
+            samples,
+            output,
+        } => {
+            println!(
+                "Running General Pre-Discard Analysis with {} hands, {} samples...",
+                count, samples
+            );
+
+            let mut file = std::fs::File::create(&output).expect("Could not create CSV file");
+            // Custom header with specific order and alignment
+            writeln!(
+                file,
+                "{:<35}, {:<10}, {:>7}, {:>15}, {:>5}, {:>5}, {:>5}, {:>5}, {:>5}, {:>5}, {:>5}, {:<35}, {:>15}, {:>5}, {:>5}, {:>5}, {:>6}, {:>6}, {:>6}, {:>5}, {:<10}, {:>7}, {:>5}, {:>8}, {:>10}, {:>10}, {:>10}, {:>11}, {:>13}, {:>8}, {:>9}, {:>12}",
+                "InitHand", "InitSkat", "ISkFull", "JacksMask", "CntJ", "Aces", "Tens", "Att10", "Blk10", "MxLen", "TKS", "FinalHand", "PostJacksMask", "PCntJ", "PAces", "PTens", "PAtt10", "PBlk10", "PMxLen", "PTKS", "SkatCards", "PSkFull", "SkPts", "WinProb", "ProbGrand", "ProbClubs", "ProbSpades", "ProbHearts", "ProbDiamonds", "MaxProb", "BestGame", "DurationMs"
+            )
+            .unwrap();
+
+            // Wrap file in Mutex for thread safety (generic F requires Sync+Send in analysis.rs)
+            use std::sync::{Arc, Mutex};
+            let file_mutex = Arc::new(Mutex::new(file));
+
+            analyze_general_pre_discard(
+                count,
+                samples,
+                |(hand, skat, discard, sig, probs, duration_micros)| {
+                    // probs is [f32; 5]: Grand, Clubs, Spades, Hearts, Diamonds
+                    let (best_idx, max_prob) = probs
+                        .iter()
+                        .enumerate()
+                        .max_by(|(_, a), (_, b)| a.partial_cmp(b).unwrap())
+                        .unwrap();
+
+                    let best_game_name = match best_idx {
+                        0 => "Grand",
+                        1 => "Clubs",
+                        2 => "Spades",
+                        3 => "Hearts",
+                        4 => "Diamonds",
+                        _ => "Unknown",
+                    };
+
+                    let final_hand = (hand | skat) ^ discard;
+                    let init_hand_str = hand.__str(); // Use hand instead of cards_str
+                    let init_skat_str = skat.__str();
+                    let final_hand_str = final_hand.__str();
+                    let discard_str = discard.__str();
+
+                    // 1. InitSkatFulls
+                    let init_skat_fulls = (skat & (ACES | TENS)).count_ones();
+
+                    // 2. PostSkatFulls (Discard)
+                    let post_skat_fulls = (discard & (ACES | TENS)).count_ones();
+
+                    // Calculate Skat attributes manually for the *discard*
+                    let skat_fulls_count = (discard & (ACES | TENS)).count_ones();
+
+                    let mut skat_points = 0;
+                    use skat_aug23::consts::bitboard::GRAND_CONN;
+                    for (mask, val) in GRAND_CONN {
+                        if (discard & mask) != 0 {
+                            skat_points += val;
+                        }
+                    }
+
+                    // Manually format the metric columns from sig
+                    let jacks_str = sig.jacks_string();
+
+                    // Row format matching header:
+                    // InitHand,InitSkat,JacksMask,JackCount,Aces,Tens,AttachedTens,BlankTens,MaxSuitLen,TenKingSmall,FinalHand,SkatCards,SkatFulls,SkatPoints,WinProb,ProbGrand...
+
+                    // Calculate Post-Discard metrics from final_hand
+                    let post_sig = HandSignature::from_hand_and_skat_suit(final_hand, 0, None);
+
+                    // Row format matching header:
+                    // InitHand,InitSkat,
+                    // JacksMask,JackCount,Aces,Tens,AttachedTens,BlankTens,MaxSuitLen,TenKingSmall,
+                    // FinalHand,
+                    // PostAces,PostTens,PostAttachedTens,PostBlankTens,PostMaxSuitLen,PostTenKingSmall,
+                    // SkatCards,SkatFulls,SkatPoints,WinProb,ProbGrand...
+
+                    let duration_ms = duration_micros as f64 / 1000.0;
+
+                    // 4. Formatted Row with Padding
+                    let row_str = format!(
+                    "{:<35}, {:<10}, {:>7}, {:>15}, {:>5}, {:>5}, {:>5}, {:>5}, {:>5}, {:>5}, {:>5}, {:<35}, {:>15}, {:>5}, {:>5}, {:>5}, {:>6}, {:>6}, {:>6}, {:>5}, {:<10}, {:>7}, {:>5}, {:>8.4}, {:>10.4}, {:>10.4}, {:>10.4}, {:>11.4}, {:>13.4}, {:>8.4}, {:>9}, {:>12.2}",
+                    init_hand_str,
+                    init_skat_str,
+                    init_skat_fulls,
+                    jacks_str,
+                    sig.trump_count,
+                    sig.aces,
+                    sig.tens,
+                    sig.attached_tens,
+                    sig.blank_tens,
+                    sig.max_suit_len,
+                    sig.ten_king_small,
+                    final_hand_str,
+                    post_sig.jacks_string(), // PostJacksMask
+                    post_sig.trump_count,    // PostJackCount
+                    post_sig.aces,
+                    post_sig.tens,
+                    post_sig.attached_tens,
+                    post_sig.blank_tens,
+                    post_sig.max_suit_len,
+                    post_sig.ten_king_small,
+                    discard_str,
+                    post_skat_fulls,
+                    skat_points,
+                    max_prob,
+                    probs[0], probs[1], probs[2], probs[3], probs[4], max_prob, best_game_name,
+                    duration_ms
+                );
+
+                    if let Ok(mut f) = file_mutex.lock() {
+                        writeln!(f, "{}", row_str).unwrap();
+                    }
+                },
+            );
+            println!("Analysis complete. Results written to {}", output);
         }
         args::Commands::GenerateJson {
             count,
@@ -292,11 +418,12 @@ fn main() {
 
                 if jacks_count == 1 && sig.aces == 2 {
                     // Potential candidate, run analysis
-                    let (_, prob) = analyze_hand_with_pickup(my_hand, skat, 20, false); // Fast check
+                    let (_, prob, _) = analyze_hand_with_pickup(my_hand, skat, 20, false); // Fast check
 
                     if prob >= min_win {
                         // Double check with more samples
-                        let (_, prob_refined) = analyze_hand_with_pickup(my_hand, skat, 100, false);
+                        let (_, prob_refined, _) =
+                            analyze_hand_with_pickup(my_hand, skat, 100, false);
 
                         if prob_refined >= min_win {
                             found += 1;

@@ -20,6 +20,10 @@ pub struct HandSignature {
     pub skat_fulls: u8,
     // Trump Count (for Suit games, includes Jacks + Suit cards)
     pub trump_count: u8,
+    // General Analysis Metrics
+    pub standing_tens: u8,
+    pub blank_tens: u8,
+    pub max_suit_len: u8,
 }
 
 impl HandSignature {
@@ -50,6 +54,8 @@ impl HandSignature {
         let mut tens = 0;
         let mut attached_tens = 0;
         let mut ten_king_small = 0;
+        let mut blank_tens = 0;
+        let mut suit_lengths = [0u8; 4];
         // Start with Jacks
         let mut trump_count = (jacks as u32).count_ones() as u8;
 
@@ -73,6 +79,10 @@ impl HandSignature {
                 trump_count += trumps_in_suit;
             }
 
+            // Count cards in suit (excluding Jacks) for max_suit_len
+            let cards_in_suit = ((hand & *suit_mask & !JACKS) as u32).count_ones() as u8;
+            suit_lengths[i] = cards_in_suit;
+
             let has_ace = (hand & ace) != 0;
             // If it is trump suit, Ace is a TRUMP (usually high trump), but for analysis we might want to separate "Trumps" vs "Side Aces".
             // User requested "Trump Length" and "Side Aces".
@@ -87,6 +97,10 @@ impl HandSignature {
                     tens += 1;
                     if has_ace {
                         attached_tens += 1;
+                    }
+                    // Blank Ten = Ten is the ONLY card in that suit (excluding Jacks)
+                    if cards_in_suit == 1 {
+                        blank_tens += 1;
                     }
                 }
 
@@ -105,6 +119,13 @@ impl HandSignature {
                         ten_king_small += 1;
                     }
                 }
+            }
+        }
+
+        let mut max_suit_len = 0;
+        for &len in &suit_lengths {
+            if len > max_suit_len {
+                max_suit_len = len;
             }
         }
 
@@ -129,6 +150,9 @@ impl HandSignature {
             card_count: hand.count_ones() as u8,
             skat_fulls,
             trump_count,
+            standing_tens: attached_tens,
+            blank_tens,
+            max_suit_len,
         }
     }
 
@@ -153,8 +177,7 @@ impl HandSignature {
     }
 
     pub fn to_csv_header() -> String {
-        "Cards,JacksMask,TrumpCount,Aces,Tens,AttachedTens,TenKingSmall,SkatFulls,SkatCards,SkatPoints,WinProb"
-            .to_string()
+        "Cards,JacksMask,TrumpCount,Aces,Tens,AttachedTens,BlankTens,MaxSuitLen,TenKingSmall,SkatFulls,SkatCards,SkatPoints,WinProb".to_string()
     }
 
     pub fn to_csv_row(&self, hand: u32, skat: u32, win_prob: f32) -> String {
@@ -172,13 +195,15 @@ impl HandSignature {
         }
 
         format!(
-            "{},{},{},{},{},{},{},{},{},{},{:.4}",
+            "{},{},{},{},{},{},{},{},{},{},{},{},{:.4}",
             cards_str,
             jacks_str,
             self.trump_count,
             self.aces,
             self.tens,
             self.attached_tens,
+            self.blank_tens,
+            self.max_suit_len,
             self.ten_king_small,
             self.skat_fulls,
             skat_str,

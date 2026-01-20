@@ -1,0 +1,6 @@
+InitHand,InitSkat,JacksMask,JackCount,Aces,Tens,AttachedTens,BlankTens,MaxSuitLen,TenKingSmall,FinalHand,PostAces,PostTens,PostAttachedTens,PostBlankTens,PostMaxSuitLen,PostTenKingSmall,SkatCards,SkatFulls,SkatPoints,WinProb,ProbGrand,ProbClubs,ProbSpades,ProbHearts,ProbDiamonds,MaxProb,BestGame
+[DJ CT HA HT HQ H9 DA DT DQ D7],[C9 HK],D,1,2,3,2,1,4,0,[DJ HA HT HK HQ H9 DA DT DQ D7],2,2,2,0,5,1,[CT C9],1,10,0.8500,0.0000,0.0000,0.0000,0.8500,0.0500,0.8500,Hearts
+[CJ CA CK C8 SK SQ S8 HK DT DK],[DJ C9],C,1,1,1,0,0,3,0,[CJ DJ CA CK C8 SK SQ S8 DT DK],1,1,0,0,3,0,[C9 HK],0,4,0.1000,0.0500,0.0500,0.1000,0.0000,0.0000,0.1000,Spades
+[CK SA S9 HA HK H9 H8 DA DQ D8],[C7 ST],-,0,3,0,0,0,4,0,[C7 SA ST S9 HA HK H9 H8 DA DQ],3,1,1,0,4,0,[CK D8],0,4,0.2500,0.1500,0.2500,0.0000,0.0500,0.0000,0.2500,Clubs
+[SJ C9 C8 ST S7 HT HQ DT DQ D7],[CK DK],S,1,0,3,0,0,3,0,[C9 C8 ST S7 HT HQ DT DK DQ D7],0,3,0,0,4,1,[SJ CK],0,6,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,Diamonds
+[CJ CA SA SK S9 S8 HT HQ DK D9],[DJ C9],C,1,2,1,0,0,4,0,[CJ DJ CA C9 SA SK S9 S8 HT HQ],2,1,0,0,4,0,[DK D9],0,4,0.3500,0.3500,0.0000,0.2500,0.2000,0.0500,0.3500,Grand

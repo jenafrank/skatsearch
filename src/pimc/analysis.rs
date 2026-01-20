@@ -35,7 +35,7 @@ pub fn analyze_hand_with_pickup(
     skat: u32,
     samples: u32,
     post_discard: bool,
-) -> (HandSignature, f32) {
+) -> (HandSignature, f32, u32) {
     let sig_initial = HandSignature::from_hand(my_hand);
     let cards_12 = my_hand | skat;
 
@@ -101,10 +101,10 @@ pub fn analyze_hand_with_pickup(
         let problem = builder.build();
         let search = PimcSearch::new(problem, samples, None);
         let (prob, _) = search.estimate_win(false);
-        return (result_sig, prob);
+        return (result_sig, prob, best_discard);
     }
 
-    (result_sig, best_prob)
+    (result_sig, best_prob, best_discard)
 }
 
 use crate::skat::context::{GameContext, ProblemTransformation};
@@ -236,4 +236,76 @@ pub fn analyze_suit_with_pickup(
     }
 
     (sig_initial, sig_post, best_prob, best_keep, best_discard)
+}
+
+pub fn analyze_general_pre_discard<F>(count: u32, samples: u32, on_result: F)
+where
+    F: Fn((u32, u32, u32, HandSignature, [f32; 5], u128)) + Sync + Send,
+{
+    use rand::seq::SliceRandom;
+    use rand::thread_rng;
+    use std::time::Instant;
+
+    (0..count).into_iter().for_each(|_| {
+        let start_time = Instant::now();
+        let mut rng = thread_rng();
+        let mut deck: Vec<u32> = (0..32).map(|i| 1 << i).collect();
+        deck.shuffle(&mut rng);
+
+        let mut my_hand = 0;
+        for i in 0..10 {
+            my_hand |= deck[i];
+        }
+        let mut skat = 0;
+        for i in 10..12 {
+            skat |= deck[i];
+        }
+
+        // Improve samples for best-game search slightly?
+        // "Best Game" involves checking 5 variants (Grand + 4 Suits) * Discards.
+        // Using analyze_hand_with_pickup logic for each.
+
+        // 1. Analyze Grand
+        // analyze_hand_with_pickup now returns (sig, prob, discard)
+        let (_, prob_grand, discard_grand) =
+            analyze_hand_with_pickup(my_hand, skat, samples, false);
+
+        // 2. Analyze Suits
+        let mut suit_probs = [0.0; 4];
+        let mut suit_discards = [0u32; 4];
+        for suit in 0..4 {
+            // analyze_suit_with_pickup returns (sig_init, sig_post, prob, keep, discard)
+            let (_, _, prob, _, discard) =
+                analyze_suit_with_pickup(my_hand, skat, suit, samples, false);
+            suit_probs[suit as usize] = prob;
+            suit_discards[suit as usize] = discard;
+        }
+
+        let all_probs = [
+            prob_grand,
+            suit_probs[0], // Clubs
+            suit_probs[1], // Spades
+            suit_probs[2], // Hearts
+            suit_probs[3], // Diamonds
+        ];
+
+        // Find best discard
+        let (best_suit_idx, max_suit_prob) = suit_probs
+            .iter()
+            .enumerate()
+            .max_by(|(_, a), (_, b)| a.partial_cmp(b).unwrap())
+            .unwrap();
+
+        let optimal_discard = if prob_grand >= *max_suit_prob {
+            discard_grand
+        } else {
+            suit_discards[best_suit_idx]
+        };
+
+        // Signature of the PRE-DISCARD hand
+        let sig = HandSignature::from_hand_and_skat_suit(my_hand, 0, None);
+
+        let duration = start_time.elapsed().as_micros();
+        on_result((my_hand, skat, optimal_discard, sig, all_probs, duration));
+    })
 }

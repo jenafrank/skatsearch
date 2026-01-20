@@ -166,6 +166,15 @@ pub enum Commands {
         #[arg(long, default_value_t = false)]
         post_discard: bool,
     },
+    /// Analyze General Pre-Discard Strength (Can I win *any* game?)
+    AnalyzeGeneral {
+        #[arg(long, default_value_t = 100)]
+        count: u32,
+        #[arg(long, default_value_t = 20)]
+        samples: u32,
+        #[arg(long, default_value = "research/data/general_pre_stats.csv")]
+        output: String,
+    },
     GenerateJson {
         /// Number of valid JSONs to find
         #[arg(short, long, default_value_t = 10)]
