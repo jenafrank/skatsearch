@@ -240,7 +240,7 @@ pub fn analyze_suit_with_pickup(
 
 pub fn analyze_general_pre_discard<F>(count: u32, samples: u32, on_result: F)
 where
-    F: Fn((u32, u32, u32, HandSignature, [f32; 5], f32, u128)) + Sync + Send,
+    F: Fn((u32, u32, u32, HandSignature, [f32; 5], f32, u8, u128)) + Sync + Send,
 {
     use rand::seq::SliceRandom;
     use rand::thread_rng;
@@ -293,20 +293,66 @@ where
         let (_, _, prob_null, _, discard_null) =
             analyze_null_with_pickup(my_hand, skat, samples, false);
 
-        // Find best discard
-        let (best_suit_idx, max_suit_prob) = suit_probs
-            .iter()
-            .enumerate()
-            .max_by(|(_, a), (_, b)| a.partial_cmp(b).unwrap())
-            .unwrap();
+        // Determine Best Variant (Prob > Value > Preference)
+        use crate::skat::rules::calculate_game_value;
 
-        let optimal_discard = if prob_null >= prob_grand && prob_null >= *max_suit_prob {
-            discard_null
-        } else if prob_grand >= *max_suit_prob {
-            discard_grand
-        } else {
-            suit_discards[best_suit_idx]
-        };
+        struct Candidate {
+            variant: u8,
+            prob: f32,
+            discard: u32,
+        }
+
+        let mut candidates = Vec::with_capacity(6);
+        // 0: Grand
+        candidates.push(Candidate {
+            variant: 0,
+            prob: prob_grand,
+            discard: discard_grand,
+        });
+        // 1..4: Suits (Clubs=1, Spades=2, Hearts=3, Diamonds=4)
+        for i in 0..4 {
+            candidates.push(Candidate {
+                variant: (i + 1) as u8,
+                prob: suit_probs[i],
+                discard: suit_discards[i],
+            });
+        }
+        // 5: Null
+        candidates.push(Candidate {
+            variant: 5,
+            prob: prob_null,
+            discard: discard_null,
+        });
+
+        candidates.sort_by(|a, b| {
+            // 1. Probability (desc)
+            b.prob
+                .partial_cmp(&a.prob)
+                .unwrap_or(std::cmp::Ordering::Equal)
+                .then_with(|| {
+                    // 2. Game Value (desc)
+                    let val_a = calculate_game_value(my_hand | skat, a.variant);
+                    let val_b = calculate_game_value(my_hand | skat, b.variant);
+                    val_b.cmp(&val_a)
+                })
+                .then_with(|| {
+                    // 3. Preference (Grand < Suits < Null by variant index? No.)
+                    // User prefers Grand (0).
+                    // Variant 0 < 1..4 < 5.
+                    // Lower variant index = higher preference?
+                    // Grand(0) > others.
+                    // Null(5) vs Suit(1..4)? User said "Null before simple Diamonds".
+                    // If Values Equal: Null (23) vs Diamond (9)? No, values differ.
+                    // If Values Equal? E.g. Diamond With 2 (27) vs Null (23)? Null loses on Value.
+                    // If Values identical? (Unlikely).
+                    // Just fallback to Variant ASC (Grand first).
+                    a.variant.cmp(&b.variant)
+                })
+        });
+
+        let best = &candidates[0];
+        let optimal_discard = best.discard;
+        let best_variant = best.variant;
 
         // Signature of the PRE-DISCARD hand
         let sig = HandSignature::from_hand_and_skat_suit(my_hand, 0, None);
@@ -319,6 +365,7 @@ where
             sig,
             all_probs,
             prob_null,
+            best_variant,
             duration,
         ));
     })

@@ -267,8 +267,8 @@ fn main() {
             // Custom header with specific order and alignment
             writeln!(
                 file,
-                "{:<35}, {:<10}, {:<35}, {:<10}, {:>7}, {:>15}, {:>5}, {:>5}, {:>5}, {:>5}, {:>5}, {:>5}, {:>5}, {:>15}, {:>5}, {:>5}, {:>5}, {:>6}, {:>6}, {:>6}, {:>5}, {:>7}, {:>5}, {:>8}, {:>10}, {:>10}, {:>10}, {:>11}, {:>13}, {:>8}, {:>8}, {:>9}, {:>12}",
-                "InitHand", "InitSkat", "FinalHand", "SkatCards", "ISkFull", "JacksMask", "CntJ", "Aces", "Tens", "Att10", "Blk10", "MxLen", "TKS", "PostJacksMask", "PCntJ", "PAces", "PTens", "PAtt10", "PBlk10", "PMxLen", "PTKS", "PSkFull", "SkPts", "WinProb", "ProbGrand", "ProbClubs", "ProbSpades", "ProbHearts", "ProbDiamonds", "ProbNull", "MaxProb", "BestGame", "DurationMs"
+                "{:<35}, {:<10}, {:<35}, {:<10}, {:>7}, {:>15}, {:>5}, {:>5}, {:>5}, {:>5}, {:>5}, {:>5}, {:>5}, {:>15}, {:>5}, {:>5}, {:>5}, {:>6}, {:>6}, {:>6}, {:>5}, {:>7}, {:>5}, {:>8}, {:>10}, {:>10}, {:>10}, {:>11}, {:>13}, {:>8}, {:<8}, {:>8}, {:>9}, {:>12}",
+                "InitHand", "InitSkat", "FinalHand", "SkatCards", "ISkFull", "JacksMask", "CntJ", "Aces", "Tens", "Att10", "Blk10", "MxLen", "TKS", "PostJacksMask", "PCntJ", "PAces", "PTens", "PAtt10", "PBlk10", "PMxLen", "PTKS", "PSkFull", "SkPts", "WinProb", "ProbGrand", "ProbClubs", "ProbSpades", "ProbHearts", "ProbDiamonds", "ProbNull", "WonMask", "MaxProb", "BestGame", "DurationMs"
             )
             .unwrap();
 
@@ -279,32 +279,33 @@ fn main() {
             analyze_general_pre_discard(
                 count,
                 samples,
-                |(hand, skat, discard, sig, probs, prob_null, duration_micros)| {
+                |(hand, skat, discard, sig, probs, prob_null, best_variant, duration_micros)| {
                     use skat_aug23::skat::formatter::format_hand_for_game;
-                    // probs is [f32; 5]: Grand, Clubs, Spades, Hearts, Diamonds
-                    let (best_idx, max_prob) = probs
-                        .iter()
-                        .enumerate()
-                        .max_by(|(_, a), (_, b)| a.partial_cmp(b).unwrap())
-                        .unwrap();
 
-                    let best_game_name = if prob_null >= *max_prob {
-                        "Null"
-                    } else {
-                        match best_idx {
-                            0 => "Grand",
-                            1 => "Clubs",
-                            2 => "Spades",
-                            3 => "Hearts",
-                            4 => "Diamonds",
-                            _ => "Unknown",
-                        }
+                    // WonMask Logic (> 0.66)
+                    let mut won_mask = String::with_capacity(6);
+                    won_mask.push(if probs[0] > 0.66 { 'G' } else { '-' }); // Grand
+                    won_mask.push(if probs[1] > 0.66 { 'C' } else { '-' }); // Clubs
+                    won_mask.push(if probs[2] > 0.66 { 'S' } else { '-' }); // Spades
+                    won_mask.push(if probs[3] > 0.66 { 'H' } else { '-' }); // Hearts
+                    won_mask.push(if probs[4] > 0.66 { 'D' } else { '-' }); // Diamonds
+                    won_mask.push(if prob_null > 0.66 { 'N' } else { '-' }); // Null
+
+                    // BestGame Name and Prob from best_variant
+                    let best_game_name = match best_variant {
+                        0 => "Grand",
+                        1 => "Clubs",
+                        2 => "Spades",
+                        3 => "Hearts",
+                        4 => "Diamonds",
+                        5 => "Null",
+                        _ => "Unknown",
                     };
 
-                    let final_max_prob = if prob_null > *max_prob {
+                    let final_max_prob = if best_variant == 5 {
                         prob_null
                     } else {
-                        *max_prob
+                        probs[best_variant as usize]
                     };
 
                     let final_hand = (hand | skat) ^ discard;
@@ -347,7 +348,7 @@ fn main() {
 
                     // 4. Formatted Row with Padding
                     let row_str = format!(
-                    "{:<35}, {:<10}, {:<35}, {:<10}, {:>7}, {:>15}, {:>5}, {:>5}, {:>5}, {:>5}, {:>5}, {:>5}, {:>5}, {:>15}, {:>5}, {:>5}, {:>5}, {:>6}, {:>6}, {:>6}, {:>5}, {:>7}, {:>5}, {:>8.4}, {:>10.4}, {:>10.4}, {:>10.4}, {:>11.4}, {:>13.4}, {:>8.4}, {:>8.4}, {:>9}, {:>12.2}",
+                    "{:<35}, {:<10}, {:<35}, {:<10}, {:>7}, {:>15}, {:>5}, {:>5}, {:>5}, {:>5}, {:>5}, {:>5}, {:>5}, {:>15}, {:>5}, {:>5}, {:>5}, {:>6}, {:>6}, {:>6}, {:>5}, {:>7}, {:>5}, {:>8.4}, {:>10.4}, {:>10.4}, {:>10.4}, {:>11.4}, {:>13.4}, {:>8.4}, {:<8}, {:>8.4}, {:>9}, {:>12.2}",
                     init_hand_str,
                     init_skat_str,
                     final_hand_str,
@@ -371,8 +372,8 @@ fn main() {
                     post_sig.ten_king_small,
                     post_skat_fulls,
                     skat_points,
-                    max_prob,
-                    probs[0], probs[1], probs[2], probs[3], probs[4], prob_null, final_max_prob, best_game_name,
+                    final_max_prob,
+                    probs[0], probs[1], probs[2], probs[3], probs[4], prob_null, won_mask, final_max_prob, best_game_name,
                     duration_ms
                 );
 
