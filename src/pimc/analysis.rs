@@ -240,7 +240,7 @@ pub fn analyze_suit_with_pickup(
 
 pub fn analyze_general_pre_discard<F>(count: u32, samples: u32, on_result: F)
 where
-    F: Fn((u32, u32, u32, HandSignature, [f32; 5], u128)) + Sync + Send,
+    F: Fn((u32, u32, u32, HandSignature, [f32; 5], f32, u128)) + Sync + Send,
 {
     use rand::seq::SliceRandom;
     use rand::thread_rng;
@@ -289,6 +289,10 @@ where
             suit_probs[3], // Diamonds
         ];
 
+        // 3. Analyze Null
+        let (_, _, prob_null, _, discard_null) =
+            analyze_null_with_pickup(my_hand, skat, samples, false);
+
         // Find best discard
         let (best_suit_idx, max_suit_prob) = suit_probs
             .iter()
@@ -296,7 +300,9 @@ where
             .max_by(|(_, a), (_, b)| a.partial_cmp(b).unwrap())
             .unwrap();
 
-        let optimal_discard = if prob_grand >= *max_suit_prob {
+        let optimal_discard = if prob_null >= prob_grand && prob_null >= *max_suit_prob {
+            discard_null
+        } else if prob_grand >= *max_suit_prob {
             discard_grand
         } else {
             suit_discards[best_suit_idx]
@@ -306,6 +312,98 @@ where
         let sig = HandSignature::from_hand_and_skat_suit(my_hand, 0, None);
 
         let duration = start_time.elapsed().as_micros();
-        on_result((my_hand, skat, optimal_discard, sig, all_probs, duration));
+        on_result((
+            my_hand,
+            skat,
+            optimal_discard,
+            sig,
+            all_probs,
+            prob_null,
+            duration,
+        ));
     })
+}
+
+pub fn analyze_null_with_pickup(
+    my_hand: u32,
+    skat: u32,
+    samples: u32,
+    post_discard: bool,
+) -> (HandSignature, HandSignature, f32, u32, u32) {
+    use crate::consts::bitboard::ALLCARDS;
+    use crate::pimc::pimc_problem_builder::PimcProblemBuilder;
+    use crate::pimc::pimc_search::PimcSearch;
+    use crate::skat::defs::Player;
+    use crate::traits::StringConverter;
+
+    let sig_initial = HandSignature::from_hand(my_hand);
+    let cards_12 = my_hand | skat;
+
+    // Extract bits to vector for easier iteration
+    let mut bits = Vec::new();
+    for i in 0..32 {
+        if (cards_12 & (1 << i)) != 0 {
+            bits.push(1 << i);
+        }
+    }
+
+    let mut discards = Vec::new();
+    for i in 0..bits.len() {
+        for j in (i + 1)..bits.len() {
+            let discard = bits[i] | bits[j];
+            let keep = cards_12 ^ discard;
+            discards.push((keep, discard));
+        }
+    }
+
+    let selection_samples = if samples > 20 { 20 } else { samples };
+
+    // Find best discard using parallel iterator
+    let best_option = discards
+        .par_iter()
+        .map(|(keep, discard)| {
+            let remaining = ALLCARDS ^ cards_12;
+            let builder = PimcProblemBuilder::new_null()
+                .my_player(Player::Declarer)
+                .turn(Player::Declarer)
+                .my_cards_val(*keep)
+                .skat_cards(&discard.__str())
+                .remaining_cards(&remaining.__str());
+            // Threshold is set by new_null()
+
+            let problem = builder.build();
+            let search = PimcSearch::new(problem, selection_samples, None);
+            let (prob, _) = search.estimate_win(false);
+            (prob, *keep, *discard)
+        })
+        .max_by(|a, b| a.0.partial_cmp(&b.0).unwrap())
+        .unwrap();
+
+    let (best_prob, best_keep, best_discard) = best_option;
+
+    let sig_post = if post_discard {
+        HandSignature::from_hand_and_skat(best_keep, best_discard)
+    } else {
+        HandSignature::from_hand(best_keep)
+    };
+
+    // Run full analysis on best discard (if selection samples was smaller)
+    let final_prob = if samples > selection_samples {
+        let remaining = ALLCARDS ^ cards_12;
+        let builder = PimcProblemBuilder::new_null()
+            .my_player(Player::Declarer)
+            .turn(Player::Declarer)
+            .my_cards_val(best_keep)
+            .skat_cards(&best_discard.__str())
+            .remaining_cards(&remaining.__str());
+
+        let problem = builder.build();
+        let search = PimcSearch::new(problem, samples, None);
+        let (prob, _) = search.estimate_win(false);
+        prob
+    } else {
+        best_prob
+    };
+
+    (sig_initial, sig_post, final_prob, best_keep, best_discard)
 }

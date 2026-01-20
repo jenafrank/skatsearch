@@ -3,6 +3,7 @@ pub mod context;
 pub mod counters;
 pub mod defs;
 pub mod engine;
+pub mod formatter;
 pub mod position;
 pub mod rules;
 pub mod search;
