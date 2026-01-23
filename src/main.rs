@@ -401,8 +401,6 @@ fn main() {
             let mut attempts = 0;
 
             use skat_aug23::pimc::analysis::analyze_hand_with_pickup;
-            use skat_aug23::pimc::pimc_problem_builder::PimcProblemBuilder;
-            use skat_aug23::skat::context::GameContext;
             use skat_aug23::skat::signature::HandSignature;
 
             while found < count {
@@ -423,7 +421,7 @@ fn main() {
                 let sig = HandSignature::from_hand(my_hand);
 
                 // Count Jacks
-                let jacks_count = (sig.jacks.count_ones());
+                let jacks_count = sig.jacks.count_ones();
 
                 if jacks_count == 1 && sig.aces == 2 {
                     // Potential candidate, run analysis
@@ -1122,7 +1120,6 @@ fn main() {
             let input: args::GameContextInput =
                 serde_json::from_str(&context_content).expect("JSON was not well-formatted");
 
-            use skat_aug23::skat::context::ProblemTransformation;
             use skat_aug23::traits::BitConverter;
 
             let declarer_cards = input.declarer_cards.__bit();
