@@ -454,3 +454,344 @@ pub fn analyze_null_with_pickup(
 
     (sig_initial, sig_post, final_prob, best_keep, best_discard)
 }
+
+pub fn analyze_general_hand<F>(count: u32, samples: u32, on_result: F)
+where
+    F: Fn((String, u32, u32, HandSignature, [f32; 5], f32, u8, u128)) + Sync + Send,
+{
+    use crate::skat::context::GameContext;
+    use crate::skat::defs::Game; // Fix import
+    use crate::skat::defs::{
+        Player, CLUBS, DIAMONDS, HEARTS, SPADES, TRUMP_GRAND, TRUMP_NULL, TRUMP_SUIT,
+    }; // Ensure Player available
+    use crate::skat::rules::calculate_game_value; // We will use this but boost it
+    use rand::seq::SliceRandom;
+    use rand::thread_rng;
+    use std::time::Instant;
+
+    // Parallel iterator for the main count loop
+    (0..count).into_par_iter().for_each(|_| {
+        let start_time = Instant::now();
+        let mut rng = thread_rng();
+        let mut deck: Vec<u32> = (0..32).map(|i| 1 << i).collect();
+        deck.shuffle(&mut rng);
+
+        let mut my_hand = 0;
+        for i in 0..10 {
+            my_hand |= deck[i];
+        }
+
+        let mut remaining_vec: Vec<u32> = deck[10..32].to_vec();
+
+        let mut wins = [0u32; 6];
+
+        for _ in 0..samples {
+            remaining_vec.shuffle(&mut rng);
+            let skat_vec = &remaining_vec[0..2];
+            let left_vec = &remaining_vec[2..12];
+            let right_vec = &remaining_vec[12..22];
+
+            let mut skat = 0;
+            for &c in skat_vec {
+                skat |= c;
+            }
+            let mut left = 0;
+            for &c in left_vec {
+                left |= c;
+            }
+            let mut right = 0;
+            for &c in right_vec {
+                right |= c;
+            }
+
+            let game_configs = [
+                (0, Game::Grand, None),
+                (1, Game::Suit, None), // Clubs
+                (2, Game::Suit, Some(ProblemTransformation::SpadesSwitch)),
+                (3, Game::Suit, Some(ProblemTransformation::HeartsSwitch)),
+                (4, Game::Suit, Some(ProblemTransformation::DiamondsSwitch)),
+                (5, Game::Null, None),
+            ];
+
+            for (idx, game_type, transform) in game_configs.iter() {
+                let my_c = if let Some(t) = transform {
+                    GameContext::get_switched_cards(my_hand, *t)
+                } else {
+                    my_hand
+                };
+                let left_c = if let Some(t) = transform {
+                    GameContext::get_switched_cards(left, *t)
+                } else {
+                    left
+                };
+                let right_c = if let Some(t) = transform {
+                    GameContext::get_switched_cards(right, *t)
+                } else {
+                    right
+                };
+
+                let context =
+                    GameContext::create(my_c, left_c, right_c, *game_type, Player::Declarer);
+                // context.set_hand(true); REMOVED
+
+                use crate::extensions::solver::solve_and_add_skat;
+                use crate::skat::engine::SkatEngine;
+
+                let mut engine = SkatEngine::new(context, None);
+                let result = solve_and_add_skat(&mut engine);
+
+                if *game_type == Game::Null {
+                    if result.best_value == 0 {
+                        wins[*idx] += 1;
+                    }
+                } else {
+                    if result.best_value >= 61 {
+                        wins[*idx] += 1;
+                    }
+                }
+            }
+        }
+
+        let mut probs = [0.0; 6];
+        for i in 0..6 {
+            probs[i] = wins[i] as f32 / samples as f32; // index 5 is Null
+        }
+
+        struct Candidate {
+            variant: u8,
+            prob: f32,
+        }
+
+        let mut candidates = Vec::new();
+        for i in 0..6 {
+            candidates.push(Candidate {
+                variant: i as u8,
+                prob: probs[i],
+            });
+        }
+
+        candidates.sort_by(|a, b| {
+            b.prob
+                .partial_cmp(&a.prob)
+                .unwrap_or(std::cmp::Ordering::Equal)
+                .then_with(|| {
+                    // PRIORITIZE GRAND (0) if tied on probability
+                    a.variant.cmp(&b.variant)
+                })
+                .then_with(|| {
+                    let hand_val = if a.variant == 5 {
+                        35
+                    } else {
+                        let base = match a.variant {
+                            0 => 24,
+                            1 => 12,
+                            2 => 11,
+                            3 => 10,
+                            4 => 9,
+                            _ => 0,
+                        };
+                        calculate_game_value(my_hand, a.variant) + base
+                    };
+
+                    let hand_val_b = if b.variant == 5 {
+                        35
+                    } else {
+                        let base = match b.variant {
+                            0 => 24,
+                            1 => 12,
+                            2 => 11,
+                            3 => 10,
+                            4 => 9,
+                            _ => 0,
+                        };
+                        calculate_game_value(my_hand, b.variant) + base
+                    };
+
+                    hand_val_b.cmp(&hand_val)
+                })
+        });
+
+        let best = &candidates[0];
+        let best_variant = best.variant;
+
+        let sig = HandSignature::from_hand_and_skat_suit(my_hand, 0, None);
+        let duration = start_time.elapsed().as_micros();
+
+        let result_probs = [probs[0], probs[1], probs[2], probs[3], probs[4]];
+        let prob_null = probs[5];
+
+        // SORT CARDS ACCORDING TO BEST GAME
+        use crate::traits::Bitboard;
+        let (cards, n) = my_hand.__decompose();
+        let mut card_list: Vec<u32> = cards[0..n].to_vec();
+
+        card_list.sort_by(|&a, &b| {
+            fn get_sort_key(card: u32, variant: u8) -> (u8, u8, u8, u8) {
+                use crate::consts::bitboard::*;
+                let is_jack = JACKS.__contain(card);
+
+                if variant == 0 {
+                    // Grand
+                    if is_jack {
+                        let j_rank = if card == JACKOFCLUBS {
+                            4
+                        } else if card == JACKOFSPADES {
+                            3
+                        } else if card == JACKOFHEARTS {
+                            2
+                        } else {
+                            1
+                        };
+                        return (3, 0, 0, j_rank);
+                    }
+                    let s_rank = if CLUBS.__contain(card) {
+                        4
+                    } else if SPADES.__contain(card) {
+                        3
+                    } else if HEARTS.__contain(card) {
+                        2
+                    } else {
+                        1
+                    };
+                    let r_rank = if ACES.__contain(card) {
+                        8
+                    } else if TENS.__contain(card) {
+                        7
+                    } else if KINGS.__contain(card) {
+                        6
+                    } else if QUEENS.__contain(card) {
+                        5
+                    } else if NINES.__contain(card) {
+                        4
+                    } else if EIGHTS.__contain(card) {
+                        3
+                    } else {
+                        2
+                    };
+                    return (1, s_rank, r_rank, 0);
+                } else if variant == 5 {
+                    // Null
+                    let s_rank = if CLUBS.__contain(card) {
+                        4
+                    } else if SPADES.__contain(card) {
+                        3
+                    } else if HEARTS.__contain(card) {
+                        2
+                    } else {
+                        1
+                    };
+                    let r_rank = if ACES.__contain(card) {
+                        8
+                    } else if KINGS.__contain(card) {
+                        7
+                    } else if QUEENS.__contain(card) {
+                        6
+                    } else if JACKS.__contain(card) {
+                        5
+                    } else if TENS.__contain(card) {
+                        4
+                    } else if NINES.__contain(card) {
+                        3
+                    } else if EIGHTS.__contain(card) {
+                        2
+                    } else {
+                        1
+                    };
+                    return (1, s_rank, r_rank, 0);
+                } else {
+                    // Suit Game
+                    let trump_suit_mask = match variant {
+                        1 => CLUBS,
+                        2 => SPADES,
+                        3 => HEARTS,
+                        4 => DIAMONDS,
+                        _ => 0,
+                    };
+
+                    if is_jack {
+                        let j_rank = if card == JACKOFCLUBS {
+                            4
+                        } else if card == JACKOFSPADES {
+                            3
+                        } else if card == JACKOFHEARTS {
+                            2
+                        } else {
+                            1
+                        };
+                        return (3, 0, 0, j_rank);
+                    }
+
+                    if trump_suit_mask.__contain(card) {
+                        let r_rank = if ACES.__contain(card) {
+                            8
+                        } else if TENS.__contain(card) {
+                            7
+                        } else if KINGS.__contain(card) {
+                            6
+                        } else if QUEENS.__contain(card) {
+                            5
+                        } else if NINES.__contain(card) {
+                            4
+                        } else if EIGHTS.__contain(card) {
+                            3
+                        } else {
+                            2
+                        };
+                        return (2, 0, r_rank, 0);
+                    }
+
+                    let s_rank = if CLUBS.__contain(card) {
+                        4
+                    } else if SPADES.__contain(card) {
+                        3
+                    } else if HEARTS.__contain(card) {
+                        2
+                    } else {
+                        1
+                    };
+                    let r_rank = if ACES.__contain(card) {
+                        8
+                    } else if TENS.__contain(card) {
+                        7
+                    } else if KINGS.__contain(card) {
+                        6
+                    } else if QUEENS.__contain(card) {
+                        5
+                    } else if NINES.__contain(card) {
+                        4
+                    } else if EIGHTS.__contain(card) {
+                        3
+                    } else {
+                        2
+                    };
+                    return (1, s_rank, r_rank, 0);
+                }
+            }
+
+            let key_a = get_sort_key(a, best_variant);
+            let key_b = get_sort_key(b, best_variant);
+            key_b.cmp(&key_a)
+        });
+
+        use crate::traits::StringConverter;
+        let mut sorted_hand_str = String::from("[");
+        for (i, card) in card_list.iter().enumerate() {
+            if i > 0 {
+                sorted_hand_str.push(' ');
+            }
+            sorted_hand_str.push_str(&card.__str().replace("[", "").replace("]", ""));
+        }
+        sorted_hand_str.push(']');
+
+        on_result((
+            sorted_hand_str,
+            0,
+            0,
+            sig,
+            result_probs,
+            prob_null,
+            best_variant,
+            duration,
+        ));
+    });
+}

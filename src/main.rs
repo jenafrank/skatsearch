@@ -634,6 +634,88 @@ fn main() {
             }
             println!(" Analysis Complete");
         }
+        args::Commands::AnalyzeGeneralHand {
+            count,
+            samples,
+            output,
+        } => {
+            use skat_aug23::pimc::analysis::analyze_general_hand;
+
+            println!(
+                "Running General Hand Game Analysis (Best Game) with {} hands, {} samples...",
+                count, samples
+            );
+
+            let mut file = std::fs::File::create(&output).expect("Could not create CSV file");
+            // Header for Hand Analysis
+            // Similar to GeneralPreDiscard but specific columns
+            // InitHand, InitSkat (0/Unknown), BestGameName, WinProb, [Probs...], Duration
+            // And Signature columns (JacksMask, Aces, Ten, etc.)
+
+            writeln!(
+                file,
+                "{:<35}, {:<10}, {:>15}, {:>5}, {:>5}, {:>5}, {:>5}, {:>5}, {:>5}, {:>10}, {:>8}, {:>10}, {:>10}, {:>10}, {:>11}, {:>13}, {:>12}",
+                "Hand", "Skat", "JacksMask", "CntJ", "Aces", "Tens", "Att10", "MxLen", "TKS", "BestGame", "WinProb", "ProbGrand", "ProbClubs", "ProbSpades", "ProbHearts", "ProbDiamonds", "ProbNull"
+            )
+            .unwrap();
+
+            use std::sync::{Arc, Mutex};
+            let file_mutex = Arc::new(Mutex::new(file));
+
+            analyze_general_hand(
+                count,
+                samples,
+                |(hand_str, _skat, _discard, sig, probs, prob_null, best_variant, _duration)| {
+                    // hand_str is already sorted
+                    // Skat is unknown (or true skat if we passed it), but for Hand game analysis implies unknown.
+                    // We print "-" for Skat to indicate Hand game context or printing 0?
+                    // Let's print "Unknown" or just empty.
+                    let skat_str = "-";
+
+                    let best_game_name = match best_variant {
+                        0 => "Grand",
+                        1 => "Clubs",
+                        2 => "Spades",
+                        3 => "Hearts",
+                        4 => "Diamonds",
+                        5 => "Null",
+                        _ => "Unknown",
+                    };
+
+                    let final_max_prob = if best_variant == 5 {
+                        prob_null
+                    } else {
+                        probs[best_variant as usize]
+                    };
+                    let jacks_str = sig.jacks_string();
+
+                    let row_str = format!(
+                        "{:<35}, {:<10}, {:>15}, {:>5}, {:>5}, {:>5}, {:>5}, {:>5}, {:>5}, {:>10}, {:>8.4}, {:>10.4}, {:>10.4}, {:>10.4}, {:>11.4}, {:>13.4}, {:>12.4}",
+                        hand_str,
+                        skat_str,
+                        jacks_str,
+                        sig.trump_count, // Is this NumJacks or TrumpCount? For Grand it's Jacks.
+                        // Wait, sig is "from_hand_and_skat_suit(..., 0, None)". 
+                        // So trump_count is Jacks count.
+                        // max_suit_len is max length of side suits? 
+                        // Actually max_suit_len is useful.
+                        sig.aces,
+                        sig.tens,
+                        sig.attached_tens,
+                        sig.max_suit_len,
+                        sig.ten_king_small,
+                        best_game_name,
+                        final_max_prob,
+                        probs[0], probs[1], probs[2], probs[3], probs[4], prob_null
+                    );
+
+                    if let Ok(mut f) = file_mutex.lock() {
+                        writeln!(f, "{}", row_str).unwrap();
+                    }
+                },
+            );
+            println!("Analysis complete. Results written to {}", output);
+        }
 
         args::Commands::PimcBestGame {
             context,

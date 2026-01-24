@@ -204,6 +204,15 @@ pub enum Commands {
         #[arg(long, default_value_t = false)]
         post_discard: bool,
     },
+    /// Analyze General Hand Game Strength (Finding best hand game)
+    AnalyzeGeneralHand {
+        #[arg(long, default_value_t = 100)]
+        count: u32,
+        #[arg(long, default_value_t = 100)]
+        samples: u32,
+        #[arg(long, default_value = "research/data/hand_best_game.csv")]
+        output: String,
+    },
 }
 
 #[derive(Debug, Serialize, Deserialize)]
