@@ -1,0 +1,146 @@
+--- Analysis of Null Games (BestGame = Null) ---
+
+Total Null Games Found: 9025
+
+Win Probability by Number of Safe Suits:
+           count      mean       std   min  max
+SafeSuits                                      
+0           1212  0.098762  0.100199  0.05  1.0
+1           2996  0.144943  0.154142  0.05  1.0
+2           2906  0.272849  0.250193  0.05  1.0
+3           1451  0.565196  0.331124  0.05  1.0
+4            460  0.998804  0.011607  0.85  1.0
+
+Win Probability by Number of 'Blank 8s' (Singleton 8) - All Hands:
+         count      mean       std   min  max
+Blank8s                                      
+0         6957  0.254111  0.285469  0.05  1.0
+1         1910  0.396780  0.354650  0.05  1.0
+2          158  0.637342  0.325652  0.05  1.0
+
+--- Conditional Analysis: Hands with EXACTLY 3 Safe Suits ---
+Total Hands with 3 Safe Suits: 1451
+Win Probability by Number of 'Blank 8s' (given 3 Safe Suits):
+         count      mean       std   min  max
+Blank8s                                      
+0         1133  0.448411  0.275088  0.05  1.0
+1          318  0.981289  0.094170  0.10  1.0
+
+--- Conditional Analysis: Hands with EXACTLY 2 Safe Suits ---
+Total Hands with 2 Safe Suits: 2906
+Win Probability by Number of 'Blank 8s' (given 2 Safe Suits):
+         count      mean       std   min  max
+Blank8s                                      
+0         2301  0.210800  0.187569  0.05  1.0
+1          553  0.468626  0.292736  0.05  1.0
+2           52  0.936538  0.113809  0.40  1.0
+
+--- Conditional Analysis: 3 Safe Suits + Specific '7-10 Gap' in Unsafe Suit ---
+Total Hands with 7-10 Gap: 156
+Win Probability for 7-10 Gap Hands:
+count    156.000000
+mean       0.603846
+std        0.232486
+min        0.100000
+max        1.000000
+Name: ProbNull, dtype: float64
+
+--- Conditional Analysis: 3 Safe Suits + Specific 7-9-X Configurations ---
+
+Configuration: 7-9-Q (0,2,5)
+count    18.000000
+mean      0.777778
+std       0.120321
+min       0.600000
+max       1.000000
+dtype: float64
+Configuration: 7-9-K (0,2,6)
+count    18.000000
+mean      0.422222
+std       0.151679
+min       0.250000
+max       0.900000
+dtype: float64
+Configuration: 7-9-A (0,2,7)
+count    1.00
+mean     0.05
+std       NaN
+min      0.05
+max      0.05
+dtype: float64
+Configuration: 7-9-Q-K (0,2,5,6)
+count    13.000000
+mean      0.784615
+std       0.108752
+min       0.550000
+max       0.900000
+dtype: float64
+Configuration: 7-9-Q-A (0,2,5,7)
+count    13.000000
+mean      0.780769
+std       0.105156
+min       0.600000
+max       0.950000
+dtype: float64
+Configuration: 7-9-K-A (0,2,6,7)
+count    14.000000
+mean      0.582143
+std       0.135316
+min       0.400000
+max       0.950000
+dtype: float64
+
+--- Frequency Analysis: Playable Null Hands (SafeSuits >= 3, Win > 66%) ---
+Total Playable Hands: 1020
+
+Top 20 Most Frequent Configurations:
+Count      Freq %     Configuration
+--------------------------------------------------
+460        45.1       4 Safe Suits (Complete)
+312        30.6       3 Safe + [8]
+53         5.2        3 Safe + [7T]
+16         1.6        3 Safe + [789A]
+15         1.5        3 Safe + [79JA]
+15         1.5        3 Safe + [78Q]
+13         1.3        3 Safe + [78QK]
+13         1.3        3 Safe + [79Q]
+13         1.3        3 Safe + [78TA]
+11         1.1        3 Safe + [78JA]
+11         1.1        3 Safe + [79QA]
+11         1.1        3 Safe + [79QK]
+10         1.0        3 Safe + [78QKA]
+10         1.0        3 Safe + [78QA]
+9          0.9        3 Safe + [9]
+8          0.8        3 Safe + [89]
+7          0.7        3 Safe + [79TA]
+5          0.5        3 Safe + [8T]
+4          0.4        3 Safe + [79QKA]
+4          0.4        3 Safe + [7J]
+
+--- Frequency Analysis: Playable Null Hands (SafeSuits == 2, Win > 66%) ---
+Total Playable Hands (2 Safe Suits): 295
+
+Top 20 Most Frequent Configurations (2 Safe Suits):
+Count      Freq %     Configuration
+------------------------------------------------------------
+50         16.9       2 Safe + [8] + [8]
+22         7.5        2 Safe + [7T] + [8]
+12         4.1        2 Safe + [789A] + [8]
+12         4.1        2 Safe + [78QK] + [8]
+11         3.7        2 Safe + [78TA] + [8]
+11         3.7        2 Safe + [79JA] + [8]
+10         3.4        2 Safe + [78Q] + [8]
+10         3.4        2 Safe + [79QK] + [8]
+8          2.7        2 Safe + [79Q] + [8]
+8          2.7        2 Safe + [78QKA] + [8]
+8          2.7        2 Safe + [78JA] + [8]
+7          2.4        2 Safe + [7T] + [89]
+7          2.4        2 Safe + [79QKA] + [8]
+6          2.0        2 Safe + [8] + [9]
+6          2.0        2 Safe + [78QA] + [8]
+6          2.0        2 Safe + [79TA] + [8]
+5          1.7        2 Safe + [79QA] + [8]
+4          1.4        2 Safe + [7T] + [9]
+4          1.4        2 Safe + [7T] + [7T]
+4          1.4        2 Safe + [78TA] + [7T]
+
