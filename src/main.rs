@@ -654,8 +654,8 @@ fn main() {
 
             writeln!(
                 file,
-                "{:<35}, {:<10}, {:>15}, {:>5}, {:>5}, {:>5}, {:>5}, {:>5}, {:>5}, {:>10}, {:>8}, {:>10}, {:>10}, {:>10}, {:>11}, {:>13}, {:>12}",
-                "Hand", "Skat", "JacksMask", "CntJ", "Aces", "Tens", "Att10", "MxLen", "TKS", "BestGame", "WinProb", "ProbGrand", "ProbClubs", "ProbSpades", "ProbHearts", "ProbDiamonds", "ProbNull"
+                "{:<35}, {:<10}, {:>15}, {:>5}, {:>5}, {:>5}, {:>5}, {:>5}, {:>5}, {:>10}, {:>8}, {:>10}, {:>10}, {:>10}, {:>11}, {:>13}, {:>12}, {:<8}, {:>12}",
+                "Hand", "Skat", "JacksMask", "CntJ", "Aces", "Tens", "Att10", "MxLen", "TKS", "BestGame", "WinProb", "ProbGrand", "ProbClubs", "ProbSpades", "ProbHearts", "ProbDiamonds", "ProbNull", "WonMask", "DurationMs"
             )
             .unwrap();
 
@@ -665,8 +665,17 @@ fn main() {
             analyze_general_hand(
                 count,
                 samples,
-                |(hand_str, _skat, _discard, sig, probs, prob_null, best_variant, _duration)| {
-                    // hand_str is already sorted
+                |(
+                    hand_val,
+                    _skat,
+                    _discard,
+                    sig,
+                    probs,
+                    prob_null,
+                    best_variant,
+                    duration_micros,
+                )| {
+                    // hand_val is u32
                     // Skat is unknown (or true skat if we passed it), but for Hand game analysis implies unknown.
                     // We print "-" for Skat to indicate Hand game context or printing 0?
                     // Let's print "Unknown" or just empty.
@@ -682,6 +691,9 @@ fn main() {
                         _ => "Unknown",
                     };
 
+                    use skat_aug23::skat::formatter::format_hand_for_game;
+                    let hand_str = format_hand_for_game(hand_val, best_game_name);
+
                     let final_max_prob = if best_variant == 5 {
                         prob_null
                     } else {
@@ -689,8 +701,19 @@ fn main() {
                     };
                     let jacks_str = sig.jacks_string();
 
+                    // WonMask Logic (> 0.66)
+                    let mut won_mask = String::with_capacity(6);
+                    won_mask.push(if probs[0] > 0.66 { 'G' } else { '-' }); // Grand
+                    won_mask.push(if probs[1] > 0.66 { 'C' } else { '-' }); // Clubs
+                    won_mask.push(if probs[2] > 0.66 { 'S' } else { '-' }); // Spades
+                    won_mask.push(if probs[3] > 0.66 { 'H' } else { '-' }); // Hearts
+                    won_mask.push(if probs[4] > 0.66 { 'D' } else { '-' }); // Diamonds
+                    won_mask.push(if prob_null > 0.66 { 'N' } else { '-' }); // Null
+
+                    let duration_ms = duration_micros as f64 / 1000.0;
+
                     let row_str = format!(
-                        "{:<35}, {:<10}, {:>15}, {:>5}, {:>5}, {:>5}, {:>5}, {:>5}, {:>5}, {:>10}, {:>8.4}, {:>10.4}, {:>10.4}, {:>10.4}, {:>11.4}, {:>13.4}, {:>12.4}",
+                        "{:<35}, {:<10}, {:>15}, {:>5}, {:>5}, {:>5}, {:>5}, {:>5}, {:>5}, {:>10}, {:>8.4}, {:>10.4}, {:>10.4}, {:>10.4}, {:>11.4}, {:>13.4}, {:>12.4}, {:<8}, {:>12.2}",
                         hand_str,
                         skat_str,
                         jacks_str,
@@ -706,7 +729,9 @@ fn main() {
                         sig.ten_king_small,
                         best_game_name,
                         final_max_prob,
-                        probs[0], probs[1], probs[2], probs[3], probs[4], prob_null
+                        probs[0], probs[1], probs[2], probs[3], probs[4], prob_null,
+                        won_mask,
+                        duration_ms
                     );
 
                     if let Ok(mut f) = file_mutex.lock() {
