@@ -88,46 +88,66 @@ def analyze_bubbles_pre():
         # Normalize size
         sizes_norm = (sizes / sizes.max()) * 2000 + 100
         
+        # Strict Discontinuity with 4 Bins
+        import matplotlib.colors as mcolors
+        
+        # Colors: Purple (0-50), Red (50-65), Yellow (65-75), Green (75-100)
+        colors = ['#9C27B0', '#D32F2F', '#FFD700', '#388E3C'] # Purple, Red, Gold, Green
+        bounds = [0.0, 0.50, 0.65, 0.75, 1.0]
+        
+        cmap = mcolors.ListedColormap(colors)
+        norm = mcolors.BoundaryNorm(bounds, cmap.N)
+        
         scatter = plt.scatter(
             x=grouped['CntJ'], 
             y=grouped['SafeFulls'], 
             s=sizes_norm, 
             c=grouped['MeanWinRate'], 
-            cmap='RdYlGn', 
-            alpha=0.7, 
-            edgecolors='grey', 
-            vmin=0.0, 
-            vmax=1.0
+            cmap=cmap, 
+            norm=norm,
+            alpha=0.9, 
+            edgecolors='black',
+            linewidth=0.5
         )
         
-        # Add labels
+        # Add labels to ALL bubbles
         for i, row in grouped.iterrows():
-            if row['Count'] > 50: 
-                plt.text(
-                    row['CntJ'], 
-                    row['SafeFulls'], 
-                    f"{row['MeanWinRate']:.0%}\n(n={row['Count']})", 
-                    ha='center', 
-                    va='center', 
-                    fontsize=9, 
-                    color='black',
-                    fontweight='bold'
-                )
+            # Choose text color based on background luminance roughly
+            # Purple/Red/Green -> White text. Yellow -> Black text.
+            win_rate = row['MeanWinRate']
+            text_color = 'black' if (0.65 <= win_rate < 0.75) else 'white'
+            
+            label = f"{win_rate:.0%}"
+            # Add count for bubbles that are at least 20% of the max frequency in this plot
+            if row['Count'] > grouped['Count'].max() * 0.2:
+                label += f"\n(n={int(row['Count'])})"
+
+            plt.text(
+                row['CntJ'], 
+                row['SafeFulls'], 
+                label, 
+                ha='center', 
+                va='center', 
+                fontsize=10, 
+                color=text_color,
+                fontweight='bold'
+            )
 
         # Colorbar
-        cbar = plt.colorbar(scatter)
-        cbar.set_label('Mean Max Win Probability')
+        cbar = plt.colorbar(scatter, ticks=[0.25, 0.575, 0.7, 0.875])
+        cbar.ax.set_yticklabels(['<50% (Purple)', '50-65% (Red)', '65-75% (Yel)', '>75% (Green)']) 
+        cbar.set_label('Win Probability Category')
         
         # Grid and Ticks
         plt.xticks(range(5)) # Jacks 0-4
         plt.yticks(range(int(grouped['SafeFulls'].max()) + 2))
         
-        plt.title(f"Pre-Discard Biddability: {title_suffix}\n(Win Prob based on Jacks vs. Standing Fulls)", fontsize=16)
+        plt.title(f"Pre-Discard Biddability: {title_suffix}\n(Purple <50 | Red <65 | Yellow <75 | Green >75)", fontsize=16)
         plt.xlabel("Number of Jacks", fontsize=14)
         plt.ylabel("Standing Fulls (Aces + Tens with Ace)", fontsize=14)
         
         # Add annotation
-        plt.figtext(0.5, 0.01, f"Category: {title_suffix} (Max Suit Length + Jacks). Size = Frequency.", ha="center", fontsize=10, style='italic')
+        plt.figtext(0.5, 0.01, f"Category: {title_suffix}. Size = Frequency.", ha="center", fontsize=10, style='italic')
         
         output_path = os.path.join(output_dir, filename)
         plt.savefig(output_path, dpi=100, bbox_inches='tight')
@@ -137,26 +157,41 @@ def analyze_bubbles_pre():
         # --- Interactve Plotly Chart ---
         try:
             import plotly.express as px
+            import numpy as np
             
             # Format hover data
             grouped['Win Rate'] = grouped['MeanWinRate'].apply(lambda x: f"{x:.1%}")
             
+            # Discrete Colorscale for Plotly
+            # We map the range 0-1 to specific colors
+            custom_colorscale = [
+                [0.0, '#9C27B0'],  # Purple
+                [0.499, '#9C27B0'],
+                [0.50, '#D32F2F'],  # Red
+                [0.649, '#D32F2F'],
+                [0.65, '#FFD700'],  # Yellow
+                [0.749, '#FFD700'],
+                [0.75, '#388E3C'],  # Green
+                [1.0, '#388E3C']
+            ]
+
             fig = px.scatter(
                 grouped, 
                 x='CntJ', 
                 y='SafeFulls', 
                 size='Count', 
                 color='MeanWinRate',
+                text='Win Rate', # Add text to bubbles
                 hover_name='Win Rate',
                 hover_data={
                     'CntJ': True, 
                     'SafeFulls': True, 
                     'Count': True, 
-                    'MeanWinRate': False, # Shown in hover_name
-                    'Win Rate': False # Duplicate
+                    'MeanWinRate': False, 
+                    'Win Rate': False 
                 },
-                title=f"Pre-Discard Biddability: {title_suffix}<br><sup>Win Prob based on Jacks vs. Standing Fulls. Size=Frequency.</sup>",
-                color_continuous_scale='RdYlGn',
+                title=f"Pre-Discard Biddability: {title_suffix}<br><sup>Purple <50% | Red 50-65% | Yellow 65-75% | Green >75%</sup>",
+                color_continuous_scale=custom_colorscale,
                 range_color=[0, 1],
                 size_max=60
             )

@@ -142,6 +142,23 @@ if len(relevant) > 0:
     plt.ylabel("Post-Discard Mean WinProb (Realized by Stagnant Hands)", fontsize=14)
     plt.legend()
     
+    
+    # 4-Zone Color Palette for Scatter
+    # Purple (<0.50), Red (0.50-0.65), Yellow (0.65-0.75), Green (>0.75)
+    # Since hue is 'TotalTrumps', we should keep that but maybe color the bubbles by WinProb?
+    # The user asked for bubble colors. However, this chart maps Pre vs Post.
+    # Color represents "Total Trumps" in this chart. 
+    # But maybe we should change the color to represent the DELTA or the PostProb?
+    # The user request "Die Bubble-Grafiken" likely refers to the main 3 bubble charts.
+    # The Stagnation chart is a different type (Scatter Pre vs Post). 
+    # Proceeding to keep TotalTrumps as Hue but maybe add distinct colors for consistency if possible.
+    # For now, let's stick to Viridis for this scientific chart unless explicitly requested.
+    # Wait, "Die Bubble-Grafiken" probably implies all of them.
+    # But for this chart, X/Y axes are Probabilities. 
+    # Let's keep it scientifically clean but update the HTML interactive version to maybe use the color zones if applicable?
+    # Actually, let's assume the user meant the "Biddability/Strength" charts.
+    # I will leave this one as is for now to avoid confusion, or maybe just update the interactive tooltip.
+    
     out_path = "research/plots/stagnation_traps.png"
     plt.savefig(out_path, dpi=100)
     plt.close()
@@ -179,7 +196,7 @@ if len(relevant) > 0:
             labels={
                 "PreMeanProb": "Pre-Discard Mean WinProb (Expected)", 
                 "PostMeanProb": "Post-Discard Mean WinProb (Realized)",
-                "TotalTrumps": "Total Trumps"
+                "TotalTrumps": "Total Trumps (Color Code)"
             },
             range_x=[0.5, 1.0],
             range_y=[0.2, 1.0],
