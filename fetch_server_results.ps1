@@ -1,5 +1,5 @@
 # Fetch Results from Server
-# Downloads the latest 'general_pre_stats_final_50k' CSV file.
+# Downloads the latest 'hand_best_game' or 'general_pre_stats' CSV file.
 
 $ServerIP = "62.171.133.101"
 $User = "root"
@@ -8,7 +8,8 @@ $LocalPath = "research/data"
 
 Write-Host "Checking for latest file on server..."
 # Check for latest file
-$Cmd = "ls -t $RemotePath/general_pre_stats_final_50k_*.csv 2>/dev/null | head -n 1"
+# Check for latest file (general or hand specialized)
+$Cmd = "ls -t $RemotePath/hand_best_game_*.csv $RemotePath/general_pre_stats_final_50k_*.csv 2>/dev/null | head -n 1"
 $LatestFile = ssh $User@$ServerIP $Cmd
 
 if ([string]::IsNullOrWhiteSpace($LatestFile)) {

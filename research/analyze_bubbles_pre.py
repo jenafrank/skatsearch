@@ -58,14 +58,13 @@ def analyze_bubbles_pre():
     
     for trumps in categories:
         if trumps == 7:
-        # ... logic continues ...
             subset = df[df['PotentialTrumps'] >= 7].copy()
             title_suffix = "7+ Potential Trumps"
-            filename = "bubble_pre_trumps_7_plus.png"
+            filename_base = "bubble_pre_trumps_7_plus"
         else:
             subset = df[df['PotentialTrumps'] == trumps].copy()
             title_suffix = f"{trumps} Potential Trumps"
-            filename = f"bubble_pre_trumps_{trumps}.png"
+            filename_base = f"bubble_pre_trumps_{trumps}"
             
         if len(subset) == 0:
             print(f"No data for {trumps} Trumps")
@@ -76,6 +75,12 @@ def analyze_bubbles_pre():
             Count=('MaxProb', 'count'),
             MeanWinRate=('MaxProb', 'mean')
         ).reset_index()
+        
+        # DEBUG: Print count for 1 Jack, 0 SafeFulls
+        if trumps == 4:
+             debug_row = grouped[(grouped['CntJ'] == 1) & (grouped['SafeFulls'] == 0)]
+             if not debug_row.empty:
+                 print(f"DEBUG PRE (4 Trumps, 1J, 0Safe): n={debug_row['Count'].values[0]}")
         
         if len(grouped) == 0:
             continue
@@ -138,21 +143,24 @@ def analyze_bubbles_pre():
         cbar.ax.set_yticklabels(['<50% (Purple)', '50-65% (Red)', '65-75% (Yel)', '>75% (Green)']) 
         cbar.set_label('Win Probability Category')
         
-        # Grid and Ticks
+        # Grid and Ticks - STANDARDIZED V7
         plt.xticks(range(5)) # Jacks 0-4
-        plt.yticks(range(int(grouped['SafeFulls'].max()) + 2))
+        plt.yticks(range(9)) # SafeFulls 0-8
         
-        plt.title(f"Pre-Discard Biddability: {title_suffix}\n(Purple <50 | Red <65 | Yellow <75 | Green >75)", fontsize=16)
+        plt.title(f"Pre-Discard Biddability: {title_suffix}", fontsize=16)
         plt.xlabel("Number of Jacks", fontsize=14)
-        plt.ylabel("Standing Fulls (Aces + Tens with Ace)", fontsize=14)
+        plt.ylabel("Safe Fulls (Aces + Tens with Ace)", fontsize=14)
         
         # Add annotation
-        plt.figtext(0.5, 0.01, f"Category: {title_suffix}. Size = Frequency.", ha="center", fontsize=10, style='italic')
-        
-        output_path = os.path.join(output_dir, filename)
-        plt.savefig(output_path, dpi=100, bbox_inches='tight')
-        print(f"Saved: {output_path}")
+        plt.figtext(0.5, 0.01, "Size represents frequency. Color represents Win Probability.", ha="center", fontsize=10, style='italic')
+        plt.grid(True, linestyle='--', alpha=0.7)
+        plt.xlim(-0.5, 4.5)
+        plt.ylim(-0.5, 8.5) # Standardized to max possible (4 Aces + 4 Tens)
+
+        out_path = f"{output_dir}/{filename_base}_v7.png"
+        plt.savefig(out_path, dpi=100, bbox_inches='tight')
         plt.close()
+        print(f"Saved: {out_path}")
 
         # --- Interactve Plotly Chart ---
         try:
@@ -207,10 +215,9 @@ def analyze_bubbles_pre():
             fig.update_xaxes(dtick=1)
             fig.update_yaxes(dtick=1)
             
-            html_filename = filename.replace('.png', '.html')
-            html_output_path = os.path.join(output_dir, html_filename)
-            fig.write_html(html_output_path)
-            print(f"Saved Interactive: {html_output_path}")
+            html_out = f"{output_dir}/{filename_base}_v7.html"
+            fig.write_html(html_out)
+            print(f"Saved Interactive: {html_out}")
             
         except ImportError:
             print("Plotly not installed. Skipping interactive chart.")

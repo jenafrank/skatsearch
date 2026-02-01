@@ -29,19 +29,18 @@ df.columns = df.columns.str.strip()
 if 'BestGame' in df.columns:
     df['BestGame'] = df['BestGame'].astype(str).str.strip()
 
-# 3. Filter for Grand Games only
-df = df[df['BestGame'] == 'Grand'].copy()
-print("Filtered Grand Games:", len(df))
-
-if len(df) == 0:
-    print("No Grand games found.")
-    exit()
+# 3. NO Filtering by BestGame - We want Grand Potential for ALL hands
+# df = df[df['BestGame'] == 'Grand'].copy()
+print("Processing ALL hands for Grand Potential:", len(df))
 
 # 4. Calculate Features
 # Ensure numeric
-cols_to_numeric = ['PMxLen', 'PCntJ', 'PAces', 'PAtt10', 'MaxProb']
+cols_to_numeric = ['PMxLen', 'PCntJ', 'PAces', 'PAtt10', 'ProbGrand']
 for col in cols_to_numeric:
     df[col] = pd.to_numeric(df[col], errors='coerce')
+    
+# Use ProbGrand as WinProb
+df['WinProb'] = df['ProbGrand']
 
 # TotalTrumps proxy for Grand:
 # "Effective Strength" = Jacks (PCntJ) + Longest Suit Length (PMxLen)
@@ -64,20 +63,21 @@ for trumps in categories:
     if trumps == 7:
         subset = df[df['TotalTrumps'] >= 7].copy()
         title_suffix = "7+ Effective Length (Jacks + Longest Suit)"
-        filename = "bubble_grand_post_len_7_plus.png"
+        filename = "bubble_grand_post_len_7_plus_v7.png"
     else:
         subset = df[df['TotalTrumps'] == trumps].copy()
         title_suffix = f"{trumps} Effective Length (Jacks + Longest Suit)"
-        filename = f"bubble_grand_post_len_{trumps}.png"
+        filename = f"bubble_grand_post_len_{trumps}_v7.png"
         
     if len(subset) == 0:
         print(f"No data for Grand Post-Discard: {title_suffix}")
         continue
         
     # Group by Signature
+    # Group by Signature
     grouped = subset.groupby(['PCntJ', 'PSafeFulls']).agg(
-        Count=('MaxProb', 'count'),
-        MeanWinRate=('MaxProb', 'mean')
+        Count=('WinProb', 'count'),
+        MeanWinRate=('WinProb', 'mean')
     ).reset_index()
     
     if len(grouped) == 0:
@@ -156,6 +156,9 @@ for trumps in categories:
     
     # Add annotation
     plt.figtext(0.5, 0.01, "Size represents frequency. Color represents Win Probability.", ha="center", fontsize=10, style='italic')
+    plt.grid(True, linestyle='--', alpha=0.7)
+    plt.xlim(-0.5, 4.5)
+    plt.ylim(-0.5, 8.5)
     
     output_path = os.path.join(output_dir, filename)
     plt.savefig(output_path, dpi=100, bbox_inches='tight')
@@ -206,12 +209,10 @@ for trumps in categories:
             xaxis_title="Number of Jacks",
             yaxis_title="Standing Fulls (Aces + Tens with Ace)",
             coloraxis_colorbar_title="Win Probability",
-            template="plotly_white"
+            template="plotly_white",
+            xaxis=dict(range=[-0.5, 4.5], tickmode='linear', tick0=0, dtick=1),
+            yaxis=dict(range=[-0.5, 8.5], tickmode='linear', tick0=0, dtick=1)
         )
-        
-        # Ticks
-        fig.update_xaxes(dtick=1)
-        fig.update_yaxes(dtick=1)
         
         html_filename = filename.replace('.png', '.html')
         html_output_path = os.path.join(output_dir, html_filename)

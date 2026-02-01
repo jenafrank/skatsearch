@@ -29,51 +29,54 @@ df.columns = df.columns.str.strip()
 if 'BestGame' in df.columns:
     df['BestGame'] = df['BestGame'].astype(str).str.strip()
 
-# 3. Filter for Suit Games only
-suit_games = ['Clubs', 'Spades', 'Hearts', 'Diamonds']
-df = df[df['BestGame'].isin(suit_games)].copy()
-print("Filtered Suit Games:", len(df))
+# 3. NO Filtering by BestGame - We want Suit Potential for ALL hands
+    # suit_games = ['Clubs', 'Spades', 'Hearts', 'Diamonds']
+    # df = df[df['BestGame'].isin(suit_games)].copy()
+    print("Processing ALL hands for Suit Potential:", len(df))
+    
+    # 4. Calculate Features
+    # Ensure numeric for Suit Probs
+    suit_cols = ['ProbClubs', 'ProbSpades', 'ProbHearts', 'ProbDiamonds']
+    cols_to_numeric = ['PMxLen', 'PCntJ', 'PAces', 'PAtt10'] + suit_cols
+    
+    for col in cols_to_numeric:
+        if col in df.columns:
+            df[col] = pd.to_numeric(df[col], errors='coerce')
+            
+    # Calculate Max Suit Probability for each hand (Best Suit Game)
+    df['WinProb'] = df[suit_cols].max(axis=1)
 
-if len(df) == 0:
-    print("No suit games found.")
-    exit()
-
-# 4. Calculate Features
-# Ensure numeric
-cols_to_numeric = ['PMxLen', 'PCntJ', 'PAces', 'PAtt10', 'MaxProb']
-for col in cols_to_numeric:
-    df[col] = pd.to_numeric(df[col], errors='coerce')
-
-df['TotalTrumps'] = df['PMxLen'] + df['PCntJ']
-df['PSafeFulls'] = df['PAces'] + df['PAtt10']
-
-print("TotalTrumps counts:")
-print(df['TotalTrumps'].value_counts().sort_index())
-
-# 5. Define Categories
-categories = [4, 5, 6, 7] # 4, 5, 6, 7+ 
-
-output_dir = "research/plots"
+    df['TotalTrumps'] = df['PMxLen'] + df['PCntJ']
+    df['PSafeFulls'] = df['PAces'] + df['PAtt10']
+    
+    print("TotalTrumps counts:")
+    print(df['TotalTrumps'].value_counts().sort_index())
+    
+    # 5. Define Categories
+    categories = [4, 5, 6, 7] # 4, 5, 6, 7+ 
+    
+    output_dir = "research/plots"
 os.makedirs(output_dir, exist_ok=True)
 
 for trumps in categories:
     if trumps == 7:
         subset = df[df['TotalTrumps'] >= 7].copy()
         title_suffix = "7+ Total Trumps (Post)"
-        filename = "bubble_post_trumps_7_plus.png"
+        filename = "bubble_post_trumps_7_plus_v7.png"
     else:
         subset = df[df['TotalTrumps'] == trumps].copy()
         title_suffix = f"{trumps} Total Trumps (Post)"
-        filename = f"bubble_post_trumps_{trumps}.png"
+        filename = f"bubble_post_trumps_{trumps}_v7.png"
         
     if len(subset) == 0:
         print(f"No data for Post-Discard: {title_suffix}")
         continue
         
     # Group by Signature
+    # Group by Signature
     grouped = subset.groupby(['PCntJ', 'PSafeFulls']).agg(
-        Count=('MaxProb', 'count'),
-        MeanWinRate=('MaxProb', 'mean')
+        Count=('WinProb', 'count'),
+        MeanWinRate=('WinProb', 'mean')
     ).reset_index()
     
     if len(grouped) == 0:
@@ -154,6 +157,10 @@ for trumps in categories:
     
     # Add annotation
     plt.figtext(0.5, 0.01, "Size represents frequency. Color represents Win Probability (Green > 66%, Red < 33%)", ha="center", fontsize=10, style='italic')
+    plt.figtext(0.5, 0.01, "Size represents frequency (normalized). Color is Win Rate.", ha="center", fontsize=10, style='italic')
+    plt.grid(True, linestyle='--', alpha=0.7)
+    plt.xlim(-0.5, 4.5)
+    plt.ylim(-0.5, 8.5)
     
     output_path = os.path.join(output_dir, filename)
     plt.savefig(output_path, dpi=100, bbox_inches='tight')
@@ -204,12 +211,10 @@ for trumps in categories:
             xaxis_title="Number of Jacks",
             yaxis_title="Standing Fulls (Aces + Tens with Ace)",
             coloraxis_colorbar_title="Win Probability",
-            template="plotly_white"
+            template="plotly_white",
+            xaxis=dict(range=[-0.5, 4.5], tickmode='linear', tick0=0, dtick=1),
+            yaxis=dict(range=[-0.5, 8.5], tickmode='linear', tick0=0, dtick=1)
         )
-        
-        # Ticks
-        fig.update_xaxes(dtick=1)
-        fig.update_yaxes(dtick=1)
         
         html_filename = filename.replace('.png', '.html')
         html_output_path = os.path.join(output_dir, html_filename)
