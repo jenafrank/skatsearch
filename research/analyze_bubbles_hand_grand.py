@@ -148,7 +148,7 @@ def analyze_bubbles_hand_grand():
         plt.ylim(-0.5, 8.5)
         plt.xlim(-0.5, 4.5)
 
-        out_path = f"{output_dir}/{filename_base}_v8.png"
+        out_path = f"{output_dir}/{filename_base}_v11.png"
         plt.savefig(out_path, dpi=100, bbox_inches='tight')
         plt.close()
         print(f"Saved: {out_path}")
@@ -196,7 +196,7 @@ def analyze_bubbles_hand_grand():
             legend_title="Win Probability"
         )
         
-        html_out = f"{output_dir}/{filename_base}_v8.html"
+        html_out = f"{output_dir}/{filename_base}_v11.html"
         fig.write_html(html_out)
         print(f"Saved Interactive: {html_out}")
 

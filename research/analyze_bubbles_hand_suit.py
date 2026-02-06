@@ -165,44 +165,42 @@ def analyze_bubbles_hand_suit():
         plt.ylim(-0.5, 8.5)
         plt.xlim(-0.5, 4.5)
 
-        out_path = f"{output_dir}/{filename_base}_v8.png"
+        out_path = f"{output_dir}/{filename_base}_v11.png"
         plt.savefig(out_path, dpi=100, bbox_inches='tight')
         plt.close()
         print(f"Saved: {out_path}")
 
-        # --- Interactive Plotly Chart ---
-        
-        def get_color_category(p):
-            if p < 0.40: return "Lose (<40%)"
-            if p < 0.50: return "Risky (40-50%)"
-            if p < 0.75: return "Playable (50-75%)"
-            return "Win (>75%)"
-            
-        grouped['Category'] = grouped['MeanWinRate'].apply(get_color_category)
+        # --- Interactive Plotly ---
+        # Map Color to Win Rate for Color Scale consistency
         grouped['Win %'] = grouped['MeanWinRate'].apply(lambda x: f"{x:.1%}")
-        
-        color_map = {
-            "Lose (<40%)": "#9C27B0",
-            "Risky (40-50%)": "#D32F2F",
-            "Playable (50-75%)": "#FFD700",
-            "Win (>75%)": "#388E3C"
-        }
+        grouped['AvgWinProb'] = grouped['MeanWinRate'] # For hover data
+        grouped['Samples'] = grouped['Count'] # For hover data
 
         fig = px.scatter(
-            grouped,
-            x='CntJ',
-            y='SafeFulls',
-            size='Count',
-            color='Category',
-            color_discrete_map=color_map,
-            hover_name='Category',
-            hover_data={'CntJ': True, 'SafeFulls': True, 'Win %': True, 'Count': True, 'Category': False},
+            grouped, 
+            x='CntJ', 
+            y='SafeFulls', 
+            size='Count', 
+            color='MeanWinRate', # Use raw mean for continuous scale
+            color_continuous_scale=[
+                (0.00, '#9C27B0'),   # Purple 0%
+                (0.40, '#9C27B0'),   # Purple 40%
+                (0.40001, '#D32F2F'), # Red 40%
+                (0.50, '#D32F2F'),   # Red 50%
+                (0.50001, '#FFD700'), # Yellow 50%
+                (0.75, '#FFD700'),   # Yellow 75%
+                (0.75001, '#388E3C'), # Green 75%
+                (1.00, '#388E3C')    # Green 100%
+            ],
+            range_color=[0, 1],
+            hover_name='CntJ',
+            hover_data={'CntJ': True, 'SafeFulls': True, 'Win %': ':.1%', 'Count': True, 'AvgWinProb': ':.1%', 'Samples': True},
             size_max=60,
             title=f"Suit Hand Strength: {title_suffix}",
             template="plotly_white"
         )
         
-        # Text Colors: Always Black
+        # Add text labels for Win %
         fig.update_traces(text=grouped['Win %'], textposition='middle center', textfont=dict(color='black'))
 
         fig.update_layout(
@@ -213,7 +211,7 @@ def analyze_bubbles_hand_suit():
             legend_title="Win Probability"
         )
         
-        html_out = f"{output_dir}/{filename_base}_v8.html"
+        html_out = f"{output_dir}/{filename_base}_v11.html"
         fig.write_html(html_out)
         print(f"Saved Interactive: {html_out}")
 

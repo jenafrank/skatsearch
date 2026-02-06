@@ -8,12 +8,12 @@ def create_decision_summary_pdf():
     # A4 Landscape size in inches (approx 11.69 x 8.27)
     # 2x2 Grid
     
-    output_pdf = "research/plots/decision_maps_summary_v10.pdf"
+    output_pdf = "research/plots/decision_maps_summary_v11.pdf"
     img_files = [
-        "research/plots/bubble_decision_map_trumps_4_v10.png",
-        "research/plots/bubble_decision_map_trumps_5_v10.png",
-        "research/plots/bubble_decision_map_trumps_6_v10.png",
-        "research/plots/bubble_decision_map_trumps_7_v10.png"
+        "research/plots/bubble_decision_map_trumps_4_v11.png",
+        "research/plots/bubble_decision_map_trumps_5_v11.png",
+        "research/plots/bubble_decision_map_trumps_6_v11.png",
+        "research/plots/bubble_decision_map_trumps_7_v11.png"
     ]
     
     titles = [

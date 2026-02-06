@@ -107,10 +107,10 @@ def analyze_decision_map():
         
         if trumps == 7:
             title_suffix = "7 Trumps"
-            filename_base = "bubble_decision_map_trumps_7_v10"
+            filename_base = "bubble_decision_map_trumps_7_v11"
         else:
             title_suffix = f"{trumps} Trumps"
-            filename_base = f"bubble_decision_map_trumps_{trumps}_v10"
+            filename_base = f"bubble_decision_map_trumps_{trumps}_v11"
             
         if len(subset) == 0:
             continue
