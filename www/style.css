@@ -621,6 +621,78 @@ button:hover {
     /* Ensure size */
 }
 
+/* Image Mode Card Styles */
+.card-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    /* or cover, depending on scan aspect ratio */
+    border-radius: 8px;
+    display: block;
+}
+
+.card.image-mode {
+    padding: 0;
+    background-color: transparent;
+    border: none;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+    /* Keep shadow for depth */
+}
+
+.card.image-mode:hover {
+    transform: translateY(-20px);
+    z-index: 50 !important;
+}
+
+.card.image-mode .card-corner,
+.card.image-mode .card-center {
+    display: none;
+    /* Hide text fallback */
+}
+
+.card.image-mode .owner-token {
+    /* Ensure token is still visible on top of image */
+    z-index: 25;
+    bottom: 5px;
+    right: 5px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.8);
+}
+
+/* Settings Modal Elements */
+.settings-group {
+    margin: 15px 0;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.settings-group label {
+    margin-right: 10px;
+    font-weight: bold;
+    color: #f1c40f;
+}
+
+.settings-row {
+    display: flex;
+    gap: 20px;
+    margin-top: 5px;
+}
+
+.icon-btn {
+    background: none;
+    border: none;
+    font-size: 1.5em;
+    cursor: pointer;
+    color: #bdc3c7;
+    padding: 5px;
+    transition: color 0.2s;
+}
+
+.icon-btn:hover {
+    color: #f1c40f;
+}
+
 #selection-hand-container .card {
     margin: 5px;
     cursor: pointer;

@@ -866,21 +866,43 @@ function createCardElement(shortStr, owner, simplified = false) {
     const suit = shortStr[0];
     let rank = shortStr[1];
     if (rank === 'T') rank = '10';
+
     const div = document.createElement('div');
+    const isImageMode = currentCardDisplay === 'image';
+
     div.className = `card suit-${suit} ${simplified ? 'simplified' : ''}`;
+    if (isImageMode && !simplified) { // Simplified (opponents in cheat mode) small cards - maybe keep simplified? 
+        // Actually user wanted tiles "if space is tight". 
+        // For now let's apply image mode if enabled, unless it's the simplified view (which is tiny).
+        // But requested features mentioned "abkürzende quadratische Kacheln" - maybe that IS simplified view?
+        // Let's support images for normal cards first.
+        div.classList.add('image-mode');
+    }
+
     div.dataset.card = shortStr;
     const suitChar = SUIT_SYMBOL[suit] || '?';
+
     let tokenHtml = '';
     if (owner) {
         tokenHtml = `<div class="owner-token">${owner}</div>`;
     }
 
-    if (simplified) {
+    if (isImageMode && !simplified) {
+        // Image Rendering
+        const imgPath = getCardImagePath(shortStr);
+        // We use an img tag. 
+        // Fallback to text if error? We can try.
+        div.innerHTML = `
+            <img src="${imgPath}" class="card-image" onerror="this.style.display='none'; this.parentElement.classList.remove('image-mode'); this.parentElement.innerHTML = '<div class=\\'card-corner\\'><span>${rank}</span><span>${suitChar}</span></div><div class=\\'card-center\\'>${suitChar}</div><div class=\\'card-corner\\' style=\\'transform: rotate(180deg)\\'><span>${rank}</span><span>${suitChar}</span></div>${tokenHtml}';">
+            ${tokenHtml}
+        `;
+    } else if (simplified) {
         div.innerHTML = `
             <div class="simplified-center">${suitChar}${rank}</div>
             ${tokenHtml}
         `;
     } else {
+        // CSS Rendering (Classic)
         div.innerHTML = `
             <div class="card-corner"><span>${rank}</span><span>${suitChar}</span></div>
             <div class="card-center">${suitChar}</div>
@@ -891,4 +913,87 @@ function createCardElement(shortStr, owner, simplified = false) {
     return div;
 }
 
+// --- Card Mapping Logic ---
+
+let currentDeckStyle = 'french'; // 'french', 'german'
+let currentCardDisplay = 'css';  // 'css', 'image'
+let currentImageType = 'full';   // 'full', 'tile'
+
+// German mappings
+// Suits: C->E (Eichel), S->G (Grün), H->H (Herz), D->S (Schellen)
+// Ranks: 7,8,9, T(10), J->U (Unter), Q->O (Ober), K->K, A->A
+const GERMAN_SUIT_MAP = { 'C': 'E', 'S': 'G', 'H': 'H', 'D': 'S' };
+const GERMAN_RANK_MAP = { '7': '7', '8': '8', '9': '9', 'T': '10', 'J': 'U', 'Q': 'O', 'K': 'K', 'A': 'A' };
+
+function getCardImagePath(shortStr) {
+    // shortStr like "C_J" or "HK" -> wait, input is "CJ" "HK" etc from WASM (2 chars)
+    // WASM: C, S, H, D.  7, 8, 9, T, J, Q, K, A.
+
+    let suit = shortStr[0];
+    let rank = shortStr[1];
+
+    let fileSuit = suit;
+    let fileRank = rank;
+
+    if (currentDeckStyle === 'german') {
+        fileSuit = GERMAN_SUIT_MAP[suit] || suit;
+        fileRank = GERMAN_RANK_MAP[rank] || rank;
+    } else {
+        // French
+        // Map T->10
+        if (rank === 'T') fileRank = '10';
+    }
+
+    // Check Rank for french if not T
+    if (currentDeckStyle === 'french' && rank === 'T') fileRank = '10';
+
+    const filename = `${fileSuit}_${fileRank}.png`; // e.g. E_U.png or C_10.png
+
+    // Path construction
+    // assets/cards/{french|german}/{full|tile}/...
+    return `assets/cards/${currentDeckStyle}/${currentImageType}/${filename}`;
+}
+
+// --- Settings UI Logic ---
+
+let settingsModal;
+function initSettings() {
+    settingsModal = document.getElementById('settings-modal');
+    document.getElementById('btn-settings').onclick = () => {
+        settingsModal.style.display = 'flex';
+    };
+    document.getElementById('btn-close-settings').onclick = () => {
+        settingsModal.style.display = 'none';
+        updateUI(); // Re-render to apply changes
+        // Also need to re-render selection if active
+        if (selectionPhase) renderSelectionUI();
+    };
+
+    // Radios
+    document.querySelectorAll('input[name="deck-style"]').forEach(r => {
+        r.addEventListener('change', (e) => { currentDeckStyle = e.target.value; });
+    });
+    document.querySelectorAll('input[name="card-display"]').forEach(r => {
+        r.addEventListener('change', (e) => { currentCardDisplay = e.target.value; });
+    });
+    document.querySelectorAll('input[name="image-type"]').forEach(r => {
+        r.addEventListener('change', (e) => { currentImageType = e.target.value; });
+    });
+}
+
+// Hook init
+const originalRun = run;
+run = async function () {
+    initSettings();
+    await originalRun.call(this);
+}
+
+// Execute run logic (replaced above, so we just call run() if not already called? 
+// No, the original file had `run();` at the end.
+// We are replacing the end of the file.
+// So we should redefine run or just call initSettings inside the replacing block before calling run.
+
+// Let's rewrite the run function call at the end to be safe.
+initSettings();
 run();
+
