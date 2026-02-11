@@ -16,6 +16,7 @@ pub struct PimcProblem {
     previous_card: u32,
     next_card: u32,
     all_cards: u32,
+    active_suit: u32,
     threshold: u8,
 
     // Facts
@@ -523,6 +524,10 @@ impl PimcProblem {
     pub fn set_declarer_start_points(&mut self, points: u8) {
         self.declarer_start_points = points;
     }
+
+    pub fn set_active_suit(&mut self, active_suit: u32) {
+        self.active_suit = active_suit;
+    }
 }
 
 impl PimcProblem {
@@ -532,6 +537,7 @@ impl PimcProblem {
             my_cards: 0u32,
             my_player: Player::Declarer,
             all_cards: 0u32,
+            active_suit: 0u32,
             previous_card: 0u32,
             next_card: 0u32,
             threshold: 1u8,
@@ -560,6 +566,7 @@ impl PimcProblem {
             .cards(Player::Left, "")
             .cards(Player::Right, "")
             .turn(self.my_player)
+            .trick_suit(self.active_suit)
             .trick_from_uproblem(self.previous_card, self.next_card)
             .threshold(self.threshold)
             .set_cards_for_problem(self.my_cards, self.my_player)
@@ -661,6 +668,7 @@ mod tests {
             my_cards: "CA CT SA".__bit(),
             next_card: 0u32,
             previous_card: 0u32,
+            active_suit: 0u32,
             my_player: Player::Declarer,
             threshold: 1,
             facts_previous_player: Facts::one_fact(true, false, false, false, false),
@@ -687,6 +695,7 @@ mod tests {
             threshold: 1,
             previous_card: "ST".__bit(),
             next_card: 0u32,
+            active_suit: 0u32,
             facts_previous_player: Facts::zero_fact(),
             facts_next_player: Facts::zero_fact(),
             declarer_start_points: 0,
@@ -728,6 +737,7 @@ mod tests {
             threshold: 1,
             next_card: 0u32,
             previous_card: 0u32,
+            active_suit: 0u32,
             facts_previous_player: Facts::zero_fact(),
             facts_next_player: Facts::one_fact(true, false, false, false, false), // No Trump for Left
             declarer_start_points: 0,
@@ -783,6 +793,7 @@ mod tests {
             threshold: 1,
             next_card: 0u32,
             previous_card: 0u32,
+            active_suit: 0u32,
             facts_previous_player: Facts::zero_fact(),
             facts_next_player: Facts::one_fact(false, true, false, false, false), // No Clubs for Left
             declarer_start_points: 0,
@@ -833,6 +844,7 @@ mod tests {
             threshold: 1,
             next_card: 0u32,
             previous_card: 0u32,
+            active_suit: 0u32,
             facts_previous_player: Facts::zero_fact(),
             facts_next_player: Facts::one_fact(false, false, true, false, false), // No Spades for Left
             declarer_start_points: 0,
@@ -886,6 +898,7 @@ mod tests {
             threshold: 1,
             next_card: 0u32,
             previous_card: 0u32,
+            active_suit: 0u32,
             facts_previous_player: Facts::zero_fact(),
             facts_next_player: Facts::one_fact(true, false, false, false, false), // No Trump for Left
             declarer_start_points: 0,
@@ -926,6 +939,7 @@ mod tests {
             threshold: 1,
             next_card: 0u32,
             previous_card: 0u32,
+            active_suit: 0u32,
             facts_previous_player: Facts::zero_fact(),
             facts_next_player: Facts::one_fact(false, true, false, false, false), // No Clubs for Left
             declarer_start_points: 0,
@@ -967,6 +981,7 @@ mod tests {
             threshold: 1,
             next_card: 0u32,
             previous_card: 0u32,
+            active_suit: 0u32,
             facts_previous_player: Facts::zero_fact(),
             facts_next_player: Facts::one_fact(false, false, true, false, false), // No Spades for Left
             declarer_start_points: 0,
@@ -1007,6 +1022,7 @@ mod tests {
             threshold: 1,
             next_card: 0u32,
             previous_card: 0u32,
+            active_suit: 0u32,
             facts_previous_player: Facts::zero_fact(),
             facts_next_player: Facts::one_fact(false, false, false, true, false), // No Hearts for Left
             declarer_start_points: 0,
@@ -1047,6 +1063,7 @@ mod tests {
             threshold: 1,
             next_card: 0u32,
             previous_card: 0u32,
+            active_suit: 0u32,
             facts_previous_player: Facts::zero_fact(),
             facts_next_player: Facts::one_fact(false, false, false, false, true), // No Diamonds for Left
             declarer_start_points: 0,

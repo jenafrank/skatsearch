@@ -120,6 +120,11 @@ impl GameContextBuilder {
         self
     }
 
+    pub fn trick_suit(mut self, trick_suit: u32) -> GameContextBuilder {
+        self.trick_suit = Some(trick_suit);
+        self
+    }
+
     pub fn build(self) -> GameContext {
         self.validate();
 

@@ -2,10 +2,10 @@ mod args;
 
 use clap::Parser;
 use rand::seq::SliceRandom;
-use skat_aug23::consts::bitboard::{ACES, TENS};
+use skat_aug23::consts::bitboard::*;
 use skat_aug23::extensions::solver::{solve, solve_optimum, solve_win, OptimumMode};
 use skat_aug23::pimc::analysis::{
-    analyze_general_pre_discard, analyze_hand, analyze_hand_with_pickup,
+    analyze_general_pre_discard, analyze_hand, analyze_hand_with_pickup, analyze_null_detailed,
 };
 use skat_aug23::pimc::facts::Facts;
 use skat_aug23::pimc::pimc_problem_builder::PimcProblemBuilder;
@@ -15,7 +15,7 @@ use skat_aug23::skat::defs::Player;
 use skat_aug23::skat::defs::{CLUBS, DIAMONDS, HEARTS, SPADES};
 use skat_aug23::skat::engine::SkatEngine;
 use skat_aug23::skat::signature::HandSignature;
-use skat_aug23::traits::{BitConverter, Points, StringConverter};
+use skat_aug23::traits::{BitConverter, Bitboard, Points, StringConverter};
 use std::fs;
 use std::io::Write;
 
@@ -152,6 +152,114 @@ fn main() {
                     }
                 }
             }
+        }
+        args::Commands::AnalyzeNull {
+            count,
+            samples,
+            output,
+            hand,
+        } => {
+            println!(
+                "Analyzing Null Hands (Count: {}, Samples: {}, HandGame: {})...",
+                count, samples, hand
+            );
+
+            let file = std::fs::File::create(output).expect("Could not create output file");
+            writeln!(&file, "Hand,Skat,Won,Points,Moves,DurationMs,StartPlayer").unwrap();
+
+            use std::sync::{Arc, Mutex};
+            let file_mutex = Arc::new(Mutex::new(file));
+
+            analyze_null_detailed(
+                count,
+                samples,
+                hand,
+                move |(hand_val, skat_val, won, points, moves, probs, duration, start_player)| {
+                    let mut moves_probs_str = String::new();
+                    for (i, card_val) in moves.iter().enumerate() {
+                        if i > 0 {
+                            moves_probs_str.push_str(", ");
+                        }
+                        let card_str = card_val.__str();
+                        let prob = if i < probs.len() {
+                            (probs[i] * 100.0).round() as i32
+                        } else {
+                            0 // Should not happen if lengths match
+                        };
+
+                        moves_probs_str.push_str(&format!("{}:{}", card_str, prob));
+                    }
+
+                    // --- SORTING HELPER ---
+                    let format_null_cards = |cards_bit: u32| -> String {
+                        let (list_arr, _) = cards_bit.__decompose();
+                        let mut list: Vec<u32> =
+                            list_arr.iter().cloned().filter(|&c| c != 0).collect();
+                        list.sort_by(|&a, &b| {
+                            // Suit Order: C > S > H > D (3, 2, 1, 0)
+                            let suit_a = skat_aug23::skat::rules::get_suit_for_card(
+                                a,
+                                skat_aug23::skat::defs::Game::Null,
+                            );
+                            let suit_b = skat_aug23::skat::rules::get_suit_for_card(
+                                b,
+                                skat_aug23::skat::defs::Game::Null,
+                            );
+
+                            if suit_a != suit_b {
+                                // Suits differ. Descending Suit order.
+                                suit_b.cmp(&suit_a)
+                            } else {
+                                // Same Suit. Null Rank Order.
+                                // 7 < 8 < 9 < 10 < J < Q < K < A
+                                let get_rank = |c: u32| -> u8 {
+                                    if (c & SEVENS) != 0 {
+                                        0
+                                    } else if (c & EIGHTS) != 0 {
+                                        1
+                                    } else if (c & NINES) != 0 {
+                                        2
+                                    } else if (c & TENS) != 0 {
+                                        3
+                                    } else if (c & JACKS) != 0 {
+                                        4
+                                    } else if (c & QUEENS) != 0 {
+                                        5
+                                    } else if (c & KINGS) != 0 {
+                                        6
+                                    } else if (c & ACES) != 0 {
+                                        7
+                                    } else {
+                                        0
+                                    }
+                                };
+                                get_rank(a).cmp(&get_rank(b))
+                            }
+                        });
+
+                        let mut s = String::new();
+                        for (i, c) in list.iter().enumerate() {
+                            if i > 0 {
+                                s.push(' ');
+                            }
+                            s.push_str(&c.__str());
+                        }
+                        s
+                    };
+
+                    let hand_str = format_null_cards(hand_val);
+                    let skat_str = format_null_cards(skat_val);
+
+                    let mut f = file_mutex.lock().unwrap();
+                    writeln!(
+                        f,
+                        "\"{}\",\"{}\",{},{},\"{}\",{},{:?}",
+                        hand_str, skat_str, won, points, moves_probs_str, duration, start_player
+                    )
+                    .unwrap();
+                },
+            );
+            println!("Analysis complete.");
         }
         args::Commands::AnalyzeGrand {
             count,

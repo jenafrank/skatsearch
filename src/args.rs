@@ -213,6 +213,21 @@ pub enum Commands {
         #[arg(long, default_value = "research/data/hand_best_game.csv")]
         output: String,
     },
+    /// Detailed Null Game Simulation with PIMC trajectory
+    AnalyzeNull {
+        /// Number of hands to describe
+        #[arg(short, long, default_value_t = 5000)]
+        count: u32,
+        /// Samples per move
+        #[arg(short, long, default_value_t = 20)]
+        samples: u32,
+        /// Output CSV file
+        #[arg(short, long, default_value = "research/data/null_sim_detailed.csv")]
+        output: String,
+        /// Null Hand (No Skat Pickup)
+        #[arg(long, default_value_t = false)]
+        hand: bool,
+    },
 }
 
 #[derive(Debug, Serialize, Deserialize)]

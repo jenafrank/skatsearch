@@ -39,13 +39,14 @@ impl GameContext {
         game_type: Game,
         start_player: Player,
     ) -> Self {
+        let threshold_upper = if game_type == Game::Null { 1 } else { 61 };
         Self {
             declarer_cards,
             left_cards,
             right_cards,
             game_type,
             start_player,
-            threshold_upper: 61, // Default
+            threshold_upper,
             trick_cards: 0,
             trick_suit: 0,
             declarer_start_points: 0,

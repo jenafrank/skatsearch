@@ -632,3 +632,83 @@ where
         ));
     });
 }
+
+pub fn analyze_null_detailed<F>(count: u32, samples: u32, hand_game: bool, on_result: F)
+where
+    F: Fn(
+            (
+                u32,
+                u32,
+                bool,
+                u8,
+                Vec<u32>,
+                Vec<f32>,
+                u128,
+                crate::skat::defs::Player,
+            ),
+        ) + Sync
+        + Send,
+{
+    use crate::pimc::playout::playout_with_history;
+    use crate::skat::context::GameContext;
+    use crate::skat::defs::{Game, Player};
+    use rand::prelude::*;
+    use rayon::prelude::*;
+    use std::time::Instant;
+    // use crate::pimc::analysis::analyze_null_with_pickup; // Available in same module
+
+    (0..count).into_par_iter().for_each(|_| {
+        let start = Instant::now();
+        let mut rng = thread_rng();
+        // Generate Deck
+        let mut deck: Vec<u32> = (0..32).map(|i| 1 << i).collect();
+        deck.shuffle(&mut rng);
+
+        let mut my_hand = 0;
+        for i in 0..10 {
+            my_hand |= deck[i];
+        }
+        let mut skat = 0;
+        for i in 10..12 {
+            skat |= deck[i];
+        }
+        let mut left = 0;
+        for i in 12..22 {
+            left |= deck[i];
+        }
+        let mut right = 0;
+        for i in 22..32 {
+            right |= deck[i];
+        }
+
+        if !hand_game {
+            // Run optimization to find best discard
+            // Using local function analyze_null_with_pickup
+            let (_, _, _, best_keep, best_discard) =
+                analyze_null_with_pickup(my_hand, skat, 20, false);
+            my_hand = best_keep;
+            skat = best_discard;
+        }
+
+        // Randomize Start Player to capture positional variance
+        let start_players = [Player::Declarer, Player::Left, Player::Right];
+        let start_player = *start_players.choose(&mut rng).unwrap();
+
+        let context = GameContext::create(my_hand, left, right, Game::Null, start_player);
+
+        let trace = playout_with_history(context, samples);
+
+        let duration = start.elapsed().as_millis();
+
+        on_result((
+            my_hand,
+            skat,
+            trace.declarer_won,
+            trace.declarer_points,
+            trace.moves,
+            trace.win_probs,
+            duration,
+            start_player,
+        ));
+    });
+}

@@ -1,0 +1,4 @@
+Hand,Skat,Won,Points,Moves,DurationMs,StartPlayer
+"[CJ SJ DJ C7 SA S8 HA HT DT D9]","[ST DK]",false,1,"CJ:0, D8:100, DQ:100",8063,Declarer
+"[CA CT CK SK HK DA DT DQ D9 D8]","[HT H8]",false,1,"D9:0, S7:100, HQ:100",9114,Declarer
+"[SJ HJ CQ C9 C7 SQ S9 HK H7 DT]","[CT SK]",false,1,"C8:100, CQ:0, DQ:100",14056,Right

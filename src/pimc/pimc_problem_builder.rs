@@ -140,6 +140,11 @@ impl PimcProblemBuilder {
         self
     }
 
+    pub fn active_suit(mut self, active_suit: u32) -> PimcProblemBuilder {
+        self.active_suit = Some(active_suit);
+        self
+    }
+
     pub fn facts(mut self, player: Player, facts: Facts) -> PimcProblemBuilder {
         match player {
             Player::Declarer => self.facts_declarer = Some(facts),
@@ -272,6 +277,10 @@ impl PimcProblemBuilder {
 
         if let Some(skat) = self.skat_cards {
             uproblem.set_skat_cards(skat);
+        }
+
+        if let Some(active_suit) = self.active_suit {
+            uproblem.set_active_suit(active_suit);
         }
 
         uproblem
