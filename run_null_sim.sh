@@ -24,7 +24,8 @@ for i in $(seq 1 $CORES); do
    OUT_FILE="${OUTPUT_PREFIX}_part${i}.csv"
    echo "Launching worker $i -> $OUT_FILE"
    # Running in background
-   ./target/release/skat_aug23 analyze-null --count $COUNT_PER_CORE --samples $SAMPLES --output "$OUT_FILE" --hand &
+   # Set RAYON_NUM_THREADS=1 to prevent internal parallelism (double parallelization)
+   RAYON_NUM_THREADS=1 ./target/release/skat_aug23 analyze-null --count $COUNT_PER_CORE --samples $SAMPLES --output "$OUT_FILE" --hand &
    # Store PID
    pids="$pids $!"
 done
