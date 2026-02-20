@@ -1,15 +1,16 @@
 use crate::consts::bitboard::{
     ACES, CLUBS, DIAMONDS, EIGHTS, HEARTS, JACKS, KINGS, NINES, QUEENS, SPADES, TENS, TRUMP_SUIT,
 };
+use crate::extensions::skat_solving::{solve_best_game_all_variants, AccelerationMode};
 use crate::extensions::solver::{solve_optimum_from_position, OptimumMode};
 use crate::pimc::facts::Facts;
 use crate::pimc::pimc_problem_builder::PimcProblemBuilder;
 use crate::pimc::pimc_search::PimcSearch;
-use crate::skat::context::GameContext;
+use crate::skat::context::{GameContext, ProblemTransformation};
 use crate::skat::defs::{Game, Player};
 use crate::skat::engine::SkatEngine;
 use crate::skat::rules::get_suit_for_card;
-use crate::traits::{Bitboard, StringConverter};
+use crate::traits::{Bitboard, Points, StringConverter};
 use rand::prelude::*;
 
 pub fn run_playout(
@@ -80,6 +81,80 @@ pub fn generate_random_deal(
         start_player,
     );
     (context, game_type, start_player)
+}
+
+/// Tries to generate one "interesting" deal:
+///   1. Shuffle a full 32-card deck (declarer gets 12, left/right each 10).
+///   2. Run perfect-information best-game for Grand and all 4 Suit variants
+///      (Null excluded). Skip Null entirely.
+///   3. Take the variant with the highest value.  Reject if value < 50.
+///   4. Apply the optimal 2-card discard → declarer now holds 10 cards.
+///   5. Apply any suit transformation so the GameContext uses Clubs order.
+///   6. Return (context_10cards, game_type, start_player, label, discard_str).
+///
+/// Returns `None` if the random deal did not qualify.
+pub fn generate_smart_deal() -> Option<(GameContext, Game, Player, String, String)> {
+    let start_player = Player::Declarer; // Declarer always leads first trick
+
+    let mut rng = rand::thread_rng();
+    let mut deck: Vec<u8> = (0..32).collect();
+    deck.shuffle(&mut rng);
+
+    // 12 cards for declarer (includes 2 Skat cards), 10 each for Left / Right.
+    let mut decl_12 = 0u32;
+    let mut left_cards = 0u32;
+    let mut right_cards = 0u32;
+    for i in 0..12 {
+        decl_12 |= 1 << deck[i];
+    }
+    for i in 12..22 {
+        left_cards |= 1 << deck[i];
+    }
+    for i in 22..32 {
+        right_cards |= 1 << deck[i];
+    }
+
+    // Run best-game for Grand + all 4 Suit variants (skip Null).
+    let all_variants = solve_best_game_all_variants(
+        decl_12,
+        left_cards,
+        right_cards,
+        start_player,
+        AccelerationMode::AlphaBetaAccelerating,
+    );
+
+    // Filter out Null, keep only Grand/Suit, pick best value.
+    let best = all_variants
+        .into_iter()
+        .filter(|r| r.game_type != Game::Null)
+        .max_by_key(|r| r.value)?;
+
+    // Reject deals where perfect-play score is below 50 pts.
+    if best.value < 50 {
+        return None;
+    }
+
+    let skat_discard = best.skat_1 | best.skat_2;
+    let discard_str = format!("{} {}", best.skat_1.__str(), best.skat_2.__str());
+    let skat_points = skat_discard.points();
+
+    // The declarer's final 10-card hand after discard.
+    let decl_10 = decl_12 & !skat_discard;
+
+    // Apply suit transformation to Left/Right if needed (Spades/Hearts/Diamonds).
+    let (d_final, l_final, r_final) = match best.transformation {
+        None => (decl_10, left_cards, right_cards),
+        Some(trans) => (
+            GameContext::get_switched_cards(decl_10, trans),
+            GameContext::get_switched_cards(left_cards, trans),
+            GameContext::get_switched_cards(right_cards, trans),
+        ),
+    };
+
+    let mut ctx = GameContext::create(d_final, l_final, r_final, best.game_type, start_player);
+    ctx.set_declarer_start_points(skat_points);
+
+    Some((ctx, best.game_type, start_player, best.label, discard_str))
 }
 
 fn log_distribution(ctx: &GameContext, game_type: Game, start_player: Player) {

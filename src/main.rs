@@ -1070,6 +1070,26 @@ fn main() {
                 );
             }
         }
+        args::Commands::SmartPointsPlayout { samples } => {
+            use skat_aug23::extensions::cli_playout::generate_smart_deal;
+            match generate_smart_deal() {
+                None => {
+                    // Deal did not qualify (best game < 50 pts or no Grand/Suit).
+                    // Print a short marker so the Python loop can detect the skip.
+                    println!("SMART_DEAL_SKIP: deal did not qualify.");
+                    std::process::exit(2);
+                }
+                Some((ctx, game_type, start_player, label, discard)) => {
+                    println!("SMART_DEAL_OK: game={} discard={}", label, discard);
+                    skat_aug23::extensions::cli_playout::run_points_playout(
+                        ctx,
+                        game_type,
+                        start_player,
+                        samples,
+                    );
+                }
+            }
+        }
         args::Commands::StandardPlayout { context } => {
             println!("Reading context file: {}", context);
             let context_content = fs::read_to_string(context).expect("Unable to read context file");

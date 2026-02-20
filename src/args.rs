@@ -79,6 +79,16 @@ pub enum Commands {
         #[arg(short, long, default_value_t = 20)]
         samples: u32,
     },
+    /// Like PointsPlayout, but ONLY simulates "interesting" games:
+    /// auto-generates a random deal, runs perfect-information best-game
+    /// (Grand/Suit only, no Null), discards optimally, and only proceeds
+    /// when the perfect-play score is >= 50 pts for the Declarer.
+    /// Returns exit code 2 if the deal did not qualify so the caller can loop.
+    SmartPointsPlayout {
+        /// Number of PIMC samples to run per move (default: 20)
+        #[arg(short, long, default_value_t = 20)]
+        samples: u32,
+    },
     /// Plays out the game from the given state using Perfect Information.
     /// It assumes all cards are known to all players (open hand) and executes the optimal line of play to determine the final score.
     StandardPlayout {
