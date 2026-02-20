@@ -1,6 +1,9 @@
 use std::collections::HashMap;
 use std::fs::OpenOptions;
 use std::io::Write;
+use std::sync::Mutex;
+
+use rayon::prelude::*;
 
 use super::pimc_problem::PimcProblem;
 use crate::extensions::solver::{solve_all_cards, solve_win};
@@ -102,56 +105,59 @@ impl PimcSearch {
     }
 
     pub fn estimate_probability_of_all_cards(&self, info: bool) -> Vec<(u32, f32)> {
-        let mut global_dict = HashMap::new();
         let my_player = self.uproblem.my_player();
+        let threshold = self.uproblem.threshold();
+        let game_type = self.uproblem.game_type();
 
-        for i in 0..self.sample_size {
+        // Shared accumulator: card → total win-count across all samples.
+        let global_dict: Mutex<HashMap<u32, u32>> = Mutex::new(HashMap::new());
+
+        (0..self.sample_size).into_par_iter().for_each(|i| {
             let concrete_problem = self.uproblem.generate_concrete_problem();
             let mut solver = SkatEngine::new(concrete_problem, None);
-            let x = self.uproblem.threshold();
-            let search_result = solve_all_cards(&mut solver, x - 1, x);
-            let mut local_dict = HashMap::new();
+            let search_result = solve_all_cards(&mut solver, threshold - 1, threshold);
 
+            let mut local_dict: HashMap<u32, u8> = HashMap::new();
             for line in search_result.results.iter() {
                 let card = line.0;
                 let value = line.2;
-                let mut winvalue: u8 = 0;
 
-                let mut declarer_wins = false;
-                if self.uproblem.game_type() == Game::Null {
-                    if value == 0 {
-                        declarer_wins = true;
-                    }
+                let declarer_wins = if game_type == Game::Null {
+                    value == 0
                 } else {
-                    if value >= self.uproblem.threshold() {
-                        declarer_wins = true;
-                    }
-                }
-
-                if my_player == Player::Declarer {
+                    value >= threshold
+                };
+                let winvalue: u8 = if my_player == Player::Declarer {
                     if declarer_wins {
-                        winvalue = 1;
+                        1
+                    } else {
+                        0
                     }
                 } else {
-                    // Defender wins if Declarer Loses
                     if !declarer_wins {
-                        winvalue = 1;
+                        1
+                    } else {
+                        0
                     }
-                }
-
+                };
                 local_dict.insert(card, winvalue);
-
-                let entry = global_dict.entry(card).or_insert(0);
-                *entry += winvalue;
             }
 
+            // Merge into global accumulator.
+            {
+                let mut global = global_dict.lock().unwrap();
+                for (&card, &wv) in local_dict.iter() {
+                    *global.entry(card).or_insert(0) += wv as u32;
+                }
+            }
+
+            // Optional per-sample log file (serialised via re-opening the file).
             if let Some(path) = &self.log_file {
                 let mut file = OpenOptions::new()
                     .create(true)
                     .append(true)
                     .open(path)
                     .unwrap();
-
                 writeln!(file, "Sample {}:", i).unwrap();
                 writeln!(
                     file,
@@ -161,68 +167,107 @@ impl PimcSearch {
                 .unwrap();
                 writeln!(file, "Left    : {}", solver.context.left_cards().__str()).unwrap();
                 writeln!(file, "Right   : {}", solver.context.right_cards().__str()).unwrap();
-                let mut wins: Vec<String> = local_dict
-                    .iter()
-                    .filter(|(_, &v)| v > 0)
-                    .map(|(k, _)| k.__str())
-                    .collect();
-                let mut losses: Vec<String> = local_dict
-                    .iter()
-                    .filter(|(_, &v)| v == 0)
-                    .map(|(k, _)| k.__str())
-                    .collect();
-
-                // Sort for consistent output
-                wins.sort();
-                losses.sort();
-
-                writeln!(
-                    file,
-                    "Moves   : WINS: {} | LOSS: {}",
-                    wins.join(" "),
-                    losses.join(" ")
-                )
-                .unwrap();
                 writeln!(file, "--------------------------------------------------").unwrap();
             }
 
             if info {
-                println!("Game {}", i);
                 println!(
-                    "Declarer cards: {}",
-                    solver.context.declarer_cards().__str()
+                    "Sample {}: Declarer={} Left={} Right={}",
+                    i,
+                    solver.context.declarer_cards().__str(),
+                    solver.context.left_cards().__str(),
+                    solver.context.right_cards().__str(),
                 );
-                println!("Left cards    : {}", solver.context.left_cards().__str());
-                println!("Right cards   : {}", solver.context.right_cards().__str());
-                println!(
-                    "All moves: {}",
-                    local_dict
-                        .iter()
-                        .map(|(k, v)| format!("{}: {}", k.__str(), v))
-                        .collect::<Vec<_>>()
-                        .join(", ")
-                );
-                println!();
             }
-        }
+        });
 
-        let mut ret_dict = HashMap::new();
+        let global = global_dict.into_inner().unwrap();
+        let mut sorted: Vec<(u32, f32)> = global
+            .iter()
+            .map(|(&card, &wins)| (card, wins as f32 / self.sample_size as f32))
+            .collect();
+        sorted.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap());
+        sorted
+    }
 
-        for (k, v) in global_dict.iter() {
-            let entry = ret_dict.entry(*k).or_insert(0.0);
-            *entry = *v as f32 / self.sample_size as f32;
-        }
+    /// Like `estimate_probability_of_all_cards` but returns the **average declarer point value**
+    /// (0–120) instead of a binary win/loss probability.
+    ///
+    /// From the perspective of the current player:
+    /// - Declarer: higher average score = better.
+    /// - Defender: score is inverted to `120 - decl_points`, so higher still means better.
+    /// - Null games: declarer_wins (value==0) → score 120; else 0.
+    ///
+    /// Returns `Vec<(card, avg_score)>` sorted descending by avg_score.
+    pub fn estimate_avg_points_of_all_cards(&self, info: bool) -> Vec<(u32, f32)> {
+        let my_player = self.uproblem.my_player();
+        let game_type = self.uproblem.game_type();
 
-        let mut sorted_entries = ret_dict.iter().collect::<Vec<_>>();
-        sorted_entries.sort_by(|a, b| b.1.partial_cmp(a.1).unwrap());
+        // Shared accumulator: card → (sum_of_scores, count).
+        let global: Mutex<HashMap<u32, (f32, u32)>> = Mutex::new(HashMap::new());
 
-        let mut ret: Vec<(u32, f32)> = Vec::new();
+        (0..self.sample_size).into_par_iter().for_each(|i| {
+            let concrete_problem = self.uproblem.generate_concrete_problem();
+            let mut solver = SkatEngine::new(concrete_problem, None);
+            // Full-range solve to get exact point values (0–120).
+            let search_result = solve_all_cards(&mut solver, 0, 120);
 
-        for entry in sorted_entries {
-            ret.push((*entry.0, *entry.1));
-        }
+            let mut local: Vec<(u32, f32)> = Vec::new();
+            for line in search_result.results.iter() {
+                let card = line.0;
+                let decl_points = line.2; // u8, 0–120
 
-        ret
+                let player_score: f32 = if game_type == Game::Null {
+                    if decl_points == 0 {
+                        if my_player == Player::Declarer {
+                            120.0
+                        } else {
+                            0.0
+                        }
+                    } else {
+                        if my_player == Player::Declarer {
+                            0.0
+                        } else {
+                            120.0
+                        }
+                    }
+                } else if my_player == Player::Declarer {
+                    decl_points as f32
+                } else {
+                    120.0 - decl_points as f32
+                };
+                local.push((card, player_score));
+            }
+
+            // Merge into global accumulator.
+            {
+                let mut g = global.lock().unwrap();
+                for (card, score) in local {
+                    let entry = g.entry(card).or_insert((0.0, 0));
+                    entry.0 += score;
+                    entry.1 += 1;
+                }
+            }
+
+            if info {
+                println!(
+                    "Sample {}: Declarer={} Left={} Right={}",
+                    i,
+                    solver.context.declarer_cards().__str(),
+                    solver.context.left_cards().__str(),
+                    solver.context.right_cards().__str(),
+                );
+            }
+        });
+
+        // Compute averages and sort descending.
+        let g = global.into_inner().unwrap();
+        let mut entries: Vec<(u32, f32)> = g
+            .iter()
+            .map(|(&card, &(sum, cnt))| (card, sum / cnt.max(1) as f32))
+            .collect();
+        entries.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
+        entries
     }
 }
 

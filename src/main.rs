@@ -261,6 +261,7 @@ fn main() {
             );
             println!("Analysis complete.");
         }
+
         args::Commands::AnalyzeGrand {
             count,
             samples,
@@ -888,106 +889,186 @@ fn main() {
             println!("--------------------------------------------------");
         }
         args::Commands::Playout {
+            game_type,
+            start_player,
             context,
             samples,
-            god,
         } => {
-            println!("Reading context file: {}", context);
-            let context_content = fs::read_to_string(context).expect("Unable to read context file");
-            println!("Context content read. Parsing JSON...");
-            let input: args::GameContextInput =
-                serde_json::from_str(&context_content).expect("JSON was not well-formatted");
-            println!("JSON parsed successfully.");
+            if let Some(ctx_path) = context {
+                println!("Reading context file: {}", ctx_path);
+                let context_content =
+                    fs::read_to_string(ctx_path).expect("Unable to read context file");
+                println!("Context content read. Parsing JSON...");
+                let input: args::GameContextInput =
+                    serde_json::from_str(&context_content).expect("JSON was not well-formatted");
+                println!("JSON parsed successfully.");
 
-            let mut game_context = GameContext::create(
-                input.declarer_cards.__bit(),
-                input.left_cards.__bit(),
-                input.right_cards.__bit(),
-                input.game_type,
-                input.start_player,
-            );
+                let mut game_context = GameContext::create(
+                    input.declarer_cards.__bit(),
+                    input.left_cards.__bit(),
+                    input.right_cards.__bit(),
+                    input.game_type,
+                    input.start_player,
+                );
 
-            if let Some(trick_cards_str) = input.trick_cards {
-                game_context.set_trick_cards(trick_cards_str.__bit());
-            }
+                if let Some(trick_cards_str) = input.trick_cards {
+                    game_context.set_trick_cards(trick_cards_str.__bit());
+                }
 
-            if let Some(trick_suit_str) = input.trick_suit {
-                let suit = match trick_suit_str.to_lowercase().as_str() {
-                    "clubs" | "c" => CLUBS,
-                    "spades" | "s" => SPADES,
-                    "hearts" | "h" => HEARTS,
-                    "diamonds" | "d" => DIAMONDS,
-                    "trump" | "t" => match game_context.game_type() {
-                        skat_aug23::skat::defs::Game::Grand => {
-                            skat_aug23::consts::bitboard::TRUMP_GRAND
-                        }
-                        _ => skat_aug23::consts::bitboard::TRUMP_SUIT,
-                    },
-                    _ => 0,
-                };
-                game_context.set_trick_suit(suit);
-            }
+                if let Some(trick_suit_str) = input.trick_suit {
+                    let suit = match trick_suit_str.to_lowercase().as_str() {
+                        "clubs" | "c" => CLUBS,
+                        "spades" | "s" => SPADES,
+                        "hearts" | "h" => HEARTS,
+                        "diamonds" | "d" => DIAMONDS,
+                        "trump" | "t" => match game_context.game_type() {
+                            skat_aug23::skat::defs::Game::Grand => {
+                                skat_aug23::consts::bitboard::TRUMP_GRAND
+                            }
+                            _ => skat_aug23::consts::bitboard::TRUMP_SUIT,
+                        },
+                        _ => 0,
+                    };
+                    game_context.set_trick_suit(suit);
+                }
 
-            if let Some(points) = input.declarer_start_points {
-                game_context.set_declarer_start_points(points);
-            } else {
-                let total_cards = game_context.declarer_cards().count_ones()
-                    + game_context.left_cards().count_ones()
-                    + game_context.right_cards().count_ones()
-                    + game_context.trick_cards().count_ones();
-
-                if total_cards == 30
-                    && game_context.game_type() != skat_aug23::skat::defs::Game::Null
-                {
-                    let skat = game_context.get_skat();
-                    let points = skat.points();
-                    println!(
-                        "Auto-Skat: Determined {} points in Skat. Adding to declarer start points.",
-                        points
-                    );
+                if let Some(points) = input.declarer_start_points {
                     game_context.set_declarer_start_points(points);
-                }
-            }
+                } else {
+                    let total_cards = game_context.declarer_cards().count_ones()
+                        + game_context.left_cards().count_ones()
+                        + game_context.right_cards().count_ones()
+                        + game_context.trick_cards().count_ones();
 
-            game_context.set_threshold_upper(61);
-
-            if let Err(e) = game_context.validate() {
-                eprintln!("Validation Error: {}", e);
-                std::process::exit(1);
-            }
-
-            let n_samples = samples.or(input.samples).unwrap_or(20);
-
-            // Determine God Players
-            let mut god_players = Vec::new();
-            let mut god_strings = Vec::new();
-
-            // CLI overrides JSON
-            if let Some(g_str) = god {
-                god_strings = g_str.split(',').map(|s| s.trim().to_string()).collect();
-            } else if let Some(g_vec) = input.god_players {
-                god_strings = g_vec;
-            }
-
-            for s in god_strings {
-                match s.to_lowercase().as_str() {
-                    "declarer" | "decl" => {
-                        god_players.push(skat_aug23::skat::defs::Player::Declarer)
+                    if total_cards == 30
+                        && game_context.game_type() != skat_aug23::skat::defs::Game::Null
+                    {
+                        let skat = game_context.get_skat();
+                        let points = skat.points();
+                        println!(
+                            "Auto-Skat: Determined {} points in Skat. Adding to declarer start points.",
+                            points
+                        );
+                        game_context.set_declarer_start_points(points);
                     }
-                    "left" => god_players.push(skat_aug23::skat::defs::Player::Left),
-                    "right" => god_players.push(skat_aug23::skat::defs::Player::Right),
-                    _ => eprintln!("Warning: Unknown God Player '{}'", s),
                 }
-            }
 
-            println!(
-                "Calling skat_aug23::pimc::playout::playout with {} samples...",
-                n_samples
-            );
-            if !god_players.is_empty() {
-                println!("  God Mode Active for: {:?}", god_players);
+                game_context.set_threshold_upper(120); // Playout uses value not win check, but good to set.
+
+                if let Err(e) = game_context.validate() {
+                    eprintln!("Validation Error: {}", e);
+                    std::process::exit(1);
+                }
+
+                println!("Calling skat_aug23::extensions::cli_playout::run_playout...");
+                skat_aug23::extensions::cli_playout::run_playout(
+                    game_context,
+                    input.game_type,
+                    input.start_player,
+                    samples,
+                );
+            } else {
+                println!("No context file provided. Generating random deal...");
+                let (game_context, g, p) =
+                    skat_aug23::extensions::cli_playout::generate_random_deal(
+                        game_type,
+                        start_player,
+                    );
+
+                skat_aug23::extensions::cli_playout::run_playout(game_context, g, p, samples);
             }
-            skat_aug23::pimc::playout::playout(game_context, n_samples, &god_players);
+        }
+        args::Commands::PointsPlayout {
+            game_type,
+            start_player,
+            context,
+            samples,
+        } => {
+            if let Some(ctx_path) = context {
+                println!("Reading context file: {}", ctx_path);
+                let context_content =
+                    fs::read_to_string(ctx_path).expect("Unable to read context file");
+                let input: args::GameContextInput =
+                    serde_json::from_str(&context_content).expect("JSON was not well-formatted");
+
+                let mut game_context = GameContext::create(
+                    input.declarer_cards.__bit(),
+                    input.left_cards.__bit(),
+                    input.right_cards.__bit(),
+                    input.game_type,
+                    input.start_player,
+                );
+
+                if let Some(trick_cards_str) = input.trick_cards {
+                    game_context.set_trick_cards(trick_cards_str.__bit());
+                }
+
+                if let Some(trick_suit_str) = input.trick_suit {
+                    let suit = match trick_suit_str.to_lowercase().as_str() {
+                        "clubs" | "c" => CLUBS,
+                        "spades" | "s" => SPADES,
+                        "hearts" | "h" => HEARTS,
+                        "diamonds" | "d" => DIAMONDS,
+                        "trump" | "t" => match game_context.game_type() {
+                            skat_aug23::skat::defs::Game::Grand => {
+                                skat_aug23::consts::bitboard::TRUMP_GRAND
+                            }
+                            _ => skat_aug23::consts::bitboard::TRUMP_SUIT,
+                        },
+                        _ => 0,
+                    };
+                    game_context.set_trick_suit(suit);
+                }
+
+                if let Some(points) = input.declarer_start_points {
+                    game_context.set_declarer_start_points(points);
+                } else {
+                    let total_cards = game_context.declarer_cards().count_ones()
+                        + game_context.left_cards().count_ones()
+                        + game_context.right_cards().count_ones()
+                        + game_context.trick_cards().count_ones();
+
+                    if total_cards == 30
+                        && game_context.game_type() != skat_aug23::skat::defs::Game::Null
+                    {
+                        let skat = game_context.get_skat();
+                        let points = skat.points();
+                        println!(
+                            "Auto-Skat: Determined {} points in Skat. Adding to declarer start points.",
+                            points
+                        );
+                        game_context.set_declarer_start_points(points);
+                    }
+                }
+
+                game_context.set_threshold_upper(120);
+
+                if let Err(e) = game_context.validate() {
+                    eprintln!("Validation Error: {}", e);
+                    std::process::exit(1);
+                }
+
+                skat_aug23::extensions::cli_playout::run_points_playout(
+                    game_context,
+                    input.game_type,
+                    input.start_player,
+                    samples,
+                );
+            } else {
+                println!("No context file provided. Generating random deal...");
+                let (game_context, g, p) =
+                    skat_aug23::extensions::cli_playout::generate_random_deal(
+                        game_type,
+                        start_player,
+                    );
+
+                skat_aug23::extensions::cli_playout::run_points_playout(
+                    game_context,
+                    g,
+                    p,
+                    samples,
+                );
+            }
         }
         args::Commands::StandardPlayout { context } => {
             println!("Reading context file: {}", context);

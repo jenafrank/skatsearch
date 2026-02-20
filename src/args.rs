@@ -49,15 +49,35 @@ pub enum Commands {
     /// Simulates the game using Perfect Information Monte Carlo (PIMC).
     /// It samples possible hidden card distributions to handle incomplete information and plays out the game move-by-move. This is closest to a "real" AI player.
     Playout {
-        /// Path to the JSON context file
+        /// Game Type: "grand", "null", "clubs"
+        #[arg(long, default_value = "grand")]
+        game_type: String,
+        /// Start Player: "declarer", "left", "right"
+        #[arg(long, default_value = "declarer")]
+        start_player: String,
+        /// Path to the JSON context file (optional, overrides generated)
         #[arg(short, long)]
-        context: String,
-        /// Number of PIMC samples to run per move (default: 20, or from JSON)
+        context: Option<String>,
+        /// Number of PIMC samples to run per move (default: 20)
+        #[arg(short, long, default_value_t = 20)]
+        samples: u32,
+    },
+    /// Simulates the game using PIMC, but optimises for average expected POINT VALUE instead of win probability.
+    /// This leads to more natural-looking play since the metric is continuous (0-120) rather than binary win/loss.
+    /// Particularly useful for training data generation.
+    PointsPlayout {
+        /// Game Type: "grand", "null", "clubs"
+        #[arg(long, default_value = "grand")]
+        game_type: String,
+        /// Start Player: "declarer", "left", "right"
+        #[arg(long, default_value = "declarer")]
+        start_player: String,
+        /// Path to the JSON context file (optional, overrides generated)
         #[arg(short, long)]
-        samples: Option<u32>,
-        /// Players who have perfect information (comma-separated: "declarer,left,right")
-        #[arg(short, long)]
-        god: Option<String>,
+        context: Option<String>,
+        /// Number of PIMC samples to run per move (default: 20)
+        #[arg(short, long, default_value_t = 20)]
+        samples: u32,
     },
     /// Plays out the game from the given state using Perfect Information.
     /// It assumes all cards are known to all players (open hand) and executes the optimal line of play to determine the final score.
