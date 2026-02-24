@@ -89,6 +89,21 @@ pub enum Commands {
         #[arg(short, long, default_value_t = 20)]
         samples: u32,
     },
+    /// Null-specific PIMC playout. Uses a 3-tier card selection strategy:
+    /// (1) PIMC win probability, (2) trick-analysis tiebreaker (declarer avoids,
+    /// opponent forces with cheapest winning card), (3) lowest card fallback.
+    NullPlayout {
+        /// Number of PIMC samples to run per move (default: 20)
+        #[arg(short, long, default_value_t = 20)]
+        samples: u32,
+        /// Path to a JSON context file (optional). If omitted, a random Null deal is generated.
+        #[arg(short, long)]
+        context: Option<String>,
+        /// Sampling mode for PIMC: "random" (default) or "likely-null"
+        /// (only deals where opponents hold plausible Null hands are accepted).
+        #[arg(short, long, default_value = "random")]
+        distribution: String,
+    },
     /// Plays out the game from the given state using Perfect Information.
     /// It assumes all cards are known to all players (open hand) and executes the optimal line of play to determine the final score.
     StandardPlayout {

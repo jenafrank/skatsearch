@@ -1090,6 +1090,35 @@ fn main() {
                 }
             }
         }
+        args::Commands::NullPlayout {
+            samples,
+            context,
+            distribution,
+        } => {
+            use skat_aug23::extensions::cli_playout::{generate_random_deal, run_null_playout};
+            use skat_aug23::pimc::pimc_problem::SamplingMode;
+            let mode = if distribution == "likely-null" {
+                SamplingMode::LikelyNull
+            } else {
+                SamplingMode::Random
+            };
+            let ctx = if let Some(ctx_path) = context {
+                let content = fs::read_to_string(&ctx_path).expect("Unable to read context file");
+                let input: args::GameContextInput =
+                    serde_json::from_str(&content).expect("Invalid JSON context");
+                GameContext::create(
+                    input.declarer_cards.__bit(),
+                    input.left_cards.__bit(),
+                    input.right_cards.__bit(),
+                    input.game_type,
+                    input.start_player,
+                )
+            } else {
+                let (c, _, _) = generate_random_deal("null".to_string(), "declarer".to_string());
+                c
+            };
+            run_null_playout(ctx, samples, mode);
+        }
         args::Commands::StandardPlayout { context } => {
             println!("Reading context file: {}", context);
             let context_content = fs::read_to_string(context).expect("Unable to read context file");

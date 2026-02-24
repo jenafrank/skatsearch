@@ -1,10 +1,104 @@
-﻿use crate::skat::builder::GameContextBuilder;
+use crate::consts::bitboard::{
+    ACES, EIGHTS, JACKS, KINGS, NINES, NULL_CLUBS, NULL_DIAMONDS, NULL_HEARTS, NULL_SPADES, QUEENS,
+    SEVENS, TENS,
+};
+use crate::skat::builder::GameContextBuilder;
 use crate::skat::context::GameContext;
 use crate::skat::defs::Game;
 use crate::skat::defs::Player;
 use crate::traits::{BitConverter, StringConverter};
 
 use super::facts::Facts;
+
+/// How PIMC samples are drawn: purely random, or filtered to plausible Null hands.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
+pub enum SamplingMode {
+    /// Every legal card distribution is equally likely (standard PIMC).
+    #[default]
+    Random,
+    /// Only distributions where BOTH opponents hold a "likely Null hand" are accepted.
+    /// A likely Null hand has =2 gaps total and gaps in at most 2 suits.
+    /// (Gap = a break in the consecutive sequence of a suit that could force a trick.)
+    LikelyNull,
+}
+
+/// Count the number of Null gaps (Fehlstellen) in a single suit.
+///
+/// Gaps are:
+/// 1. A *starting gap*: the lowest held card is NOT the 7 of the suit.
+/// 2. An *inner gap*:   a hole between two consecutively held ranks.
+///
+/// Cards absent above the highest held rank are NOT counted as gaps.
+fn count_null_gaps_in_suit(hand: u32, suit_mask: u32) -> u32 {
+    let suit_hand = hand & suit_mask;
+    if suit_hand == 0 {
+        return 0;
+    }
+
+    // Rank presence within this suit, ordered 7..A (index 0 = Seven, 7 = Ace).
+    let rank_masks = [
+        SEVENS & suit_mask,
+        EIGHTS & suit_mask,
+        NINES & suit_mask,
+        TENS & suit_mask,
+        JACKS & suit_mask,
+        QUEENS & suit_mask,
+        KINGS & suit_mask,
+        ACES & suit_mask,
+    ];
+    let held: [bool; 8] = std::array::from_fn(|i| (suit_hand & rank_masks[i]) != 0);
+
+    // Find first and last held rank.
+    let first = match held.iter().position(|&h| h) {
+        Some(i) => i,
+        None => return 0,
+    };
+    let last = held.iter().rposition(|&h| h).unwrap_or(first);
+
+    let mut gaps = 0u32;
+
+    // Starting gap: doesn't begin at rank index 0 (Seven).
+    if first > 0 {
+        gaps += 1;
+    }
+
+    // Inner gaps: holes strictly between first and last held rank.
+    let mut in_gap = false;
+    for i in (first + 1)..=last {
+        if held[i] {
+            if in_gap {
+                gaps += 1;
+                in_gap = false;
+            }
+        } else {
+            in_gap = true;
+        }
+    }
+
+    gaps
+}
+
+/// Count a hand's total Null gaps and in how many suits gaps appear.
+pub fn count_hand_null_gaps(hand: u32) -> (u32, u32) {
+    let suits = [NULL_CLUBS, NULL_SPADES, NULL_HEARTS, NULL_DIAMONDS];
+    let mut total_gaps = 0u32;
+    let mut suits_with_gaps = 0u32;
+    for &suit in &suits {
+        let g = count_null_gaps_in_suit(hand, suit);
+        total_gaps += g;
+        if g > 0 {
+            suits_with_gaps += 1;
+        }
+    }
+    (total_gaps, suits_with_gaps)
+}
+
+/// Returns `true` if the hand qualifies as a plausible Null hand:
+/// =2 total gaps and gaps in at most 2 suits.
+pub fn is_likely_null_hand(hand: u32) -> bool {
+    let (total, suit_count) = count_hand_null_gaps(hand);
+    total <= 2 && suit_count <= 2
+}
 
 #[derive(Clone, Copy)]
 pub struct PimcProblem {
@@ -28,6 +122,9 @@ pub struct PimcProblem {
 
     // Asymmetric Information
     skat_cards: Option<u32>,
+
+    // Sampling mode
+    pub sampling_mode: SamplingMode,
 }
 
 impl PimcProblem {
@@ -545,6 +642,7 @@ impl PimcProblem {
             facts_next_player: Facts::zero_fact(),
             declarer_start_points: 0,
             skat_cards: None,
+            sampling_mode: SamplingMode::Random,
         }
     }
 
@@ -557,6 +655,32 @@ impl PimcProblem {
     }
 
     pub fn generate_concrete_problem(&self) -> GameContext {
+        if self.sampling_mode == SamplingMode::LikelyNull {
+            self.generate_concrete_problem_likely_null()
+        } else {
+            self.generate_concrete_problem_inner()
+        }
+    }
+
+    /// Rejection-sampling version: retries until both opponents hold
+    /// a "likely Null" hand (=2 gaps, gaps in =2 suits).
+    fn generate_concrete_problem_likely_null(&self) -> GameContext {
+        for _ in 0..200 {
+            let ctx = self.generate_concrete_problem_inner();
+            let (left_ok, right_ok) = {
+                let lh = ctx.left_cards();
+                let rh = ctx.right_cards();
+                (is_likely_null_hand(lh), is_likely_null_hand(rh))
+            };
+            if left_ok && right_ok {
+                return ctx;
+            }
+        }
+        // Fallback: return any valid deal if no LikelyNull found after 200 tries.
+        self.generate_concrete_problem_inner()
+    }
+
+    fn generate_concrete_problem_inner(&self) -> GameContext {
         let _ = self.validate();
 
         let distribution_pool = self.calculate_distribution_pool();
@@ -653,7 +777,7 @@ fn verify_card_distribution(problem: &GameContext) -> bool {
 // Unit tests
 #[cfg(test)]
 mod tests {
-    use super::PimcProblem;
+    use super::{PimcProblem, SamplingMode};
     use crate::{
         pimc::pimc_problem::Facts,
         skat::defs::{Game, Player},
@@ -676,6 +800,7 @@ mod tests {
             declarer_start_points: 0,
 
             skat_cards: None,
+            sampling_mode: SamplingMode::Random,
         };
 
         let problem = uproblem.generate_concrete_problem();
@@ -701,6 +826,7 @@ mod tests {
             declarer_start_points: 0,
 
             skat_cards: None,
+            sampling_mode: SamplingMode::Random,
         };
 
         let problem = uproblem.generate_concrete_problem();
@@ -743,6 +869,7 @@ mod tests {
             declarer_start_points: 0,
 
             skat_cards: None,
+            sampling_mode: SamplingMode::Random,
         };
 
         // Run multiple times to ensure randomness doesn't accidentally succeed
@@ -799,6 +926,7 @@ mod tests {
             declarer_start_points: 0,
 
             skat_cards: None,
+            sampling_mode: SamplingMode::Random,
         };
 
         for _ in 0..20 {
@@ -850,6 +978,7 @@ mod tests {
             declarer_start_points: 0,
 
             skat_cards: None,
+            sampling_mode: SamplingMode::Random,
         };
 
         for _ in 0..20 {
@@ -904,6 +1033,7 @@ mod tests {
             declarer_start_points: 0,
 
             skat_cards: None,
+            sampling_mode: SamplingMode::Random,
         };
 
         for _ in 0..20 {
@@ -945,6 +1075,7 @@ mod tests {
             declarer_start_points: 0,
 
             skat_cards: None,
+            sampling_mode: SamplingMode::Random,
         };
 
         for _ in 0..20 {
@@ -987,6 +1118,7 @@ mod tests {
             declarer_start_points: 0,
 
             skat_cards: None,
+            sampling_mode: SamplingMode::Random,
         };
 
         for _ in 0..20 {
@@ -1028,6 +1160,7 @@ mod tests {
             declarer_start_points: 0,
 
             skat_cards: None,
+            sampling_mode: SamplingMode::Random,
         };
 
         for _ in 0..20 {
@@ -1069,6 +1202,7 @@ mod tests {
             declarer_start_points: 0,
 
             skat_cards: None,
+            sampling_mode: SamplingMode::Random,
         };
 
         for _ in 0..20 {

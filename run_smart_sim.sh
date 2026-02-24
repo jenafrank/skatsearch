@@ -29,6 +29,12 @@ set -euo pipefail
 N_GAMES=${1:-1000}
 SAMPLES=${2:-20}
 N_WORKERS=${3:-$(nproc)}
+RAYON_THREADS=${4:-2}    # Rayon inner threads per worker process
+                          # N_WORKERS × RAYON_THREADS should equal nproc
+                          # e.g. 16 cores → RAYON=2, WORKERS=8
+
+# Propagate to child processes (Rayon reads this automatically)
+export RAYON_NUM_THREADS="${RAYON_THREADS}"
 REPO_DIR="$(cd "$(dirname "$0")" && pwd)"
 BIN="${REPO_DIR}/target/release/skat_aug23"
 SCRIPT="${REPO_DIR}/run_smart_playout_loop.py"

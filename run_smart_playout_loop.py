@@ -127,12 +127,20 @@ def main():
             continue
 
         if result.returncode != 0:
-            # Unexpected error – log and continue
-            with open(LOG_FILE, "a", encoding="utf-8") as log:
-                log.write(f"[Attempt {attempts}] ERROR exit={result.returncode}\n")
-                log.write(result.stdout[:500])
-                log.write("\n")
+            # Unexpected error – print stderr visibly and abort after 5 consecutive failures
+            consecutive_errors = consecutive_errors + 1 if 'consecutive_errors' in dir() else 1
+            print(f"\n[ERROR] attempt {attempts}: exit code {result.returncode}", file=sys.stderr)
+            if result.stderr.strip():
+                print(f"  stderr: {result.stderr.strip()[:300]}", file=sys.stderr)
+            if result.stdout.strip():
+                print(f"  stdout: {result.stdout.strip()[:300]}", file=sys.stderr)
+            if consecutive_errors >= 5:
+                sys.exit(f"\nABORTED: 5 consecutive binary errors. "
+                         f"Check that the binary is compiled for this OS:\n"
+                         f"  cargo build --bin skat_aug23 --release")
             continue
+
+        consecutive_errors = 0
 
         qualified += 1
         output = result.stdout

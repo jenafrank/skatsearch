@@ -1,4 +1,4 @@
-use super::{facts::Facts, pimc_problem::PimcProblem};
+use super::{facts::Facts, pimc_problem::PimcProblem, pimc_problem::SamplingMode};
 use crate::{
     consts::bitboard::ALLCARDS,
     skat::defs::{Game, Player},
@@ -26,6 +26,9 @@ pub struct PimcProblemBuilder {
 
     // Asymmetric Info
     skat_cards: Option<u32>,
+
+    // Sampling Mode
+    sampling_mode: Option<SamplingMode>,
 }
 
 impl PimcProblemBuilder {
@@ -52,6 +55,11 @@ impl PimcProblemBuilder {
         self.my_player = Some(player);
         self.next_player = Some(player);
         self.my_cards = Some(cards.__bit());
+        self
+    }
+
+    pub fn sampling_mode(mut self, mode: SamplingMode) -> PimcProblemBuilder {
+        self.sampling_mode = Some(mode);
         self
     }
 
@@ -283,6 +291,12 @@ impl PimcProblemBuilder {
             uproblem.set_active_suit(active_suit);
         }
 
+        if let Some(mode) = self.sampling_mode {
+            uproblem.sampling_mode = mode;
+        } else {
+            uproblem.sampling_mode = SamplingMode::Random;
+        }
+
         uproblem
     }
 
@@ -372,6 +386,7 @@ impl Default for PimcProblemBuilder {
             facts_right: Some(Facts::zero_fact()),
             declarer_start_points: Some(0),
             skat_cards: None,
+            sampling_mode: None,
         }
     }
 }
