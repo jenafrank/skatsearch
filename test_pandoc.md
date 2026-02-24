@@ -1,2 +1,0 @@
-# Test PDF
-Hello World.
