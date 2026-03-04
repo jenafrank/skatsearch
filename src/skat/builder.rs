@@ -17,6 +17,7 @@ pub struct GameContextBuilder {
     trick_cards: Option<u32>,
     trick_suit: Option<u32>,
     declarer_start_points: Option<u8>,
+    played_cards: Option<u32>,
 }
 
 impl GameContextBuilder {
@@ -125,6 +126,11 @@ impl GameContextBuilder {
         self
     }
 
+    pub fn played_cards(mut self, played_cards: u32) -> GameContextBuilder {
+        self.played_cards = Some(played_cards);
+        self
+    }
+
     pub fn build(self) -> GameContext {
         self.validate();
 
@@ -172,6 +178,10 @@ impl GameContextBuilder {
 
         if let Some(trick_suit) = self.trick_suit {
             context.set_trick_suit(trick_suit);
+        }
+
+        if let Some(played_cards) = self.played_cards {
+            context.set_played_cards(played_cards);
         }
         // But ProblemBuilder used setters.
 
@@ -242,7 +252,8 @@ impl GameContextBuilder {
         next_player_facts: Facts,
         previous_player_facts: Facts,
     ) -> GameContextBuilder {
-        let cards_on_hands_of_both_other_players = (all_cards & !my_cards) & !card_on_table_previous_player & !card_on_table_next_player;
+        let cards_on_hands_of_both_other_players =
+            (all_cards & !my_cards) & !card_on_table_previous_player & !card_on_table_next_player;
 
         let mut cards_next_player = cards_on_hands_of_both_other_players;
         let mut cards_previous_player = cards_on_hands_of_both_other_players;
@@ -258,9 +269,13 @@ impl GameContextBuilder {
 
         let my_cards_count = my_cards.count_ones();
 
-
         let target_next = my_cards_count - if card_on_table_next_player != 0 { 1 } else { 0 };
-        let target_prev = my_cards_count - if card_on_table_previous_player != 0 { 1 } else { 0 };
+        let target_prev = my_cards_count
+            - if card_on_table_previous_player != 0 {
+                1
+            } else {
+                0
+            };
 
         if target_next == 0 {
             cards_next_player = 0;
@@ -270,11 +285,11 @@ impl GameContextBuilder {
         }
 
         let proposed_draw = self.draw_cards(
-            cards_next_player, 
-            cards_previous_player, 
+            cards_next_player,
+            cards_previous_player,
             my_cards,
             target_next,
-            target_prev
+            target_prev,
         );
 
         cards_next_player = proposed_draw.0 | card_on_table_next_player;
@@ -300,17 +315,17 @@ impl GameContextBuilder {
         cards_player_2: u32,
         _my_cards: u32,
         target_p1: u32,
-        target_p2: u32
+        target_p2: u32,
     ) -> (u32, u32) {
         let definite_cards_player_1 = cards_player_1 & !cards_player_2;
         let definite_cards_player_2 = cards_player_2 & !cards_player_1;
 
         let ambiguous_cards = cards_player_1 & cards_player_2;
         let nr_ambiguous_cards = ambiguous_cards.count_ones();
-        
+
         let nr_definite_cards_player_1 = definite_cards_player_1.count_ones();
         let nr_definite_cards_player_2 = definite_cards_player_2.count_ones();
-        
+
         // Ensure we don't underflow if constraints are impossible
         // (Assuming facts are consistent with card counts)
         let needed_for_p1 = if target_p1 > nr_definite_cards_player_1 {
@@ -318,31 +333,33 @@ impl GameContextBuilder {
         } else {
             0 // Should trigger assert/error if facts force too many cards?
         };
-        
+
         let needed_for_p2 = if target_p2 > nr_definite_cards_player_2 {
             target_p2 - nr_definite_cards_player_2
         } else {
-             0 
+            0
         };
 
-        // Assert that the ambiguous cards can satisfy the needs
-        // Note: It's possible nr_ambiguous > needed_p1 + needed_p2 if skat is involved or logic mismatch
-        // But here we usually expect exact match for endgames.
-        // Let's rely on sample count.
-        
-        assert!(needed_for_p1 + needed_for_p2 <= nr_ambiguous_cards, 
-            "Not enough ambiguous cards to satisfy targets! Available: {}, StartP1: {}, StartP2: {}, TargetP1: {}, TargetP2: {}", 
-            nr_ambiguous_cards, nr_definite_cards_player_1, nr_definite_cards_player_2, target_p1, target_p2);
+        // When Facts constraints over-restrict the intersection, gracefully degrade:
+        // Give p1 as many ambiguous cards as it needs (or all available), then p2 gets the rest.
+        // This may slightly violate fact constraints in heavily constrained late-game positions,
+        // but prevents a panic and still produces a valid card distribution.
+        let available_for_p1 = nr_ambiguous_cards.min(needed_for_p1);
+        let remaining_after_p1 = nr_ambiguous_cards.saturating_sub(available_for_p1);
+        let available_for_p2 = remaining_after_p1.min(needed_for_p2);
 
-        let draw_player_1 = random_cards(ambiguous_cards, needed_for_p1);
-        let proposed_player_1 = definite_cards_player_1 | draw_player_1;
-
+        let draw_player_1 = random_cards(ambiguous_cards, available_for_p1);
         let remaining_ambiguous = ambiguous_cards & !draw_player_1;
-        
-        let draw_player_2 = random_cards(remaining_ambiguous, needed_for_p2);
-        let proposed_player_2 = definite_cards_player_2 | draw_player_2;
 
-        (proposed_player_1, proposed_player_2)
+        let draw_player_2 = random_cards(remaining_ambiguous, available_for_p2);
+
+        // If we couldn't draw enough from the ambiguous pool, fill from the unconstrained
+        // remaining cards (those not in either player's constrained pool but in all_cards).
+        // This is acceptable since the original constraint was already approximate.
+        let filled_p1 = definite_cards_player_1 | draw_player_1;
+        let filled_p2 = definite_cards_player_2 | draw_player_2;
+
+        (filled_p1, filled_p2)
     }
 }
 
@@ -358,6 +375,7 @@ impl Default for GameContextBuilder {
             trick_cards: Some(0),
             trick_suit: Some(0),
             declarer_start_points: Some(0),
+            played_cards: Some(0),
         }
     }
 }

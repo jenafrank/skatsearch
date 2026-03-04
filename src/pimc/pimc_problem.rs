@@ -20,6 +20,9 @@ pub enum SamplingMode {
     /// A likely Null hand has =2 gaps total and gaps in at most 2 suits.
     /// (Gap = a break in the consecutive sequence of a suit that could force a trick.)
     LikelyNull,
+    /// Filter out distributions where the declarer hand doesn't have a minimum EV
+    SmartGrand,
+    SmartSuit,
 }
 
 /// Count the number of Null gaps (Fehlstellen) in a single suit.
@@ -100,6 +103,44 @@ pub fn is_likely_null_hand(hand: u32) -> bool {
     total <= 2 && suit_count <= 2
 }
 
+/// Returns `true` if the hand qualifies as a smart Grand hand.
+/// Extracted from research data for Grand EV (2.66 * P - 1.33 > 0).
+pub fn is_playable_grand_hand(hand: u32) -> bool {
+    use crate::skat::signature::HandSignature;
+    let sig = HandSignature::from_hand(hand);
+
+    // In Grand, trump_count = Jacks count for HandSignature
+    let j = sig.trump_count as i32;
+    let s = (sig.aces + sig.attached_tens) as i32;
+    let t = j + sig.max_suit_len as i32;
+
+    match t {
+        4 => (j == 1 && s >= 6) || (j == 2 && s >= 5),
+        5 => (j == 2 && s >= 5) || (j == 3 && s >= 4),
+        6 => (j == 2 && s >= 4) || (j == 3 && s >= 3) || (j == 4 && s >= 3),
+        7 => (j == 2 && s >= 4) || (j == 3 && s >= 3) || (j == 4 && s >= 3),
+        8 => (j == 2 && s >= 3) || (j == 3 && s >= 2) || (j == 4 && s >= 1),
+        _ => false,
+    }
+}
+
+/// Returns `true` if the hand qualifies as a smart Suit hand.
+/// Extracted from research data for Suit EV (2 * P - 1 > 0).
+pub fn is_playable_suit_hand(hand: u32) -> bool {
+    use crate::skat::signature::HandSignature;
+    let sig = HandSignature::from_hand(hand);
+
+    let j = sig.trump_count as i32;
+    let s = (sig.aces + sig.attached_tens) as i32;
+    let t = j + sig.max_suit_len as i32;
+
+    match t {
+        6 => (j == 0 && s >= 5) || (j == 1 && s >= 6), // In Trumps=6 grouping, Suit is optimal at these boundaries
+        8 => (j == 2 && s >= 2) || (j == 4 && s >= 0),
+        _ => false,
+    }
+}
+
 #[derive(Clone, Copy)]
 pub struct PimcProblem {
     game_type: Game,
@@ -125,6 +166,9 @@ pub struct PimcProblem {
 
     // Sampling mode
     pub sampling_mode: SamplingMode,
+
+    // Original cards tracking
+    pub declarer_played_cards: u32,
 }
 
 impl PimcProblem {
@@ -643,6 +687,7 @@ impl PimcProblem {
             declarer_start_points: 0,
             skat_cards: None,
             sampling_mode: SamplingMode::Random,
+            declarer_played_cards: 0,
         }
     }
 
@@ -655,28 +700,44 @@ impl PimcProblem {
     }
 
     pub fn generate_concrete_problem(&self) -> GameContext {
-        if self.sampling_mode == SamplingMode::LikelyNull {
-            self.generate_concrete_problem_likely_null()
-        } else {
-            self.generate_concrete_problem_inner()
+        match self.sampling_mode {
+            SamplingMode::LikelyNull => {
+                self.generate_concrete_problem_rejection_sampled(is_likely_null_hand, true)
+            } // opponent check
+            SamplingMode::SmartGrand => {
+                self.generate_concrete_problem_rejection_sampled(is_playable_grand_hand, false)
+            } // declarer check
+            SamplingMode::SmartSuit => {
+                self.generate_concrete_problem_rejection_sampled(is_playable_suit_hand, false)
+            } // declarer check
+            SamplingMode::Random => self.generate_concrete_problem_inner(),
         }
     }
 
-    /// Rejection-sampling version: retries until both opponents hold
-    /// a "likely Null" hand (=2 gaps, gaps in =2 suits).
-    fn generate_concrete_problem_likely_null(&self) -> GameContext {
+    /// Rejection-sampling version: retries until a condition is met.
+    /// If `check_opponents` is true, checks Left and Right hands.
+    /// If `check_opponents` is false, checks Declarer's hand.
+    fn generate_concrete_problem_rejection_sampled<F>(
+        &self,
+        condition: F,
+        check_opponents: bool,
+    ) -> GameContext
+    where
+        F: Fn(u32) -> bool,
+    {
         for _ in 0..200 {
             let ctx = self.generate_concrete_problem_inner();
-            let (left_ok, right_ok) = {
-                let lh = ctx.left_cards();
-                let rh = ctx.right_cards();
-                (is_likely_null_hand(lh), is_likely_null_hand(rh))
+            let check_passed = if check_opponents {
+                condition(ctx.left_cards()) && condition(ctx.right_cards())
+            } else {
+                let full_hand = ctx.declarer_cards() | self.declarer_played_cards;
+                condition(full_hand)
             };
-            if left_ok && right_ok {
+            if check_passed {
                 return ctx;
             }
         }
-        // Fallback: return any valid deal if no LikelyNull found after 200 tries.
+        // Fallback: return any valid deal if no suitable match found after 200 tries.
         self.generate_concrete_problem_inner()
     }
 
@@ -704,6 +765,7 @@ impl PimcProblem {
                 self.previous_player_facts(),
             )
             .declarer_start_points(self.declarer_start_points)
+            .played_cards(self.declarer_played_cards)
             .build();
 
         if verify_card_distribution(&problem) {
@@ -801,6 +863,7 @@ mod tests {
 
             skat_cards: None,
             sampling_mode: SamplingMode::Random,
+            declarer_played_cards: 0,
         };
 
         let problem = uproblem.generate_concrete_problem();
@@ -827,6 +890,7 @@ mod tests {
 
             skat_cards: None,
             sampling_mode: SamplingMode::Random,
+            declarer_played_cards: 0,
         };
 
         let problem = uproblem.generate_concrete_problem();
@@ -870,6 +934,7 @@ mod tests {
 
             skat_cards: None,
             sampling_mode: SamplingMode::Random,
+            declarer_played_cards: 0,
         };
 
         // Run multiple times to ensure randomness doesn't accidentally succeed
@@ -927,6 +992,7 @@ mod tests {
 
             skat_cards: None,
             sampling_mode: SamplingMode::Random,
+            declarer_played_cards: 0,
         };
 
         for _ in 0..20 {
@@ -979,6 +1045,7 @@ mod tests {
 
             skat_cards: None,
             sampling_mode: SamplingMode::Random,
+            declarer_played_cards: 0,
         };
 
         for _ in 0..20 {
@@ -1034,6 +1101,7 @@ mod tests {
 
             skat_cards: None,
             sampling_mode: SamplingMode::Random,
+            declarer_played_cards: 0,
         };
 
         for _ in 0..20 {
@@ -1076,6 +1144,7 @@ mod tests {
 
             skat_cards: None,
             sampling_mode: SamplingMode::Random,
+            declarer_played_cards: 0,
         };
 
         for _ in 0..20 {
@@ -1119,6 +1188,7 @@ mod tests {
 
             skat_cards: None,
             sampling_mode: SamplingMode::Random,
+            declarer_played_cards: 0,
         };
 
         for _ in 0..20 {
@@ -1161,6 +1231,7 @@ mod tests {
 
             skat_cards: None,
             sampling_mode: SamplingMode::Random,
+            declarer_played_cards: 0,
         };
 
         for _ in 0..20 {
@@ -1203,6 +1274,7 @@ mod tests {
 
             skat_cards: None,
             sampling_mode: SamplingMode::Random,
+            declarer_played_cards: 0,
         };
 
         for _ in 0..20 {

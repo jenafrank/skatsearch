@@ -61,6 +61,10 @@ pub enum Commands {
         /// Number of PIMC samples to run per move (default: 20)
         #[arg(short, long, default_value_t = 20)]
         samples: u32,
+        /// Sampling mode for PIMC: "random" (default), "smart-grand" or "smart-suit"
+        /// (Filters out unplayable hands for the declarer).
+        #[arg(short, long, default_value = "random")]
+        distribution: String,
     },
     /// Simulates the game using PIMC, but optimises for average expected POINT VALUE instead of win probability.
     /// This leads to more natural-looking play since the metric is continuous (0-120) rather than binary win/loss.
@@ -78,6 +82,19 @@ pub enum Commands {
         /// Number of PIMC samples to run per move (default: 20)
         #[arg(short, long, default_value_t = 20)]
         samples: u32,
+        /// Sampling mode for PIMC: "random" (default), "smart-grand" or "smart-suit"
+        /// (Filters out unplayable hands for the declarer).
+        #[arg(short, long, default_value = "random")]
+        distribution: String,
+        /// Selection strategy: "average" (default), "minimum", or "hybrid".
+        #[arg(long, default_value = "average")]
+        points_mode: String,
+        /// For hybrid mode: margin under max win_prob where fallback strategy kicks in (default 0.05).
+        #[arg(long, default_value_t = 0.05)]
+        hybrid_delta: f32,
+        /// Fallback strategy for hybrid mode: "average" or "minimum".
+        #[arg(long, default_value = "average")]
+        hybrid_fallback: String,
     },
     /// Like PointsPlayout, but ONLY simulates "interesting" games:
     /// auto-generates a random deal, runs perfect-information best-game
@@ -88,6 +105,15 @@ pub enum Commands {
         /// Number of PIMC samples to run per move (default: 20)
         #[arg(short, long, default_value_t = 20)]
         samples: u32,
+        /// Selection strategy: "average" (default), "minimum", or "hybrid".
+        #[arg(long, default_value = "average")]
+        points_mode: String,
+        /// For hybrid mode: margin under max win_prob where fallback strategy kicks in (default 0.05).
+        #[arg(long, default_value_t = 0.05)]
+        hybrid_delta: f32,
+        /// Fallback strategy for hybrid mode: "average" or "minimum".
+        #[arg(long, default_value = "average")]
+        hybrid_fallback: String,
     },
     /// Null-specific PIMC playout. Uses a 3-tier card selection strategy:
     /// (1) PIMC win probability, (2) trick-analysis tiebreaker (declarer avoids,
@@ -219,6 +245,16 @@ pub enum Commands {
         samples: u32,
         #[arg(long, default_value = "research/data/general_pre_stats.csv")]
         output: String,
+    },
+    GenerateDeal {
+        #[arg(long, default_value = "grand")]
+        game_type: String,
+        #[arg(long, default_value = "declarer")]
+        start_player: String,
+        #[arg(short, long, default_value = "smart-grand")]
+        distribution: String,
+        #[arg(short, long)]
+        out: String,
     },
     GenerateJson {
         /// Number of valid JSONs to find

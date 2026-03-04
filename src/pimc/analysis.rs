@@ -461,9 +461,7 @@ where
 {
     use crate::skat::context::GameContext;
     use crate::skat::defs::Game; // Fix import
-    use crate::skat::defs::{
-        Player, CLUBS, DIAMONDS, HEARTS, SPADES, TRUMP_GRAND, TRUMP_NULL, TRUMP_SUIT,
-    }; // Ensure Player available
+    use crate::skat::defs::Player; // Ensure Player available
     use crate::skat::rules::calculate_game_value; // We will use this but boost it
     use rand::seq::SliceRandom;
     use rand::thread_rng;

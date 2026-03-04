@@ -14,11 +14,45 @@ use crate::skat::rules::get_suit_for_card;
 use crate::traits::{Bitboard, Points, StringConverter};
 use rand::prelude::*;
 
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum FallbackStrategy {
+    Average,
+    Minimum,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum PointStrategy {
+    Average,
+    Minimum,
+    Hybrid {
+        delta: f32,
+        fallback: FallbackStrategy,
+    },
+}
+
+impl PointStrategy {
+    pub fn from_args(mode: &str, delta: f32, fallback: &str) -> Self {
+        let fb = match fallback.to_lowercase().as_str() {
+            "minimum" | "min" => FallbackStrategy::Minimum,
+            _ => FallbackStrategy::Average,
+        };
+        match mode.to_lowercase().as_str() {
+            "minimum" | "min" => PointStrategy::Minimum,
+            "hybrid" => PointStrategy::Hybrid {
+                delta,
+                fallback: fb,
+            },
+            _ => PointStrategy::Average,
+        }
+    }
+}
+
 pub fn run_playout(
     initial_context: GameContext,
     game_type: Game,
     start_player: Player,
     samples: u32,
+    sampling_mode: crate::pimc::pimc_problem::SamplingMode,
 ) {
     println!("=== Playout Configuration ===");
     println!("Game Type: {:?}", game_type);
@@ -35,12 +69,19 @@ pub fn run_playout(
 
     // 4. Run PIMC Play (Comparison)
     println!("\n=== PIMC Play Simulation ===");
-    run_pimc_play(initial_context, game_type, samples, perfect_score);
+    run_pimc_play(
+        initial_context,
+        game_type,
+        samples,
+        perfect_score,
+        sampling_mode,
+    );
 }
 
 pub fn generate_random_deal(
     game_type_str: String,
     start_player_str: String,
+    mode: crate::pimc::pimc_problem::SamplingMode,
 ) -> (GameContext, Game, Player) {
     let game_type = match game_type_str.to_lowercase().as_str() {
         "grand" => Game::Grand,
@@ -56,14 +97,62 @@ pub fn generate_random_deal(
         _ => panic!("Invalid start player: {}", start_player_str),
     };
 
+    let is_acceptable = |ctx: &GameContext| -> bool {
+        match mode {
+            crate::pimc::pimc_problem::SamplingMode::Random => true,
+            crate::pimc::pimc_problem::SamplingMode::LikelyNull => {
+                crate::pimc::pimc_problem::is_likely_null_hand(ctx.left_cards())
+                    && crate::pimc::pimc_problem::is_likely_null_hand(ctx.right_cards())
+            }
+            crate::pimc::pimc_problem::SamplingMode::SmartGrand => {
+                crate::pimc::pimc_problem::is_playable_grand_hand(ctx.declarer_cards())
+            }
+            crate::pimc::pimc_problem::SamplingMode::SmartSuit => {
+                crate::pimc::pimc_problem::is_playable_suit_hand(ctx.declarer_cards())
+            }
+        }
+    };
+
     let mut rng = rand::thread_rng();
+
+    // Try up to 200 times to deal an acceptable hand
+    for _ in 0..200 {
+        let mut deck: Vec<u8> = (0..32).collect();
+        deck.shuffle(&mut rng);
+
+        let mut declarer_cards = 0u32;
+        let mut left_cards = 0u32;
+        let mut right_cards = 0u32;
+
+        for i in 0..10 {
+            declarer_cards |= 1 << deck[i];
+        }
+        for i in 10..20 {
+            left_cards |= 1 << deck[i];
+        }
+        for i in 20..30 {
+            right_cards |= 1 << deck[i];
+        }
+
+        let context = GameContext::create(
+            declarer_cards,
+            left_cards,
+            right_cards,
+            game_type,
+            start_player,
+        );
+
+        if is_acceptable(&context) {
+            return (context, game_type, start_player);
+        }
+    }
+
+    // Fallback: Just return a random deal if condition not met after 200 tries
     let mut deck: Vec<u8> = (0..32).collect();
     deck.shuffle(&mut rng);
-
     let mut declarer_cards = 0u32;
     let mut left_cards = 0u32;
     let mut right_cards = 0u32;
-
     for i in 0..10 {
         declarer_cards |= 1 << deck[i];
     }
@@ -73,7 +162,6 @@ pub fn generate_random_deal(
     for i in 20..30 {
         right_cards |= 1 << deck[i];
     }
-
     let context = GameContext::create(
         declarer_cards,
         left_cards,
@@ -95,6 +183,13 @@ pub fn generate_random_deal(
 ///
 /// Returns `None` if the random deal did not qualify.
 pub fn generate_smart_deal() -> Option<(GameContext, Game, Player, String, String)> {
+    // Under the hood, we just generate a general random deal in 'random' mode,
+    // then analyze it.
+    let _ = generate_random_deal(
+        "grand".to_string(),
+        "declarer".to_string(),
+        crate::pimc::pimc_problem::SamplingMode::Random,
+    );
     let start_player = Player::Declarer; // Declarer always leads first trick
 
     let mut rng = rand::thread_rng();
@@ -153,7 +248,7 @@ pub fn generate_smart_deal() -> Option<(GameContext, Game, Player, String, Strin
     };
 
     let mut ctx = GameContext::create(d_final, l_final, r_final, best.game_type, start_player);
-    ctx.set_declarer_start_points(skat_points);
+    // ctx.set_declarer_start_points(skat_points); // Handled by Engine now
 
     Some((ctx, best.game_type, start_player, best.label, discard_str))
 }
@@ -295,6 +390,7 @@ fn run_pimc_play(
     _game_type: Game,
     samples: u32,
     _perfect_benchmark_val: i16,
+    sampling_mode: crate::pimc::pimc_problem::SamplingMode,
 ) {
     let mut engine = SkatEngine::new(initial_ctx.clone(), None);
     let mut position = engine.create_initial_position();
@@ -353,10 +449,15 @@ fn run_pimc_play(
                 .unwrap_or(0)
         };
 
+        // Use only the 30 cards actually in the game (exclude the 2 Skat cards)
+        let all_game_cards_pimc = engine.context.declarer_cards()
+            | engine.context.left_cards()
+            | engine.context.right_cards();
+
         let mut builder = PimcProblemBuilder::new(engine.context.game_type())
             .my_player(position.player)
             .my_cards_val(position.player_cards)
-            .all_cards_val(unplayed | position.trick_cards)
+            .all_cards_val(all_game_cards_pimc & !position.played_cards)
             .turn(position.player)
             .threshold(engine.context.points_to_win())
             .declarer_start_points(position.declarer_points)
@@ -364,7 +465,9 @@ fn run_pimc_play(
             .trick_next_player(next_c)
             .facts(Player::Declarer, facts_tracker.declarer)
             .facts(Player::Left, facts_tracker.left)
-            .facts(Player::Right, facts_tracker.right);
+            .facts(Player::Right, facts_tracker.right)
+            .sampling_mode(sampling_mode)
+            .declarer_played_cards(initial_ctx.declarer_cards() & !position.declarer_cards);
 
         let problem = builder.build();
 
@@ -466,11 +569,14 @@ pub fn run_points_playout(
     game_type: Game,
     start_player: Player,
     samples: u32,
+    sampling_mode: crate::pimc::pimc_problem::SamplingMode,
+    point_strategy: PointStrategy,
 ) {
     println!("=== Points Playout Configuration ===");
     println!("Game Type: {:?}", game_type);
     println!("Start Player: {:?}", start_player);
     println!("PIMC Samples: {}", samples);
+    println!("Strategy: {:?}", point_strategy);
     println!("=====================================\n");
 
     log_distribution(&initial_context, game_type, start_player);
@@ -479,7 +585,14 @@ pub fn run_points_playout(
     let perfect_score = run_perfect_play(&initial_context, game_type);
 
     println!("\n=== PIMC Points Play Simulation ===");
-    run_pimc_points_play(initial_context, game_type, samples, perfect_score);
+    run_pimc_points_play(
+        initial_context,
+        game_type,
+        samples,
+        perfect_score,
+        sampling_mode,
+        point_strategy,
+    );
 }
 
 /// Like `run_pimc_play` but selects moves by **average expected declarer points**
@@ -489,6 +602,8 @@ fn run_pimc_points_play(
     _game_type: Game,
     samples: u32,
     _perfect_benchmark_val: i16,
+    sampling_mode: crate::pimc::pimc_problem::SamplingMode,
+    point_strategy: PointStrategy,
 ) {
     let mut engine = SkatEngine::new(initial_ctx.clone(), None);
     let mut position = engine.create_initial_position();
@@ -541,10 +656,15 @@ fn run_pimc_points_play(
             .map(|(_, c)| *c)
             .unwrap_or(0);
 
+        // Use only the cards actually in the game, not ALLCARDS (excludes the 2 Skat cards)
+        let all_game_cards = engine.context.declarer_cards()
+            | engine.context.left_cards()
+            | engine.context.right_cards();
+
         let builder = PimcProblemBuilder::new(engine.context.game_type())
             .my_player(cur_player)
             .my_cards_val(position.player_cards)
-            .all_cards_val(unplayed | position.trick_cards)
+            .all_cards_val(all_game_cards & !position.played_cards)
             .turn(cur_player)
             .threshold(engine.context.points_to_win())
             .declarer_start_points(position.declarer_points)
@@ -552,16 +672,76 @@ fn run_pimc_points_play(
             .trick_next_player(next_c)
             .facts(Player::Declarer, facts_tracker.declarer)
             .facts(Player::Left, facts_tracker.left)
-            .facts(Player::Right, facts_tracker.right);
+            .facts(Player::Right, facts_tracker.right)
+            .sampling_mode(sampling_mode)
+            .declarer_played_cards(initial_ctx.declarer_cards() & !position.declarer_cards);
 
-        let scores =
-            PimcSearch::new(builder.build(), samples, None).estimate_avg_points_of_all_cards(false);
+        let mut scores =
+            PimcSearch::new(builder.build(), samples, None).estimate_move_metrics(false);
 
-        let (pimc_card, all_scores): (u32, Vec<(u32, f32)>) = if scores.is_empty() {
+        match point_strategy {
+            PointStrategy::Average => {
+                scores.sort_by(|a, b| {
+                    b.1.avg_points
+                        .partial_cmp(&a.1.avg_points)
+                        .unwrap_or(std::cmp::Ordering::Equal)
+                });
+            }
+            PointStrategy::Minimum => {
+                scores.sort_by(|a, b| {
+                    b.1.min_points
+                        .partial_cmp(&a.1.min_points)
+                        .unwrap_or(std::cmp::Ordering::Equal)
+                });
+            }
+            PointStrategy::Hybrid { delta, fallback } => {
+                // Sort primarily by win_prob. But if the difference is < delta, fallback to the secondary metric.
+                scores.sort_by(|a, b| {
+                    let win_cmp =
+                        b.1.win_prob
+                            .partial_cmp(&a.1.win_prob)
+                            .unwrap_or(std::cmp::Ordering::Equal);
+                    if win_cmp == std::cmp::Ordering::Equal
+                        || (b.1.win_prob - a.1.win_prob).abs() <= delta
+                    {
+                        match fallback {
+                            FallbackStrategy::Average => {
+                                b.1.avg_points
+                                    .partial_cmp(&a.1.avg_points)
+                                    .unwrap_or(std::cmp::Ordering::Equal)
+                            }
+                            FallbackStrategy::Minimum => {
+                                b.1.min_points
+                                    .partial_cmp(&a.1.min_points)
+                                    .unwrap_or(std::cmp::Ordering::Equal)
+                            }
+                        }
+                    } else {
+                        win_cmp
+                    }
+                });
+            }
+        }
+
+        let (pimc_card, all_scores_str): (u32, Vec<(u32, String)>) = if scores.is_empty() {
             let (arr, _) = position.get_legal_moves().__decompose();
             (arr[0], vec![])
         } else {
-            (scores[0].0, scores.clone())
+            let str_scores = scores
+                .iter()
+                .map(|(c, m)| match point_strategy {
+                    PointStrategy::Average => (*c, format!("{:.0}", m.avg_points)),
+                    PointStrategy::Minimum => (*c, format!("{:.0}", m.min_points)),
+                    PointStrategy::Hybrid { fallback, .. } => {
+                        let fval = match fallback {
+                            FallbackStrategy::Average => m.avg_points,
+                            FallbackStrategy::Minimum => m.min_points,
+                        };
+                        (*c, format!("{:.0}%/{:.0}", m.win_prob * 100.0, fval))
+                    }
+                })
+                .collect();
+            (scores[0].0, str_scores)
         };
 
         // ── Loss ────────────────────────────────────────────────────────────────
@@ -628,9 +808,9 @@ fn run_pimc_points_play(
             "   "
         };
         let who = if is_decl { "D" } else { "O" };
-        let scores_str: String = all_scores
+        let scores_str: String = all_scores_str
             .iter()
-            .map(|(c, v)| format!("{}={:.0}", c.__str(), v))
+            .map(|(c, v)| format!("{}={}", c.__str(), v))
             .collect::<Vec<_>>()
             .join("  ");
 
@@ -928,10 +1108,15 @@ fn run_pimc_null_play(
             .map(|(_, c)| *c)
             .unwrap_or(0);
 
+        // Use only the cards actually in the game, not ALLCARDS (excludes the 2 Skat cards)
+        let all_game_cards_null = engine.context.declarer_cards()
+            | engine.context.left_cards()
+            | engine.context.right_cards();
+
         let builder = PimcProblemBuilder::new(engine.context.game_type())
             .my_player(cur_player)
             .my_cards_val(position.player_cards)
-            .all_cards_val(unplayed | position.trick_cards)
+            .all_cards_val(all_game_cards_null & !position.played_cards)
             .turn(cur_player)
             .threshold(engine.context.points_to_win())
             .declarer_start_points(position.declarer_points)

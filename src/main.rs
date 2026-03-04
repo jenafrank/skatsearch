@@ -493,6 +493,54 @@ fn main() {
             );
             println!("Analysis complete. Results written to {}", output);
         }
+        args::Commands::GenerateDeal {
+            game_type,
+            start_player,
+            distribution,
+            out,
+        } => {
+            let mode = match distribution.as_str() {
+                "smart-grand" => skat_aug23::pimc::pimc_problem::SamplingMode::SmartGrand,
+                "smart-suit" => skat_aug23::pimc::pimc_problem::SamplingMode::SmartSuit,
+                "likely-null" => skat_aug23::pimc::pimc_problem::SamplingMode::LikelyNull,
+                _ => skat_aug23::pimc::pimc_problem::SamplingMode::Random,
+            };
+            let (ctx, gt, sp) = skat_aug23::extensions::cli_playout::generate_random_deal(
+                game_type.clone(),
+                start_player.clone(),
+                mode,
+            );
+
+            let trick_suit = match gt {
+                skat_aug23::skat::defs::Game::Suit => {
+                    let s = game_type.to_lowercase();
+                    if s == "spades" || s == "hearts" || s == "diamonds" {
+                        Some(s)
+                    } else {
+                        Some("clubs".to_string())
+                    }
+                }
+                _ => None,
+            };
+
+            use skat_aug23::traits::{Bitboard, StringConverter};
+            let input = args::GameContextInput {
+                declarer_cards: ctx.declarer_cards().__str(),
+                left_cards: ctx.left_cards().__str(),
+                right_cards: ctx.right_cards().__str(),
+                trick_cards: None,
+                trick_suit,
+                declarer_start_points: None,
+                game_type: gt,
+                start_player: sp,
+                mode: None,
+                samples: None,
+                god_players: None,
+            };
+            let json = serde_json::to_string_pretty(&input).unwrap();
+            std::fs::write(&out, json).expect("Failed to write deal");
+            println!("Wrote generated deal to {}", out);
+        }
         args::Commands::GenerateJson {
             count,
             min_win,
@@ -893,7 +941,15 @@ fn main() {
             start_player,
             context,
             samples,
+            distribution,
         } => {
+            let mode = match distribution.as_str() {
+                "smart-grand" => skat_aug23::pimc::pimc_problem::SamplingMode::SmartGrand,
+                "smart-suit" => skat_aug23::pimc::pimc_problem::SamplingMode::SmartSuit,
+                "likely-null" => skat_aug23::pimc::pimc_problem::SamplingMode::LikelyNull,
+                _ => skat_aug23::pimc::pimc_problem::SamplingMode::Random,
+            };
+
             if let Some(ctx_path) = context {
                 println!("Reading context file: {}", ctx_path);
                 let context_content =
@@ -934,26 +990,9 @@ fn main() {
 
                 if let Some(points) = input.declarer_start_points {
                     game_context.set_declarer_start_points(points);
-                } else {
-                    let total_cards = game_context.declarer_cards().count_ones()
-                        + game_context.left_cards().count_ones()
-                        + game_context.right_cards().count_ones()
-                        + game_context.trick_cards().count_ones();
-
-                    if total_cards == 30
-                        && game_context.game_type() != skat_aug23::skat::defs::Game::Null
-                    {
-                        let skat = game_context.get_skat();
-                        let points = skat.points();
-                        println!(
-                            "Auto-Skat: Determined {} points in Skat. Adding to declarer start points.",
-                            points
-                        );
-                        game_context.set_declarer_start_points(points);
-                    }
                 }
 
-                game_context.set_threshold_upper(120); // Playout uses value not win check, but good to set.
+                // game_context.set_threshold_upper(120); // Removed redundant override
 
                 if let Err(e) = game_context.validate() {
                     eprintln!("Validation Error: {}", e);
@@ -966,6 +1005,7 @@ fn main() {
                     input.game_type,
                     input.start_player,
                     samples,
+                    mode,
                 );
             } else {
                 println!("No context file provided. Generating random deal...");
@@ -973,9 +1013,10 @@ fn main() {
                     skat_aug23::extensions::cli_playout::generate_random_deal(
                         game_type,
                         start_player,
+                        mode,
                     );
 
-                skat_aug23::extensions::cli_playout::run_playout(game_context, g, p, samples);
+                skat_aug23::extensions::cli_playout::run_playout(game_context, g, p, samples, mode);
             }
         }
         args::Commands::PointsPlayout {
@@ -983,7 +1024,23 @@ fn main() {
             start_player,
             context,
             samples,
+            distribution,
+            points_mode,
+            hybrid_delta,
+            hybrid_fallback,
         } => {
+            let point_strategy = skat_aug23::extensions::cli_playout::PointStrategy::from_args(
+                &points_mode,
+                hybrid_delta,
+                &hybrid_fallback,
+            );
+            let mode = match distribution.as_str() {
+                "smart-grand" => skat_aug23::pimc::pimc_problem::SamplingMode::SmartGrand,
+                "smart-suit" => skat_aug23::pimc::pimc_problem::SamplingMode::SmartSuit,
+                "likely-null" => skat_aug23::pimc::pimc_problem::SamplingMode::LikelyNull,
+                _ => skat_aug23::pimc::pimc_problem::SamplingMode::Random,
+            };
+
             if let Some(ctx_path) = context {
                 println!("Reading context file: {}", ctx_path);
                 let context_content =
@@ -1022,26 +1079,9 @@ fn main() {
 
                 if let Some(points) = input.declarer_start_points {
                     game_context.set_declarer_start_points(points);
-                } else {
-                    let total_cards = game_context.declarer_cards().count_ones()
-                        + game_context.left_cards().count_ones()
-                        + game_context.right_cards().count_ones()
-                        + game_context.trick_cards().count_ones();
-
-                    if total_cards == 30
-                        && game_context.game_type() != skat_aug23::skat::defs::Game::Null
-                    {
-                        let skat = game_context.get_skat();
-                        let points = skat.points();
-                        println!(
-                            "Auto-Skat: Determined {} points in Skat. Adding to declarer start points.",
-                            points
-                        );
-                        game_context.set_declarer_start_points(points);
-                    }
                 }
 
-                game_context.set_threshold_upper(120);
+                // game_context.set_threshold_upper(120); // Removed redundant override
 
                 if let Err(e) = game_context.validate() {
                     eprintln!("Validation Error: {}", e);
@@ -1053,6 +1093,8 @@ fn main() {
                     input.game_type,
                     input.start_player,
                     samples,
+                    mode,
+                    point_strategy,
                 );
             } else {
                 println!("No context file provided. Generating random deal...");
@@ -1060,6 +1102,7 @@ fn main() {
                     skat_aug23::extensions::cli_playout::generate_random_deal(
                         game_type,
                         start_player,
+                        mode,
                     );
 
                 skat_aug23::extensions::cli_playout::run_points_playout(
@@ -1067,10 +1110,22 @@ fn main() {
                     g,
                     p,
                     samples,
+                    mode,
+                    point_strategy,
                 );
             }
         }
-        args::Commands::SmartPointsPlayout { samples } => {
+        args::Commands::SmartPointsPlayout {
+            samples,
+            points_mode,
+            hybrid_delta,
+            hybrid_fallback,
+        } => {
+            let point_strategy = skat_aug23::extensions::cli_playout::PointStrategy::from_args(
+                &points_mode,
+                hybrid_delta,
+                &hybrid_fallback,
+            );
             use skat_aug23::extensions::cli_playout::generate_smart_deal;
             match generate_smart_deal() {
                 None => {
@@ -1081,11 +1136,24 @@ fn main() {
                 }
                 Some((ctx, game_type, start_player, label, discard)) => {
                     println!("SMART_DEAL_OK: game={} discard={}", label, discard);
+
+                    let sampling_mode = match game_type {
+                        skat_aug23::skat::defs::Game::Grand => {
+                            skat_aug23::pimc::pimc_problem::SamplingMode::SmartGrand
+                        }
+                        skat_aug23::skat::defs::Game::Suit => {
+                            skat_aug23::pimc::pimc_problem::SamplingMode::SmartSuit
+                        }
+                        _ => skat_aug23::pimc::pimc_problem::SamplingMode::Random,
+                    };
+
                     skat_aug23::extensions::cli_playout::run_points_playout(
                         ctx,
                         game_type,
                         start_player,
                         samples,
+                        sampling_mode,
+                        point_strategy,
                     );
                 }
             }
@@ -1114,7 +1182,8 @@ fn main() {
                     input.start_player,
                 )
             } else {
-                let (c, _, _) = generate_random_deal("null".to_string(), "declarer".to_string());
+                let (c, _, _) =
+                    generate_random_deal("null".to_string(), "declarer".to_string(), mode);
                 c
             };
             run_null_playout(ctx, samples, mode);
@@ -1156,29 +1225,11 @@ fn main() {
 
             if let Some(points) = input.declarer_start_points {
                 game_context.set_declarer_start_points(points);
-            } else {
-                // Check for Auto-Skat-Points
-                let total_cards = game_context.declarer_cards().count_ones()
-                    + game_context.left_cards().count_ones()
-                    + game_context.right_cards().count_ones()
-                    + game_context.trick_cards().count_ones();
-
-                if total_cards == 30
-                    && game_context.game_type() != skat_aug23::skat::defs::Game::Null
-                {
-                    let skat = game_context.get_skat();
-                    let points = skat.points();
-                    println!(
-                        "Auto-Skat: Determined {} points in Skat. Adding to declarer start points.",
-                        points
-                    );
-                    game_context.set_declarer_start_points(points);
-                }
             }
 
             // Standard playout uses full information, so threshold might matter less for 'playout' line by line,
             // but engine needs it.
-            game_context.set_threshold_upper(120);
+            game_context.set_threshold_upper(61);
 
             if let Err(e) = game_context.validate() {
                 eprintln!("Validation Error: {}", e);
@@ -1322,26 +1373,9 @@ fn main() {
 
             if let Some(points) = input.declarer_start_points {
                 game_context.set_declarer_start_points(points);
-            } else {
-                let total_cards = game_context.declarer_cards().count_ones()
-                    + game_context.left_cards().count_ones()
-                    + game_context.right_cards().count_ones()
-                    + game_context.trick_cards().count_ones();
-
-                if total_cards == 30
-                    && game_context.game_type() != skat_aug23::skat::defs::Game::Null
-                {
-                    let skat = game_context.get_skat();
-                    let points = skat.points();
-                    println!(
-                        "Auto-Skat: Determined {} points in Skat. Adding to declarer start points.",
-                        points
-                    );
-                    game_context.set_declarer_start_points(points);
-                }
             }
 
-            game_context.set_threshold_upper(120);
+            // game_context.set_threshold_upper(120); // Removed redundant override
 
             if let Err(e) = game_context.validate() {
                 eprintln!("Validation Error: {}", e);

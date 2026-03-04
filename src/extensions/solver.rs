@@ -119,26 +119,9 @@ pub fn solve_all_cards_from_position(
 }
 
 pub fn solve_and_add_skat(engine: &mut SkatEngine) -> SolveRet {
-    // Solve core problem
-    let mut ret = solve_double_dummy(engine, 0, 120, 1);
-
-    let double_dummy_result = ret.best_value;
-    let skat_value = engine.context.get_skat().points();
-
-    match engine.context.game_type() {
-        Game::Null => {
-            if double_dummy_result == 0 {
-                ret.best_value = 0;
-            } else {
-                ret.best_value = 1;
-            }
-        }
-        _ => {
-            ret.best_value = double_dummy_result + skat_value;
-        }
-    }
-
-    ret
+    // Solve core problem. Skat points are now included in the initial position points
+    // if the game is not Null, so solve_double_dummy returns the full total.
+    solve_double_dummy(engine, 0, 120, 1)
 }
 
 // -----------------------------------------------------------------------------

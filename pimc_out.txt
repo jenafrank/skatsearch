@@ -1,0 +1,35 @@
+Reading context file: generated_smart_suit_deal.json
+Auto-Skat: Determined 2 points in Skat. Adding to declarer start points.
+=== Points Playout Configuration ===
+Game Type: Suit
+Start Player: Declarer
+PIMC Samples: 20
+Strategy: Minimum
+=====================================
+
+Cards Distribution (Sorted for Suit):
+Declarer: [CJ SJ C7 ST S8 HQ H9 H8 DT DQ]
+Left    : [CA CT CK C9 SQ S9 S7 HK H7 D8]
+Right   : [DJ CQ SA SK HA HT DA DK D9 D7]
+Skat    : [HJ C8]
+Start Player: Declarer
+
+=== Perfect Play Simulation ===
+Starting Perfect Play...
+  Trick  1  D:C7  L:CA  R:CQ
+  Trick  2  L:HK  R:HA  D:HQ
+  Trick  3  R:DA  D:DT  L:D8
+  Trick  4  R:DJ  D:CJ  L:CK
+  Trick  5  D:SJ  L:C9  R:D9
+  Trick  6  D:ST  L:SQ  R:SA
+  Trick  7  R:HT  D:H9  L:H7
+  Trick  8  R:SK  D:S8  L:S9
+  Trick  9  R:DK  D:DQ  L:CT
+  Trick 10  L:S7  R:D7  D:H8
+Perfect Play Finished. Result: 12 pts
+
+=== PIMC Points Play Simulation ===
+Starting PIMC Points Play...
+-- Trick  1 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    CJ  perf:C7 opt= 12  loss=0(D)  avgs:[CJ=12  SJ=12  H8=8  H9=8  HQ=8  ST=8  S8=8  DQ=8  DT=8  C7=6]
+  L    PIMC:    C9  perf:C9 opt= 15  loss=0(O)  avgs:[C9=51  CK=47  CT=41  CA=40]

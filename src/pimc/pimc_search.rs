@@ -12,6 +12,13 @@ use crate::skat::defs::Player;
 use crate::skat::engine::SkatEngine;
 use crate::traits::StringConverter;
 
+#[derive(Debug, Clone, Copy, Default)]
+pub struct MoveMetrics {
+    pub win_prob: f32,
+    pub avg_points: f32,
+    pub min_points: f32,
+}
+
 pub struct PimcSearch {
     pub uproblem: PimcProblem,
     pub sample_size: u32,
@@ -268,6 +275,114 @@ impl PimcSearch {
             .collect();
         entries.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
         entries
+    }
+
+    /// Evaluates `win_prob`, `avg_points`, and `min_points` for each card in a single pass.
+    /// Used by PointsPlayout hybrid/minimum strategies.
+    pub fn estimate_move_metrics(&self, info: bool) -> Vec<(u32, MoveMetrics)> {
+        let my_player = self.uproblem.my_player();
+        let game_type = self.uproblem.game_type();
+        let threshold = self.uproblem.threshold();
+
+        // Accumulator: card -> (wins, points_sum, points_min, count)
+        let global: Mutex<HashMap<u32, (u32, f32, f32, u32)>> = Mutex::new(HashMap::new());
+
+        (0..self.sample_size).into_par_iter().for_each(|i| {
+            let concrete_problem = self.uproblem.generate_concrete_problem();
+            let mut solver = SkatEngine::new(concrete_problem, None);
+            let search_result = solve_all_cards(&mut solver, 0, 120);
+
+            let mut local: Vec<(u32, bool, f32)> = Vec::new();
+            for line in search_result.results.iter() {
+                let card = line.0;
+                let decl_points = line.2; // u8, 0-120
+
+                // Win Prob Logic
+                let declarer_wins = if game_type == Game::Null {
+                    decl_points == 0
+                } else {
+                    decl_points >= threshold
+                };
+                let win = if my_player == Player::Declarer {
+                    declarer_wins
+                } else {
+                    !declarer_wins
+                };
+
+                // Points Logic
+                let player_score: f32 = if game_type == Game::Null {
+                    if decl_points == 0 {
+                        if my_player == Player::Declarer {
+                            120.0
+                        } else {
+                            0.0
+                        }
+                    } else {
+                        if my_player == Player::Declarer {
+                            0.0
+                        } else {
+                            120.0
+                        }
+                    }
+                } else if my_player == Player::Declarer {
+                    decl_points as f32
+                } else {
+                    120.0 - decl_points as f32
+                };
+
+                local.push((card, win, player_score));
+            }
+
+            // Merge into global
+            {
+                let mut g = global.lock().unwrap();
+                for (card, win, score) in local {
+                    let entry = g.entry(card).or_insert((0, 0.0, 150.0, 0));
+                    if win {
+                        entry.0 += 1;
+                    }
+                    entry.1 += score;
+                    if score < entry.2 {
+                        entry.2 = score;
+                    }
+                    entry.3 += 1;
+                }
+            }
+
+            if info {
+                println!(
+                    "Sample {}: Declarer={} Left={} Right={}",
+                    i,
+                    solver.context.declarer_cards().__str(),
+                    solver.context.left_cards().__str(),
+                    solver.context.right_cards().__str(),
+                );
+            }
+        });
+
+        let g = global.into_inner().unwrap();
+        let mut results: Vec<(u32, MoveMetrics)> = g
+            .into_iter()
+            .map(|(card, (wins, sum, min, count))| {
+                let cnt = count.max(1) as f32;
+                (
+                    card,
+                    MoveMetrics {
+                        win_prob: wins as f32 / cnt,
+                        avg_points: sum / cnt,
+                        min_points: if count == 0 { 0.0 } else { min },
+                    },
+                )
+            })
+            .collect();
+
+        // Default sort by avg descending to match previous API shape mostly
+        results.sort_by(|a, b| {
+            b.1.avg_points
+                .partial_cmp(&a.1.avg_points)
+                .unwrap_or(std::cmp::Ordering::Equal)
+        });
+        results
     }
 }
 

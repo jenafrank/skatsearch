@@ -1,0 +1,1363 @@
+warning: output filename collision.
+The bin target `skat_aug23` in package `skat_aug23 v0.1.0 (C:\Users\jenaf\source\repos\skatsearch)` has the same output filename as the lib target `skat_aug23` in package `skat_aug23 v0.1.0 (C:\Users\jenaf\source\repos\skatsearch)`.
+Colliding filename is: C:\Users\jenaf\source\repos\skatsearch\target\release\deps\skat_aug23.pdb
+The targets should have unique names.
+Consider changing their names to be unique or compiling them separately.
+This may become a hard error in the future; see <https://github.com/rust-lang/cargo/issues/6313>.
+warning: output filename collision.
+The bin target `skat_aug23` in package `skat_aug23 v0.1.0 (C:\Users\jenaf\source\repos\skatsearch)` has the same output filename as the lib target `skat_aug23` in package `skat_aug23 v0.1.0 (C:\Users\jenaf\source\repos\skatsearch)`.
+Colliding filename is: C:\Users\jenaf\source\repos\skatsearch\target\release\skat_aug23.pdb
+The targets should have unique names.
+Consider changing their names to be unique or compiling them separately.
+This may become a hard error in the future; see <https://github.com/rust-lang/cargo/issues/6313>.
+warning: unused import: `Deserialize`
+ --> src\lib_wasm.rs:7:13
+  |
+7 | use serde::{Deserialize, Serialize};
+  |             ^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` on by default
+
+warning: unused imports: `JACKOFCLUBS`, `JACKOFDIAMONDS`, `JACKOFHEARTS`, and `JACKOFSPADES`
+ --> src\skat\context.rs:7:44
+  |
+7 | ...S, JACKOFCLUBS, JACKOFDIAMONDS, JACKOFHEARTS, JACKOFSPADES,
+  |       ^^^^^^^^^^^  ^^^^^^^^^^^^^^  ^^^^^^^^^^^^  ^^^^^^^^^^^^
+
+warning: variable does not need to be mutable
+   --> src\extensions\cli_playout.rs:452:13
+    |
+452 | ...   let mut builder = PimcProblemBuilder::new(engine.co...
+    |           ----^^^^^^^
+    |           |
+    |           help: remove this `mut`
+    |
+    = note: `#[warn(unused_mut)]` on by default
+
+warning: variable does not need to be mutable
+   --> src\extensions\cli_playout.rs:469:13
+    |
+469 | ...   let mut search = PimcSearch::new(problem, samples, ...
+    |           ----^^^^^^
+    |           |
+    |           help: remove this `mut`
+
+warning: unused variable: `skat_points`
+   --> src\lib_wasm.rs:203:13
+    |
+203 |         let skat_points = skat_cards.points();
+    |             ^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_skat_points`
+    |
+    = note: `#[warn(unused_variables)]` on by default
+
+warning: variable does not need to be mutable
+   --> src\lib_wasm.rs:135:14
+    |
+135 |         let (mut deck, _count) = ALLCARDS.__decompose();
+    |              ----^^^^
+    |              |
+    |              help: remove this `mut`
+
+warning: unreachable pattern
+   --> src\lib_wasm.rs:642:13
+    |
+642 |             _ => "Unknown".to_string(),
+    |             ^ no value can reach this
+    |
+note: multiple earlier patterns match some of the same values
+   --> src\lib_wasm.rs:642:13
+    |
+636 |             (Game::Grand, _) => "Grand".to_string(),
+    |             ---------------- matches some of the same values
+637 |             (Game::Null, _) => "Null".to_string(),
+    |             --------------- matches some of the same values
+638 |             (Game::Suit, None) => "Clubs".to_string(),
+    |             ------------------ matches some of the same values
+639 |             (Game::Suit, Some(SpadesSwitch)) => "Spades"....
+    |             -------------------------------- matches some of the same values
+...
+642 |             _ => "Unknown".to_string(),
+    |             ^ ...and 2 other patterns collectively make this unreachable
+    = note: `#[warn(unreachable_patterns)]` on by default
+
+warning: unused variable: `score`
+   --> src\lib_wasm.rs:997:26
+    |
+997 |         if let Ok((card, score, val)) = res {
+    |                          ^^^^^ help: if this is intentional, prefix it with an underscore: `_score`
+
+warning: unused variable: `best_card_mask`
+    --> src\lib_wasm.rs:1011:14
+     |
+1011 |         let (best_card_mask, best_val) = self.solve_best...
+     |              ^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_best_card_mask`
+
+warning: variable `skat` is assigned to, but never used
+   --> src\pimc\analysis.rs:492:21
+    |
+492 |             let mut skat = 0;
+    |                     ^^^^
+    |
+    = note: consider using `_skat` instead
+
+warning: variable does not need to be mutable
+   --> src\pimc\playout.rs:522:25
+    |
+522 | ...   let mut current_winner_rank = get_null_rank(card);
+    |           ----^^^^^^^^^^^^^^^^^^^
+    |           |
+    |           help: remove this `mut`
+
+warning: value assigned to `skat_fulls` is never read
+   --> src\skat\signature.rs:132:17
+    |
+132 |         let mut skat_fulls = 0;
+    |                 ^^^^^^^^^^
+    |
+    = help: maybe it is overwritten before being read?
+    = note: `#[warn(unused_assignments)]` on by default
+
+warning: method `calculate_theoretical_value` is never used
+   --> src\lib_wasm.rs:903:8
+    |
+133 | impl SkatGame {
+    | ------------- method in this implementation
+...
+903 |     fn calculate_theoretical_value(&self) -> i32 {
+    |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` on by default
+
+warning: `skat_aug23` (lib) generated 13 warnings (run `cargo fix --lib -p skat_aug23` to apply 6 suggestions)
+warning: unused import: `Bitboard`
+   --> src\main.rs:526:38
+    |
+526 |             use skat_aug23::traits::{Bitboard, StringConverter};
+    |                                      ^^^^^^^^
+    |
+    = note: `#[warn(unused_imports)]` on by default
+
+warning: `skat_aug23` (bin "skat_aug23") generated 1 warning (run `cargo fix --bin "skat_aug23"` to apply 1 suggestion)
+    Finished `release` profile [optimized + debuginfo] target(s) in 0.05s
+     Running `target\release\skat_aug23.exe points-playout --game-type suit -c generated_smart_suit_deal.json -d smart-suit --points-mode minimum`
+thread '<unnamed>' panicked at src\skat\builder.rs:333:9:
+Not enough ambiguous cards to satisfy targets! Available: 13, StartP1: 0, StartP2: 0, TargetP1: 9, TargetP2: 9
+stack backtrace:
+   0: std::panicking::begin_panic_handler
+             at /rustc/e71f9a9a98b0faf423844bf0ba7438f29dc27d58\library/std\src\panicking.rs:665
+   1: core::panicking::panic_fmt
+             at /rustc/e71f9a9a98b0faf423844bf0ba7438f29dc27d58\library/core\src\panicking.rs:76
+   2: skat_aug23::skat::builder::GameContextBuilder::set_cards_for_other_players
+             at .\src\skat\builder.rs:272
+   3: skat_aug23::pimc::pimc_problem::PimcProblem::generate_concrete_problem_inner
+             at .\src\pimc\pimc_problem.rs:749
+   4: skat_aug23::pimc::pimc_problem::PimcProblem::generate_concrete_problem_rejection_sampled
+             at .\src\pimc\pimc_problem.rs:729
+   5: skat_aug23::pimc::pimc_problem::PimcProblem::generate_concrete_problem
+             at .\src\pimc\pimc_problem.rs:711
+   6: skat_aug23::pimc::pimc_search::impl$0::estimate_move_metrics::closure$0
+             at .\src\pimc\pimc_search.rs:291
+   7: core::ops::function::impls::impl$1::call_mut<tuple$<u32>,skat_aug23::pimc::pimc_search::impl$0::estimate_move_metrics::closure_env$0>
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\core\src\ops\function.rs:272
+   8: rayon_core::join::join_context::closure$0<rayon::iter::plumbing::bridge_producer_consumer::helper::closure_env$0<rayon::range::IterProducer<u32>,rayon::iter::for_each::ForEachConsumer<skat_aug23::pimc::pimc_search::impl$0::estimate_move_metrics::closure_en
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\join\mod.rs:142
+   9: rayon_core::join::join_context::closure$0<rayon::iter::plumbing::bridge_producer_consumer::helper::closure_env$0<rayon::range::IterProducer<u32>,rayon::iter::for_each::ForEachConsumer<skat_aug23::pimc::pimc_search::impl$0::estimate_move_metrics::closure_en
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\join\mod.rs:142
+  10: rayon_core::join::join_context::closure$0<rayon::iter::plumbing::bridge_producer_consumer::helper::closure_env$0<rayon::range::IterProducer<u32>,rayon::iter::for_each::ForEachConsumer<skat_aug23::pimc::pimc_search::impl$0::estimate_move_metrics::closure_en
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\join\mod.rs:142
+  11: rayon_core::join::join_context
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\join\mod.rs:132
+  12: rayon::iter::plumbing::bridge_producer_consumer::helper<rayon::range::IterProducer<u32>,rayon::iter::for_each::ForEachConsumer<skat_aug23::pimc::pimc_search::impl$0::estimate_move_metrics::closure_env$0> >
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-1.10.0\src\iter\plumbing\mod.rs:415
+  13: rayon_core::join::join_context::closure$0<rayon::iter::plumbing::bridge_producer_consumer::helper::closure_env$0<rayon::range::IterProducer<u32>,rayon::iter::for_each::ForEachConsumer<skat_aug23::pimc::pimc_search::impl$0::estimate_move_metrics::closure_en
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\join\mod.rs:142
+  14: rayon_core::registry::impl$6::in_worker_cold::closure$0::closure$0
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:522
+  15: rayon_core::job::impl$9::call::closure$0
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\job.rs:218
+  16: core::panic::unwind_safe::impl$25::call_once
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\core\src\panic\unwind_safe.rs:272
+  17: std::panicking::try::do_call
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\std\src\panicking.rs:557
+  18: std::panicking::try
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\std\src\panicking.rs:520
+  19: std::panic::catch_unwind
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\std\src\panic.rs:358
+  20: rayon_core::unwind::halt_unwinding
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\unwind.rs:17
+  21: rayon_core::job::JobResult::call
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\job.rs:218
+  22: rayon_core::job::impl$4::execute<rayon_core::latch::LatchRef<rayon_core::latch::LockLatch>,rayon_core::registry::impl$6::in_worker_cold::closure$0::closure_env$0<rayon_core::join::join_context::closure_env$0<rayon::iter::plumbing::bridge_producer_consumer:
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\job.rs:120
+  23: rayon_core::registry::WorkerThread::wait_until_cold
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:794
+  24: rayon_core::registry::WorkerThread::wait_until
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:769
+  25: rayon_core::registry::WorkerThread::wait_until_out_of_work
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:818
+  26: rayon_core::registry::main_loop
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:923
+  27: rayon_core::registry::ThreadBuilder::run
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:53
+  28: rayon_core::registry::impl$2::spawn::closure$0
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:98
+note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+thread '<unnamed>' panicked at src\skat\builder.rs:333:9:
+Not enough ambiguous cards to satisfy targets! Available: 13, StartP1: 0, StartP2: 0, TargetP1: 9, TargetP2: 9
+stack backtrace:
+   0: std::panicking::begin_panic_handler
+             at /rustc/e71f9a9a98b0faf423844bf0ba7438f29dc27d58\library/std\src\panicking.rs:665
+   1: core::panicking::panic_fmt
+             at /rustc/e71f9a9a98b0faf423844bf0ba7438f29dc27d58\library/core\src\panicking.rs:76
+   2: skat_aug23::skat::builder::GameContextBuilder::set_cards_for_other_players
+             at .\src\skat\builder.rs:272
+   3: skat_aug23::pimc::pimc_problem::PimcProblem::generate_concrete_problem_inner
+             at .\src\pimc\pimc_problem.rs:749
+   4: skat_aug23::pimc::pimc_problem::PimcProblem::generate_concrete_problem_rejection_sampled
+             at .\src\pimc\pimc_problem.rs:729
+   5: skat_aug23::pimc::pimc_problem::PimcProblem::generate_concrete_problem
+             at .\src\pimc\pimc_problem.rs:711
+   6: skat_aug23::pimc::pimc_search::impl$0::estimate_move_metrics::closure$0
+             at .\src\pimc\pimc_search.rs:291
+   7: core::ops::function::impls::impl$1::call_mut<tuple$<u32>,skat_aug23::pimc::pimc_search::impl$0::estimate_move_metrics::closure_env$0>
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\core\src\ops\function.rs:272
+   8: rayon_core::join::join_context::closure$0<rayon::iter::plumbing::bridge_producer_consumer::helper::closure_env$0<rayon::range::IterProducer<u32>,rayon::iter::for_each::ForEachConsumer<skat_aug23::pimc::pimc_search::impl$0::estimate_move_metrics::closure_en
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\join\mod.rs:142
+   9: rayon_core::join::join_context::closure$0<rayon::iter::plumbing::bridge_producer_consumer::helper::closure_env$0<rayon::range::IterProducer<u32>,rayon::iter::for_each::ForEachConsumer<skat_aug23::pimc::pimc_search::impl$0::estimate_move_metrics::closure_en
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\join\mod.rs:142
+  10: rayon_core::join::join_context::closure$0<rayon::iter::plumbing::bridge_producer_consumer::helper::closure_env$0<rayon::range::IterProducer<u32>,rayon::iter::for_each::ForEachConsumer<skat_aug23::pimc::pimc_search::impl$0::estimate_move_metrics::closure_en
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\join\mod.rs:142
+  11: rayon_core::join::join_context
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\join\mod.rs:132
+  12: rayon::iter::plumbing::bridge_producer_consumer::helper<rayon::range::IterProducer<u32>,rayon::iter::for_each::ForEachConsumer<skat_aug23::pimc::pimc_search::impl$0::estimate_move_metrics::closure_env$0> >
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-1.10.0\src\iter\plumbing\mod.rs:415
+  13: rayon::iter::plumbing::bridge_producer_consumer::helper::closure$1
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-1.10.0\src\iter\plumbing\mod.rs:426
+  14: rayon_core::join::join_context::call_b::closure$0
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\join\mod.rs:129
+  15: rayon_core::job::impl$9::call::closure$0
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\job.rs:218
+  16: core::panic::unwind_safe::impl$25::call_once
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\core\src\panic\unwind_safe.rs:272
+  17: std::panicking::try::do_call
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\std\src\panicking.rs:557
+  18: std::panicking::try
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\std\src\panicking.rs:520
+  19: std::panic::catch_unwind
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\std\src\panic.rs:358
+  20: rayon_core::unwind::halt_unwinding
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\unwind.rs:17
+  21: rayon_core::job::JobResult::call
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\job.rs:218
+  22: rayon_core::job::impl$4::execute<rayon_core::latch::SpinLatch,rayon_core::join::join_context::call_b::closure_env$0<tuple$<>,rayon::iter::plumbing::bridge_producer_consumer::helper::closure_env$1<rayon::range::IterProducer<u32>,rayon::iter::for_each::ForEa
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\job.rs:120
+  23: rayon_core::registry::WorkerThread::wait_until_cold
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:794
+  24: rayon_core::registry::WorkerThread::wait_until
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:769
+  25: rayon_core::registry::WorkerThread::wait_until_out_of_work
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:818
+  26: rayon_core::registry::main_loop
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:923
+  27: rayon_core::registry::ThreadBuilder::run
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:53
+  28: rayon_core::registry::impl$2::spawn::closure$0
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:98
+note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+thread '<unnamed>' panicked at src\skat\builder.rs:333:9:
+Not enough ambiguous cards to satisfy targets! Available: 13, StartP1: 0, StartP2: 0, TargetP1: 9, TargetP2: 9
+stack backtrace:
+   0: std::panicking::begin_panic_handler
+             at /rustc/e71f9a9a98b0faf423844bf0ba7438f29dc27d58\library/std\src\panicking.rs:665
+   1: core::panicking::panic_fmt
+             at /rustc/e71f9a9a98b0faf423844bf0ba7438f29dc27d58\library/core\src\panicking.rs:76
+   2: skat_aug23::skat::builder::GameContextBuilder::set_cards_for_other_players
+             at .\src\skat\builder.rs:272
+   3: skat_aug23::pimc::pimc_problem::PimcProblem::generate_concrete_problem_inner
+             at .\src\pimc\pimc_problem.rs:749
+   4: skat_aug23::pimc::pimc_problem::PimcProblem::generate_concrete_problem_rejection_sampled
+             at .\src\pimc\pimc_problem.rs:729
+   5: skat_aug23::pimc::pimc_problem::PimcProblem::generate_concrete_problem
+             at .\src\pimc\pimc_problem.rs:711
+   6: skat_aug23::pimc::pimc_search::impl$0::estimate_move_metrics::closure$0
+             at .\src\pimc\pimc_search.rs:291
+   7: core::ops::function::impls::impl$1::call_mut<tuple$<u32>,skat_aug23::pimc::pimc_search::impl$0::estimate_move_metrics::closure_env$0>
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\core\src\ops\function.rs:272
+   8: core::iter::traits::iterator::Iterator::for_each::call::closure$0
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\core\src\iter\traits\iterator.rs:797
+   9: core::iter::traits::iterator::Iterator::fold
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\core\src\iter\traits\iterator.rs:2546
+  10: core::iter::traits::iterator::Iterator::for_each
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\core\src\iter\traits\iterator.rs:800
+  11: rayon::iter::for_each::impl$1::consume_iter
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-1.10.0\src\iter\for_each.rs:55
+  12: rayon::iter::plumbing::Producer::fold_with
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-1.10.0\src\iter\plumbing\mod.rs:109
+  13: rayon::iter::plumbing::bridge_producer_consumer::helper<rayon::range::IterProducer<u32>,rayon::iter::for_each::ForEachConsumer<skat_aug23::pimc::pimc_search::impl$0::estimate_move_metrics::closure_env$0> >
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-1.10.0\src\iter\plumbing\mod.rs:437
+  14: rayon::iter::plumbing::bridge_producer_consumer::helper::closure$1
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-1.10.0\src\iter\plumbing\mod.rs:426
+  15: rayon_core::join::join_context::call_b::closure$0
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\join\mod.rs:129
+  16: rayon_core::job::impl$9::call::closure$0
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\job.rs:218
+  17: core::panic::unwind_safe::impl$25::call_once
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\core\src\panic\unwind_safe.rs:272
+  18: std::panicking::try::do_call
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\std\src\panicking.rs:557
+  19: std::panicking::try
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\std\src\panicking.rs:520
+  20: std::panic::catch_unwind
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\std\src\panic.rs:358
+  21: rayon_core::unwind::halt_unwinding
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\unwind.rs:17
+  22: rayon_core::job::JobResult::call
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\job.rs:218
+  23: rayon_core::job::impl$4::execute<rayon_core::latch::SpinLatch,rayon_core::join::join_context::call_b::closure_env$0<tuple$<>,rayon::iter::plumbing::bridge_producer_consumer::helper::closure_env$1<rayon::range::IterProducer<u32>,rayon::iter::for_each::ForEa
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\job.rs:120
+  24: rayon_core::registry::WorkerThread::wait_until_cold
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:794
+  25: rayon_core::registry::WorkerThread::wait_until
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:769
+  26: rayon_core::registry::WorkerThread::wait_until_out_of_work
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:818
+  27: rayon_core::registry::main_loop
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:923
+  28: rayon_core::registry::ThreadBuilder::run
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:53
+  29: rayon_core::registry::impl$2::spawn::closure$0
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:98
+note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+thread '<unnamed>' panicked at src\skat\builder.rs:333:9:
+Not enough ambiguous cards to satisfy targets! Available: 13, StartP1: 0, StartP2: 0, TargetP1: 9, TargetP2: 9
+stack backtrace:
+   0: std::panicking::begin_panic_handler
+             at /rustc/e71f9a9a98b0faf423844bf0ba7438f29dc27d58\library/std\src\panicking.rs:665
+   1: core::panicking::panic_fmt
+             at /rustc/e71f9a9a98b0faf423844bf0ba7438f29dc27d58\library/core\src\panicking.rs:76
+   2: skat_aug23::skat::builder::GameContextBuilder::set_cards_for_other_players
+             at .\src\skat\builder.rs:272
+   3: skat_aug23::pimc::pimc_problem::PimcProblem::generate_concrete_problem_inner
+             at .\src\pimc\pimc_problem.rs:749
+   4: skat_aug23::pimc::pimc_problem::PimcProblem::generate_concrete_problem_rejection_sampled
+             at .\src\pimc\pimc_problem.rs:729
+   5: skat_aug23::pimc::pimc_problem::PimcProblem::generate_concrete_problem
+             at .\src\pimc\pimc_problem.rs:711
+   6: skat_aug23::pimc::pimc_search::impl$0::estimate_move_metrics::closure$0
+             at .\src\pimc\pimc_search.rs:291
+   7: core::ops::function::impls::impl$1::call_mut<tuple$<u32>,skat_aug23::pimc::pimc_search::impl$0::estimate_move_metrics::closure_env$0>
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\core\src\ops\function.rs:272
+   8: rayon_core::join::join_context::closure$0<rayon::iter::plumbing::bridge_producer_consumer::helper::closure_env$0<rayon::range::IterProducer<u32>,rayon::iter::for_each::ForEachConsumer<skat_aug23::pimc::pimc_search::impl$0::estimate_move_metrics::closure_en
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\join\mod.rs:142
+   9: rayon_core::join::join_context::closure$0<rayon::iter::plumbing::bridge_producer_consumer::helper::closure_env$0<rayon::range::IterProducer<u32>,rayon::iter::for_each::ForEachConsumer<skat_aug23::pimc::pimc_search::impl$0::estimate_move_metrics::closure_en
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\join\mod.rs:142
+  10: rayon_core::join::join_context
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\join\mod.rs:132
+  11: rayon::iter::plumbing::bridge_producer_consumer::helper<rayon::range::IterProducer<u32>,rayon::iter::for_each::ForEachConsumer<skat_aug23::pimc::pimc_search::impl$0::estimate_move_metrics::closure_env$0> >
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-1.10.0\src\iter\plumbing\mod.rs:415
+  12: rayon::iter::plumbing::bridge_producer_consumer::helper::closure$1
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-1.10.0\src\iter\plumbing\mod.rs:426
+  13: rayon_core::join::join_context::call_b::closure$0
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\join\mod.rs:129
+  14: rayon_core::job::impl$9::call::closure$0
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\job.rs:218
+  15: core::panic::unwind_safe::impl$25::call_once
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\core\src\panic\unwind_safe.rs:272
+  16: std::panicking::try::do_call
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\std\src\panicking.rs:557
+  17: std::panicking::try
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\std\src\panicking.rs:520
+  18: std::panic::catch_unwind
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\std\src\panic.rs:358
+  19: rayon_core::unwind::halt_unwinding
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\unwind.rs:17
+  20: rayon_core::job::JobResult::call
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\job.rs:218
+  21: rayon_core::job::impl$4::execute<rayon_core::latch::SpinLatch,rayon_core::join::join_context::call_b::closure_env$0<tuple$<>,rayon::iter::plumbing::bridge_producer_consumer::helper::closure_env$1<rayon::range::IterProducer<u32>,rayon::iter::for_each::ForEa
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\job.rs:120
+  22: rayon_core::registry::WorkerThread::wait_until_cold
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:794
+  23: rayon_core::registry::WorkerThread::wait_until
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:769
+  24: rayon_core::registry::WorkerThread::wait_until_out_of_work
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:818
+  25: rayon_core::registry::main_loop
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:923
+  26: rayon_core::registry::ThreadBuilder::run
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:53
+  27: rayon_core::registry::impl$2::spawn::closure$0
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:98
+note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+thread '<unnamed>' panicked at src\skat\builder.rs:333:9:
+Not enough ambiguous cards to satisfy targets! Available: 13, StartP1: 0, StartP2: 0, TargetP1: 9, TargetP2: 9
+stack backtrace:
+   0: std::panicking::begin_panic_handler
+             at /rustc/e71f9a9a98b0faf423844bf0ba7438f29dc27d58\library/std\src\panicking.rs:665
+   1: core::panicking::panic_fmt
+             at /rustc/e71f9a9a98b0faf423844bf0ba7438f29dc27d58\library/core\src\panicking.rs:76
+   2: skat_aug23::skat::builder::GameContextBuilder::set_cards_for_other_players
+             at .\src\skat\builder.rs:272
+   3: skat_aug23::pimc::pimc_problem::PimcProblem::generate_concrete_problem_inner
+             at .\src\pimc\pimc_problem.rs:749
+   4: skat_aug23::pimc::pimc_problem::PimcProblem::generate_concrete_problem_rejection_sampled
+             at .\src\pimc\pimc_problem.rs:729
+   5: skat_aug23::pimc::pimc_problem::PimcProblem::generate_concrete_problem
+             at .\src\pimc\pimc_problem.rs:711
+   6: skat_aug23::pimc::pimc_search::impl$0::estimate_move_metrics::closure$0
+             at .\src\pimc\pimc_search.rs:291
+   7: core::ops::function::impls::impl$1::call_mut<tuple$<u32>,skat_aug23::pimc::pimc_search::impl$0::estimate_move_metrics::closure_env$0>
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\core\src\ops\function.rs:272
+   8: rayon_core::join::join_context::closure$0<rayon::iter::plumbing::bridge_producer_consumer::helper::closure_env$0<rayon::range::IterProducer<u32>,rayon::iter::for_each::ForEachConsumer<skat_aug23::pimc::pimc_search::impl$0::estimate_move_metrics::closure_en
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\join\mod.rs:142
+   9: rayon_core::join::join_context
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\join\mod.rs:132
+  10: rayon::iter::plumbing::bridge_producer_consumer::helper<rayon::range::IterProducer<u32>,rayon::iter::for_each::ForEachConsumer<skat_aug23::pimc::pimc_search::impl$0::estimate_move_metrics::closure_env$0> >
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-1.10.0\src\iter\plumbing\mod.rs:415
+  11: rayon::iter::plumbing::bridge_producer_consumer::helper::closure$1
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-1.10.0\src\iter\plumbing\mod.rs:426
+  12: rayon_core::join::join_context::call_b::closure$0
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\join\mod.rs:129
+  13: rayon_core::job::impl$9::call::closure$0
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\job.rs:218
+  14: core::panic::unwind_safe::impl$25::call_once
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\core\src\panic\unwind_safe.rs:272
+  15: std::panicking::try::do_call
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\std\src\panicking.rs:557
+  16: std::panicking::try
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\std\src\panicking.rs:520
+  17: std::panic::catch_unwind
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\std\src\panic.rs:358
+  18: rayon_core::unwind::halt_unwinding
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\unwind.rs:17
+  19: rayon_core::job::JobResult::call
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\job.rs:218
+  20: rayon_core::job::impl$4::execute<rayon_core::latch::SpinLatch,rayon_core::join::join_context::call_b::closure_env$0<tuple$<>,rayon::iter::plumbing::bridge_producer_consumer::helper::closure_env$1<rayon::range::IterProducer<u32>,rayon::iter::for_each::ForEa
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\job.rs:120
+  21: rayon_core::registry::WorkerThread::wait_until_cold
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:794
+  22: rayon_core::registry::WorkerThread::wait_until
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:769
+  23: rayon_core::registry::WorkerThread::wait_until_out_of_work
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:818
+  24: rayon_core::registry::main_loop
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:923
+  25: rayon_core::registry::ThreadBuilder::run
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:53
+  26: rayon_core::registry::impl$2::spawn::closure$0
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:98
+note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+thread '<unnamed>' panicked at src\skat\builder.rs:333:9:
+Not enough ambiguous cards to satisfy targets! Available: 13, StartP1: 0, StartP2: 0, TargetP1: 9, TargetP2: 9
+stack backtrace:
+   0: std::panicking::begin_panic_handler
+             at /rustc/e71f9a9a98b0faf423844bf0ba7438f29dc27d58\library/std\src\panicking.rs:665
+   1: core::panicking::panic_fmt
+             at /rustc/e71f9a9a98b0faf423844bf0ba7438f29dc27d58\library/core\src\panicking.rs:76
+   2: skat_aug23::skat::builder::GameContextBuilder::set_cards_for_other_players
+             at .\src\skat\builder.rs:272
+   3: skat_aug23::pimc::pimc_problem::PimcProblem::generate_concrete_problem_inner
+             at .\src\pimc\pimc_problem.rs:749
+   4: skat_aug23::pimc::pimc_problem::PimcProblem::generate_concrete_problem_rejection_sampled
+             at .\src\pimc\pimc_problem.rs:729
+   5: skat_aug23::pimc::pimc_problem::PimcProblem::generate_concrete_problem
+             at .\src\pimc\pimc_problem.rs:711
+   6: skat_aug23::pimc::pimc_search::impl$0::estimate_move_metrics::closure$0
+             at .\src\pimc\pimc_search.rs:291
+   7: core::ops::function::impls::impl$1::call_mut<tuple$<u32>,skat_aug23::pimc::pimc_search::impl$0::estimate_move_metrics::closure_env$0>
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\core\src\ops\function.rs:272
+   8: rayon_core::join::join_context::closure$0<rayon::iter::plumbing::bridge_producer_consumer::helper::closure_env$0<rayon::range::IterProducer<u32>,rayon::iter::for_each::ForEachConsumer<skat_aug23::pimc::pimc_search::impl$0::estimate_move_metrics::closure_en
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\join\mod.rs:142
+   9: rayon_core::join::join_context
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\join\mod.rs:132
+  10: rayon::iter::plumbing::bridge_producer_consumer::helper<rayon::range::IterProducer<u32>,rayon::iter::for_each::ForEachConsumer<skat_aug23::pimc::pimc_search::impl$0::estimate_move_metrics::closure_env$0> >
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-1.10.0\src\iter\plumbing\mod.rs:415
+  11: rayon::iter::plumbing::bridge_producer_consumer::helper::closure$1
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-1.10.0\src\iter\plumbing\mod.rs:426
+  12: rayon_core::join::join_context::call_b::closure$0
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\join\mod.rs:129
+  13: rayon_core::job::impl$9::call::closure$0
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\job.rs:218
+  14: core::panic::unwind_safe::impl$25::call_once
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\core\src\panic\unwind_safe.rs:272
+  15: std::panicking::try::do_call
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\std\src\panicking.rs:557
+  16: std::panicking::try
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\std\src\panicking.rs:520
+  17: std::panic::catch_unwind
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\std\src\panic.rs:358
+  18: rayon_core::unwind::halt_unwinding
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\unwind.rs:17
+  19: rayon_core::job::JobResult::call
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\job.rs:218
+  20: rayon_core::job::impl$4::execute<rayon_core::latch::SpinLatch,rayon_core::join::join_context::call_b::closure_env$0<tuple$<>,rayon::iter::plumbing::bridge_producer_consumer::helper::closure_env$1<rayon::range::IterProducer<u32>,rayon::iter::for_each::ForEa
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\job.rs:120
+  21: rayon_core::registry::WorkerThread::wait_until_cold
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:794
+  22: rayon_core::registry::WorkerThread::wait_until
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:769
+  23: rayon_core::registry::WorkerThread::wait_until_out_of_work
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:818
+  24: rayon_core::registry::main_loop
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:923
+  25: rayon_core::registry::ThreadBuilder::run
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:53
+  26: rayon_core::registry::impl$2::spawn::closure$0
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:98
+note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+thread '<unnamed>' panicked at src\skat\builder.rs:333:9:
+Not enough ambiguous cards to satisfy targets! Available: 13, StartP1: 0, StartP2: 0, TargetP1: 9, TargetP2: 9
+stack backtrace:
+   0: std::panicking::begin_panic_handler
+             at /rustc/e71f9a9a98b0faf423844bf0ba7438f29dc27d58\library/std\src\panicking.rs:665
+   1: core::panicking::panic_fmt
+             at /rustc/e71f9a9a98b0faf423844bf0ba7438f29dc27d58\library/core\src\panicking.rs:76
+   2: skat_aug23::skat::builder::GameContextBuilder::set_cards_for_other_players
+             at .\src\skat\builder.rs:272
+   3: skat_aug23::pimc::pimc_problem::PimcProblem::generate_concrete_problem_inner
+             at .\src\pimc\pimc_problem.rs:749
+   4: skat_aug23::pimc::pimc_problem::PimcProblem::generate_concrete_problem_rejection_sampled
+             at .\src\pimc\pimc_problem.rs:729
+   5: skat_aug23::pimc::pimc_problem::PimcProblem::generate_concrete_problem
+             at .\src\pimc\pimc_problem.rs:711
+   6: skat_aug23::pimc::pimc_search::impl$0::estimate_move_metrics::closure$0
+             at .\src\pimc\pimc_search.rs:291
+   7: core::ops::function::impls::impl$1::call_mut<tuple$<u32>,skat_aug23::pimc::pimc_search::impl$0::estimate_move_metrics::closure_env$0>
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\core\src\ops\function.rs:272
+   8: core::iter::traits::iterator::Iterator::for_each::call::closure$0
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\core\src\iter\traits\iterator.rs:797
+   9: core::iter::traits::iterator::Iterator::fold
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\core\src\iter\traits\iterator.rs:2546
+  10: core::iter::traits::iterator::Iterator::for_each
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\core\src\iter\traits\iterator.rs:800
+  11: rayon::iter::for_each::impl$1::consume_iter
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-1.10.0\src\iter\for_each.rs:55
+  12: rayon::iter::plumbing::Producer::fold_with
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-1.10.0\src\iter\plumbing\mod.rs:109
+  13: rayon::iter::plumbing::bridge_producer_consumer::helper<rayon::range::IterProducer<u32>,rayon::iter::for_each::ForEachConsumer<skat_aug23::pimc::pimc_search::impl$0::estimate_move_metrics::closure_env$0> >
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-1.10.0\src\iter\plumbing\mod.rs:437
+  14: rayon::iter::plumbing::bridge_producer_consumer::helper::closure$1
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-1.10.0\src\iter\plumbing\mod.rs:426
+  15: rayon_core::join::join_context::call_b::closure$0
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\join\mod.rs:129
+  16: rayon_core::job::impl$9::call::closure$0
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\job.rs:218
+  17: core::panic::unwind_safe::impl$25::call_once
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\core\src\panic\unwind_safe.rs:272
+  18: std::panicking::try::do_call
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\std\src\panicking.rs:557
+  19: std::panicking::try
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\std\src\panicking.rs:520
+  20: std::panic::catch_unwind
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\std\src\panic.rs:358
+  21: rayon_core::unwind::halt_unwinding
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\unwind.rs:17
+  22: rayon_core::job::JobResult::call
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\job.rs:218
+  23: rayon_core::job::impl$4::execute<rayon_core::latch::SpinLatch,rayon_core::join::join_context::call_b::closure_env$0<tuple$<>,rayon::iter::plumbing::bridge_producer_consumer::helper::closure_env$1<rayon::range::IterProducer<u32>,rayon::iter::for_each::ForEa
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\job.rs:120
+  24: rayon_core::registry::WorkerThread::wait_until_cold
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:794
+  25: rayon_core::registry::WorkerThread::wait_until
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:769
+  26: rayon_core::registry::WorkerThread::wait_until_out_of_work
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:818
+  27: rayon_core::registry::main_loop
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:923
+  28: rayon_core::registry::ThreadBuilder::run
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:53
+  29: rayon_core::registry::impl$2::spawn::closure$0
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:98
+note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+thread '<unnamed>' panicked at src\skat\builder.rs:333:9:
+Not enough ambiguous cards to satisfy targets! Available: 13, StartP1: 0, StartP2: 0, TargetP1: 9, TargetP2: 9
+stack backtrace:
+   0: std::panicking::begin_panic_handler
+             at /rustc/e71f9a9a98b0faf423844bf0ba7438f29dc27d58\library/std\src\panicking.rs:665
+   1: core::panicking::panic_fmt
+             at /rustc/e71f9a9a98b0faf423844bf0ba7438f29dc27d58\library/core\src\panicking.rs:76
+   2: skat_aug23::skat::builder::GameContextBuilder::set_cards_for_other_players
+             at .\src\skat\builder.rs:272
+   3: skat_aug23::pimc::pimc_problem::PimcProblem::generate_concrete_problem_inner
+             at .\src\pimc\pimc_problem.rs:749
+   4: skat_aug23::pimc::pimc_problem::PimcProblem::generate_concrete_problem_rejection_sampled
+             at .\src\pimc\pimc_problem.rs:729
+   5: skat_aug23::pimc::pimc_problem::PimcProblem::generate_concrete_problem
+             at .\src\pimc\pimc_problem.rs:711
+   6: skat_aug23::pimc::pimc_search::impl$0::estimate_move_metrics::closure$0
+             at .\src\pimc\pimc_search.rs:291
+   7: core::ops::function::impls::impl$1::call_mut<tuple$<u32>,skat_aug23::pimc::pimc_search::impl$0::estimate_move_metrics::closure_env$0>
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\core\src\ops\function.rs:272
+   8: rayon_core::join::join_context::closure$0<rayon::iter::plumbing::bridge_producer_consumer::helper::closure_env$0<rayon::range::IterProducer<u32>,rayon::iter::for_each::ForEachConsumer<skat_aug23::pimc::pimc_search::impl$0::estimate_move_metrics::closure_en
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\join\mod.rs:142
+   9: rayon_core::join::join_context
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\join\mod.rs:132
+  10: rayon::iter::plumbing::bridge_producer_consumer::helper<rayon::range::IterProducer<u32>,rayon::iter::for_each::ForEachConsumer<skat_aug23::pimc::pimc_search::impl$0::estimate_move_metrics::closure_env$0> >
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-1.10.0\src\iter\plumbing\mod.rs:415
+  11: rayon::iter::plumbing::bridge_producer_consumer::helper::closure$1
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-1.10.0\src\iter\plumbing\mod.rs:426
+  12: rayon_core::join::join_context::call_b::closure$0
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\join\mod.rs:129
+  13: rayon_core::job::impl$9::call::closure$0
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\job.rs:218
+  14: core::panic::unwind_safe::impl$25::call_once
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\core\src\panic\unwind_safe.rs:272
+  15: std::panicking::try::do_call
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\std\src\panicking.rs:557
+  16: std::panicking::try
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\std\src\panicking.rs:520
+  17: std::panic::catch_unwind
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\std\src\panic.rs:358
+  18: rayon_core::unwind::halt_unwinding
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\unwind.rs:17
+  19: rayon_core::job::JobResult::call
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\job.rs:218
+  20: rayon_core::job::impl$4::execute<rayon_core::latch::SpinLatch,rayon_core::join::join_context::call_b::closure_env$0<tuple$<>,rayon::iter::plumbing::bridge_producer_consumer::helper::closure_env$1<rayon::range::IterProducer<u32>,rayon::iter::for_each::ForEa
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\job.rs:120
+  21: rayon_core::registry::WorkerThread::wait_until_cold
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:794
+  22: rayon_core::registry::WorkerThread::wait_until
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:769
+  23: rayon_core::registry::WorkerThread::wait_until_out_of_work
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:818
+  24: rayon_core::registry::main_loop
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:923
+  25: rayon_core::registry::ThreadBuilder::run
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:53
+  26: rayon_core::registry::impl$2::spawn::closure$0
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:98
+note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+thread '<unnamed>' panicked at src\skat\builder.rs:333:9:
+Not enough ambiguous cards to satisfy targets! Available: 13, StartP1: 0, StartP2: 0, TargetP1: 9, TargetP2: 9
+stack backtrace:
+   0: std::panicking::begin_panic_handler
+             at /rustc/e71f9a9a98b0faf423844bf0ba7438f29dc27d58\library/std\src\panicking.rs:665
+   1: core::panicking::panic_fmt
+             at /rustc/e71f9a9a98b0faf423844bf0ba7438f29dc27d58\library/core\src\panicking.rs:76
+   2: skat_aug23::skat::builder::GameContextBuilder::set_cards_for_other_players
+             at .\src\skat\builder.rs:272
+   3: skat_aug23::pimc::pimc_problem::PimcProblem::generate_concrete_problem_inner
+             at .\src\pimc\pimc_problem.rs:749
+   4: skat_aug23::pimc::pimc_problem::PimcProblem::generate_concrete_problem_rejection_sampled
+             at .\src\pimc\pimc_problem.rs:729
+   5: skat_aug23::pimc::pimc_problem::PimcProblem::generate_concrete_problem
+             at .\src\pimc\pimc_problem.rs:711
+   6: skat_aug23::pimc::pimc_search::impl$0::estimate_move_metrics::closure$0
+             at .\src\pimc\pimc_search.rs:291
+   7: core::ops::function::impls::impl$1::call_mut<tuple$<u32>,skat_aug23::pimc::pimc_search::impl$0::estimate_move_metrics::closure_env$0>
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\core\src\ops\function.rs:272
+   8: core::iter::traits::iterator::Iterator::for_each::call::closure$0
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\core\src\iter\traits\iterator.rs:797
+   9: core::iter::traits::iterator::Iterator::fold
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\core\src\iter\traits\iterator.rs:2546
+  10: core::iter::traits::iterator::Iterator::for_each
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\core\src\iter\traits\iterator.rs:800
+  11: rayon::iter::for_each::impl$1::consume_iter
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-1.10.0\src\iter\for_each.rs:55
+  12: rayon::iter::plumbing::Producer::fold_with
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-1.10.0\src\iter\plumbing\mod.rs:109
+  13: rayon::iter::plumbing::bridge_producer_consumer::helper<rayon::range::IterProducer<u32>,rayon::iter::for_each::ForEachConsumer<skat_aug23::pimc::pimc_search::impl$0::estimate_move_metrics::closure_env$0> >
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-1.10.0\src\iter\plumbing\mod.rs:437
+  14: rayon::iter::plumbing::bridge_producer_consumer::helper::closure$1
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-1.10.0\src\iter\plumbing\mod.rs:426
+  15: rayon_core::join::join_context::call_b::closure$0
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\join\mod.rs:129
+  16: rayon_core::job::impl$9::call::closure$0
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\job.rs:218
+  17: core::panic::unwind_safe::impl$25::call_once
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\core\src\panic\unwind_safe.rs:272
+  18: std::panicking::try::do_call
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\std\src\panicking.rs:557
+  19: std::panicking::try
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\std\src\panicking.rs:520
+  20: std::panic::catch_unwind
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\std\src\panic.rs:358
+  21: rayon_core::unwind::halt_unwinding
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\unwind.rs:17
+  22: rayon_core::job::JobResult::call
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\job.rs:218
+  23: rayon_core::job::impl$4::execute<rayon_core::latch::SpinLatch,rayon_core::join::join_context::call_b::closure_env$0<tuple$<>,rayon::iter::plumbing::bridge_producer_consumer::helper::closure_env$1<rayon::range::IterProducer<u32>,rayon::iter::for_each::ForEa
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\job.rs:120
+  24: rayon_core::registry::WorkerThread::wait_until_cold
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:794
+  25: rayon_core::registry::WorkerThread::wait_until
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:769
+  26: rayon_core::registry::WorkerThread::wait_until_out_of_work
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:818
+  27: rayon_core::registry::main_loop
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:923
+  28: rayon_core::registry::ThreadBuilder::run
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:53
+  29: rayon_core::registry::impl$2::spawn::closure$0
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:98
+note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+thread '<unnamed>' panicked at src\skat\builder.rs:333:9:
+Not enough ambiguous cards to satisfy targets! Available: 13, StartP1: 0, StartP2: 0, TargetP1: 9, TargetP2: 9
+stack backtrace:
+   0: std::panicking::begin_panic_handler
+             at /rustc/e71f9a9a98b0faf423844bf0ba7438f29dc27d58\library/std\src\panicking.rs:665
+   1: core::panicking::panic_fmt
+             at /rustc/e71f9a9a98b0faf423844bf0ba7438f29dc27d58\library/core\src\panicking.rs:76
+   2: skat_aug23::skat::builder::GameContextBuilder::set_cards_for_other_players
+             at .\src\skat\builder.rs:272
+   3: skat_aug23::pimc::pimc_problem::PimcProblem::generate_concrete_problem_inner
+             at .\src\pimc\pimc_problem.rs:749
+   4: skat_aug23::pimc::pimc_problem::PimcProblem::generate_concrete_problem_rejection_sampled
+             at .\src\pimc\pimc_problem.rs:729
+   5: skat_aug23::pimc::pimc_problem::PimcProblem::generate_concrete_problem
+             at .\src\pimc\pimc_problem.rs:711
+   6: skat_aug23::pimc::pimc_search::impl$0::estimate_move_metrics::closure$0
+             at .\src\pimc\pimc_search.rs:291
+   7: core::ops::function::impls::impl$1::call_mut<tuple$<u32>,skat_aug23::pimc::pimc_search::impl$0::estimate_move_metrics::closure_env$0>
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\core\src\ops\function.rs:272
+   8: rayon_core::join::join_context::closure$0<rayon::iter::plumbing::bridge_producer_consumer::helper::closure_env$0<rayon::range::IterProducer<u32>,rayon::iter::for_each::ForEachConsumer<skat_aug23::pimc::pimc_search::impl$0::estimate_move_metrics::closure_en
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\join\mod.rs:142
+   9: rayon_core::join::join_context
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\join\mod.rs:132
+  10: rayon::iter::plumbing::bridge_producer_consumer::helper<rayon::range::IterProducer<u32>,rayon::iter::for_each::ForEachConsumer<skat_aug23::pimc::pimc_search::impl$0::estimate_move_metrics::closure_env$0> >
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-1.10.0\src\iter\plumbing\mod.rs:415
+  11: rayon::iter::plumbing::bridge_producer_consumer::helper::closure$1
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-1.10.0\src\iter\plumbing\mod.rs:426
+  12: rayon_core::join::join_context::call_b::closure$0
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\join\mod.rs:129
+  13: rayon_core::job::impl$9::call::closure$0
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\job.rs:218
+  14: core::panic::unwind_safe::impl$25::call_once
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\core\src\panic\unwind_safe.rs:272
+  15: std::panicking::try::do_call
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\std\src\panicking.rs:557
+  16: std::panicking::try
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\std\src\panicking.rs:520
+  17: std::panic::catch_unwind
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\std\src\panic.rs:358
+  18: rayon_core::unwind::halt_unwinding
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\unwind.rs:17
+  19: rayon_core::job::JobResult::call
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\job.rs:218
+  20: rayon_core::job::impl$4::execute<rayon_core::latch::SpinLatch,rayon_core::join::join_context::call_b::closure_env$0<tuple$<>,rayon::iter::plumbing::bridge_producer_consumer::helper::closure_env$1<rayon::range::IterProducer<u32>,rayon::iter::for_each::ForEa
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\job.rs:120
+  21: rayon_core::registry::WorkerThread::wait_until_cold
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:794
+  22: rayon_core::registry::WorkerThread::wait_until
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:769
+  23: rayon_core::registry::WorkerThread::wait_until_out_of_work
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:818
+  24: rayon_core::registry::main_loop
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:923
+  25: rayon_core::registry::ThreadBuilder::run
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:53
+  26: rayon_core::registry::impl$2::spawn::closure$0
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:98
+note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+thread '<unnamed>' panicked at src\skat\builder.rs:333:9:
+Not enough ambiguous cards to satisfy targets! Available: 13, StartP1: 0, StartP2: 0, TargetP1: 9, TargetP2: 9
+stack backtrace:
+   0: std::panicking::begin_panic_handler
+             at /rustc/e71f9a9a98b0faf423844bf0ba7438f29dc27d58\library/std\src\panicking.rs:665
+   1: core::panicking::panic_fmt
+             at /rustc/e71f9a9a98b0faf423844bf0ba7438f29dc27d58\library/core\src\panicking.rs:76
+   2: skat_aug23::skat::builder::GameContextBuilder::set_cards_for_other_players
+             at .\src\skat\builder.rs:272
+   3: skat_aug23::pimc::pimc_problem::PimcProblem::generate_concrete_problem_inner
+             at .\src\pimc\pimc_problem.rs:749
+   4: skat_aug23::pimc::pimc_problem::PimcProblem::generate_concrete_problem_rejection_sampled
+             at .\src\pimc\pimc_problem.rs:729
+   5: skat_aug23::pimc::pimc_problem::PimcProblem::generate_concrete_problem
+             at .\src\pimc\pimc_problem.rs:711
+   6: skat_aug23::pimc::pimc_search::impl$0::estimate_move_metrics::closure$0
+             at .\src\pimc\pimc_search.rs:291
+   7: core::ops::function::impls::impl$1::call_mut<tuple$<u32>,skat_aug23::pimc::pimc_search::impl$0::estimate_move_metrics::closure_env$0>
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\core\src\ops\function.rs:272
+   8: rayon_core::join::join_context::closure$0<rayon::iter::plumbing::bridge_producer_consumer::helper::closure_env$0<rayon::range::IterProducer<u32>,rayon::iter::for_each::ForEachConsumer<skat_aug23::pimc::pimc_search::impl$0::estimate_move_metrics::closure_en
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\join\mod.rs:142
+   9: rayon_core::join::join_context
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\join\mod.rs:132
+  10: rayon::iter::plumbing::bridge_producer_consumer::helper<rayon::range::IterProducer<u32>,rayon::iter::for_each::ForEachConsumer<skat_aug23::pimc::pimc_search::impl$0::estimate_move_metrics::closure_env$0> >
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-1.10.0\src\iter\plumbing\mod.rs:415
+  11: rayon::iter::plumbing::bridge_producer_consumer::helper::closure$1
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-1.10.0\src\iter\plumbing\mod.rs:426
+  12: rayon_core::join::join_context::call_b::closure$0
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\join\mod.rs:129
+  13: rayon_core::job::impl$9::call::closure$0
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\job.rs:218
+  14: core::panic::unwind_safe::impl$25::call_once
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\core\src\panic\unwind_safe.rs:272
+  15: std::panicking::try::do_call
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\std\src\panicking.rs:557
+  16: std::panicking::try
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\std\src\panicking.rs:520
+  17: std::panic::catch_unwind
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\std\src\panic.rs:358
+  18: rayon_core::unwind::halt_unwinding
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\unwind.rs:17
+  19: rayon_core::job::JobResult::call
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\job.rs:218
+  20: rayon_core::job::impl$4::execute<rayon_core::latch::SpinLatch,rayon_core::join::join_context::call_b::closure_env$0<tuple$<>,rayon::iter::plumbing::bridge_producer_consumer::helper::closure_env$1<rayon::range::IterProducer<u32>,rayon::iter::for_each::ForEa
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\job.rs:120
+  21: rayon_core::registry::WorkerThread::wait_until_cold
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:794
+  22: rayon_core::registry::WorkerThread::wait_until
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:769
+  23: rayon_core::registry::WorkerThread::wait_until_out_of_work
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:818
+  24: rayon_core::registry::main_loop
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:923
+  25: rayon_core::registry::ThreadBuilder::run
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:53
+  26: rayon_core::registry::impl$2::spawn::closure$0
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:98
+note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+thread '<unnamed>' panicked at src\skat\builder.rs:333:9:
+Not enough ambiguous cards to satisfy targets! Available: 13, StartP1: 0, StartP2: 0, TargetP1: 9, TargetP2: 9
+stack backtrace:
+   0: std::panicking::begin_panic_handler
+             at /rustc/e71f9a9a98b0faf423844bf0ba7438f29dc27d58\library/std\src\panicking.rs:665
+   1: core::panicking::panic_fmt
+             at /rustc/e71f9a9a98b0faf423844bf0ba7438f29dc27d58\library/core\src\panicking.rs:76
+   2: skat_aug23::skat::builder::GameContextBuilder::set_cards_for_other_players
+             at .\src\skat\builder.rs:272
+   3: skat_aug23::pimc::pimc_problem::PimcProblem::generate_concrete_problem_inner
+             at .\src\pimc\pimc_problem.rs:749
+   4: skat_aug23::pimc::pimc_problem::PimcProblem::generate_concrete_problem_rejection_sampled
+             at .\src\pimc\pimc_problem.rs:729
+   5: skat_aug23::pimc::pimc_problem::PimcProblem::generate_concrete_problem
+             at .\src\pimc\pimc_problem.rs:711
+   6: skat_aug23::pimc::pimc_search::impl$0::estimate_move_metrics::closure$0
+             at .\src\pimc\pimc_search.rs:291
+   7: core::ops::function::impls::impl$1::call_mut<tuple$<u32>,skat_aug23::pimc::pimc_search::impl$0::estimate_move_metrics::closure_env$0>
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\core\src\ops\function.rs:272
+   8: core::iter::traits::iterator::Iterator::for_each::call::closure$0
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\core\src\iter\traits\iterator.rs:797
+   9: core::iter::traits::iterator::Iterator::fold
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\core\src\iter\traits\iterator.rs:2546
+  10: core::iter::traits::iterator::Iterator::for_each
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\core\src\iter\traits\iterator.rs:800
+  11: rayon::iter::for_each::impl$1::consume_iter
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-1.10.0\src\iter\for_each.rs:55
+  12: rayon::iter::plumbing::Producer::fold_with
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-1.10.0\src\iter\plumbing\mod.rs:109
+  13: rayon::iter::plumbing::bridge_producer_consumer::helper<rayon::range::IterProducer<u32>,rayon::iter::for_each::ForEachConsumer<skat_aug23::pimc::pimc_search::impl$0::estimate_move_metrics::closure_env$0> >
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-1.10.0\src\iter\plumbing\mod.rs:437
+  14: rayon::iter::plumbing::bridge_producer_consumer::helper::closure$1
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-1.10.0\src\iter\plumbing\mod.rs:426
+  15: rayon_core::join::join_context::call_b::closure$0
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\join\mod.rs:129
+  16: rayon_core::job::impl$9::call::closure$0
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\job.rs:218
+  17: core::panic::unwind_safe::impl$25::call_once
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\core\src\panic\unwind_safe.rs:272
+  18: std::panicking::try::do_call
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\std\src\panicking.rs:557
+  19: std::panicking::try
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\std\src\panicking.rs:520
+  20: std::panic::catch_unwind
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\std\src\panic.rs:358
+  21: rayon_core::unwind::halt_unwinding
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\unwind.rs:17
+  22: rayon_core::job::JobResult::call
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\job.rs:218
+  23: rayon_core::job::impl$4::execute<rayon_core::latch::SpinLatch,rayon_core::join::join_context::call_b::closure_env$0<tuple$<>,rayon::iter::plumbing::bridge_producer_consumer::helper::closure_env$1<rayon::range::IterProducer<u32>,rayon::iter::for_each::ForEa
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\job.rs:120
+  24: rayon_core::registry::WorkerThread::wait_until_cold
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:794
+  25: rayon_core::registry::WorkerThread::wait_until
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:769
+  26: rayon_core::registry::WorkerThread::wait_until_out_of_work
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:818
+  27: rayon_core::registry::main_loop
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:923
+  28: rayon_core::registry::ThreadBuilder::run
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:53
+  29: rayon_core::registry::impl$2::spawn::closure$0
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:98
+note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+thread '<unnamed>' panicked at src\skat\builder.rs:333:9:
+Not enough ambiguous cards to satisfy targets! Available: 13, StartP1: 0, StartP2: 0, TargetP1: 9, TargetP2: 9
+stack backtrace:
+   0: std::panicking::begin_panic_handler
+             at /rustc/e71f9a9a98b0faf423844bf0ba7438f29dc27d58\library/std\src\panicking.rs:665
+   1: core::panicking::panic_fmt
+             at /rustc/e71f9a9a98b0faf423844bf0ba7438f29dc27d58\library/core\src\panicking.rs:76
+   2: skat_aug23::skat::builder::GameContextBuilder::set_cards_for_other_players
+             at .\src\skat\builder.rs:272
+   3: skat_aug23::pimc::pimc_problem::PimcProblem::generate_concrete_problem_inner
+             at .\src\pimc\pimc_problem.rs:749
+   4: skat_aug23::pimc::pimc_problem::PimcProblem::generate_concrete_problem_rejection_sampled
+             at .\src\pimc\pimc_problem.rs:729
+   5: skat_aug23::pimc::pimc_problem::PimcProblem::generate_concrete_problem
+             at .\src\pimc\pimc_problem.rs:711
+   6: skat_aug23::pimc::pimc_search::impl$0::estimate_move_metrics::closure$0
+             at .\src\pimc\pimc_search.rs:291
+   7: core::ops::function::impls::impl$1::call_mut<tuple$<u32>,skat_aug23::pimc::pimc_search::impl$0::estimate_move_metrics::closure_env$0>
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\core\src\ops\function.rs:272
+   8: core::iter::traits::iterator::Iterator::for_each::call::closure$0
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\core\src\iter\traits\iterator.rs:797
+   9: core::iter::traits::iterator::Iterator::fold
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\core\src\iter\traits\iterator.rs:2546
+  10: core::iter::traits::iterator::Iterator::for_each
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\core\src\iter\traits\iterator.rs:800
+  11: rayon::iter::for_each::impl$1::consume_iter
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-1.10.0\src\iter\for_each.rs:55
+  12: rayon::iter::plumbing::Producer::fold_with
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-1.10.0\src\iter\plumbing\mod.rs:109
+  13: rayon::iter::plumbing::bridge_producer_consumer::helper<rayon::range::IterProducer<u32>,rayon::iter::for_each::ForEachConsumer<skat_aug23::pimc::pimc_search::impl$0::estimate_move_metrics::closure_env$0> >
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-1.10.0\src\iter\plumbing\mod.rs:437
+  14: rayon::iter::plumbing::bridge_producer_consumer::helper::closure$1
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-1.10.0\src\iter\plumbing\mod.rs:426
+  15: rayon_core::join::join_context::call_b::closure$0
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\join\mod.rs:129
+  16: rayon_core::job::impl$9::call::closure$0
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\job.rs:218
+  17: core::panic::unwind_safe::impl$25::call_once
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\core\src\panic\unwind_safe.rs:272
+  18: std::panicking::try::do_call
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\std\src\panicking.rs:557
+  19: std::panicking::try
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\std\src\panicking.rs:520
+  20: std::panic::catch_unwind
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\std\src\panic.rs:358
+  21: rayon_core::unwind::halt_unwinding
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\unwind.rs:17
+  22: rayon_core::job::JobResult::call
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\job.rs:218
+  23: rayon_core::job::impl$4::execute<rayon_core::latch::SpinLatch,rayon_core::join::join_context::call_b::closure_env$0<tuple$<>,rayon::iter::plumbing::bridge_producer_consumer::helper::closure_env$1<rayon::range::IterProducer<u32>,rayon::iter::for_each::ForEa
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\job.rs:120
+  24: rayon_core::registry::WorkerThread::wait_until_cold
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:794
+  25: rayon_core::registry::WorkerThread::wait_until
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:769
+  26: rayon_core::registry::WorkerThread::wait_until_out_of_work
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:818
+  27: rayon_core::registry::main_loop
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:923
+  28: rayon_core::registry::ThreadBuilder::run
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:53
+  29: rayon_core::registry::impl$2::spawn::closure$0
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:98
+note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+thread '<unnamed>' panicked at src\skat\builder.rs:333:9:
+Not enough ambiguous cards to satisfy targets! Available: 13, StartP1: 0, StartP2: 0, TargetP1: 9, TargetP2: 9
+stack backtrace:
+   0: std::panicking::begin_panic_handler
+             at /rustc/e71f9a9a98b0faf423844bf0ba7438f29dc27d58\library/std\src\panicking.rs:665
+   1: core::panicking::panic_fmt
+             at /rustc/e71f9a9a98b0faf423844bf0ba7438f29dc27d58\library/core\src\panicking.rs:76
+   2: skat_aug23::skat::builder::GameContextBuilder::set_cards_for_other_players
+             at .\src\skat\builder.rs:272
+   3: skat_aug23::pimc::pimc_problem::PimcProblem::generate_concrete_problem_inner
+             at .\src\pimc\pimc_problem.rs:749
+   4: skat_aug23::pimc::pimc_problem::PimcProblem::generate_concrete_problem_rejection_sampled
+             at .\src\pimc\pimc_problem.rs:729
+   5: skat_aug23::pimc::pimc_problem::PimcProblem::generate_concrete_problem
+             at .\src\pimc\pimc_problem.rs:711
+   6: skat_aug23::pimc::pimc_search::impl$0::estimate_move_metrics::closure$0
+             at .\src\pimc\pimc_search.rs:291
+   7: core::ops::function::impls::impl$1::call_mut<tuple$<u32>,skat_aug23::pimc::pimc_search::impl$0::estimate_move_metrics::closure_env$0>
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\core\src\ops\function.rs:272
+   8: rayon_core::join::join_context::closure$0<rayon::iter::plumbing::bridge_producer_consumer::helper::closure_env$0<rayon::range::IterProducer<u32>,rayon::iter::for_each::ForEachConsumer<skat_aug23::pimc::pimc_search::impl$0::estimate_move_metrics::closure_en
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\join\mod.rs:142
+   9: rayon_core::join::join_context
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\join\mod.rs:132
+  10: rayon::iter::plumbing::bridge_producer_consumer::helper<rayon::range::IterProducer<u32>,rayon::iter::for_each::ForEachConsumer<skat_aug23::pimc::pimc_search::impl$0::estimate_move_metrics::closure_env$0> >
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-1.10.0\src\iter\plumbing\mod.rs:415
+  11: rayon::iter::plumbing::bridge_producer_consumer::helper::closure$1
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-1.10.0\src\iter\plumbing\mod.rs:426
+  12: rayon_core::join::join_context::call_b::closure$0
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\join\mod.rs:129
+  13: rayon_core::job::impl$9::call::closure$0
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\job.rs:218
+  14: core::panic::unwind_safe::impl$25::call_once
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\core\src\panic\unwind_safe.rs:272
+  15: std::panicking::try::do_call
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\std\src\panicking.rs:557
+  16: std::panicking::try
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\std\src\panicking.rs:520
+  17: std::panic::catch_unwind
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\std\src\panic.rs:358
+  18: rayon_core::unwind::halt_unwinding
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\unwind.rs:17
+  19: rayon_core::job::JobResult::call
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\job.rs:218
+  20: rayon_core::job::impl$4::execute<rayon_core::latch::SpinLatch,rayon_core::join::join_context::call_b::closure_env$0<tuple$<>,rayon::iter::plumbing::bridge_producer_consumer::helper::closure_env$1<rayon::range::IterProducer<u32>,rayon::iter::for_each::ForEa
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\job.rs:120
+  21: rayon_core::registry::WorkerThread::wait_until_cold
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:794
+  22: rayon_core::registry::WorkerThread::wait_until
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:769
+  23: rayon_core::registry::WorkerThread::wait_until_out_of_work
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:818
+  24: rayon_core::registry::main_loop
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:923
+  25: rayon_core::registry::ThreadBuilder::run
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:53
+  26: rayon_core::registry::impl$2::spawn::closure$0
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:98
+note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+thread '<unnamed>' panicked at src\skat\builder.rs:333:9:
+Not enough ambiguous cards to satisfy targets! Available: 13, StartP1: 0, StartP2: 0, TargetP1: 9, TargetP2: 9
+stack backtrace:
+   0: std::panicking::begin_panic_handler
+             at /rustc/e71f9a9a98b0faf423844bf0ba7438f29dc27d58\library/std\src\panicking.rs:665
+   1: core::panicking::panic_fmt
+             at /rustc/e71f9a9a98b0faf423844bf0ba7438f29dc27d58\library/core\src\panicking.rs:76
+   2: skat_aug23::skat::builder::GameContextBuilder::set_cards_for_other_players
+             at .\src\skat\builder.rs:272
+   3: skat_aug23::pimc::pimc_problem::PimcProblem::generate_concrete_problem_inner
+             at .\src\pimc\pimc_problem.rs:749
+   4: skat_aug23::pimc::pimc_problem::PimcProblem::generate_concrete_problem_rejection_sampled
+             at .\src\pimc\pimc_problem.rs:729
+   5: skat_aug23::pimc::pimc_problem::PimcProblem::generate_concrete_problem
+             at .\src\pimc\pimc_problem.rs:711
+   6: skat_aug23::pimc::pimc_search::impl$0::estimate_move_metrics::closure$0
+             at .\src\pimc\pimc_search.rs:291
+   7: core::ops::function::impls::impl$1::call_mut<tuple$<u32>,skat_aug23::pimc::pimc_search::impl$0::estimate_move_metrics::closure_env$0>
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\core\src\ops\function.rs:272
+   8: core::iter::traits::iterator::Iterator::for_each::call::closure$0
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\core\src\iter\traits\iterator.rs:797
+   9: core::iter::traits::iterator::Iterator::fold
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\core\src\iter\traits\iterator.rs:2546
+  10: core::iter::traits::iterator::Iterator::for_each
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\core\src\iter\traits\iterator.rs:800
+  11: rayon::iter::for_each::impl$1::consume_iter
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-1.10.0\src\iter\for_each.rs:55
+  12: rayon::iter::plumbing::Producer::fold_with
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-1.10.0\src\iter\plumbing\mod.rs:109
+  13: rayon::iter::plumbing::bridge_producer_consumer::helper<rayon::range::IterProducer<u32>,rayon::iter::for_each::ForEachConsumer<skat_aug23::pimc::pimc_search::impl$0::estimate_move_metrics::closure_env$0> >
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-1.10.0\src\iter\plumbing\mod.rs:437
+  14: rayon::iter::plumbing::bridge_producer_consumer::helper::closure$1
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-1.10.0\src\iter\plumbing\mod.rs:426
+  15: rayon_core::join::join_context::call_b::closure$0
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\join\mod.rs:129
+  16: rayon_core::job::impl$9::call::closure$0
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\job.rs:218
+  17: core::panic::unwind_safe::impl$25::call_once
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\core\src\panic\unwind_safe.rs:272
+  18: std::panicking::try::do_call
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\std\src\panicking.rs:557
+  19: std::panicking::try
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\std\src\panicking.rs:520
+  20: std::panic::catch_unwind
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\std\src\panic.rs:358
+  21: rayon_core::unwind::halt_unwinding
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\unwind.rs:17
+  22: rayon_core::job::JobResult::call
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\job.rs:218
+  23: rayon_core::job::impl$4::execute<rayon_core::latch::SpinLatch,rayon_core::join::join_context::call_b::closure_env$0<tuple$<>,rayon::iter::plumbing::bridge_producer_consumer::helper::closure_env$1<rayon::range::IterProducer<u32>,rayon::iter::for_each::ForEa
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\job.rs:120
+  24: rayon_core::registry::WorkerThread::wait_until_cold
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:794
+  25: rayon_core::registry::WorkerThread::wait_until
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:769
+  26: rayon_core::registry::WorkerThread::wait_until_out_of_work
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:818
+  27: rayon_core::registry::main_loop
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:923
+  28: rayon_core::registry::ThreadBuilder::run
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:53
+  29: rayon_core::registry::impl$2::spawn::closure$0
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:98
+note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+thread '<unnamed>' panicked at src\skat\builder.rs:333:9:
+Not enough ambiguous cards to satisfy targets! Available: 13, StartP1: 0, StartP2: 0, TargetP1: 9, TargetP2: 9
+stack backtrace:
+   0: std::panicking::begin_panic_handler
+             at /rustc/e71f9a9a98b0faf423844bf0ba7438f29dc27d58\library/std\src\panicking.rs:665
+   1: core::panicking::panic_fmt
+             at /rustc/e71f9a9a98b0faf423844bf0ba7438f29dc27d58\library/core\src\panicking.rs:76
+   2: skat_aug23::skat::builder::GameContextBuilder::set_cards_for_other_players
+             at .\src\skat\builder.rs:272
+   3: skat_aug23::pimc::pimc_problem::PimcProblem::generate_concrete_problem_inner
+             at .\src\pimc\pimc_problem.rs:749
+   4: skat_aug23::pimc::pimc_problem::PimcProblem::generate_concrete_problem_rejection_sampled
+             at .\src\pimc\pimc_problem.rs:729
+   5: skat_aug23::pimc::pimc_problem::PimcProblem::generate_concrete_problem
+             at .\src\pimc\pimc_problem.rs:711
+   6: skat_aug23::pimc::pimc_search::impl$0::estimate_move_metrics::closure$0
+             at .\src\pimc\pimc_search.rs:291
+   7: core::ops::function::impls::impl$1::call_mut<tuple$<u32>,skat_aug23::pimc::pimc_search::impl$0::estimate_move_metrics::closure_env$0>
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\core\src\ops\function.rs:272
+   8: rayon_core::join::join_context::closure$0<rayon::iter::plumbing::bridge_producer_consumer::helper::closure_env$0<rayon::range::IterProducer<u32>,rayon::iter::for_each::ForEachConsumer<skat_aug23::pimc::pimc_search::impl$0::estimate_move_metrics::closure_en
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\join\mod.rs:142
+   9: rayon_core::join::join_context
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\join\mod.rs:132
+  10: rayon::iter::plumbing::bridge_producer_consumer::helper<rayon::range::IterProducer<u32>,rayon::iter::for_each::ForEachConsumer<skat_aug23::pimc::pimc_search::impl$0::estimate_move_metrics::closure_env$0> >
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-1.10.0\src\iter\plumbing\mod.rs:415
+  11: rayon::iter::plumbing::bridge_producer_consumer::helper::closure$1
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-1.10.0\src\iter\plumbing\mod.rs:426
+  12: rayon_core::join::join_context::call_b::closure$0
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\join\mod.rs:129
+  13: rayon_core::job::impl$9::call::closure$0
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\job.rs:218
+  14: core::panic::unwind_safe::impl$25::call_once
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\core\src\panic\unwind_safe.rs:272
+  15: std::panicking::try::do_call
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\std\src\panicking.rs:557
+  16: std::panicking::try
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\std\src\panicking.rs:520
+  17: std::panic::catch_unwind
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\std\src\panic.rs:358
+  18: rayon_core::unwind::halt_unwinding
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\unwind.rs:17
+  19: rayon_core::job::JobResult::call
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\job.rs:218
+  20: rayon_core::job::impl$4::execute<rayon_core::latch::SpinLatch,rayon_core::join::join_context::call_b::closure_env$0<tuple$<>,rayon::iter::plumbing::bridge_producer_consumer::helper::closure_env$1<rayon::range::IterProducer<u32>,rayon::iter::for_each::ForEa
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\job.rs:120
+  21: rayon_core::registry::WorkerThread::wait_until_cold
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:794
+  22: rayon_core::registry::WorkerThread::wait_until
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:769
+  23: rayon_core::registry::WorkerThread::wait_until_out_of_work
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:818
+  24: rayon_core::registry::main_loop
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:923
+  25: rayon_core::registry::ThreadBuilder::run
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:53
+  26: rayon_core::registry::impl$2::spawn::closure$0
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:98
+note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+thread '<unnamed>' panicked at src\skat\builder.rs:333:9:
+Not enough ambiguous cards to satisfy targets! Available: 13, StartP1: 0, StartP2: 0, TargetP1: 9, TargetP2: 9
+stack backtrace:
+   0: std::panicking::begin_panic_handler
+             at /rustc/e71f9a9a98b0faf423844bf0ba7438f29dc27d58\library/std\src\panicking.rs:665
+   1: core::panicking::panic_fmt
+             at /rustc/e71f9a9a98b0faf423844bf0ba7438f29dc27d58\library/core\src\panicking.rs:76
+   2: skat_aug23::skat::builder::GameContextBuilder::set_cards_for_other_players
+             at .\src\skat\builder.rs:272
+   3: skat_aug23::pimc::pimc_problem::PimcProblem::generate_concrete_problem_inner
+             at .\src\pimc\pimc_problem.rs:749
+   4: skat_aug23::pimc::pimc_problem::PimcProblem::generate_concrete_problem_rejection_sampled
+             at .\src\pimc\pimc_problem.rs:729
+   5: skat_aug23::pimc::pimc_problem::PimcProblem::generate_concrete_problem
+             at .\src\pimc\pimc_problem.rs:711
+   6: skat_aug23::pimc::pimc_search::impl$0::estimate_move_metrics::closure$0
+             at .\src\pimc\pimc_search.rs:291
+   7: core::ops::function::impls::impl$1::call_mut<tuple$<u32>,skat_aug23::pimc::pimc_search::impl$0::estimate_move_metrics::closure_env$0>
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\core\src\ops\function.rs:272
+   8: rayon_core::join::join_context::closure$0<rayon::iter::plumbing::bridge_producer_consumer::helper::closure_env$0<rayon::range::IterProducer<u32>,rayon::iter::for_each::ForEachConsumer<skat_aug23::pimc::pimc_search::impl$0::estimate_move_metrics::closure_en
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\join\mod.rs:142
+   9: rayon_core::join::join_context
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\join\mod.rs:132
+  10: rayon::iter::plumbing::bridge_producer_consumer::helper<rayon::range::IterProducer<u32>,rayon::iter::for_each::ForEachConsumer<skat_aug23::pimc::pimc_search::impl$0::estimate_move_metrics::closure_env$0> >
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-1.10.0\src\iter\plumbing\mod.rs:415
+  11: rayon::iter::plumbing::bridge_producer_consumer::helper::closure$1
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-1.10.0\src\iter\plumbing\mod.rs:426
+  12: rayon_core::join::join_context::call_b::closure$0
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\join\mod.rs:129
+  13: rayon_core::job::impl$9::call::closure$0
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\job.rs:218
+  14: core::panic::unwind_safe::impl$25::call_once
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\core\src\panic\unwind_safe.rs:272
+  15: std::panicking::try::do_call
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\std\src\panicking.rs:557
+  16: std::panicking::try
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\std\src\panicking.rs:520
+  17: std::panic::catch_unwind
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\std\src\panic.rs:358
+  18: rayon_core::unwind::halt_unwinding
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\unwind.rs:17
+  19: rayon_core::job::JobResult::call
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\job.rs:218
+  20: rayon_core::job::impl$4::execute<rayon_core::latch::SpinLatch,rayon_core::join::join_context::call_b::closure_env$0<tuple$<>,rayon::iter::plumbing::bridge_producer_consumer::helper::closure_env$1<rayon::range::IterProducer<u32>,rayon::iter::for_each::ForEa
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\job.rs:120
+  21: rayon_core::registry::WorkerThread::wait_until_cold
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:794
+  22: rayon_core::registry::WorkerThread::wait_until
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:769
+  23: rayon_core::registry::WorkerThread::wait_until_out_of_work
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:818
+  24: rayon_core::registry::main_loop
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:923
+  25: rayon_core::registry::ThreadBuilder::run
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:53
+  26: rayon_core::registry::impl$2::spawn::closure$0
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:98
+note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+thread '<unnamed>' panicked at src\skat\builder.rs:333:9:
+Not enough ambiguous cards to satisfy targets! Available: 13, StartP1: 0, StartP2: 0, TargetP1: 9, TargetP2: 9
+stack backtrace:
+   0: std::panicking::begin_panic_handler
+             at /rustc/e71f9a9a98b0faf423844bf0ba7438f29dc27d58\library/std\src\panicking.rs:665
+   1: core::panicking::panic_fmt
+             at /rustc/e71f9a9a98b0faf423844bf0ba7438f29dc27d58\library/core\src\panicking.rs:76
+   2: skat_aug23::skat::builder::GameContextBuilder::set_cards_for_other_players
+             at .\src\skat\builder.rs:272
+   3: skat_aug23::pimc::pimc_problem::PimcProblem::generate_concrete_problem_inner
+             at .\src\pimc\pimc_problem.rs:749
+   4: skat_aug23::pimc::pimc_problem::PimcProblem::generate_concrete_problem_rejection_sampled
+             at .\src\pimc\pimc_problem.rs:729
+   5: skat_aug23::pimc::pimc_problem::PimcProblem::generate_concrete_problem
+             at .\src\pimc\pimc_problem.rs:711
+   6: skat_aug23::pimc::pimc_search::impl$0::estimate_move_metrics::closure$0
+             at .\src\pimc\pimc_search.rs:291
+   7: core::ops::function::impls::impl$1::call_mut<tuple$<u32>,skat_aug23::pimc::pimc_search::impl$0::estimate_move_metrics::closure_env$0>
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\core\src\ops\function.rs:272
+   8: rayon_core::join::join_context::closure$0<rayon::iter::plumbing::bridge_producer_consumer::helper::closure_env$0<rayon::range::IterProducer<u32>,rayon::iter::for_each::ForEachConsumer<skat_aug23::pimc::pimc_search::impl$0::estimate_move_metrics::closure_en
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\join\mod.rs:142
+   9: rayon_core::join::join_context::closure$0<rayon::iter::plumbing::bridge_producer_consumer::helper::closure_env$0<rayon::range::IterProducer<u32>,rayon::iter::for_each::ForEachConsumer<skat_aug23::pimc::pimc_search::impl$0::estimate_move_metrics::closure_en
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\join\mod.rs:142
+  10: rayon_core::join::join_context
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\join\mod.rs:132
+  11: rayon::iter::plumbing::bridge_producer_consumer::helper<rayon::range::IterProducer<u32>,rayon::iter::for_each::ForEachConsumer<skat_aug23::pimc::pimc_search::impl$0::estimate_move_metrics::closure_env$0> >
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-1.10.0\src\iter\plumbing\mod.rs:415
+  12: rayon::iter::plumbing::bridge_producer_consumer::helper::closure$1
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-1.10.0\src\iter\plumbing\mod.rs:426
+  13: rayon_core::join::join_context::call_b::closure$0
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\join\mod.rs:129
+  14: rayon_core::job::impl$9::call::closure$0
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\job.rs:218
+  15: core::panic::unwind_safe::impl$25::call_once
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\core\src\panic\unwind_safe.rs:272
+  16: std::panicking::try::do_call
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\std\src\panicking.rs:557
+  17: std::panicking::try
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\std\src\panicking.rs:520
+  18: std::panic::catch_unwind
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\std\src\panic.rs:358
+  19: rayon_core::unwind::halt_unwinding
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\unwind.rs:17
+  20: rayon_core::job::JobResult::call
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\job.rs:218
+  21: rayon_core::job::impl$4::execute<rayon_core::latch::SpinLatch,rayon_core::join::join_context::call_b::closure_env$0<tuple$<>,rayon::iter::plumbing::bridge_producer_consumer::helper::closure_env$1<rayon::range::IterProducer<u32>,rayon::iter::for_each::ForEa
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\job.rs:120
+  22: rayon_core::registry::WorkerThread::wait_until_cold
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:794
+  23: rayon_core::registry::WorkerThread::wait_until
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:769
+  24: rayon_core::registry::WorkerThread::wait_until_out_of_work
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:818
+  25: rayon_core::registry::main_loop
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:923
+  26: rayon_core::registry::ThreadBuilder::run
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:53
+  27: rayon_core::registry::impl$2::spawn::closure$0
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:98
+note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+thread '<unnamed>' panicked at src\skat\builder.rs:333:9:
+Not enough ambiguous cards to satisfy targets! Available: 13, StartP1: 0, StartP2: 0, TargetP1: 9, TargetP2: 9
+stack backtrace:
+   0: std::panicking::begin_panic_handler
+             at /rustc/e71f9a9a98b0faf423844bf0ba7438f29dc27d58\library/std\src\panicking.rs:665
+   1: core::panicking::panic_fmt
+             at /rustc/e71f9a9a98b0faf423844bf0ba7438f29dc27d58\library/core\src\panicking.rs:76
+   2: skat_aug23::skat::builder::GameContextBuilder::set_cards_for_other_players
+             at .\src\skat\builder.rs:272
+   3: skat_aug23::pimc::pimc_problem::PimcProblem::generate_concrete_problem_inner
+             at .\src\pimc\pimc_problem.rs:749
+   4: skat_aug23::pimc::pimc_problem::PimcProblem::generate_concrete_problem_rejection_sampled
+             at .\src\pimc\pimc_problem.rs:729
+   5: skat_aug23::pimc::pimc_problem::PimcProblem::generate_concrete_problem
+             at .\src\pimc\pimc_problem.rs:711
+   6: skat_aug23::pimc::pimc_search::impl$0::estimate_move_metrics::closure$0
+             at .\src\pimc\pimc_search.rs:291
+   7: core::ops::function::impls::impl$1::call_mut<tuple$<u32>,skat_aug23::pimc::pimc_search::impl$0::estimate_move_metrics::closure_env$0>
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\core\src\ops\function.rs:272
+   8: core::iter::traits::iterator::Iterator::for_each::call::closure$0
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\core\src\iter\traits\iterator.rs:797
+   9: core::iter::traits::iterator::Iterator::fold
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\core\src\iter\traits\iterator.rs:2546
+  10: core::iter::traits::iterator::Iterator::for_each
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\core\src\iter\traits\iterator.rs:800
+  11: rayon::iter::for_each::impl$1::consume_iter
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-1.10.0\src\iter\for_each.rs:55
+  12: rayon::iter::plumbing::Producer::fold_with
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-1.10.0\src\iter\plumbing\mod.rs:109
+  13: rayon::iter::plumbing::bridge_producer_consumer::helper<rayon::range::IterProducer<u32>,rayon::iter::for_each::ForEachConsumer<skat_aug23::pimc::pimc_search::impl$0::estimate_move_metrics::closure_env$0> >
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-1.10.0\src\iter\plumbing\mod.rs:437
+  14: rayon::iter::plumbing::bridge_producer_consumer::helper::closure$1
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-1.10.0\src\iter\plumbing\mod.rs:426
+  15: rayon_core::join::join_context::call_b::closure$0
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\join\mod.rs:129
+  16: rayon_core::job::impl$9::call::closure$0
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\job.rs:218
+  17: core::panic::unwind_safe::impl$25::call_once
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\core\src\panic\unwind_safe.rs:272
+  18: std::panicking::try::do_call
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\std\src\panicking.rs:557
+  19: std::panicking::try
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\std\src\panicking.rs:520
+  20: std::panic::catch_unwind
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\std\src\panic.rs:358
+  21: rayon_core::unwind::halt_unwinding
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\unwind.rs:17
+  22: rayon_core::job::JobResult::call
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\job.rs:218
+  23: rayon_core::job::impl$4::execute<rayon_core::latch::SpinLatch,rayon_core::join::join_context::call_b::closure_env$0<tuple$<>,rayon::iter::plumbing::bridge_producer_consumer::helper::closure_env$1<rayon::range::IterProducer<u32>,rayon::iter::for_each::ForEa
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\job.rs:120
+  24: rayon_core::registry::WorkerThread::wait_until_cold
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:794
+  25: rayon_core::registry::WorkerThread::wait_until
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:769
+  26: rayon_core::registry::WorkerThread::wait_until_out_of_work
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:818
+  27: rayon_core::registry::main_loop
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:923
+  28: rayon_core::registry::ThreadBuilder::run
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:53
+  29: rayon_core::registry::impl$2::spawn::closure$0
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:98
+note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+thread '<unnamed>' panicked at src\skat\builder.rs:333:9:
+Not enough ambiguous cards to satisfy targets! Available: 13, StartP1: 0, StartP2: 0, TargetP1: 9, TargetP2: 9
+stack backtrace:
+   0: std::panicking::begin_panic_handler
+             at /rustc/e71f9a9a98b0faf423844bf0ba7438f29dc27d58\library/std\src\panicking.rs:665
+   1: core::panicking::panic_fmt
+             at /rustc/e71f9a9a98b0faf423844bf0ba7438f29dc27d58\library/core\src\panicking.rs:76
+   2: skat_aug23::skat::builder::GameContextBuilder::set_cards_for_other_players
+             at .\src\skat\builder.rs:272
+   3: skat_aug23::pimc::pimc_problem::PimcProblem::generate_concrete_problem_inner
+             at .\src\pimc\pimc_problem.rs:749
+   4: skat_aug23::pimc::pimc_problem::PimcProblem::generate_concrete_problem_rejection_sampled
+             at .\src\pimc\pimc_problem.rs:729
+   5: skat_aug23::pimc::pimc_problem::PimcProblem::generate_concrete_problem
+             at .\src\pimc\pimc_problem.rs:711
+   6: skat_aug23::pimc::pimc_search::impl$0::estimate_move_metrics::closure$0
+             at .\src\pimc\pimc_search.rs:291
+   7: core::ops::function::impls::impl$1::call_mut<tuple$<u32>,skat_aug23::pimc::pimc_search::impl$0::estimate_move_metrics::closure_env$0>
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\core\src\ops\function.rs:272
+   8: core::iter::traits::iterator::Iterator::for_each::call::closure$0
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\core\src\iter\traits\iterator.rs:797
+   9: core::iter::traits::iterator::Iterator::fold
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\core\src\iter\traits\iterator.rs:2546
+  10: core::iter::traits::iterator::Iterator::for_each
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\core\src\iter\traits\iterator.rs:800
+  11: rayon::iter::for_each::impl$1::consume_iter
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-1.10.0\src\iter\for_each.rs:55
+  12: rayon::iter::plumbing::Producer::fold_with
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-1.10.0\src\iter\plumbing\mod.rs:109
+  13: rayon::iter::plumbing::bridge_producer_consumer::helper<rayon::range::IterProducer<u32>,rayon::iter::for_each::ForEachConsumer<skat_aug23::pimc::pimc_search::impl$0::estimate_move_metrics::closure_env$0> >
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-1.10.0\src\iter\plumbing\mod.rs:437
+  14: rayon::iter::plumbing::bridge_producer_consumer::helper::closure$1
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-1.10.0\src\iter\plumbing\mod.rs:426
+  15: rayon_core::join::join_context::call_b::closure$0
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\join\mod.rs:129
+  16: rayon_core::job::impl$9::call::closure$0
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\job.rs:218
+  17: core::panic::unwind_safe::impl$25::call_once
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\core\src\panic\unwind_safe.rs:272
+  18: std::panicking::try::do_call
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\std\src\panicking.rs:557
+  19: std::panicking::try
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\std\src\panicking.rs:520
+  20: std::panic::catch_unwind
+             at C:\Users\jenaf\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library\std\src\panic.rs:358
+  21: rayon_core::unwind::halt_unwinding
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\unwind.rs:17
+  22: rayon_core::job::JobResult::call
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\job.rs:218
+  23: rayon_core::job::impl$4::execute<rayon_core::latch::SpinLatch,rayon_core::join::join_context::call_b::closure_env$0<tuple$<>,rayon::iter::plumbing::bridge_producer_consumer::helper::closure_env$1<rayon::range::IterProducer<u32>,rayon::iter::for_each::ForEa
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\job.rs:120
+  24: rayon_core::registry::WorkerThread::wait_until_cold
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:794
+  25: rayon_core::registry::WorkerThread::wait_until
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:769
+  26: rayon_core::registry::WorkerThread::wait_until_out_of_work
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:818
+  27: rayon_core::registry::main_loop
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:923
+  28: rayon_core::registry::ThreadBuilder::run
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:53
+  29: rayon_core::registry::impl$2::spawn::closure$0
+             at C:\Users\jenaf\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rayon-core-1.12.1\src\registry.rs:98
+note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+error: process didn't exit successfully: `target\release\skat_aug23.exe points-playout --game-type suit -c generated_smart_suit_deal.json -d smart-suit --points-mode minimum` (exit code: 101)

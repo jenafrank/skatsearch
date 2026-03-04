@@ -115,11 +115,16 @@ impl Position {
     }
 
     pub fn create_initial_position(game_context: &GameContext) -> Position {
+        let mut initial_points = game_context.declarer_start_points;
+        if game_context.game_type != Game::Null {
+            initial_points += game_context.get_skat().points();
+        }
+
         Position::create(
             game_context.trick_cards(),
             game_context.trick_cards(),
             game_context.trick_suit(),
-            game_context.declarer_start_points,
+            initial_points,
             game_context.start_player(),
             game_context,
             true,

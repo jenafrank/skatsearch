@@ -29,6 +29,7 @@ pub struct GameContext {
     pub trick_cards: u32,
     pub trick_suit: u32,
     pub declarer_start_points: u8,
+    pub played_cards: u32,
 }
 
 impl GameContext {
@@ -50,6 +51,7 @@ impl GameContext {
             trick_cards: 0,
             trick_suit: 0,
             declarer_start_points: 0,
+            played_cards: 0,
         }
     }
 
@@ -65,6 +67,7 @@ impl GameContext {
             trick_cards: 0,
             trick_suit: 0,
             declarer_start_points: 0,
+            played_cards: 0,
         }
     }
 
@@ -104,6 +107,10 @@ impl GameContext {
         self.declarer_start_points = points;
     }
 
+    pub fn set_played_cards(&mut self, played_cards: u32) {
+        self.played_cards = played_cards;
+    }
+
     // Getters
 
     pub fn declarer_cards(&self) -> u32 {
@@ -138,6 +145,10 @@ impl GameContext {
         self.trick_suit
     }
 
+    pub fn played_cards(&self) -> u32 {
+        self.played_cards
+    }
+
     // Derived logic
 
     pub fn total_points(&self) -> u8 {
@@ -146,11 +157,16 @@ impl GameContext {
 
     pub fn get_skat(&self) -> u32 {
         use crate::skat::defs::ALLCARDS;
-        ALLCARDS ^ self.declarer_cards ^ self.left_cards ^ self.right_cards ^ self.trick_cards
+        ALLCARDS
+            ^ self.declarer_cards
+            ^ self.left_cards
+            ^ self.right_cards
+            ^ self.trick_cards
+            ^ self.played_cards
     }
 
     pub fn create_initial_position(&self) -> Position {
-        Position::create_initial_position(self) // Calls Position::create... which takes &GameContext (renamed Problem)
+        Position::create_initial_position(self)
     }
 
     // Transformations
@@ -159,6 +175,7 @@ impl GameContext {
         let switched_declarer_cards = GameContext::get_switched_cards(p.declarer_cards, switch);
         let switched_left_cards = GameContext::get_switched_cards(p.left_cards, switch);
         let switched_right_cards = GameContext::get_switched_cards(p.right_cards, switch);
+        let switched_played_cards = GameContext::get_switched_cards(p.played_cards, switch);
 
         GameContext {
             declarer_cards: switched_declarer_cards,
@@ -170,6 +187,7 @@ impl GameContext {
             trick_cards: p.trick_cards,
             trick_suit: p.trick_suit,
             declarer_start_points: p.declarer_start_points,
+            played_cards: switched_played_cards,
         }
     }
 

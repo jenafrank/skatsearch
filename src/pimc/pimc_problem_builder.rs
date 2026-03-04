@@ -29,6 +29,7 @@ pub struct PimcProblemBuilder {
 
     // Sampling Mode
     sampling_mode: Option<SamplingMode>,
+    declarer_played_cards: Option<u32>,
 }
 
 impl PimcProblemBuilder {
@@ -60,6 +61,11 @@ impl PimcProblemBuilder {
 
     pub fn sampling_mode(mut self, mode: SamplingMode) -> PimcProblemBuilder {
         self.sampling_mode = Some(mode);
+        self
+    }
+
+    pub fn declarer_played_cards(mut self, cards: u32) -> PimcProblemBuilder {
+        self.declarer_played_cards = Some(cards);
         self
     }
 
@@ -297,6 +303,10 @@ impl PimcProblemBuilder {
             uproblem.sampling_mode = SamplingMode::Random;
         }
 
+        if let Some(played) = self.declarer_played_cards {
+            uproblem.declarer_played_cards = played;
+        }
+
         uproblem
     }
 
@@ -387,6 +397,7 @@ impl Default for PimcProblemBuilder {
             declarer_start_points: Some(0),
             skat_cards: None,
             sampling_mode: None,
+            declarer_played_cards: None,
         }
     }
 }

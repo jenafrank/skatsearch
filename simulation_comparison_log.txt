@@ -1,0 +1,2012 @@
+=== SKAT Playout Comparative Analysis ===
+
+--- GAME 1 ---
+Deal Generated using SmartGrand Heuristics.
+
+Perfect Play (Reference):
+Starting Perfect Play...
+  Trick  1  D:DA  L:D7  R:DK
+  Trick  2  D:S9  L:ST  R:S7
+  Trick  3  L:HJ  R:CA  D:CJ
+  Trick  4  D:SJ  L:CT  R:HA
+  Trick  5  D:DJ  L:HT  R:HK
+  Trick  6  D:SA  L:SK  R:CQ
+  Trick  7  D:DT  L:CK  R:C8
+  Trick  8  D:SQ  L:HQ  R:C7
+  Trick  9  D:S8  L:C9  R:H9
+  Trick 10  D:D9  L:H7  R:H8
+Perfect Play Finished. Result: 110 pts
+
+Strategy b3) PIMC (Win Probability only):
+Starting PIMC Play...
+--- Trick 1 (Player: Declarer) ---
+    PIMC Analysis: DT (0.0) CJ (0.0) D9 (0.0)
+  PIMC plays: DT | Perfect was: DA | Loss: 0 | (Perfect Val: 110, PIMC Action Val: 110)
+    PIMC Analysis: D7 (1.0)
+  PIMC plays: D7 | Perfect was: D7 | Loss: 0 | (Perfect Val: 110, PIMC Action Val: 110)
+    PIMC Analysis: DK (0.9)
+  PIMC plays: DK | Perfect was: DK | Loss: 0 | (Perfect Val: 110, PIMC Action Val: 110)
+--- Trick 2 (Player: Declarer) ---
+    PIMC Analysis: DJ (0.0) D9 (0.0) DA (0.0)
+  PIMC plays: DJ | Perfect was: S9 | Loss: 15 | (Perfect Val: 110, PIMC Action Val: 95)
+    PIMC Analysis: HJ (1.0)
+  PIMC plays: HJ | Perfect was: HJ | Loss: 0 | (Perfect Val: 95, PIMC Action Val: 95)
+    PIMC Analysis: C7 (1.0) CA (1.0) CQ (1.0)
+  PIMC plays: C7 | Perfect was: CA | Loss: 11 | (Perfect Val: 95, PIMC Action Val: 106)
+--- Trick 3 (Player: Left) ---
+    PIMC Analysis: HQ (1.0) ST (1.0) C9 (1.0)
+  PIMC plays: HQ | Perfect was: CT | Loss: 0 | (Perfect Val: 106, PIMC Action Val: 106)
+    PIMC Analysis: HK (1.0) H9 (1.0) H8 (1.0)
+  PIMC plays: HK | Perfect was: HA | Loss: 0 | (Perfect Val: 106, PIMC Action Val: 106)
+    PIMC Analysis: D9 (0.0) SJ (0.0) SA (0.0)
+  PIMC plays: D9 | Perfect was: CJ | Loss: 7 | (Perfect Val: 106, PIMC Action Val: 99)
+--- Trick 4 (Player: Right) ---
+    PIMC Analysis: CA (1.0) HA (1.0) H8 (1.0)
+  PIMC plays: CA | Perfect was: CA | Loss: 0 | (Perfect Val: 99, PIMC Action Val: 99)
+    PIMC Analysis: SA (0.0) S9 (0.0) S8 (0.0)
+  PIMC plays: SA | Perfect was: CJ | Loss: 57 | (Perfect Val: 99, PIMC Action Val: 42)
+    PIMC Analysis: C9 (1.0) CK (1.0) CT (1.0)
+  PIMC plays: C9 | Perfect was: CT | Loss: 7 | (Perfect Val: 42, PIMC Action Val: 49)
+--- Trick 5 (Player: Right) ---
+    PIMC Analysis: HA (1.0) H8 (1.0) CQ (1.0)
+  PIMC plays: HA | Perfect was: CQ | Loss: 8 | (Perfect Val: 49, PIMC Action Val: 57)
+    PIMC Analysis: SJ (0.0) CJ (0.0) DA (0.0)
+  PIMC plays: SJ | Perfect was: CJ | Loss: 0 | (Perfect Val: 57, PIMC Action Val: 57)
+    PIMC Analysis: H7 (1.0) HT (1.0)
+  PIMC plays: H7 | Perfect was: H7 | Loss: 0 | (Perfect Val: 57, PIMC Action Val: 57)
+--- Trick 6 (Player: Declarer) ---
+    PIMC Analysis: DA (0.0) S9 (0.0) SQ (0.0)
+  PIMC plays: DA | Perfect was: DA | Loss: 0 | (Perfect Val: 57, PIMC Action Val: 57)
+    PIMC Analysis: ST (1.0) HT (1.0) CK (1.0)
+  PIMC plays: ST | Perfect was: CK | Loss: 23 | (Perfect Val: 57, PIMC Action Val: 80)
+    PIMC Analysis: H8 (1.0) S7 (1.0) H9 (1.0)
+  PIMC plays: H8 | Perfect was: S7 | Loss: 3 | (Perfect Val: 80, PIMC Action Val: 83)
+--- Trick 7 (Player: Declarer) ---
+    PIMC Analysis: CJ (0.0) S9 (0.0) SQ (0.0)
+  PIMC plays: CJ | Perfect was: S9 | Loss: 26 | (Perfect Val: 83, PIMC Action Val: 57)
+    PIMC Analysis: SK (1.0) HT (1.0) CK (1.0)
+  PIMC plays: SK | Perfect was: CK | Loss: 30 | (Perfect Val: 57, PIMC Action Val: 87)
+    PIMC Analysis: H9 (1.0) S7 (1.0) CQ (1.0)
+  PIMC plays: H9 | Perfect was: CQ | Loss: 0 | (Perfect Val: 87, PIMC Action Val: 87)
+--- Trick 8 (Player: Declarer) ---
+    PIMC Analysis: S8 (0.0) S9 (0.0) SQ (0.0)
+  PIMC plays: S8 | Perfect was: SQ | Loss: 0 | (Perfect Val: 87, PIMC Action Val: 87)
+    PIMC Analysis: CT (1.0) HT (1.0) CK (1.0)
+  PIMC plays: CT | Perfect was: CT | Loss: 0 | (Perfect Val: 87, PIMC Action Val: 87)
+    PIMC Analysis: S7 (1.0)
+  PIMC plays: S7 | Perfect was: S7 | Loss: 0 | (Perfect Val: 87, PIMC Action Val: 87)
+--- Trick 9 (Player: Declarer) ---
+    PIMC Analysis: S9 (0.0) SQ (0.0)
+  PIMC plays: S9 | Perfect was: SQ | Loss: 0 | (Perfect Val: 87, PIMC Action Val: 87)
+    PIMC Analysis: CK (1.0) HT (1.0)
+  PIMC plays: CK | Perfect was: HT | Loss: 0 | (Perfect Val: 87, PIMC Action Val: 87)
+    PIMC Analysis: C8 (1.0) CQ (1.0)
+  PIMC plays: C8 | Perfect was: CQ | Loss: 0 | (Perfect Val: 87, PIMC Action Val: 87)
+--- Trick 10 (Player: Declarer) ---
+    PIMC Analysis: SQ (0.0)
+  PIMC plays: SQ | Perfect was: SQ | Loss: 0 | (Perfect Val: 87, PIMC Action Val: 87)
+    PIMC Analysis: HT (1.0)
+  PIMC plays: HT | Perfect was: HT | Loss: 0 | (Perfect Val: 87, PIMC Action Val: 87)
+    PIMC Analysis: CQ (1.0)
+  PIMC plays: CQ | Perfect was: CQ | Loss: 0 | (Perfect Val: 87, PIMC Action Val: 87)
+Game Finished. Total Point Loss: 187 (Declarer: 105, Opponents: 82)
+
+Strategy b1) PIMC Points Playout (Hybrid Mode with Average Fallback):
+Starting PIMC Points Play...
+-- Trick  1 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    S8  perf:DA opt=110  loss=0(D)  avgs:[S8=0%/98  S9=0%/98  CJ=0%/98  SJ=0%/98  DT=0%/97  DA=0%/97  SQ=0%/95  SA=0%/92  D9=0%/85  DJ=0%/84]
+  L    PIMC:    ST  perf:ST opt=110  loss=0(O)  avgs:[ST=100%/42  SK=100%/37]
+  R    PIMC:    S7  perf:S7 opt=110  loss=0(O)  avgs:[S7=100%/49]
+  +- score after trick  1: 3 pts
+-- Trick  2 (L leads) ----------------------------------------------------------------
+  L    PIMC:    HJ  perf:HJ opt=110  loss=0(O)  avgs:[HJ=100%/41  SK=100%/39  D7=100%/38  CK=100%/38  CT=100%/37  HT=100%/36  HQ=100%/36  H7=100%/35  C9=100%/35]
+  R *  PIMC:    H9  perf:CA opt=110  loss=0(O)  avgs:[H9=100%/67  C8=100%/67  H8=100%/67  C7=100%/67  DK=100%/66  CQ=100%/65  HK=100%/63  CA=100%/56  HA=100%/52]
+  D *  PIMC:    SJ  perf:CJ opt=110  loss=0(D)  avgs:[SJ=0%/110  CJ=0%/110  DJ=0%/106]
+  +- score after trick  2: 7 pts
+-- Trick  3 (D leads) ----------------------------------------------------------------
+  D    PIMC:    CJ  perf:CJ opt=110  loss=0(D)  avgs:[CJ=0%/110  DT=0%/110  DA=0%/110  DJ=0%/110  SA=0%/110  D9=0%/100  S9=0%/96  SQ=0%/93]
+  L *  PIMC:    D7  perf:CT opt=110  loss=0(O)  avgs:[D7=100%/38  SK=100%/37  H7=100%/36  HQ=100%/36  C9=100%/36  CK=100%/36  HT=100%/32  CT=100%/31]
+  R *  PIMC:    C7  perf:CA opt=110  loss=0(O)  avgs:[C7=100%/50  C8=100%/50  H8=100%/50  DK=100%/50  CQ=100%/49  HK=100%/48  CA=100%/40  HA=100%/39]
+  +- score after trick  3: 9 pts
+-- Trick  4 (D leads) ----------------------------------------------------------------
+  D    PIMC:    DJ  perf:DJ opt=110  loss=0(D)  avgs:[DJ=0%/110  SA=0%/110  DT=0%/110  DA=0%/110  D9=0%/96  S9=0%/95  SQ=0%/92]
+  L *  PIMC:    SK  perf:CT opt=110  loss=0(O)  avgs:[SK=100%/45  CK=100%/45  HQ=100%/45  H7=100%/45  C9=100%/45  CT=100%/41  HT=100%/37]
+  R *  PIMC:    DK  perf:CA opt=110  loss=0(O)  avgs:[DK=100%/51  C8=100%/51  H8=100%/51  CQ=100%/51  HK=100%/51  HA=100%/44  CA=100%/36]
+  +- score after trick  4: 19 pts
+-- Trick  5 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    D9  perf:SA opt=110  loss=0(D)  avgs:[D9=0%/110  DA=0%/110  SQ=0%/110  SA=0%/110  S9=0%/110  DT=0%/110]
+  L *  PIMC:    CK  perf:CT opt=110  loss=0(O)  avgs:[CK=100%/53  CT=100%/52  HQ=100%/52  C9=100%/52  H7=100%/51  HT=100%/50]
+  R *  PIMC:    C8  perf:CA opt=110  loss=0(O)  avgs:[C8=100%/46  CQ=100%/46  H8=100%/46  HK=100%/46  HA=100%/39  CA=100%/32]
+  +- score after trick  5: 23 pts
+-- Trick  6 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    SQ  perf:SA opt=110  loss=0(D)  avgs:[SQ=0%/110  DA=0%/110  DT=0%/110  SA=0%/110  S9=0%/110]
+  L    PIMC:    CT  perf:CT opt=110  loss=0(O)  avgs:[CT=100%/48  HT=100%/47  HQ=100%/45  C9=100%/45  H7=100%/44]
+  R *  PIMC:    HK  perf:CA opt=110  loss=0(O)  avgs:[HK=100%/10  CA=100%/10  HA=100%/10  CQ=100%/10  H8=100%/10]
+  +- score after trick  6: 40 pts
+-- Trick  7 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    S9  perf:SA opt=110  loss=0(D)  avgs:[S9=0%/110  DT=0%/110  DA=0%/110  SA=0%/110]
+  L    PIMC:    HT  perf:HT opt=110  loss=0(O)  avgs:[HT=100%/10  C9=100%/10  H7=100%/10  HQ=100%/10]
+  R    PIMC:    CA  perf:CA opt=110  loss=0(O)  avgs:[CA=100%/10  H8=100%/10  HA=100%/10  CQ=100%/10]
+  +- score after trick  7: 61 pts
+-- Trick  8 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    DA  perf:SA opt=110  loss=0(D)  avgs:[DA=0%/110  DT=0%/110  SA=0%/110]
+  L *  PIMC:    C9  perf:HQ opt=110  loss=0(O)  avgs:[C9=100%/10  HQ=100%/10  H7=100%/10]
+  R    PIMC:    HA  perf:HA opt=110  loss=0(O)  avgs:[HA=100%/10  CQ=100%/10  H8=100%/10]
+  +- score after trick  8: 83 pts
+-- Trick  9 (D leads) ----------------------------------------------------------------
+  D    PIMC:    SA  perf:SA opt=110  loss=0(D)  avgs:[SA=0%/110  DT=0%/110]
+  L    PIMC:    HQ  perf:HQ opt=110  loss=0(O)  avgs:[HQ=100%/10  H7=100%/10]
+  R    PIMC:    CQ  perf:CQ opt=110  loss=0(O)  avgs:[CQ=100%/10  H8=100%/10]
+  +- score after trick  9: 100 pts
+-- Trick 10 (D leads) ----------------------------------------------------------------
+  D    PIMC:    DT  perf:DT opt=110  loss=0(D)  avgs:[DT=0%/110]
+  L    PIMC:    H7  perf:H7 opt=110  loss=0(O)  avgs:[H7=100%/10]
+  R    PIMC:    H8  perf:H8 opt=110  loss=0(O)  avgs:[H8=100%/10]
+  +- score after trick 10: 110 pts
+Game Finished. Total Point Loss: 0 (D:0 O:0) | Final score: 110 pts
+
+Strategy b2) PIMC Points Playout (Average Mode only):
+Starting PIMC Points Play...
+-- Trick  1 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    S8  perf:DA opt=110  loss=0(D)  avgs:[S8=96  S9=96  CJ=96  SJ=96  SQ=94  DT=94  DA=94  SA=93  D9=80  DJ=80]
+  L    PIMC:    ST  perf:ST opt=110  loss=0(O)  avgs:[ST=46  SK=42]
+  R    PIMC:    S7  perf:S7 opt=110  loss=0(O)  avgs:[S7=54]
+  +- score after trick  1: 3 pts
+-- Trick  2 (L leads) ----------------------------------------------------------------
+  L *  PIMC:    SK  perf:HJ opt=110  loss=0(O)  avgs:[SK=36  HJ=36  D7=34  CT=33  CK=33  HQ=31  HT=31  H7=30  C9=30]
+  R *  PIMC:    DK  perf:CA opt=110  loss=0(O)  avgs:[DK=42  CQ=42  HK=41  C8=41  H9=41  C7=41  H8=41  HA=35  CA=35]
+  D    PIMC:    SA  perf:SA opt=110  loss=0(D)  avgs:[SA=110  S9=101  SQ=98]
+  +- score after trick  2: 22 pts
+-- Trick  3 (D leads) ----------------------------------------------------------------
+  D    PIMC:    CJ  perf:CJ opt=110  loss=0(D)  avgs:[CJ=110  SJ=110  D9=109  DT=105  DA=104  S9=97  DJ=95  SQ=94]
+  L    PIMC:    HJ  perf:HJ opt=110  loss=0(O)  avgs:[HJ=21]
+  R *  PIMC:    C8  perf:CA opt=110  loss=0(O)  avgs:[C8=52  H9=52  C7=52  H8=52  CQ=51  HK=49  CA=38  HA=38]
+  +- score after trick  3: 26 pts
+-- Trick  4 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    DJ  perf:SJ opt=110  loss=0(D)  avgs:[DJ=110  D9=110  SQ=110  S9=110  SJ=110  DA=110  DT=110]
+  L *  PIMC:    D7  perf:CT opt=110  loss=0(O)  avgs:[D7=26  HQ=25  C9=25  H7=25  CK=25  CT=23  HT=21]
+  R *  PIMC:    H8  perf:CA opt=110  loss=0(O)  avgs:[H8=47  H9=47  C7=47  CQ=46  HK=45  HA=36  CA=36]
+  +- score after trick  4: 28 pts
+-- Trick  5 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    DA  perf:SJ opt=110  loss=0(D)  avgs:[DA=110  SQ=110  SJ=110  DT=110  D9=110  S9=110]
+  L *  PIMC:    H7  perf:CT opt=110  loss=0(O)  avgs:[H7=28  CK=28  HQ=28  C9=28  HT=26  CT=25]
+  R *  PIMC:    C7  perf:CA opt=110  loss=0(O)  avgs:[C7=46  H9=46  HK=45  CQ=45  HA=36  CA=32]
+  +- score after trick  5: 39 pts
+-- Trick  6 (D leads) ----------------------------------------------------------------
+  D    PIMC:    SJ  perf:SJ opt=110  loss=0(D)  avgs:[SJ=110  S9=110  DT=110  SQ=110  D9=110]
+  L *  PIMC:    HT  perf:CT opt=110  loss=0(O)  avgs:[HT=10  CT=10  C9=10  HQ=10  CK=10]
+  R *  PIMC:    H9  perf:CA opt=110  loss=0(O)  avgs:[H9=41  CQ=41  HK=41  HA=36  CA=29]
+  +- score after trick  6: 51 pts
+-- Trick  7 (D leads) ----------------------------------------------------------------
+  D    PIMC:    DT  perf:DT opt=110  loss=0(D)  avgs:[DT=110  D9=110  SQ=110  S9=110]
+  L *  PIMC:    HQ  perf:CT opt=110  loss=0(O)  avgs:[HQ=10  CK=10  CT=10  C9=10]
+  R *  PIMC:    CQ  perf:CA opt=110  loss=0(O)  avgs:[CQ=38  HK=37  HA=33  CA=26]
+  +- score after trick  7: 67 pts
+-- Trick  8 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    S9  perf:SQ opt=110  loss=0(D)  avgs:[S9=110  D9=110  SQ=110]
+  L *  PIMC:    CK  perf:CT opt=110  loss=0(O)  avgs:[CK=10  C9=10  CT=10]
+  R    PIMC:    CA  perf:CA opt=110  loss=0(O)  avgs:[CA=10  HA=10  HK=10]
+  +- score after trick  8: 82 pts
+-- Trick  9 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    D9  perf:SQ opt=110  loss=0(D)  avgs:[D9=110  SQ=110]
+  L    PIMC:    CT  perf:CT opt=110  loss=0(O)  avgs:[CT=10  C9=10]
+  R    PIMC:    HA  perf:HA opt=110  loss=0(O)  avgs:[HA=10  HK=10]
+  +- score after trick  9: 103 pts
+-- Trick 10 (D leads) ----------------------------------------------------------------
+  D    PIMC:    SQ  perf:SQ opt=110  loss=0(D)  avgs:[SQ=110]
+  L    PIMC:    C9  perf:C9 opt=110  loss=0(O)  avgs:[C9=10]
+  R    PIMC:    HK  perf:HK opt=110  loss=0(O)  avgs:[HK=10]
+  +- score after trick 10: 110 pts
+Game Finished. Total Point Loss: 0 (D:0 O:0) | Final score: 110 pts
+
+================================================================================
+
+--- GAME 2 ---
+Deal Generated using SmartGrand Heuristics.
+
+Perfect Play (Reference):
+Starting Perfect Play...
+  Trick  1  D:CJ  L:CK  R:DJ
+  Trick  2  D:SJ  L:HQ  R:ST
+  Trick  3  D:CA  L:D9  R:C9
+  Trick  4  D:SA  L:S7  R:DQ
+  Trick  5  D:DA  L:D8  R:D7
+  Trick  6  D:SK  L:H9  R:C8
+  Trick  7  D:CQ  L:HA  R:CT
+  Trick  8  R:DT  D:HJ  L:HK
+  Trick  9  D:SQ  L:H8  R:C7
+  Trick 10  D:H7  L:HT  R:DK
+Perfect Play Finished. Result: 82 pts
+
+Strategy b3) PIMC (Win Probability only):
+Starting PIMC Play...
+--- Trick 1 (Player: Declarer) ---
+    PIMC Analysis: DA (0.0) CQ (0.0) SK (0.0)
+  PIMC plays: DA | Perfect was: CJ | Loss: 0 | (Perfect Val: 82, PIMC Action Val: 82)
+    PIMC Analysis: D8 (1.0) D9 (1.0)
+  PIMC plays: D8 | Perfect was: D9 | Loss: 0 | (Perfect Val: 82, PIMC Action Val: 82)
+    PIMC Analysis: D7 (0.9) DK (0.9) DQ (0.9)
+  PIMC plays: D7 | Perfect was: DQ | Loss: 0 | (Perfect Val: 82, PIMC Action Val: 82)
+--- Trick 2 (Player: Declarer) ---
+    PIMC Analysis: H7 (0.0) HJ (0.0) CJ (0.0)
+  PIMC plays: H7 | Perfect was: CJ | Loss: 1 | (Perfect Val: 82, PIMC Action Val: 81)
+    PIMC Analysis: HT (1.0) HK (1.0) H8 (1.0)
+  PIMC plays: HT | Perfect was: HA | Loss: 1 | (Perfect Val: 81, PIMC Action Val: 82)
+    PIMC Analysis: ST (1.0) C9 (1.0) C8 (1.0)
+  PIMC plays: ST | Perfect was: ST | Loss: 0 | (Perfect Val: 82, PIMC Action Val: 82)
+--- Trick 3 (Player: Left) ---
+    PIMC Analysis: D9 (1.0) H8 (1.0) S7 (1.0)
+  PIMC plays: D9 | Perfect was: S7 | Loss: 5 | (Perfect Val: 82, PIMC Action Val: 87)
+    PIMC Analysis: DQ (1.0) DT (1.0) DK (1.0)
+  PIMC plays: DQ | Perfect was: DT | Loss: 7 | (Perfect Val: 87, PIMC Action Val: 94)
+    PIMC Analysis: SA (0.0) CJ (0.0) CQ (0.0)
+  PIMC plays: SA | Perfect was: CQ | Loss: 32 | (Perfect Val: 94, PIMC Action Val: 62)
+--- Trick 4 (Player: Right) ---
+    PIMC Analysis: C7 (1.0) C8 (1.0) DK (1.0)
+  PIMC plays: C7 | Perfect was: DJ | Loss: 12 | (Perfect Val: 62, PIMC Action Val: 74)
+    PIMC Analysis: CQ (0.0) CA (0.0)
+  PIMC plays: CQ | Perfect was: CQ | Loss: 0 | (Perfect Val: 74, PIMC Action Val: 74)
+    PIMC Analysis: CK (1.0)
+  PIMC plays: CK | Perfect was: CK | Loss: 0 | (Perfect Val: 74, PIMC Action Val: 74)
+--- Trick 5 (Player: Left) ---
+    PIMC Analysis: HQ (1.0) H8 (1.0) HA (1.0)
+  PIMC plays: HQ | Perfect was: S7 | Loss: 5 | (Perfect Val: 74, PIMC Action Val: 79)
+    PIMC Analysis: DK (1.0) C9 (1.0) DJ (1.0)
+  PIMC plays: DK | Perfect was: DJ | Loss: 0 | (Perfect Val: 79, PIMC Action Val: 79)
+    PIMC Analysis: SQ (0.0) CA (0.0) SJ (0.0)
+  PIMC plays: SQ | Perfect was: CJ | Loss: 16 | (Perfect Val: 79, PIMC Action Val: 63)
+--- Trick 6 (Player: Left) ---
+    PIMC Analysis: HK (1.0) H9 (1.0) S7 (1.0)
+  PIMC plays: HK | Perfect was: S7 | Loss: 6 | (Perfect Val: 63, PIMC Action Val: 69)
+    PIMC Analysis: DJ (1.0) DT (1.0) C9 (1.0)
+  PIMC plays: DJ | Perfect was: DJ | Loss: 0 | (Perfect Val: 69, PIMC Action Val: 69)
+    PIMC Analysis: CJ (0.0) SK (0.0) CA (0.0)
+  PIMC plays: CJ | Perfect was: CJ | Loss: 0 | (Perfect Val: 69, PIMC Action Val: 69)
+--- Trick 7 (Player: Declarer) ---
+    PIMC Analysis: SK (0.0) SJ (0.0) HJ (0.0)
+  PIMC plays: SK | Perfect was: SJ | Loss: 0 | (Perfect Val: 69, PIMC Action Val: 69)
+    PIMC Analysis: S7 (1.0)
+  PIMC plays: S7 | Perfect was: S7 | Loss: 0 | (Perfect Val: 69, PIMC Action Val: 69)
+    PIMC Analysis: CT (1.0) DT (1.0) C9 (1.0)
+  PIMC plays: CT | Perfect was: CT | Loss: 0 | (Perfect Val: 69, PIMC Action Val: 69)
+--- Trick 8 (Player: Declarer) ---
+    PIMC Analysis: CA (0.0) HJ (0.0) SJ (0.0)
+  PIMC plays: CA | Perfect was: SJ | Loss: 0 | (Perfect Val: 69, PIMC Action Val: 69)
+    PIMC Analysis: HA (1.0) H9 (1.0) H8 (1.0)
+  PIMC plays: HA | Perfect was: HA | Loss: 0 | (Perfect Val: 69, PIMC Action Val: 69)
+    PIMC Analysis: C9 (1.0) C8 (1.0)
+  PIMC plays: C9 | Perfect was: C9 | Loss: 0 | (Perfect Val: 69, PIMC Action Val: 69)
+--- Trick 9 (Player: Declarer) ---
+    PIMC Analysis: SJ (0.0) HJ (0.0)
+  PIMC plays: SJ | Perfect was: SJ | Loss: 0 | (Perfect Val: 69, PIMC Action Val: 69)
+    PIMC Analysis: H8 (1.0) H9 (1.0)
+  PIMC plays: H8 | Perfect was: H9 | Loss: 0 | (Perfect Val: 69, PIMC Action Val: 69)
+    PIMC Analysis: C8 (1.0) DT (1.0)
+  PIMC plays: C8 | Perfect was: DT | Loss: 0 | (Perfect Val: 69, PIMC Action Val: 69)
+--- Trick 10 (Player: Declarer) ---
+    PIMC Analysis: HJ (0.0)
+  PIMC plays: HJ | Perfect was: HJ | Loss: 0 | (Perfect Val: 69, PIMC Action Val: 69)
+    PIMC Analysis: H9 (1.0)
+  PIMC plays: H9 | Perfect was: H9 | Loss: 0 | (Perfect Val: 69, PIMC Action Val: 69)
+    PIMC Analysis: DT (1.0)
+  PIMC plays: DT | Perfect was: DT | Loss: 0 | (Perfect Val: 69, PIMC Action Val: 69)
+Game Finished. Total Point Loss: 85 (Declarer: 49, Opponents: 36)
+
+Strategy b1) PIMC Points Playout (Hybrid Mode with Average Fallback):
+Starting PIMC Points Play...
+-- Trick  1 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    DA  perf:CJ opt= 82  loss=0(D)  avgs:[DA=0%/79  CJ=0%/79  HJ=0%/79  SJ=0%/79  CA=0%/77  H7=0%/77  CQ=0%/76  SA=0%/75  SQ=0%/68  SK=0%/68]
+  L *  PIMC:    D8  perf:D9 opt= 82  loss=0(O)  avgs:[D8=90%/32  D9=90%/32]
+  R *  PIMC:    D7  perf:DQ opt= 82  loss=0(O)  avgs:[D7=100%/37  DQ=100%/37  DK=100%/36  DT=100%/33]
+  +- score after trick  1: 11 pts
+-- Trick  2 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    SJ  perf:CJ opt= 82  loss=0(D)  avgs:[SJ=0%/81  HJ=0%/81  CJ=0%/81  CA=0%/79  SA=0%/79  H7=0%/78  CQ=0%/75  SQ=0%/69  SK=0%/68]
+  L    PIMC:    CK  perf:CK opt= 82  loss=0(O)  avgs:[CK=100%/43  D9=100%/41  S7=100%/40  HK=100%/40  HQ=100%/40  HT=100%/39  H9=100%/39  H8=100%/39  HA=100%/39]
+  R    PIMC:    DJ  perf:DJ opt= 82  loss=0(O)  avgs:[DJ=95%/39]
+  +- score after trick  2: 19 pts
+-- Trick  3 (D leads) ----------------------------------------------------------------
+  D *  PIMC:(!) H7  perf:CJ opt= 82  loss=6(D)  avgs:[H7=0%/82  SA=0%/82  CA=0%/80  CJ=0%/80  HJ=0%/80  CQ=0%/79  SQ=0%/74  SK=0%/73]
+  L    PIMC:    HA  perf:HA opt= 76  loss=0(O)  avgs:[HA=100%/55  HT=100%/55  HK=100%/52  HQ=100%/51  H8=100%/48  H9=100%/48]
+  R    PIMC:    ST  perf:ST opt= 76  loss=0(O)  avgs:[ST=100%/46  DT=100%/45  CT=100%/44  DK=100%/40  DQ=100%/40  C9=100%/37  C8=100%/37  C7=100%/37]
+  +- score after trick  3: 19 pts
+-- Trick  4 (L leads) ----------------------------------------------------------------
+  L *  PIMC:(!) HK  perf:S7 opt= 76  loss=6(O)  avgs:[HK=100%/42  HQ=100%/42  H9=100%/41  H8=100%/41  S7=100%/41  HT=100%/40  D9=100%/40]
+  R    PIMC:    DT  perf:DT opt= 82  loss=0(O)  avgs:[DT=100%/41  CT=100%/39  DK=100%/39  DQ=100%/38  C9=100%/36  C8=100%/36  C7=100%/36]
+  D *  PIMC:(!) CJ  perf:CQ opt= 82  loss=6(D)  avgs:[CJ=0%/85  HJ=0%/85  CQ=0%/82  SQ=0%/70  SK=0%/69  SA=0%/62  CA=0%/61]
+  +- score after trick  4: 35 pts
+-- Trick  5 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    CQ  perf:HJ opt= 76  loss=0(D)  avgs:[CQ=0%/84  SA=0%/83  SK=0%/83  SQ=0%/83  CA=0%/82  HJ=0%/81]
+  L *  PIMC:(!) S7  perf:HT opt= 76  loss=10(O)  avgs:[S7=100%/43  D9=100%/42  H9=100%/41  H8=100%/41  HQ=100%/41  HT=100%/37]
+  R    PIMC:    CT  perf:CT opt= 86  loss=0(O)  avgs:[CT=100%/34  C7=100%/21  C9=100%/21  C8=100%/21]
+  +- score after trick  5: 35 pts
+-- Trick  6 (R leads) ----------------------------------------------------------------
+  R *  PIMC:    C9  perf:DK opt= 86  loss=0(O)  avgs:[C9=100%/34  DK=100%/34  DQ=100%/34  C8=100%/34  C7=100%/34]
+  D    PIMC:    CA  perf:CA opt= 86  loss=0(D)  avgs:[CA=0%/86]
+  L *  PIMC:    D9  perf:HT opt= 86  loss=0(O)  avgs:[D9=100%/37  H8=100%/37  H9=100%/37  HQ=100%/37  HT=100%/35]
+  +- score after trick  6: 46 pts
+-- Trick  7 (D leads) ----------------------------------------------------------------
+  D    PIMC:    HJ  perf:HJ opt= 86  loss=0(D)  avgs:[HJ=0%/86  SQ=0%/86  SA=0%/86  SK=0%/86]
+  L *  PIMC:    H8  perf:HT opt= 86  loss=0(O)  avgs:[H8=100%/41  H9=100%/41  HQ=100%/40  HT=100%/37]
+  R    PIMC:    DK  perf:DK opt= 86  loss=0(O)  avgs:[DK=100%/34  C8=100%/34  DQ=100%/34  C7=100%/34]
+  +- score after trick  7: 52 pts
+-- Trick  8 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    SQ  perf:SA opt= 86  loss=0(D)  avgs:[SQ=0%/86  SK=0%/86  SA=0%/86]
+  L    PIMC:    HT  perf:HT opt= 86  loss=0(O)  avgs:[HT=100%/53  HQ=100%/53  H9=100%/51]
+  R *  PIMC:    C7  perf:DQ opt= 86  loss=0(O)  avgs:[C7=100%/34  DQ=100%/34  C8=100%/34]
+  +- score after trick  8: 65 pts
+-- Trick  9 (D leads) ----------------------------------------------------------------
+  D    PIMC:    SA  perf:SA opt= 86  loss=0(D)  avgs:[SA=0%/86  SK=0%/86]
+  L    PIMC:    HQ  perf:HQ opt= 86  loss=0(O)  avgs:[HQ=100%/34  H9=100%/34]
+  R    PIMC:    DQ  perf:DQ opt= 86  loss=0(O)  avgs:[DQ=100%/34  C8=100%/34]
+  +- score after trick  9: 82 pts
+-- Trick 10 (D leads) ----------------------------------------------------------------
+  D    PIMC:    SK  perf:SK opt= 86  loss=0(D)  avgs:[SK=0%/86]
+  L    PIMC:    H9  perf:H9 opt= 86  loss=0(O)  avgs:[H9=100%/34]
+  R    PIMC:    C8  perf:C8 opt= 86  loss=0(O)  avgs:[C8=100%/34]
+  +- score after trick 10: 86 pts
+Game Finished. Total Point Loss: 28 (D:12 O:16) | Final score: 86 pts
+
+Strategy b2) PIMC Points Playout (Average Mode only):
+Starting PIMC Points Play...
+-- Trick  1 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    DA  perf:CJ opt= 82  loss=0(D)  avgs:[DA=77  SJ=77  HJ=77  CJ=77  H7=75  CA=75  CQ=74  SA=73  SQ=68  SK=67]
+  L    PIMC:    D9  perf:D9 opt= 82  loss=0(O)  avgs:[D9=38  D8=38]
+  R *  PIMC:    D7  perf:DQ opt= 82  loss=0(O)  avgs:[D7=30  DQ=29  DK=29  DT=27]
+  +- score after trick  1: 11 pts
+-- Trick  2 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    HJ  perf:CJ opt= 82  loss=0(D)  avgs:[HJ=79  SJ=79  CJ=79  CA=77  H7=77  CQ=75  SA=75  SQ=68  SK=67]
+  L    PIMC:    CK  perf:CK opt= 82  loss=0(O)  avgs:[CK=43  HA=43  HT=43  D8=41  HK=41  S7=41  HQ=41  H8=38  H9=38]
+  R    PIMC:    DJ  perf:DJ opt= 82  loss=0(O)  avgs:[DJ=38]
+  +- score after trick  2: 19 pts
+-- Trick  3 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    SA  perf:CJ opt= 82  loss=0(D)  avgs:[SA=82  H7=81  SJ=79  CJ=79  CQ=78  CA=78  SQ=73  SK=72]
+  L    PIMC:    S7  perf:S7 opt= 82  loss=0(O)  avgs:[S7=38]
+  R    PIMC:    ST  perf:ST opt= 82  loss=0(O)  avgs:[ST=35]
+  +- score after trick  3: 40 pts
+-- Trick  4 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    H7  perf:CJ opt= 82  loss=0(D)  avgs:[H7=91  SJ=89  SK=89  SQ=89  CJ=89  CA=88  CQ=88]
+  L    PIMC:    HA  perf:HA opt= 82  loss=0(O)  avgs:[HA=50  HT=50  HK=48  HQ=48  H8=45  H9=45]
+  R    PIMC:    DT  perf:DT opt= 82  loss=0(O)  avgs:[DT=44  CT=43  DK=40  DQ=39  C9=37  C7=37  C8=37]
+  +- score after trick  4: 40 pts
+-- Trick  5 (L leads) ----------------------------------------------------------------
+  L *  PIMC:(!) H8  perf:HT opt= 82  loss=10(O)  avgs:[H8=49  H9=49  HQ=48  HK=48  HT=44  D8=40]
+  R *  PIMC:(!) C9  perf:DK opt= 92  loss=4(O)  avgs:[C9=36  C8=36  C7=36  DQ=36  DK=35  CT=31]
+  D    PIMC:    CQ  perf:CQ opt= 96  loss=0(D)  avgs:[CQ=96  SJ=86  CJ=86  SQ=86  SK=85  CA=73]
+  +- score after trick  5: 40 pts
+-- Trick  6 (L leads) ----------------------------------------------------------------
+  L *  PIMC:    HQ  perf:HT opt= 96  loss=0(O)  avgs:[HQ=53  HK=52  H9=52  HT=50  D8=46]
+  R *  PIMC:    DK  perf:CT opt= 96  loss=0(O)  avgs:[DK=24  C8=24  CT=24  DQ=24  C7=24]
+  D *  PIMC:    SJ  perf:CJ opt= 96  loss=0(D)  avgs:[SJ=96  CJ=96  SQ=86  SK=85  CA=78]
+  +- score after trick  6: 49 pts
+-- Trick  7 (D leads) ----------------------------------------------------------------
+  D    PIMC:    CJ  perf:CJ opt= 96  loss=0(D)  avgs:[CJ=96  SQ=96  CA=96  SK=96]
+  L *  PIMC:    H9  perf:HT opt= 96  loss=0(O)  avgs:[H9=36  D8=36  HK=36  HT=32]
+  R *  PIMC:    C8  perf:CT opt= 96  loss=0(O)  avgs:[C8=24  CT=24  DQ=24  C7=24]
+  +- score after trick  7: 51 pts
+-- Trick  8 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    SQ  perf:CA opt= 96  loss=0(D)  avgs:[SQ=96  CA=96  SK=96]
+  L    PIMC:    HT  perf:HT opt= 96  loss=0(O)  avgs:[HT=40  D8=40  HK=36]
+  R    PIMC:    CT  perf:CT opt= 96  loss=0(O)  avgs:[CT=24  C7=24  DQ=24]
+  +- score after trick  8: 74 pts
+-- Trick  9 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    SK  perf:CA opt= 96  loss=0(D)  avgs:[SK=96  CA=96]
+  L    PIMC:    HK  perf:HK opt= 96  loss=0(O)  avgs:[HK=24  D8=24]
+  R *  PIMC:    C7  perf:DQ opt= 96  loss=0(O)  avgs:[C7=24  DQ=24]
+  +- score after trick  9: 82 pts
+-- Trick 10 (D leads) ----------------------------------------------------------------
+  D    PIMC:    CA  perf:CA opt= 96  loss=0(D)  avgs:[CA=96]
+  L    PIMC:    D8  perf:D8 opt= 96  loss=0(O)  avgs:[D8=24]
+  R    PIMC:    DQ  perf:DQ opt= 96  loss=0(O)  avgs:[DQ=24]
+  +- score after trick 10: 96 pts
+Game Finished. Total Point Loss: 14 (D:0 O:14) | Final score: 96 pts
+
+================================================================================
+
+--- GAME 3 ---
+Deal Generated using SmartGrand Heuristics.
+
+Perfect Play (Reference):
+Starting Perfect Play...
+  Trick  1  D:HJ  L:SJ  R:DA
+  Trick  2  L:DT  R:DK  D:CQ
+  Trick  3  L:CT  R:CK  D:CA
+  Trick  4  D:DJ  L:HQ  R:HT
+  Trick  5  D:SA  L:S7  R:HK
+  Trick  6  D:HA  L:H9  R:DQ
+  Trick  7  D:ST  L:C9  R:C8
+  Trick  8  D:SK  L:H8  R:C7
+  Trick  9  D:SQ  L:H7  R:D9
+  Trick 10  D:S9  L:D8  R:D7
+Perfect Play Finished. Result: 88 pts
+
+Strategy b3) PIMC (Win Probability only):
+Starting PIMC Play...
+--- Trick 1 (Player: Declarer) ---
+    PIMC Analysis: SK (0.0) CQ (0.0) SA (0.0)
+  PIMC plays: SK | Perfect was: HJ | Loss: 0 | (Perfect Val: 88, PIMC Action Val: 88)
+    PIMC Analysis: S7 (1.0)
+  PIMC plays: S7 | Perfect was: S7 | Loss: 0 | (Perfect Val: 88, PIMC Action Val: 88)
+    PIMC Analysis: CK (0.9) HK (0.9) DA (0.9)
+  PIMC plays: CK | Perfect was: HT | Loss: 0 | (Perfect Val: 88, PIMC Action Val: 88)
+--- Trick 2 (Player: Declarer) ---
+    PIMC Analysis: ST (0.0) DJ (0.0) CA (0.0)
+  PIMC plays: ST | Perfect was: HJ | Loss: 4 | (Perfect Val: 88, PIMC Action Val: 84)
+    PIMC Analysis: H8 (1.0) SJ (1.0) H7 (1.0)
+  PIMC plays: H8 | Perfect was: SJ | Loss: 4 | (Perfect Val: 84, PIMC Action Val: 88)
+    PIMC Analysis: D9 (0.9) DK (0.9) C7 (0.9)
+  PIMC plays: D9 | Perfect was: DQ | Loss: 0 | (Perfect Val: 88, PIMC Action Val: 88)
+--- Trick 3 (Player: Declarer) ---
+    PIMC Analysis: DJ (0.0) CA (0.0) CQ (0.0)
+  PIMC plays: DJ | Perfect was: HJ | Loss: 0 | (Perfect Val: 88, PIMC Action Val: 88)
+    PIMC Analysis: SJ (1.0)
+  PIMC plays: SJ | Perfect was: SJ | Loss: 0 | (Perfect Val: 88, PIMC Action Val: 88)
+    PIMC Analysis: DK (1.0) DQ (1.0) C8 (1.0)
+  PIMC plays: DK | Perfect was: DA | Loss: 2 | (Perfect Val: 88, PIMC Action Val: 90)
+--- Trick 4 (Player: Left) ---
+    PIMC Analysis: C9 (1.0) H9 (1.0) CT (1.0)
+  PIMC plays: C9 | Perfect was: DT | Loss: 22 | (Perfect Val: 90, PIMC Action Val: 112)
+    PIMC Analysis: C7 (1.0) C8 (1.0)
+  PIMC plays: C7 | Perfect was: C8 | Loss: 0 | (Perfect Val: 112, PIMC Action Val: 112)
+    PIMC Analysis: CQ (0.0) CA (0.0)
+  PIMC plays: CQ | Perfect was: CQ | Loss: 0 | (Perfect Val: 112, PIMC Action Val: 112)
+--- Trick 5 (Player: Declarer) ---
+    PIMC Analysis: HJ (0.0) S9 (0.0) SA (0.0)
+  PIMC plays: HJ | Perfect was: HJ | Loss: 0 | (Perfect Val: 112, PIMC Action Val: 112)
+    PIMC Analysis: DT (1.0) CT (1.0) H9 (1.0)
+  PIMC plays: DT | Perfect was: CT | Loss: 0 | (Perfect Val: 112, PIMC Action Val: 112)
+    PIMC Analysis: DQ (1.0) DA (1.0) D7 (1.0)
+  PIMC plays: DQ | Perfect was: DA | Loss: 0 | (Perfect Val: 112, PIMC Action Val: 112)
+--- Trick 6 (Player: Declarer) ---
+    PIMC Analysis: HA (0.0) SA (0.0) S9 (0.0)
+  PIMC plays: HA | Perfect was: CA | Loss: 0 | (Perfect Val: 112, PIMC Action Val: 112)
+    PIMC Analysis: H9 (1.0) HQ (1.0) H7 (1.0)
+  PIMC plays: H9 | Perfect was: HQ | Loss: 0 | (Perfect Val: 112, PIMC Action Val: 112)
+    PIMC Analysis: HT (1.0) HK (1.0)
+  PIMC plays: HT | Perfect was: HT | Loss: 0 | (Perfect Val: 112, PIMC Action Val: 112)
+--- Trick 7 (Player: Declarer) ---
+    PIMC Analysis: S9 (0.0) SA (0.0) CA (0.0)
+  PIMC plays: S9 | Perfect was: CA | Loss: 0 | (Perfect Val: 112, PIMC Action Val: 112)
+    PIMC Analysis: D8 (1.0) CT (1.0) HQ (1.0)
+  PIMC plays: D8 | Perfect was: CT | Loss: 0 | (Perfect Val: 112, PIMC Action Val: 112)
+    PIMC Analysis: D7 (1.0) C8 (1.0) DA (1.0)
+  PIMC plays: D7 | Perfect was: DA | Loss: 0 | (Perfect Val: 112, PIMC Action Val: 112)
+--- Trick 8 (Player: Declarer) ---
+    PIMC Analysis: CA (0.0) SA (0.0) SQ (0.0)
+  PIMC plays: CA | Perfect was: CA | Loss: 0 | (Perfect Val: 112, PIMC Action Val: 112)
+    PIMC Analysis: CT (1.0)
+  PIMC plays: CT | Perfect was: CT | Loss: 0 | (Perfect Val: 112, PIMC Action Val: 112)
+    PIMC Analysis: C8 (1.0)
+  PIMC plays: C8 | Perfect was: C8 | Loss: 0 | (Perfect Val: 112, PIMC Action Val: 112)
+--- Trick 9 (Player: Declarer) ---
+    PIMC Analysis: SQ (0.0) SA (0.0)
+  PIMC plays: SQ | Perfect was: SA | Loss: 0 | (Perfect Val: 112, PIMC Action Val: 112)
+    PIMC Analysis: HQ (1.0) H7 (1.0)
+  PIMC plays: HQ | Perfect was: HQ | Loss: 0 | (Perfect Val: 112, PIMC Action Val: 112)
+    PIMC Analysis: HK (1.0) DA (1.0)
+  PIMC plays: HK | Perfect was: DA | Loss: 0 | (Perfect Val: 112, PIMC Action Val: 112)
+--- Trick 10 (Player: Declarer) ---
+    PIMC Analysis: SA (0.0)
+  PIMC plays: SA | Perfect was: SA | Loss: 0 | (Perfect Val: 112, PIMC Action Val: 112)
+    PIMC Analysis: H7 (1.0)
+  PIMC plays: H7 | Perfect was: H7 | Loss: 0 | (Perfect Val: 112, PIMC Action Val: 112)
+    PIMC Analysis: DA (1.0)
+  PIMC plays: DA | Perfect was: DA | Loss: 0 | (Perfect Val: 112, PIMC Action Val: 112)
+Game Finished. Total Point Loss: 32 (Declarer: 4, Opponents: 28)
+
+Strategy b1) PIMC Points Playout (Hybrid Mode with Average Fallback):
+Starting PIMC Points Play...
+-- Trick  1 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    SK  perf:HJ opt= 88  loss=0(D)  avgs:[SK=0%/89  SQ=0%/89  DJ=0%/89  SA=0%/89  ST=0%/89  HJ=0%/89  S9=0%/88  HA=0%/88  CA=0%/88  CQ=0%/83]
+  L    PIMC:    S7  perf:S7 opt= 88  loss=0(O)  avgs:[S7=100%/57]
+  R *  PIMC:    D7  perf:HT opt= 88  loss=0(O)  avgs:[D7=100%/35  D9=100%/35  DQ=100%/35  DK=100%/35  HK=100%/33  C8=100%/32  C7=100%/32  CK=100%/32  HT=100%/30  DA=100%/27]
+  +- score after trick  1: 6 pts
+-- Trick  2 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    S9  perf:HJ opt= 88  loss=0(D)  avgs:[S9=0%/89  CA=0%/89  HJ=0%/89  DJ=0%/89  SQ=0%/88  HA=0%/88  ST=0%/83  CQ=0%/83  SA=0%/82]
+  L *  PIMC:    H9  perf:HQ opt= 88  loss=0(O)  avgs:[H9=100%/32  H8=100%/32  H7=100%/32  HQ=100%/32  D8=100%/30  SJ=100%/30  C9=100%/30  CT=100%/28  DT=100%/28]
+  R *  PIMC:    DQ  perf:HT opt= 88  loss=0(O)  avgs:[DQ=80%/21  D9=80%/21  DK=80%/21  C8=80%/20  C7=80%/20  DA=80%/19  CK=80%/19  HK=75%/20  HT=75%/17]
+  +- score after trick  2: 9 pts
+-- Trick  3 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    DJ  perf:HJ opt= 88  loss=0(D)  avgs:[DJ=0%/88  HA=0%/88  HJ=0%/88  CA=0%/88  SQ=0%/88  ST=0%/83  CQ=0%/82  SA=0%/82]
+  L    PIMC:    SJ  perf:SJ opt= 88  loss=0(O)  avgs:[SJ=100%/29]
+  R *  PIMC:(!) HT  perf:DA opt= 88  loss=1(O)  avgs:[HT=100%/30  DA=100%/28  DK=100%/27  CK=100%/26  D9=100%/24  HK=100%/24  C8=100%/22  C7=100%/22]
+  +- score after trick  3: 9 pts
+-- Trick  4 (L leads) ----------------------------------------------------------------
+  L *  PIMC:    HQ  perf:DT opt= 89  loss=0(O)  avgs:[HQ=100%/30  H8=100%/28  H7=100%/28  DT=100%/28  D8=100%/27  CT=100%/24  C9=100%/22]
+  R    PIMC:    HK  perf:HK opt= 89  loss=0(O)  avgs:[HK=100%/26]
+  D    PIMC:    HA  perf:HA opt= 89  loss=0(D)  avgs:[HA=0%/90]
+  +- score after trick  4: 27 pts
+-- Trick  5 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    CQ  perf:CA opt= 89  loss=0(D)  avgs:[CQ=0%/91  SA=0%/90  ST=0%/90  SQ=0%/90  CA=0%/90  HJ=0%/83]
+  L    PIMC:    CT  perf:CT opt= 89  loss=0(O)  avgs:[CT=100%/33  C9=100%/23]
+  R    PIMC:    CK  perf:CK opt= 89  loss=0(O)  avgs:[CK=100%/31  C8=100%/27  C7=100%/27]
+  +- score after trick  5: 27 pts
+-- Trick  6 (L leads) ----------------------------------------------------------------
+  L    PIMC:    DT  perf:DT opt= 89  loss=0(O)  avgs:[DT=100%/31  H7=100%/31  C9=100%/31  H8=100%/31  D8=100%/31]
+  R *  PIMC:    D9  perf:DA opt= 89  loss=0(O)  avgs:[D9=100%/31  DA=100%/31  DK=100%/31]
+  D    PIMC:    HJ  perf:HJ opt= 89  loss=0(D)  avgs:[HJ=0%/89  SQ=0%/76  ST=0%/69  CA=0%/68  SA=0%/68]
+  +- score after trick  6: 39 pts
+-- Trick  7 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    ST  perf:CA opt= 89  loss=0(D)  avgs:[ST=0%/89  SA=0%/89  CA=0%/89  SQ=0%/89]
+  L *  PIMC:    H7  perf:C9 opt= 89  loss=0(O)  avgs:[H7=100%/31  D8=100%/31  H8=100%/31  C9=100%/31]
+  R    PIMC:    DA  perf:DA opt= 89  loss=0(O)  avgs:[DA=100%/31  DK=100%/31  C8=100%/31  C7=100%/31]
+  +- score after trick  7: 60 pts
+-- Trick  8 (D leads) ----------------------------------------------------------------
+  D    PIMC:    CA  perf:CA opt= 89  loss=0(D)  avgs:[CA=0%/89  SQ=0%/89  SA=0%/89]
+  L    PIMC:    C9  perf:C9 opt= 89  loss=0(O)  avgs:[C9=100%/31]
+  R *  PIMC:    C7  perf:C8 opt= 89  loss=0(O)  avgs:[C7=100%/31  C8=100%/31]
+  +- score after trick  8: 71 pts
+-- Trick  9 (D leads) ----------------------------------------------------------------
+  D    PIMC:    SA  perf:SA opt= 89  loss=0(D)  avgs:[SA=0%/89  SQ=0%/89]
+  L    PIMC:    H8  perf:H8 opt= 89  loss=0(O)  avgs:[H8=100%/31  D8=100%/31]
+  R    PIMC:    DK  perf:DK opt= 89  loss=0(O)  avgs:[DK=100%/31  C8=100%/31]
+  +- score after trick  9: 86 pts
+-- Trick 10 (D leads) ----------------------------------------------------------------
+  D    PIMC:    SQ  perf:SQ opt= 89  loss=0(D)  avgs:[SQ=0%/89]
+  L    PIMC:    D8  perf:D8 opt= 89  loss=0(O)  avgs:[D8=100%/31]
+  R    PIMC:    C8  perf:C8 opt= 89  loss=0(O)  avgs:[C8=100%/31]
+  +- score after trick 10: 89 pts
+Game Finished. Total Point Loss: 1 (D:0 O:1) | Final score: 89 pts
+
+Strategy b2) PIMC Points Playout (Average Mode only):
+Starting PIMC Points Play...
+-- Trick  1 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    SQ  perf:HJ opt= 88  loss=0(D)  avgs:[SQ=89  S9=89  HA=89  SK=89  ST=89  SA=89  HJ=88  DJ=88  CA=88  CQ=83]
+  L    PIMC:    S7  perf:S7 opt= 88  loss=0(O)  avgs:[S7=55]
+  R *  PIMC:    D7  perf:HT opt= 88  loss=0(O)  avgs:[D7=37  D9=37  DQ=37  DK=37  C7=36  C8=36  CK=34  HK=34  HT=31  DA=28]
+  +- score after trick  1: 5 pts
+-- Trick  2 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    HA  perf:HJ opt= 88  loss=0(D)  avgs:[HA=89  DJ=89  HJ=89  S9=88  CA=88  SK=87  ST=82  CQ=82  SA=81]
+  L *  PIMC:    H9  perf:HQ opt= 88  loss=0(O)  avgs:[H9=30  H7=30  HQ=30  H8=30]
+  R *  PIMC:    HK  perf:HT opt= 88  loss=0(O)  avgs:[HK=29  HT=25]
+  +- score after trick  2: 20 pts
+-- Trick  3 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    S9  perf:HJ opt= 88  loss=0(D)  avgs:[S9=87  DJ=87  HJ=87  SK=87  CA=86  ST=83  SA=82  CQ=81]
+  L    PIMC:    HQ  perf:HQ opt= 88  loss=0(O)  avgs:[HQ=30  H8=30  H7=30  D8=30  C9=30  DT=29  SJ=28  CT=27]
+  R *  PIMC:    C7  perf:HT opt= 88  loss=0(O)  avgs:[C7=16  C8=16  DQ=16  D9=16  DK=16  CK=15  HT=15  DA=13]
+  +- score after trick  3: 23 pts
+-- Trick  4 (D leads) ----------------------------------------------------------------
+  D    PIMC:    HJ  perf:HJ opt= 88  loss=0(D)  avgs:[HJ=88  DJ=88  CA=87  SK=86  ST=81  SA=80  CQ=80]
+  L    PIMC:    SJ  perf:SJ opt= 88  loss=0(O)  avgs:[SJ=36]
+  R    PIMC:    DA  perf:DA opt= 88  loss=0(O)  avgs:[DA=25  DK=24  CK=24  HT=24  DQ=23  C8=20  D9=20]
+  +- score after trick  4: 23 pts
+-- Trick  5 (L leads) ----------------------------------------------------------------
+  L *  PIMC:(!) H8  perf:DT opt= 88  loss=4(O)  avgs:[H8=29  H7=29  DT=28  CT=28  C9=24  D8=20]
+  R    PIMC:    HT  perf:HT opt= 92  loss=0(O)  avgs:[HT=23]
+  D    PIMC:    CQ  perf:CQ opt= 92  loss=0(D)  avgs:[CQ=92  DJ=85  SK=75  ST=69  SA=68  CA=68]
+  +- score after trick  5: 23 pts
+-- Trick  6 (R leads) ----------------------------------------------------------------
+  R *  PIMC:    DK  perf:CK opt= 92  loss=0(O)  avgs:[DK=28  D9=28  CK=28  DQ=28  C8=28]
+  D    PIMC:    DJ  perf:DJ opt= 92  loss=0(D)  avgs:[DJ=92  SK=77  ST=71  CA=70  SA=70]
+  L *  PIMC:    D8  perf:DT opt= 92  loss=0(O)  avgs:[D8=28  DT=28]
+  +- score after trick  6: 29 pts
+-- Trick  7 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    ST  perf:CA opt= 92  loss=0(D)  avgs:[ST=92  SK=92  CA=92  SA=92]
+  L *  PIMC:    H7  perf:CT opt= 92  loss=0(O)  avgs:[H7=28  DT=28  C9=28  CT=28]
+  R *  PIMC:    DQ  perf:CK opt= 92  loss=0(O)  avgs:[DQ=28  D9=28  C8=28  CK=28]
+  +- score after trick  7: 42 pts
+-- Trick  8 (D leads) ----------------------------------------------------------------
+  D    PIMC:    CA  perf:CA opt= 92  loss=0(D)  avgs:[CA=92  SK=92  SA=92]
+  L *  PIMC:    C9  perf:CT opt= 92  loss=0(O)  avgs:[C9=28  CT=28]
+  R    PIMC:    CK  perf:CK opt= 92  loss=0(O)  avgs:[CK=28  C8=28]
+  +- score after trick  8: 57 pts
+-- Trick  9 (D leads) ----------------------------------------------------------------
+  D    PIMC:    SA  perf:SA opt= 92  loss=0(D)  avgs:[SA=92  SK=92]
+  L    PIMC:    CT  perf:CT opt= 92  loss=0(O)  avgs:[CT=28  DT=28]
+  R    PIMC:    C8  perf:C8 opt= 92  loss=0(O)  avgs:[C8=28  D9=28]
+  +- score after trick  9: 78 pts
+-- Trick 10 (D leads) ----------------------------------------------------------------
+  D    PIMC:    SK  perf:SK opt= 92  loss=0(D)  avgs:[SK=92]
+  L    PIMC:    DT  perf:DT opt= 92  loss=0(O)  avgs:[DT=28]
+  R    PIMC:    D9  perf:D9 opt= 92  loss=0(O)  avgs:[D9=28]
+  +- score after trick 10: 92 pts
+Game Finished. Total Point Loss: 4 (D:0 O:4) | Final score: 92 pts
+
+================================================================================
+
+--- GAME 4 ---
+Deal Generated using SmartGrand Heuristics.
+
+Perfect Play (Reference):
+Starting Perfect Play...
+  Trick  1  D:CJ  L:SJ  R:HA
+  Trick  2  D:HJ  L:ST  R:DQ
+  Trick  3  D:DJ  L:HT  R:C8
+  Trick  4  D:CA  L:CK  R:C7
+  Trick  5  D:SA  L:DT  R:S9
+  Trick  6  D:DA  L:D8  R:D9
+  Trick  7  D:CT  L:CQ  R:S7
+  Trick  8  D:SK  L:HQ  R:H8
+  Trick  9  D:SQ  L:C9  R:H7
+  Trick 10  D:S8  L:H9  R:D7
+Perfect Play Finished. Result: 120 pts
+
+Strategy b3) PIMC (Win Probability only):
+Starting PIMC Play...
+--- Trick 1 (Player: Declarer) ---
+    PIMC Analysis: SA (0.2) CT (0.2) CJ (0.2)
+  PIMC plays: SA | Perfect was: CJ | Loss: 0 | (Perfect Val: 120, PIMC Action Val: 120)
+    PIMC Analysis: ST (0.9)
+  PIMC plays: ST | Perfect was: ST | Loss: 0 | (Perfect Val: 120, PIMC Action Val: 120)
+    PIMC Analysis: S9 (1.0) S7 (1.0)
+  PIMC plays: S9 | Perfect was: S9 | Loss: 0 | (Perfect Val: 120, PIMC Action Val: 120)
+--- Trick 2 (Player: Declarer) ---
+    PIMC Analysis: CJ (1.0) CT (0.9) DA (0.9)
+  PIMC plays: CJ | Perfect was: CJ | Loss: 0 | (Perfect Val: 120, PIMC Action Val: 120)
+    PIMC Analysis: SJ (1.0)
+  PIMC plays: SJ | Perfect was: SJ | Loss: 0 | (Perfect Val: 120, PIMC Action Val: 120)
+    PIMC Analysis: D9 (1.0) S7 (1.0) H8 (1.0)
+  PIMC plays: D9 | Perfect was: HA | Loss: 0 | (Perfect Val: 120, PIMC Action Val: 120)
+--- Trick 3 (Player: Declarer) ---
+    PIMC Analysis: DJ (1.0) CT (1.0) HJ (1.0)
+  PIMC plays: DJ | Perfect was: HJ | Loss: 0 | (Perfect Val: 120, PIMC Action Val: 120)
+    PIMC Analysis: CK (1.0) C9 (1.0) CQ (1.0)
+  PIMC plays: CK | Perfect was: HT | Loss: 0 | (Perfect Val: 120, PIMC Action Val: 120)
+    PIMC Analysis: H8 (1.0) S7 (1.0) C7 (1.0)
+  PIMC plays: H8 | Perfect was: HA | Loss: 0 | (Perfect Val: 120, PIMC Action Val: 120)
+--- Trick 4 (Player: Declarer) ---
+    PIMC Analysis: CT (1.0) HJ (1.0) S8 (1.0)
+  PIMC plays: CT | Perfect was: HJ | Loss: 0 | (Perfect Val: 120, PIMC Action Val: 120)
+    PIMC Analysis: CQ (0.9) C9 (0.9)
+  PIMC plays: CQ | Perfect was: CQ | Loss: 0 | (Perfect Val: 120, PIMC Action Val: 120)
+    PIMC Analysis: C7 (0.9) C8 (0.9)
+  PIMC plays: C7 | Perfect was: C8 | Loss: 0 | (Perfect Val: 120, PIMC Action Val: 120)
+--- Trick 5 (Player: Declarer) ---
+    PIMC Analysis: SK (1.0) SQ (1.0) DA (1.0)
+  PIMC plays: SK | Perfect was: HJ | Loss: 0 | (Perfect Val: 120, PIMC Action Val: 120)
+    PIMC Analysis: H9 (0.9) C9 (0.9) HT (0.9)
+  PIMC plays: H9 | Perfect was: HT | Loss: 0 | (Perfect Val: 120, PIMC Action Val: 120)
+    PIMC Analysis: S7 (0.6)
+  PIMC plays: S7 | Perfect was: S7 | Loss: 0 | (Perfect Val: 120, PIMC Action Val: 120)
+--- Trick 6 (Player: Declarer) ---
+    PIMC Analysis: CA (1.0) HJ (1.0) DA (1.0)
+  PIMC plays: CA | Perfect was: HJ | Loss: 0 | (Perfect Val: 120, PIMC Action Val: 120)
+    PIMC Analysis: C9 (1.0)
+  PIMC plays: C9 | Perfect was: C9 | Loss: 0 | (Perfect Val: 120, PIMC Action Val: 120)
+    PIMC Analysis: C8 (0.6)
+  PIMC plays: C8 | Perfect was: C8 | Loss: 0 | (Perfect Val: 120, PIMC Action Val: 120)
+--- Trick 7 (Player: Declarer) ---
+    PIMC Analysis: DA (1.0) S8 (1.0) SQ (1.0)
+  PIMC plays: DA | Perfect was: HJ | Loss: 0 | (Perfect Val: 120, PIMC Action Val: 120)
+    PIMC Analysis: D8 (0.9) DT (0.8)
+  PIMC plays: D8 | Perfect was: DT | Loss: 0 | (Perfect Val: 120, PIMC Action Val: 120)
+    PIMC Analysis: DQ (0.0) D7 (0.0)
+  PIMC plays: DQ | Perfect was: DQ | Loss: 0 | (Perfect Val: 120, PIMC Action Val: 120)
+--- Trick 8 (Player: Declarer) ---
+    PIMC Analysis: SQ (1.0) S8 (1.0) HJ (1.0)
+  PIMC plays: SQ | Perfect was: HJ | Loss: 0 | (Perfect Val: 120, PIMC Action Val: 120)
+    PIMC Analysis: HT (0.3) HQ (0.3) DT (0.2)
+  PIMC plays: HT | Perfect was: HT | Loss: 0 | (Perfect Val: 120, PIMC Action Val: 120)
+    PIMC Analysis: D7 (0.0) HA (0.0) H7 (0.0)
+  PIMC plays: D7 | Perfect was: HA | Loss: 0 | (Perfect Val: 120, PIMC Action Val: 120)
+--- Trick 9 (Player: Declarer) ---
+    PIMC Analysis: S8 (1.0) HJ (1.0)
+  PIMC plays: S8 | Perfect was: HJ | Loss: 0 | (Perfect Val: 120, PIMC Action Val: 120)
+    PIMC Analysis: HQ (0.0) DT (0.0)
+  PIMC plays: HQ | Perfect was: DT | Loss: 0 | (Perfect Val: 120, PIMC Action Val: 120)
+    PIMC Analysis: H7 (0.0) HA (0.0)
+  PIMC plays: H7 | Perfect was: HA | Loss: 0 | (Perfect Val: 120, PIMC Action Val: 120)
+--- Trick 10 (Player: Declarer) ---
+    PIMC Analysis: HJ (1.0)
+  PIMC plays: HJ | Perfect was: HJ | Loss: 0 | (Perfect Val: 120, PIMC Action Val: 120)
+    PIMC Analysis: DT (0.0)
+  PIMC plays: DT | Perfect was: DT | Loss: 0 | (Perfect Val: 120, PIMC Action Val: 120)
+    PIMC Analysis: HA (0.0)
+  PIMC plays: HA | Perfect was: HA | Loss: 0 | (Perfect Val: 120, PIMC Action Val: 120)
+Game Finished. Total Point Loss: 0 (Declarer: 0, Opponents: 0)
+
+Strategy b1) PIMC Points Playout (Hybrid Mode with Average Fallback):
+Starting PIMC Points Play...
+-- Trick  1 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    CT  perf:CJ opt=120  loss=0(D)  avgs:[CT=20%/109  CA=20%/109  DA=20%/108  CJ=20%/107  SA=20%/102  SQ=0%/104  S8=0%/103  SK=0%/103  DJ=0%/95  HJ=0%/95]
+  L *  PIMC:    CQ  perf:CK opt=120  loss=0(O)  avgs:[CQ=100%/42  C9=100%/42  CK=100%/42]
+  R *  PIMC:    C7  perf:C8 opt=120  loss=0(O)  avgs:[C7=95%/39  C8=95%/39]
+  +- score after trick  1: 21 pts
+-- Trick  2 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    DA  perf:CJ opt=120  loss=0(D)  avgs:[DA=25%/112  CA=25%/110  CJ=25%/109  SA=25%/105  S8=0%/105  SQ=0%/105  SK=0%/104  HJ=0%/97  DJ=0%/97]
+  L *  PIMC:    D8  perf:DT opt=120  loss=0(O)  avgs:[D8=100%/31  DT=100%/26]
+  R *  PIMC:    D7  perf:DQ opt=120  loss=0(O)  avgs:[D7=100%/34  D9=100%/34  DQ=100%/33]
+  +- score after trick  2: 32 pts
+-- Trick  3 (D leads) ----------------------------------------------------------------
+  D    PIMC:    CJ  perf:CJ opt=120  loss=0(D)  avgs:[CJ=15%/102  SA=15%/99  CA=10%/104  SQ=0%/100  SK=0%/99  S8=0%/98  DJ=0%/90  HJ=0%/90]
+  L    PIMC:    SJ  perf:SJ opt=120  loss=0(O)  avgs:[SJ=100%/30]
+  R *  PIMC:    S7  perf:HA opt=120  loss=0(O)  avgs:[S7=100%/31  S9=100%/31  C8=100%/30  H8=100%/29  H7=100%/29  D9=100%/29  DQ=100%/28  HA=90%/20]
+  +- score after trick  3: 36 pts
+-- Trick  4 (D leads) ----------------------------------------------------------------
+  D    PIMC:    HJ  perf:HJ opt=120  loss=0(D)  avgs:[HJ=35%/107  DJ=35%/107  SA=35%/107  CA=35%/107  S8=0%/104  SQ=0%/101  SK=0%/100]
+  L *  PIMC:    H9  perf:ST opt=120  loss=0(O)  avgs:[H9=100%/40  HQ=100%/39  ST=100%/35  HT=100%/34  C9=95%/38  CK=95%/38  DT=95%/32]
+  R *  PIMC:    C8  perf:HA opt=120  loss=0(O)  avgs:[C8=95%/31  S9=95%/31  H8=95%/30  H7=95%/30  DQ=95%/30  D9=95%/30  HA=90%/15]
+  +- score after trick  4: 38 pts
+-- Trick  5 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    SA  perf:DJ opt=120  loss=0(D)  avgs:[SA=40%/108  CA=40%/108  DJ=40%/88  S8=0%/104  SQ=0%/100  SK=0%/100]
+  L    PIMC:    ST  perf:ST opt=120  loss=0(O)  avgs:[ST=95%/24]
+  R    PIMC:    S9  perf:S9 opt=120  loss=0(O)  avgs:[S9=80%/20]
+  +- score after trick  5: 59 pts
+-- Trick  6 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    SQ  perf:DJ opt=120  loss=0(D)  avgs:[SQ=100%/120  SK=100%/120  DJ=100%/120  CA=100%/120  S8=100%/120]
+  L *  PIMC:    CK  perf:HT opt=120  loss=0(O)  avgs:[CK=95%/25  C9=95%/23  DT=85%/23  HT=85%/22  HQ=85%/19]
+  R *  PIMC:    H7  perf:HA opt=120  loss=0(O)  avgs:[H7=0%/0  DQ=0%/0  HA=0%/0  D9=0%/0  H8=0%/0]
+  +- score after trick  6: 66 pts
+-- Trick  7 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    CA  perf:DJ opt=120  loss=0(D)  avgs:[CA=100%/120  SK=100%/120  DJ=100%/120  S8=100%/120]
+  L    PIMC:    C9  perf:C9 opt=120  loss=0(O)  avgs:[C9=0%/0]
+  R *  PIMC:    H8  perf:HA opt=120  loss=0(O)  avgs:[H8=0%/0  HA=0%/0  DQ=0%/0  D9=0%/0]
+  +- score after trick  7: 77 pts
+-- Trick  8 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    S8  perf:DJ opt=120  loss=0(D)  avgs:[S8=100%/120  DJ=100%/120  SK=100%/120]
+  L    PIMC:    HT  perf:HT opt=120  loss=0(O)  avgs:[HT=0%/0  DT=0%/0  HQ=0%/0]
+  R    PIMC:    HA  perf:HA opt=120  loss=0(O)  avgs:[HA=0%/0  D9=0%/0  DQ=0%/0]
+  +- score after trick  8: 98 pts
+-- Trick  9 (D leads) ----------------------------------------------------------------
+  D    PIMC:    DJ  perf:DJ opt=120  loss=0(D)  avgs:[DJ=100%/120  SK=100%/120]
+  L *  PIMC:    HQ  perf:DT opt=120  loss=0(O)  avgs:[HQ=0%/0  DT=0%/0]
+  R *  PIMC:    D9  perf:DQ opt=120  loss=0(O)  avgs:[D9=0%/0  DQ=0%/0]
+  +- score after trick  9: 103 pts
+-- Trick 10 (D leads) ----------------------------------------------------------------
+  D    PIMC:    SK  perf:SK opt=120  loss=0(D)  avgs:[SK=100%/120]
+  L    PIMC:    DT  perf:DT opt=120  loss=0(O)  avgs:[DT=0%/0]
+  R    PIMC:    DQ  perf:DQ opt=120  loss=0(O)  avgs:[DQ=0%/0]
+  +- score after trick 10: 120 pts
+Game Finished. Total Point Loss: 0 (D:0 O:0) | Final score: 120 pts
+
+Strategy b2) PIMC Points Playout (Average Mode only):
+Starting PIMC Points Play...
+-- Trick  1 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    CT  perf:CJ opt=120  loss=0(D)  avgs:[CT=110  CA=110  CJ=108  DA=108  S8=104  SQ=104  SK=103  SA=103  HJ=97  DJ=97]
+  L *  PIMC:    CQ  perf:CK opt=120  loss=0(O)  avgs:[CQ=39  C9=39  CK=38]
+  R *  PIMC:    C7  perf:C8 opt=120  loss=0(O)  avgs:[C7=37  C8=37]
+  +- score after trick  1: 21 pts
+-- Trick  2 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    DA  perf:CJ opt=120  loss=0(D)  avgs:[DA=111  CJ=109  CA=107  SA=104  SQ=102  S8=102  SK=101  HJ=96  DJ=96]
+  L *  PIMC:    D8  perf:DT opt=120  loss=0(O)  avgs:[D8=38  DT=29]
+  R *  PIMC:    D9  perf:DQ opt=120  loss=0(O)  avgs:[D9=34  D7=34  DQ=32]
+  +- score after trick  2: 32 pts
+-- Trick  3 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    CA  perf:CJ opt=120  loss=0(D)  avgs:[CA=108  CJ=105  S8=104  SQ=104  SK=103  SA=101  HJ=95  DJ=95]
+  L *  PIMC:    C9  perf:CK opt=120  loss=0(O)  avgs:[C9=28  CK=28]
+  R    PIMC:    C8  perf:C8 opt=120  loss=0(O)  avgs:[C8=37]
+  +- score after trick  3: 43 pts
+-- Trick  4 (D leads) ----------------------------------------------------------------
+  D    PIMC:    CJ  perf:CJ opt=120  loss=0(D)  avgs:[CJ=110  SA=106  S8=103  SQ=102  SK=101  HJ=96  DJ=96]
+  L    PIMC:    SJ  perf:SJ opt=120  loss=0(O)  avgs:[SJ=30]
+  R *  PIMC:    S9  perf:HA opt=120  loss=0(O)  avgs:[S9=33  S7=33  H8=33  H7=33  D7=32  DQ=31  HA=16]
+  +- score after trick  4: 47 pts
+-- Trick  5 (D leads) ----------------------------------------------------------------
+  D    PIMC:    HJ  perf:HJ opt=120  loss=0(D)  avgs:[HJ=111  DJ=111  SA=111  S8=105  SQ=102  SK=101]
+  L *  PIMC:    H9  perf:ST opt=120  loss=0(O)  avgs:[H9=32  HQ=32  CK=31  ST=29  HT=27  DT=23]
+  R *  PIMC:    S7  perf:HA opt=120  loss=0(O)  avgs:[S7=36  H8=33  D7=33  H7=33  DQ=33  HA=20]
+  +- score after trick  5: 49 pts
+-- Trick  6 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    SA  perf:DJ opt=120  loss=0(D)  avgs:[SA=120  DJ=120  S8=100  SQ=97  SK=96]
+  L    PIMC:    ST  perf:ST opt=120  loss=0(O)  avgs:[ST=21]
+  R *  PIMC:    H7  perf:HA opt=120  loss=0(O)  avgs:[H7=23  H8=23  D7=23  DQ=22  HA=5]
+  +- score after trick  6: 70 pts
+-- Trick  7 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    SK  perf:DJ opt=120  loss=0(D)  avgs:[SK=120  DJ=120  SQ=120  S8=120]
+  L *  PIMC:    CK  perf:HT opt=120  loss=0(O)  avgs:[CK=0  HT=0  HQ=0  DT=0]
+  R *  PIMC:    DQ  perf:HA opt=120  loss=0(O)  avgs:[DQ=0  H8=0  D7=0  HA=0]
+  +- score after trick  7: 81 pts
+-- Trick  8 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    S8  perf:DJ opt=120  loss=0(D)  avgs:[S8=120  SQ=120  DJ=120]
+  L *  PIMC:    HQ  perf:HT opt=120  loss=0(O)  avgs:[HQ=0  DT=0  HT=0]
+  R    PIMC:    HA  perf:HA opt=120  loss=0(O)  avgs:[HA=0  H8=0  D7=0]
+  +- score after trick  8: 95 pts
+-- Trick  9 (D leads) ----------------------------------------------------------------
+  D    PIMC:    DJ  perf:DJ opt=120  loss=0(D)  avgs:[DJ=120  SQ=120]
+  L *  PIMC:    DT  perf:HT opt=120  loss=0(O)  avgs:[DT=0  HT=0]
+  R    PIMC:    H8  perf:H8 opt=120  loss=0(O)  avgs:[H8=0  D7=0]
+  +- score after trick  9: 107 pts
+-- Trick 10 (D leads) ----------------------------------------------------------------
+  D    PIMC:    SQ  perf:SQ opt=120  loss=0(D)  avgs:[SQ=120]
+  L    PIMC:    HT  perf:HT opt=120  loss=0(O)  avgs:[HT=0]
+  R    PIMC:    D7  perf:D7 opt=120  loss=0(O)  avgs:[D7=0]
+  +- score after trick 10: 120 pts
+Game Finished. Total Point Loss: 0 (D:0 O:0) | Final score: 120 pts
+
+================================================================================
+
+--- GAME 5 ---
+Deal Generated using SmartGrand Heuristics.
+
+Perfect Play (Reference):
+Starting Perfect Play...
+  Trick  1  D:CJ  L:CT  R:C9
+  Trick  2  D:DA  L:D9  R:C8
+  Trick  3  D:CK  L:CA  R:CQ
+  Trick  4  L:SA  R:S9  D:H9
+  Trick  5  L:ST  R:SQ  D:SJ
+  Trick  6  D:HJ  L:HT  R:HQ
+  Trick  7  D:DT  L:D8  R:C7
+  Trick  8  D:D7  L:DK  R:SK
+  Trick  9  L:HK  R:H8  D:HA
+  Trick 10  D:DQ  L:H7  R:S8
+Perfect Play Finished. Result: 83 pts
+
+Strategy b3) PIMC (Win Probability only):
+Starting PIMC Play...
+--- Trick 1 (Player: Declarer) ---
+    PIMC Analysis: HJ (0.0) DA (0.0) SJ (0.0)
+  PIMC plays: HJ | Perfect was: CJ | Loss: 0 | (Perfect Val: 83, PIMC Action Val: 83)
+    PIMC Analysis: ST (1.0) D8 (1.0) SA (1.0)
+  PIMC plays: ST | Perfect was: CT | Loss: 0 | (Perfect Val: 83, PIMC Action Val: 83)
+    PIMC Analysis: C7 (0.9) C9 (0.9) SK (0.9)
+  PIMC plays: C7 | Perfect was: C9 | Loss: 0 | (Perfect Val: 83, PIMC Action Val: 83)
+--- Trick 2 (Player: Declarer) ---
+    PIMC Analysis: DQ (0.0) CJ (0.0) D7 (0.0)
+  PIMC plays: DQ | Perfect was: DA | Loss: 5 | (Perfect Val: 83, PIMC Action Val: 78)
+    PIMC Analysis: DK (1.0) D8 (1.0) D9 (1.0)
+  PIMC plays: DK | Perfect was: DK | Loss: 0 | (Perfect Val: 78, PIMC Action Val: 78)
+    PIMC Analysis: C9 (1.0) SK (1.0) SQ (1.0)
+  PIMC plays: C9 | Perfect was: SK | Loss: 4 | (Perfect Val: 78, PIMC Action Val: 82)
+--- Trick 3 (Player: Left) ---
+    PIMC Analysis: H7 (1.0) HK (1.0) SA (1.0)
+  PIMC plays: H7 | Perfect was: CA | Loss: 10 | (Perfect Val: 82, PIMC Action Val: 92)
+    PIMC Analysis: HQ (1.0) H8 (1.0)
+  PIMC plays: HQ | Perfect was: HQ | Loss: 0 | (Perfect Val: 92, PIMC Action Val: 92)
+    PIMC Analysis: H9 (0.0) HA (0.0)
+  PIMC plays: H9 | Perfect was: H9 | Loss: 0 | (Perfect Val: 92, PIMC Action Val: 92)
+--- Trick 4 (Player: Right) ---
+    PIMC Analysis: S9 (1.0) S8 (1.0) C8 (1.0)
+  PIMC plays: S9 | Perfect was: SK | Loss: 3 | (Perfect Val: 92, PIMC Action Val: 95)
+    PIMC Analysis: HA (0.0) DT (0.0) SJ (0.0)
+  PIMC plays: HA | Perfect was: CK | Loss: 25 | (Perfect Val: 95, PIMC Action Val: 70)
+    PIMC Analysis: SA (1.0)
+  PIMC plays: SA | Perfect was: SA | Loss: 0 | (Perfect Val: 70, PIMC Action Val: 70)
+--- Trick 5 (Player: Left) ---
+    PIMC Analysis: HT (1.0) D9 (1.0) HK (1.0)
+  PIMC plays: HT | Perfect was: CA | Loss: 4 | (Perfect Val: 70, PIMC Action Val: 74)
+    PIMC Analysis: H8 (1.0)
+  PIMC plays: H8 | Perfect was: H8 | Loss: 0 | (Perfect Val: 74, PIMC Action Val: 74)
+    PIMC Analysis: CJ (0.0) DT (0.0) D7 (0.0)
+  PIMC plays: CJ | Perfect was: CK | Loss: 4 | (Perfect Val: 74, PIMC Action Val: 70)
+--- Trick 6 (Player: Declarer) ---
+    PIMC Analysis: SJ (0.0) CK (0.0) D7 (0.0)
+  PIMC plays: SJ | Perfect was: DA | Loss: 1 | (Perfect Val: 70, PIMC Action Val: 69)
+    PIMC Analysis: CA (1.0) D8 (1.0) CT (1.0)
+  PIMC plays: CA | Perfect was: CT | Loss: 1 | (Perfect Val: 69, PIMC Action Val: 70)
+    PIMC Analysis: S8 (1.0) C8 (1.0) SQ (1.0)
+  PIMC plays: S8 | Perfect was: CQ | Loss: 0 | (Perfect Val: 70, PIMC Action Val: 70)
+--- Trick 7 (Player: Declarer) ---
+    PIMC Analysis: CK (0.0) DT (0.0) DA (0.0)
+  PIMC plays: CK | Perfect was: DA | Loss: 7 | (Perfect Val: 70, PIMC Action Val: 63)
+    PIMC Analysis: CT (1.0)
+  PIMC plays: CT | Perfect was: CT | Loss: 0 | (Perfect Val: 63, PIMC Action Val: 63)
+    PIMC Analysis: C8 (1.0) CQ (1.0)
+  PIMC plays: C8 | Perfect was: CQ | Loss: 3 | (Perfect Val: 63, PIMC Action Val: 66)
+--- Trick 8 (Player: Left) ---
+    PIMC Analysis: D8 (1.0) HK (1.0) D9 (1.0)
+  PIMC plays: D8 | Perfect was: HK | Loss: 8 | (Perfect Val: 66, PIMC Action Val: 74)
+    PIMC Analysis: SQ (1.0) SK (1.0) CQ (1.0)
+  PIMC plays: SQ | Perfect was: SK | Loss: 0 | (Perfect Val: 74, PIMC Action Val: 74)
+    PIMC Analysis: DA (0.0) DT (0.0) D7 (0.0)
+  PIMC plays: DA | Perfect was: DA | Loss: 0 | (Perfect Val: 74, PIMC Action Val: 74)
+--- Trick 9 (Player: Declarer) ---
+    PIMC Analysis: DT (0.0) D7 (0.0)
+  PIMC plays: DT | Perfect was: DT | Loss: 0 | (Perfect Val: 74, PIMC Action Val: 74)
+    PIMC Analysis: D9 (1.0)
+  PIMC plays: D9 | Perfect was: D9 | Loss: 0 | (Perfect Val: 74, PIMC Action Val: 74)
+    PIMC Analysis: CQ (1.0) SK (1.0)
+  PIMC plays: CQ | Perfect was: SK | Loss: 0 | (Perfect Val: 74, PIMC Action Val: 74)
+--- Trick 10 (Player: Declarer) ---
+    PIMC Analysis: D7 (0.0)
+  PIMC plays: D7 | Perfect was: D7 | Loss: 0 | (Perfect Val: 74, PIMC Action Val: 74)
+    PIMC Analysis: HK (1.0)
+  PIMC plays: HK | Perfect was: HK | Loss: 0 | (Perfect Val: 74, PIMC Action Val: 74)
+    PIMC Analysis: SK (1.0)
+  PIMC plays: SK | Perfect was: SK | Loss: 0 | (Perfect Val: 74, PIMC Action Val: 74)
+Game Finished. Total Point Loss: 75 (Declarer: 42, Opponents: 33)
+
+Strategy b1) PIMC Points Playout (Hybrid Mode with Average Fallback):
+Starting PIMC Points Play...
+-- Trick  1 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    DT  perf:CJ opt= 83  loss=0(D)  avgs:[DT=0%/81  DA=0%/81  CK=0%/81  HJ=0%/80  CJ=0%/80  SJ=0%/80  HA=0%/80  H9=0%/80  D7=0%/77  DQ=0%/74]
+  L *  PIMC:    D8  perf:D9 opt= 83  loss=0(O)  avgs:[D8=100%/59  D9=100%/59  DK=100%/57]
+  R *  PIMC:    C8  perf:C9 opt= 83  loss=0(O)  avgs:[C8=95%/32  C7=95%/32  C9=95%/32  H8=95%/32  S8=95%/32  S9=95%/32  SQ=95%/31  SK=95%/31  HQ=95%/31  CQ=95%/31]
+  +- score after trick  1: 12 pts
+-- Trick  2 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    CK  perf:CJ opt= 83  loss=0(D)  avgs:[CK=0%/74  HJ=0%/73  CJ=0%/73  SJ=0%/73  DA=0%/72  HA=0%/71  H9=0%/71  D7=0%/71  DQ=0%/68]
+  L    PIMC:    CA  perf:CA opt= 83  loss=0(O)  avgs:[CA=100%/63  CT=100%/63]
+  R    PIMC:    CQ  perf:CQ opt= 83  loss=0(O)  avgs:[CQ=100%/37  C9=100%/35  C7=100%/35]
+  +- score after trick  2: 12 pts
+-- Trick  3 (L leads) ----------------------------------------------------------------
+  L    PIMC:    SA  perf:SA opt= 83  loss=0(O)  avgs:[SA=100%/50  ST=100%/49  HK=100%/49  HT=100%/49  CT=100%/48  H7=100%/48  DK=100%/44  D9=100%/43]
+  R *  PIMC:(!) SQ  perf:S9 opt= 83  loss=1(O)  avgs:[SQ=100%/33  SK=100%/33  S9=100%/32  S8=100%/32]
+  D *  PIMC:    HJ  perf:CJ opt= 84  loss=0(D)  avgs:[HJ=0%/77  SJ=0%/77  CJ=0%/77  H9=0%/74  D7=0%/66  DQ=0%/64  HA=0%/50  DA=0%/47]
+  +- score after trick  3: 28 pts
+-- Trick  4 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    DA  perf:CJ opt= 84  loss=0(D)  avgs:[DA=0%/76  CJ=0%/76  SJ=0%/76  HA=0%/75  H9=0%/74  D7=0%/74  DQ=0%/72]
+  L    PIMC:    D9  perf:D9 opt= 84  loss=0(O)  avgs:[D9=100%/37  DK=100%/31]
+  R *  PIMC:    C7  perf:HQ opt= 84  loss=0(O)  avgs:[C7=100%/32  S9=100%/32  S8=100%/32  C9=100%/32  H8=100%/31  HQ=100%/30  SK=100%/30]
+  +- score after trick  4: 39 pts
+-- Trick  5 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    D7  perf:CJ opt= 84  loss=0(D)  avgs:[D7=0%/78  H9=0%/76  CJ=0%/76  SJ=0%/76  HA=0%/76  DQ=0%/75]
+  L    PIMC:    DK  perf:DK opt= 84  loss=0(O)  avgs:[DK=100%/38]
+  R *  PIMC:(!) HQ  perf:SK opt= 84  loss=1(O)  avgs:[HQ=100%/46  SK=100%/46  S8=100%/44  C9=100%/44  S9=100%/44  H8=100%/44]
+  +- score after trick  5: 39 pts
+-- Trick  6 (L leads) ----------------------------------------------------------------
+  L    PIMC:    CT  perf:CT opt= 85  loss=0(O)  avgs:[CT=100%/36  HT=100%/35  ST=100%/35  HK=100%/32  H7=100%/30]
+  R    PIMC:    C9  perf:C9 opt= 85  loss=0(O)  avgs:[C9=100%/42]
+  D *  PIMC:    H9  perf:CJ opt= 85  loss=0(D)  avgs:[H9=0%/85  SJ=0%/83  CJ=0%/83  DQ=0%/71  HA=0%/62]
+  +- score after trick  6: 39 pts
+-- Trick  7 (L leads) ----------------------------------------------------------------
+  L    PIMC:    ST  perf:ST opt= 85  loss=0(O)  avgs:[ST=100%/35  HK=100%/35  H7=100%/35  HT=100%/35]
+  R *  PIMC:    S9  perf:SK opt= 85  loss=0(O)  avgs:[S9=100%/46  S8=100%/46  SK=100%/44]
+  D *  PIMC:    SJ  perf:CJ opt= 85  loss=0(D)  avgs:[SJ=0%/85  CJ=0%/85  DQ=0%/72  HA=0%/64]
+  +- score after trick  7: 51 pts
+-- Trick  8 (D leads) ----------------------------------------------------------------
+  D    PIMC:    CJ  perf:CJ opt= 85  loss=0(D)  avgs:[CJ=0%/85  HA=0%/85  DQ=0%/85]
+  L *  PIMC:    H7  perf:HT opt= 85  loss=0(O)  avgs:[H7=100%/35  HK=100%/35  HT=100%/35]
+  R *  PIMC:    S8  perf:SK opt= 85  loss=0(O)  avgs:[S8=100%/35  SK=100%/35  H8=100%/35]
+  +- score after trick  8: 53 pts
+-- Trick  9 (D leads) ----------------------------------------------------------------
+  D    PIMC:    HA  perf:HA opt= 85  loss=0(D)  avgs:[HA=0%/85  DQ=0%/85]
+  L *  PIMC:    HK  perf:HT opt= 85  loss=0(O)  avgs:[HK=100%/35  HT=100%/35]
+  R    PIMC:    H8  perf:H8 opt= 85  loss=0(O)  avgs:[H8=100%/35]
+  +- score after trick  9: 68 pts
+-- Trick 10 (D leads) ----------------------------------------------------------------
+  D    PIMC:    DQ  perf:DQ opt= 85  loss=0(D)  avgs:[DQ=0%/85]
+  L    PIMC:    HT  perf:HT opt= 85  loss=0(O)  avgs:[HT=100%/35]
+  R    PIMC:    SK  perf:SK opt= 85  loss=0(O)  avgs:[SK=100%/35]
+  +- score after trick 10: 85 pts
+Game Finished. Total Point Loss: 2 (D:0 O:2) | Final score: 85 pts
+
+Strategy b2) PIMC Points Playout (Average Mode only):
+Starting PIMC Points Play...
+-- Trick  1 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    DT  perf:CJ opt= 83  loss=0(D)  avgs:[DT=84  DA=84  CK=84  H9=84  HA=83  HJ=82  CJ=82  SJ=82  D7=80  DQ=77]
+  L    PIMC:    D9  perf:D9 opt= 83  loss=0(O)  avgs:[D9=64  D8=64  DK=62]
+  R *  PIMC:    C7  perf:C9 opt= 83  loss=0(O)  avgs:[C7=25  SQ=25  C8=25  H8=25  S9=25  S8=25  C9=25  CQ=25  SK=24  HQ=24]
+  +- score after trick  1: 12 pts
+-- Trick  2 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    CK  perf:CJ opt= 83  loss=0(D)  avgs:[CK=74  DA=73  H9=72  HJ=72  SJ=72  CJ=72  HA=72  D7=72  DQ=69]
+  L    PIMC:    CA  perf:CA opt= 83  loss=0(O)  avgs:[CA=62  CT=62]
+  R    PIMC:    CQ  perf:CQ opt= 83  loss=0(O)  avgs:[CQ=36  C8=34  C9=34]
+  +- score after trick  2: 12 pts
+-- Trick  3 (L leads) ----------------------------------------------------------------
+  L    PIMC:    SA  perf:SA opt= 83  loss=0(O)  avgs:[SA=51  ST=51  HK=51  H7=50  HT=50  CT=48  D8=46  DK=46]
+  R *  PIMC:(!) SQ  perf:S9 opt= 83  loss=1(O)  avgs:[SQ=30  SK=30  S8=29  S9=29]
+  D *  PIMC:    SJ  perf:CJ opt= 84  loss=0(D)  avgs:[SJ=78  CJ=78  HJ=78  H9=74  D7=65  DQ=64  HA=53  DA=47]
+  +- score after trick  3: 28 pts
+-- Trick  4 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    DA  perf:CJ opt= 84  loss=0(D)  avgs:[DA=76  HA=75  CJ=75  HJ=75  H9=75  D7=75  DQ=72]
+  L    PIMC:    D8  perf:D8 opt= 84  loss=0(O)  avgs:[D8=38  DK=31]
+  R *  PIMC:    C8  perf:HQ opt= 84  loss=0(O)  avgs:[C8=29  S9=29  C9=29  S8=29  H8=29  SK=28  HQ=27]
+  +- score after trick  4: 39 pts
+-- Trick  5 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    D7  perf:CJ opt= 84  loss=0(D)  avgs:[D7=77  HJ=76  CJ=76  H9=76  HA=76  DQ=74]
+  L    PIMC:    DK  perf:DK opt= 84  loss=0(O)  avgs:[DK=38]
+  R    PIMC:    SK  perf:SK opt= 84  loss=0(O)  avgs:[SK=39  HQ=39  C9=38  S9=38  S8=38  H8=37]
+  +- score after trick  5: 39 pts
+-- Trick  6 (L leads) ----------------------------------------------------------------
+  L    PIMC:    CT  perf:CT opt= 84  loss=0(O)  avgs:[CT=37  ST=36  HK=34  HT=34  H7=31]
+  R    PIMC:    C9  perf:C9 opt= 84  loss=0(O)  avgs:[C9=44]
+  D    PIMC:    H9  perf:H9 opt= 84  loss=0(D)  avgs:[H9=84  HJ=81  CJ=81  DQ=71  HA=60]
+  +- score after trick  6: 39 pts
+-- Trick  7 (L leads) ----------------------------------------------------------------
+  L *  PIMC:    HT  perf:ST opt= 84  loss=0(O)  avgs:[HT=36  H7=36  HK=36  ST=36]
+  R *  PIMC:    H8  perf:HQ opt= 84  loss=0(O)  avgs:[H8=38  HQ=37]
+  D    PIMC:    HA  perf:HA opt= 84  loss=0(D)  avgs:[HA=84]
+  +- score after trick  7: 60 pts
+-- Trick  8 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    HJ  perf:CJ opt= 84  loss=0(D)  avgs:[HJ=84  DQ=84  CJ=84]
+  L *  PIMC:    H7  perf:ST opt= 84  loss=0(O)  avgs:[H7=36  ST=36  HK=36]
+  R *  PIMC:    S9  perf:HQ opt= 84  loss=0(O)  avgs:[S9=36  S8=36  HQ=36]
+  +- score after trick  8: 62 pts
+-- Trick  9 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    DQ  perf:CJ opt= 84  loss=0(D)  avgs:[DQ=84  CJ=84]
+  L    PIMC:    ST  perf:ST opt= 84  loss=0(O)  avgs:[ST=36  HK=36]
+  R    PIMC:    HQ  perf:HQ opt= 84  loss=0(O)  avgs:[HQ=36  S8=36]
+  +- score after trick  9: 78 pts
+-- Trick 10 (D leads) ----------------------------------------------------------------
+  D    PIMC:    CJ  perf:CJ opt= 84  loss=0(D)  avgs:[CJ=84]
+  L    PIMC:    HK  perf:HK opt= 84  loss=0(O)  avgs:[HK=36]
+  R    PIMC:    S8  perf:S8 opt= 84  loss=0(O)  avgs:[S8=36]
+  +- score after trick 10: 84 pts
+Game Finished. Total Point Loss: 1 (D:0 O:1) | Final score: 84 pts
+
+================================================================================
+
+--- GAME 6 ---
+Deal Generated using SmartGrand Heuristics.
+
+Perfect Play (Reference):
+Starting Perfect Play...
+  Trick  1  D:CJ  L:C7  R:SQ
+  Trick  2  D:HJ  L:H9  R:D9
+  Trick  3  D:SA  L:S9  R:C8
+  Trick  4  D:DA  L:H8  R:D8
+  Trick  5  D:CT  L:CA  R:CK
+  Trick  6  L:HA  R:HK  D:H7
+  Trick  7  L:HT  R:HQ  D:DJ
+  Trick  8  D:ST  L:S8  R:D7
+  Trick  9  D:DK  L:SK  R:DT
+  Trick 10  R:DQ  D:S7  L:CQ
+Perfect Play Finished. Result: 56 pts
+
+Strategy b3) PIMC (Win Probability only):
+Starting PIMC Play...
+--- Trick 1 (Player: Declarer) ---
+    PIMC Analysis: HJ (0.0) H7 (0.0) S7 (0.0)
+  PIMC plays: HJ | Perfect was: CJ | Loss: 0 | (Perfect Val: 56, PIMC Action Val: 56)
+    PIMC Analysis: CQ (1.0) C7 (1.0) CA (1.0)
+  PIMC plays: CQ | Perfect was: C7 | Loss: 3 | (Perfect Val: 56, PIMC Action Val: 59)
+    PIMC Analysis: C8 (1.0) SQ (1.0) HQ (1.0)
+  PIMC plays: C8 | Perfect was: SQ | Loss: 0 | (Perfect Val: 59, PIMC Action Val: 59)
+--- Trick 2 (Player: Declarer) ---
+    PIMC Analysis: DJ (0.0) CT (0.0) CJ (0.0)
+  PIMC plays: DJ | Perfect was: CJ | Loss: 0 | (Perfect Val: 59, PIMC Action Val: 59)
+    PIMC Analysis: S8 (1.0) S9 (1.0) HA (1.0)
+  PIMC plays: S8 | Perfect was: C7 | Loss: 7 | (Perfect Val: 59, PIMC Action Val: 66)
+    PIMC Analysis: HQ (0.9) D8 (0.9) D9 (0.9)
+  PIMC plays: HQ | Perfect was: SQ | Loss: 0 | (Perfect Val: 66, PIMC Action Val: 66)
+--- Trick 3 (Player: Declarer) ---
+    PIMC Analysis: SA (0.0) DA (0.0) H7 (0.0)
+  PIMC plays: SA | Perfect was: SA | Loss: 0 | (Perfect Val: 66, PIMC Action Val: 66)
+    PIMC Analysis: S9 (1.0) SK (1.0)
+  PIMC plays: S9 | Perfect was: SK | Loss: 0 | (Perfect Val: 66, PIMC Action Val: 66)
+    PIMC Analysis: SQ (0.9)
+  PIMC plays: SQ | Perfect was: SQ | Loss: 0 | (Perfect Val: 66, PIMC Action Val: 66)
+--- Trick 4 (Player: Declarer) ---
+    PIMC Analysis: H7 (0.0) ST (0.0) CJ (0.0)
+  PIMC plays: H7 | Perfect was: DA | Loss: 7 | (Perfect Val: 66, PIMC Action Val: 59)
+    PIMC Analysis: H8 (1.0) HT (1.0) HA (1.0)
+  PIMC plays: H8 | Perfect was: HA | Loss: 10 | (Perfect Val: 59, PIMC Action Val: 69)
+    PIMC Analysis: HK (1.0)
+  PIMC plays: HK | Perfect was: HK | Loss: 0 | (Perfect Val: 69, PIMC Action Val: 69)
+--- Trick 5 (Player: Right) ---
+    PIMC Analysis: DQ (1.0) DT (1.0) D8 (1.0)
+  PIMC plays: DQ | Perfect was: CK | Loss: 22 | (Perfect Val: 69, PIMC Action Val: 91)
+    PIMC Analysis: DA (0.0) DK (0.0)
+  PIMC plays: DA | Perfect was: DK | Loss: 15 | (Perfect Val: 91, PIMC Action Val: 76)
+    PIMC Analysis: SK (1.0) HA (1.0) CA (1.0)
+  PIMC plays: SK | Perfect was: SK | Loss: 0 | (Perfect Val: 76, PIMC Action Val: 76)
+--- Trick 6 (Player: Declarer) ---
+    PIMC Analysis: DK (0.0) ST (0.0) CT (0.0)
+  PIMC plays: DK | Perfect was: CT | Loss: 10 | (Perfect Val: 76, PIMC Action Val: 66)
+    PIMC Analysis: HA (1.0) H9 (1.0) CA (1.0)
+  PIMC plays: HA | Perfect was: HA | Loss: 0 | (Perfect Val: 66, PIMC Action Val: 66)
+    PIMC Analysis: DT (1.0) D8 (1.0) D7 (1.0)
+  PIMC plays: DT | Perfect was: DT | Loss: 0 | (Perfect Val: 66, PIMC Action Val: 66)
+--- Trick 7 (Player: Right) ---
+    PIMC Analysis: D8 (1.0) CK (1.0) D7 (1.0)
+  PIMC plays: D8 | Perfect was: CK | Loss: 4 | (Perfect Val: 66, PIMC Action Val: 70)
+    PIMC Analysis: CT (0.0) CJ (0.0) ST (0.0)
+  PIMC plays: CT | Perfect was: CT | Loss: 0 | (Perfect Val: 70, PIMC Action Val: 70)
+    PIMC Analysis: C7 (1.0) HT (1.0) CA (1.0)
+  PIMC plays: C7 | Perfect was: CA | Loss: 11 | (Perfect Val: 70, PIMC Action Val: 81)
+--- Trick 8 (Player: Right) ---
+    PIMC Analysis: CK (1.0) D7 (1.0) D9 (1.0)
+  PIMC plays: CK | Perfect was: CK | Loss: 0 | (Perfect Val: 81, PIMC Action Val: 81)
+    PIMC Analysis: S7 (0.0) CJ (0.0) ST (0.0)
+  PIMC plays: S7 | Perfect was: CJ | Loss: 15 | (Perfect Val: 81, PIMC Action Val: 66)
+    PIMC Analysis: CA (1.0)
+  PIMC plays: CA | Perfect was: CA | Loss: 0 | (Perfect Val: 66, PIMC Action Val: 66)
+--- Trick 9 (Player: Left) ---
+    PIMC Analysis: HT (1.0) H9 (1.0)
+  PIMC plays: HT | Perfect was: HT | Loss: 0 | (Perfect Val: 66, PIMC Action Val: 66)
+    PIMC Analysis: D9 (1.0) D7 (1.0)
+  PIMC plays: D9 | Perfect was: D9 | Loss: 0 | (Perfect Val: 66, PIMC Action Val: 66)
+    PIMC Analysis: ST (0.0) CJ (0.0)
+  PIMC plays: ST | Perfect was: CJ | Loss: 20 | (Perfect Val: 66, PIMC Action Val: 46)
+--- Trick 10 (Player: Left) ---
+    PIMC Analysis: H9 (1.0)
+  PIMC plays: H9 | Perfect was: H9 | Loss: 0 | (Perfect Val: 46, PIMC Action Val: 46)
+    PIMC Analysis: D7 (1.0)
+  PIMC plays: D7 | Perfect was: D7 | Loss: 0 | (Perfect Val: 46, PIMC Action Val: 46)
+    PIMC Analysis: CJ (0.0)
+  PIMC plays: CJ | Perfect was: CJ | Loss: 0 | (Perfect Val: 46, PIMC Action Val: 46)
+Game Finished. Total Point Loss: 124 (Declarer: 67, Opponents: 57)
+
+Strategy b1) PIMC Points Playout (Hybrid Mode with Average Fallback):
+Starting PIMC Points Play...
+-- Trick  1 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    ST  perf:CJ opt= 56  loss=0(D)  avgs:[ST=0%/61  SA=0%/61  CJ=0%/60  DJ=0%/60  HJ=0%/60  CT=0%/60  H7=0%/60  S7=0%/57  DK=0%/56  DA=0%/56]
+  L    PIMC:    S9  perf:S9 opt= 56  loss=0(O)  avgs:[S9=100%/53  S8=100%/53  SK=100%/48]
+  R    PIMC:    SQ  perf:SQ opt= 56  loss=0(O)  avgs:[SQ=100%/34]
+  +- score after trick  1: 15 pts
+-- Trick  2 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    SA  perf:CJ opt= 56  loss=0(D)  avgs:[SA=0%/59  H7=0%/58  CT=0%/58  HJ=0%/58  DJ=0%/58  CJ=0%/58  DA=0%/56  DK=0%/55  S7=0%/55]
+  L    PIMC:    S8  perf:S8 opt= 56  loss=0(O)  avgs:[S8=95%/53  SK=95%/52]
+  R *  PIMC:    D7  perf:C8 opt= 56  loss=0(O)  avgs:[D7=90%/32  D9=90%/32  D8=90%/32  HQ=90%/32  HK=90%/32  C8=90%/32  DQ=90%/31  CK=90%/30  DT=85%/26]
+  +- score after trick  2: 26 pts
+-- Trick  3 (D leads) ----------------------------------------------------------------
+  D    PIMC:    CJ  perf:CJ opt= 56  loss=0(D)  avgs:[CJ=0%/60  DJ=0%/60  HJ=0%/60  H7=0%/60  CT=0%/60  S7=0%/59  DA=0%/55  DK=0%/53]
+  L *  PIMC:    H8  perf:C7 opt= 56  loss=0(O)  avgs:[H8=100%/48  C7=100%/48  H9=100%/48  CQ=100%/46  HT=100%/44  HA=100%/44  CA=100%/39  SK=90%/38]
+  R *  PIMC:    D9  perf:C8 opt= 56  loss=0(O)  avgs:[D9=100%/38  D8=100%/38  DQ=100%/38  C8=100%/37  CK=100%/35  DT=100%/34  HQ=95%/37  HK=95%/36]
+  +- score after trick  3: 28 pts
+-- Trick  4 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    DJ  perf:HJ opt= 56  loss=0(D)  avgs:[DJ=0%/60  HJ=0%/60  CT=0%/59  H7=0%/58  S7=0%/58  DA=0%/56  DK=0%/51]
+  L    PIMC:    C7  perf:C7 opt= 56  loss=0(O)  avgs:[C7=100%/55  H9=100%/55  CQ=100%/53  HT=100%/50  HA=100%/49  SK=100%/46  CA=100%/42]
+  R *  PIMC:(!) D8  perf:C8 opt= 56  loss=3(O)  avgs:[D8=95%/38  DQ=95%/38  HQ=95%/38  C8=95%/38  HK=95%/38  CK=95%/36  DT=95%/30]
+  +- score after trick  4: 30 pts
+-- Trick  5 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    CT  perf:DA opt= 59  loss=0(D)  avgs:[CT=0%/62  DA=0%/61  H7=0%/61  S7=0%/60  HJ=0%/60  DK=0%/51]
+  L    PIMC:    CA  perf:CA opt= 59  loss=0(O)  avgs:[CA=100%/56  CQ=100%/37]
+  R *  PIMC:    C8  perf:CK opt= 59  loss=0(O)  avgs:[C8=100%/47  CK=100%/47]
+  +- score after trick  5: 30 pts
+-- Trick  6 (L leads) ----------------------------------------------------------------
+  L *  PIMC:    SK  perf:HA opt= 59  loss=0(O)  avgs:[SK=100%/54  HA=100%/53  HT=100%/53  CQ=100%/50  H9=100%/44]
+  R *  PIMC:(!) DT  perf:CK opt= 59  loss=11(O)  avgs:[DT=100%/40  HK=100%/38  CK=100%/38  HQ=100%/37  DQ=100%/36]
+  D    PIMC:    S7  perf:S7 opt= 70  loss=0(D)  avgs:[S7=0%/66]
+  +- score after trick  6: 30 pts
+-- Trick  7 (L leads) ----------------------------------------------------------------
+  L    PIMC:    HA  perf:HA opt= 70  loss=0(O)  avgs:[HA=100%/49  HT=100%/48  CQ=100%/45  H9=100%/39]
+  R    PIMC:    HK  perf:HK opt= 70  loss=0(O)  avgs:[HK=100%/56  HQ=100%/55]
+  D    PIMC:    H7  perf:H7 opt= 70  loss=0(D)  avgs:[H7=0%/70]
+  +- score after trick  7: 30 pts
+-- Trick  8 (L leads) ----------------------------------------------------------------
+  L    PIMC:    HT  perf:HT opt= 70  loss=0(O)  avgs:[HT=100%/58  CQ=100%/54  H9=100%/50]
+  R    PIMC:    HQ  perf:HQ opt= 70  loss=0(O)  avgs:[HQ=100%/58]
+  D    PIMC:    HJ  perf:HJ opt= 70  loss=0(D)  avgs:[HJ=0%/70  DK=0%/53  DA=0%/46]
+  +- score after trick  8: 45 pts
+-- Trick  9 (D leads) ----------------------------------------------------------------
+  D    PIMC:    DA  perf:DA opt= 70  loss=0(D)  avgs:[DA=0%/70  DK=0%/70]
+  L    PIMC:    CQ  perf:CQ opt= 70  loss=0(O)  avgs:[CQ=100%/50  H9=100%/50]
+  R    PIMC:    DQ  perf:DQ opt= 70  loss=0(O)  avgs:[DQ=100%/50]
+  +- score after trick  9: 62 pts
+-- Trick 10 (D leads) ----------------------------------------------------------------
+  D    PIMC:    DK  perf:DK opt= 70  loss=0(D)  avgs:[DK=0%/70]
+  L    PIMC:    H9  perf:H9 opt= 70  loss=0(O)  avgs:[H9=100%/50]
+  R    PIMC:    CK  perf:CK opt= 70  loss=0(O)  avgs:[CK=100%/50]
+  +- score after trick 10: 70 pts
+Game Finished. Total Point Loss: 14 (D:0 O:14) | Final score: 70 pts
+
+Strategy b2) PIMC Points Playout (Average Mode only):
+Starting PIMC Points Play...
+-- Trick  1 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    ST  perf:CJ opt= 56  loss=0(D)  avgs:[ST=63  SA=63  HJ=62  CJ=62  DJ=62  H7=60  CT=60  DA=59  DK=59  S7=56]
+  L *  PIMC:    S8  perf:S9 opt= 56  loss=0(O)  avgs:[S8=40  S9=40  SK=36]
+  R    PIMC:    SQ  perf:SQ opt= 56  loss=0(O)  avgs:[SQ=36]
+  +- score after trick  1: 15 pts
+-- Trick  2 (D leads) ----------------------------------------------------------------
+  D    PIMC:    CJ  perf:CJ opt= 56  loss=0(D)  avgs:[CJ=63  HJ=63  DJ=63  CT=62  H7=62  SA=62  DA=60  S7=58  DK=56]
+  L *  PIMC:    C7  perf:H9 opt= 56  loss=0(O)  avgs:[C7=42  H9=42  H8=42  CQ=41  S9=38  HT=38  SK=38  HA=37  CA=34]
+  R *  PIMC:    D8  perf:C8 opt= 56  loss=0(O)  avgs:[D8=32  D9=32  D7=32  DQ=32  HQ=31  HK=31  C8=30  CK=30  DT=24]
+  +- score after trick  2: 17 pts
+-- Trick  3 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    SA  perf:HJ opt= 56  loss=0(D)  avgs:[SA=64  DJ=63  HJ=63  CT=62  H7=62  DK=59  S7=59  DA=59]
+  L    PIMC:    S9  perf:S9 opt= 56  loss=0(O)  avgs:[S9=44  SK=42]
+  R *  PIMC:(!) HQ  perf:C8 opt= 56  loss=3(O)  avgs:[HQ=28  D7=27  D9=27  HK=27  DQ=27  C8=26  CK=24  DT=23]
+  +- score after trick  3: 31 pts
+-- Trick  4 (D leads) ----------------------------------------------------------------
+  D    PIMC:    HJ  perf:HJ opt= 59  loss=0(D)  avgs:[HJ=61  DJ=61  H7=61  S7=59  CT=59  DA=56  DK=54]
+  L *  PIMC:    H8  perf:H9 opt= 59  loss=0(O)  avgs:[H8=46  H9=46  CQ=44  HT=43  HA=42  SK=38  CA=36]
+  R    PIMC:    C8  perf:C8 opt= 59  loss=0(O)  avgs:[C8=35  D9=35  D7=35  DQ=34  HK=34  CK=33  DT=26]
+  +- score after trick  4: 33 pts
+-- Trick  5 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    H7  perf:DA opt= 59  loss=0(D)  avgs:[H7=59  CT=59  S7=57  DJ=56  DA=54  DK=52]
+  L    PIMC:    HA  perf:HA opt= 59  loss=0(O)  avgs:[HA=52  HT=52  H9=44]
+  R    PIMC:    HK  perf:HK opt= 59  loss=0(O)  avgs:[HK=36]
+  +- score after trick  5: 33 pts
+-- Trick  6 (L leads) ----------------------------------------------------------------
+  L *  PIMC:    SK  perf:CA opt= 59  loss=0(O)  avgs:[SK=54  HT=54  CA=51  H9=49  CQ=43]
+  R    PIMC:    CK  perf:CK opt= 59  loss=0(O)  avgs:[CK=37  DQ=36  DT=34  D7=33  D9=33]
+  D    PIMC:    S7  perf:S7 opt= 59  loss=0(D)  avgs:[S7=65]
+  +- score after trick  6: 33 pts
+-- Trick  7 (L leads) ----------------------------------------------------------------
+  L *  PIMC:    HT  perf:CA opt= 59  loss=0(O)  avgs:[HT=49  CA=47  H9=44  CQ=40]
+  R    PIMC:    DQ  perf:DQ opt= 59  loss=0(O)  avgs:[DQ=44  D7=42  D9=42  DT=41]
+  D *  PIMC:    CT  perf:DJ opt= 59  loss=0(D)  avgs:[CT=66  DJ=66  DK=55  DA=37]
+  +- score after trick  7: 33 pts
+-- Trick  8 (L leads) ----------------------------------------------------------------
+  L    PIMC:    CA  perf:CA opt= 59  loss=0(O)  avgs:[CA=56  CQ=55  H9=53]
+  R *  PIMC:(!) DT  perf:D9 opt= 59  loss=15(O)  avgs:[DT=60  D9=60  D7=60]
+  D    PIMC:    DJ  perf:DJ opt= 74  loss=0(D)  avgs:[DJ=74  DK=49  DA=42]
+  +- score after trick  8: 56 pts
+-- Trick  9 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    DK  perf:DA opt= 74  loss=0(D)  avgs:[DK=74  DA=74]
+  L    PIMC:    CQ  perf:CQ opt= 74  loss=0(O)  avgs:[CQ=46  H9=46]
+  R    PIMC:    D9  perf:D9 opt= 74  loss=0(O)  avgs:[D9=46  D7=46]
+  +- score after trick  9: 63 pts
+-- Trick 10 (D leads) ----------------------------------------------------------------
+  D    PIMC:    DA  perf:DA opt= 74  loss=0(D)  avgs:[DA=74]
+  L    PIMC:    H9  perf:H9 opt= 74  loss=0(O)  avgs:[H9=46]
+  R    PIMC:    D7  perf:D7 opt= 74  loss=0(O)  avgs:[D7=46]
+  +- score after trick 10: 74 pts
+Game Finished. Total Point Loss: 18 (D:0 O:18) | Final score: 74 pts
+
+================================================================================
+
+--- GAME 7 ---
+Deal Generated using SmartGrand Heuristics.
+
+Perfect Play (Reference):
+Starting Perfect Play...
+  Trick  1  D:CJ  L:DK  R:SJ
+  Trick  2  D:CA  L:HQ  R:C9
+  Trick  3  D:DA  L:D9  R:DT
+  Trick  4  D:CT  L:HT  R:HJ
+  Trick  5  R:SA  D:SQ  L:ST
+  Trick  6  R:SK  D:DJ  L:S8
+  Trick  7  D:CK  L:S7  R:HK
+  Trick  8  D:CQ  L:H9  R:S9
+  Trick  9  D:C8  L:H8  R:H7
+  Trick 10  D:C7  L:D7  R:D8
+Perfect Play Finished. Result: 74 pts
+
+Strategy b3) PIMC (Win Probability only):
+Starting PIMC Play...
+--- Trick 1 (Player: Declarer) ---
+    PIMC Analysis: SQ (0.0) DJ (0.0) CA (0.0)
+  PIMC plays: SQ | Perfect was: CJ | Loss: 20 | (Perfect Val: 74, PIMC Action Val: 54)
+    PIMC Analysis: S7 (1.0) ST (1.0) S8 (1.0)
+  PIMC plays: S7 | Perfect was: S8 | Loss: 0 | (Perfect Val: 54, PIMC Action Val: 54)
+    PIMC Analysis: S9 (1.0) SK (1.0) SA (1.0)
+  PIMC plays: S9 | Perfect was: SA | Loss: 44 | (Perfect Val: 54, PIMC Action Val: 98)
+--- Trick 2 (Player: Declarer) ---
+    PIMC Analysis: DA (0.6) CJ (0.6) DJ (0.0)
+  PIMC plays: DA | Perfect was: CJ | Loss: 0 | (Perfect Val: 98, PIMC Action Val: 98)
+    PIMC Analysis: D7 (1.0) D9 (1.0) DK (1.0)
+  PIMC plays: D7 | Perfect was: DK | Loss: 0 | (Perfect Val: 98, PIMC Action Val: 98)
+    PIMC Analysis: DT (1.0) D8 (1.0)
+  PIMC plays: DT | Perfect was: DT | Loss: 0 | (Perfect Val: 98, PIMC Action Val: 98)
+--- Trick 3 (Player: Declarer) ---
+    PIMC Analysis: CJ (0.5) CQ (0.0) CA (0.0)
+  PIMC plays: CJ | Perfect was: CJ | Loss: 0 | (Perfect Val: 98, PIMC Action Val: 98)
+    PIMC Analysis: DK (0.9) H9 (0.9) HQ (0.9)
+  PIMC plays: DK | Perfect was: ST | Loss: 0 | (Perfect Val: 98, PIMC Action Val: 98)
+    PIMC Analysis: HJ (1.0) SJ (1.0)
+  PIMC plays: HJ | Perfect was: SJ | Loss: 0 | (Perfect Val: 98, PIMC Action Val: 98)
+--- Trick 4 (Player: Declarer) ---
+    PIMC Analysis: CT (0.0) C7 (0.0) DJ (0.0)
+  PIMC plays: CT | Perfect was: CA | Loss: 1 | (Perfect Val: 98, PIMC Action Val: 97)
+    PIMC Analysis: HQ (0.9) HT (0.9) H8 (0.9)
+  PIMC plays: HQ | Perfect was: ST | Loss: 0 | (Perfect Val: 97, PIMC Action Val: 97)
+    PIMC Analysis: C9 (1.0)
+  PIMC plays: C9 | Perfect was: C9 | Loss: 0 | (Perfect Val: 97, PIMC Action Val: 97)
+--- Trick 5 (Player: Declarer) ---
+    PIMC Analysis: C8 (0.0) CK (0.0) C7 (0.0)
+  PIMC plays: C8 | Perfect was: CA | Loss: 0 | (Perfect Val: 97, PIMC Action Val: 97)
+    PIMC Analysis: H8 (1.0) H9 (1.0) S8 (1.0)
+  PIMC plays: H8 | Perfect was: ST | Loss: 0 | (Perfect Val: 97, PIMC Action Val: 97)
+    PIMC Analysis: SA (1.0) HK (1.0) SJ (1.0)
+  PIMC plays: SA | Perfect was: SA | Loss: 0 | (Perfect Val: 97, PIMC Action Val: 97)
+--- Trick 6 (Player: Declarer) ---
+    PIMC Analysis: CA (0.0) DJ (0.0) CQ (0.0)
+  PIMC plays: CA | Perfect was: CA | Loss: 0 | (Perfect Val: 97, PIMC Action Val: 97)
+    PIMC Analysis: H9 (1.0) S8 (1.0) D9 (1.0)
+  PIMC plays: H9 | Perfect was: ST | Loss: 7 | (Perfect Val: 97, PIMC Action Val: 104)
+    PIMC Analysis: SJ (1.0) SK (1.0) H7 (1.0)
+  PIMC plays: SJ | Perfect was: SK | Loss: 3 | (Perfect Val: 104, PIMC Action Val: 107)
+--- Trick 7 (Player: Right) ---
+    PIMC Analysis: SK (1.0) H7 (1.0) D8 (1.0)
+  PIMC plays: SK | Perfect was: SK | Loss: 0 | (Perfect Val: 107, PIMC Action Val: 107)
+    PIMC Analysis: CQ (0.0) C7 (0.0) CK (0.0)
+  PIMC plays: CQ | Perfect was: DJ | Loss: 17 | (Perfect Val: 107, PIMC Action Val: 90)
+    PIMC Analysis: S8 (1.0) ST (1.0)
+  PIMC plays: S8 | Perfect was: ST | Loss: 10 | (Perfect Val: 90, PIMC Action Val: 100)
+--- Trick 8 (Player: Right) ---
+    PIMC Analysis: HK (1.0) D8 (1.0) H7 (1.0)
+  PIMC plays: HK | Perfect was: HK | Loss: 0 | (Perfect Val: 100, PIMC Action Val: 100)
+    PIMC Analysis: C7 (0.0) DJ (0.0) CK (0.0)
+  PIMC plays: C7 | Perfect was: DJ | Loss: 14 | (Perfect Val: 100, PIMC Action Val: 86)
+    PIMC Analysis: HT (1.0)
+  PIMC plays: HT | Perfect was: HT | Loss: 0 | (Perfect Val: 86, PIMC Action Val: 86)
+--- Trick 9 (Player: Left) ---
+    PIMC Analysis: D9 (1.0) ST (1.0)
+  PIMC plays: D9 | Perfect was: ST | Loss: 0 | (Perfect Val: 86, PIMC Action Val: 86)
+    PIMC Analysis: D8 (1.0)
+  PIMC plays: D8 | Perfect was: D8 | Loss: 0 | (Perfect Val: 86, PIMC Action Val: 86)
+    PIMC Analysis: CK (0.0) DJ (0.0)
+  PIMC plays: CK | Perfect was: DJ | Loss: 4 | (Perfect Val: 86, PIMC Action Val: 82)
+--- Trick 10 (Player: Left) ---
+    PIMC Analysis: ST (1.0)
+  PIMC plays: ST | Perfect was: ST | Loss: 0 | (Perfect Val: 82, PIMC Action Val: 82)
+    PIMC Analysis: H7 (1.0)
+  PIMC plays: H7 | Perfect was: H7 | Loss: 0 | (Perfect Val: 82, PIMC Action Val: 82)
+    PIMC Analysis: DJ (0.0)
+  PIMC plays: DJ | Perfect was: DJ | Loss: 0 | (Perfect Val: 82, PIMC Action Val: 82)
+Game Finished. Total Point Loss: 120 (Declarer: 56, Opponents: 64)
+
+Strategy b1) PIMC Points Playout (Hybrid Mode with Average Fallback):
+Starting PIMC Points Play...
+-- Trick  1 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    DA  perf:CJ opt= 74  loss=0(D)  avgs:[DA=0%/90  CJ=0%/90  CQ=0%/87  CK=0%/86  CT=0%/83  CA=0%/83  SQ=0%/79  DJ=0%/71  C8=0%/65  C7=0%/65]
+  L *  PIMC:    D9  perf:DK opt= 74  loss=0(O)  avgs:[D9=95%/45  D7=95%/45  DK=95%/45]
+  R *  PIMC:    D8  perf:DT opt= 74  loss=0(O)  avgs:[D8=100%/77  DT=100%/65]
+  +- score after trick  1: 25 pts
+-- Trick  2 (D leads) ----------------------------------------------------------------
+  D    PIMC:    CJ  perf:CJ opt= 74  loss=0(D)  avgs:[CJ=0%/94  CQ=0%/88  CK=0%/87  CT=0%/84  CA=0%/83  DJ=0%/75  SQ=0%/74  C8=0%/58  C7=0%/58]
+  L *  PIMC:    H8  perf:DK opt= 74  loss=0(O)  avgs:[H8=100%/43  H9=100%/43  D7=100%/43  HQ=100%/43  S7=100%/43  S8=100%/43  DK=100%/42  ST=100%/33  HT=95%/35]
+  R *  PIMC:    HJ  perf:SJ opt= 74  loss=0(O)  avgs:[HJ=100%/63  SJ=100%/63]
+  +- score after trick  2: 29 pts
+-- Trick  3 (D leads) ----------------------------------------------------------------
+  D    PIMC:    CA  perf:CA opt= 74  loss=0(D)  avgs:[CA=0%/79  CT=0%/78  CK=0%/78  CQ=0%/78  SQ=0%/31  C8=0%/29  C7=0%/29  DJ=0%/29]
+  L *  PIMC:    D7  perf:DK opt= 74  loss=0(O)  avgs:[D7=100%/43  H9=100%/43  S7=100%/43  S8=100%/43  HQ=100%/42  DK=100%/42  HT=100%/34  ST=85%/31]
+  R    PIMC:    C9  perf:C9 opt= 74  loss=0(O)  avgs:[C9=100%/40]
+  +- score after trick  3: 40 pts
+-- Trick  4 (D leads) ----------------------------------------------------------------
+  D    PIMC:    CT  perf:CT opt= 74  loss=0(D)  avgs:[CT=0%/77  CK=0%/77  CQ=0%/77  C8=0%/77  C7=0%/77  SQ=0%/41  DJ=0%/40]
+  L *  PIMC:(!) H9  perf:HT opt= 74  loss=6(O)  avgs:[H9=100%/43  S8=100%/42  S7=100%/42  DK=100%/42  HQ=100%/41  ST=100%/33  HT=95%/31]
+  R *  PIMC:    S9  perf:DT opt= 80  loss=0(O)  avgs:[S9=100%/37  H7=100%/37  SK=100%/37  HK=100%/37  DT=100%/33  SJ=100%/33  SA=100%/33]
+  +- score after trick  4: 50 pts
+-- Trick  5 (D leads) ----------------------------------------------------------------
+  D    PIMC:    CK  perf:CK opt= 80  loss=0(D)  avgs:[CK=0%/82  CQ=0%/82  C8=0%/82  C7=0%/82  SQ=0%/50  DJ=0%/50]
+  L    PIMC:    HT  perf:HT opt= 80  loss=0(O)  avgs:[HT=100%/33  DK=100%/31  HQ=100%/30  ST=100%/30  S7=100%/28  S8=100%/28]
+  R    PIMC:    SJ  perf:SJ opt= 80  loss=0(O)  avgs:[SJ=100%/38  SK=100%/30  H7=100%/30  DT=100%/29  HK=100%/29  SA=100%/22]
+  +- score after trick  5: 50 pts
+-- Trick  6 (R leads) ----------------------------------------------------------------
+  R    PIMC:    SA  perf:SA opt= 80  loss=0(O)  avgs:[SA=100%/38  DT=100%/35  SK=100%/31  HK=100%/27  H7=100%/21]
+  D    PIMC:    SQ  perf:SQ opt= 80  loss=0(D)  avgs:[SQ=0%/83]
+  L    PIMC:    ST  perf:ST opt= 80  loss=0(O)  avgs:[ST=100%/40  S7=100%/30  S8=100%/30]
+  +- score after trick  6: 50 pts
+-- Trick  7 (R leads) ----------------------------------------------------------------
+  R *  PIMC:    H7  perf:DT opt= 80  loss=0(O)  avgs:[H7=100%/40  DT=100%/40  SK=100%/40  HK=100%/40]
+  D    PIMC:    DJ  perf:DJ opt= 80  loss=0(D)  avgs:[DJ=0%/80  C8=0%/75  C7=0%/75  CQ=0%/72]
+  L    PIMC:    HQ  perf:HQ opt= 80  loss=0(O)  avgs:[HQ=100%/40]
+  +- score after trick  7: 55 pts
+-- Trick  8 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    C7  perf:CQ opt= 80  loss=0(D)  avgs:[C7=0%/80  CQ=0%/80  C8=0%/80]
+  L *  PIMC:    S7  perf:DK opt= 80  loss=0(O)  avgs:[S7=100%/40  DK=100%/40  S8=100%/40]
+  R    PIMC:    DT  perf:DT opt= 80  loss=0(O)  avgs:[DT=100%/40  HK=100%/40  SK=100%/40]
+  +- score after trick  8: 65 pts
+-- Trick  9 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    C8  perf:CQ opt= 80  loss=0(D)  avgs:[C8=0%/80  CQ=0%/80]
+  L *  PIMC:    S8  perf:DK opt= 80  loss=0(O)  avgs:[S8=100%/40  DK=100%/40]
+  R *  PIMC:    HK  perf:SK opt= 80  loss=0(O)  avgs:[HK=100%/40  SK=100%/40]
+  +- score after trick  9: 69 pts
+-- Trick 10 (D leads) ----------------------------------------------------------------
+  D    PIMC:    CQ  perf:CQ opt= 80  loss=0(D)  avgs:[CQ=0%/80]
+  L    PIMC:    DK  perf:DK opt= 80  loss=0(O)  avgs:[DK=100%/40]
+  R    PIMC:    SK  perf:SK opt= 80  loss=0(O)  avgs:[SK=100%/40]
+  +- score after trick 10: 80 pts
+Game Finished. Total Point Loss: 6 (D:0 O:6) | Final score: 80 pts
+
+Strategy b2) PIMC Points Playout (Average Mode only):
+Starting PIMC Points Play...
+-- Trick  1 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    DA  perf:CJ opt= 74  loss=0(D)  avgs:[DA=89  CJ=89  CQ=85  CK=85  CT=82  CA=82  SQ=76  DJ=65  C8=63  C7=63]
+  L *  PIMC:    D7  perf:DK opt= 74  loss=0(O)  avgs:[D7=45  D9=45  DK=43]
+  R *  PIMC:    D8  perf:DT opt= 74  loss=0(O)  avgs:[D8=76  DT=66]
+  +- score after trick  1: 25 pts
+-- Trick  2 (D leads) ----------------------------------------------------------------
+  D    PIMC:    CJ  perf:CJ opt= 74  loss=0(D)  avgs:[CJ=86  CQ=82  CK=81  CT=78  CA=78  SQ=63  DJ=60  C8=53  C7=53]
+  L *  PIMC:    H8  perf:DK opt= 74  loss=0(O)  avgs:[H8=43  H9=43  D9=42  S8=42  HQ=42  S7=42  DK=42  HT=34  ST=32]
+  R    PIMC:    SJ  perf:SJ opt= 74  loss=0(O)  avgs:[SJ=71  HJ=71]
+  +- score after trick  2: 29 pts
+-- Trick  3 (D leads) ----------------------------------------------------------------
+  D    PIMC:    CA  perf:CA opt= 74  loss=0(D)  avgs:[CA=77  CT=76  CK=76  CQ=76  C8=29  DJ=29  C7=29  SQ=29]
+  L *  PIMC:    D9  perf:DK opt= 74  loss=0(O)  avgs:[D9=41  S7=41  S8=41  H9=41  HQ=40  DK=39  ST=31  HT=31]
+  R    PIMC:    C9  perf:C9 opt= 74  loss=0(O)  avgs:[C9=39]
+  +- score after trick  3: 40 pts
+-- Trick  4 (D leads) ----------------------------------------------------------------
+  D    PIMC:    CT  perf:CT opt= 74  loss=0(D)  avgs:[CT=77  CK=76  C7=76  C8=76  CQ=76  SQ=41  DJ=40]
+  L *  PIMC:(!) S8  perf:HT opt= 74  loss=6(O)  avgs:[S8=37  S7=37  H9=36  DK=35  HQ=35  ST=26  HT=26]
+  R *  PIMC:    S9  perf:DT opt= 80  loss=0(O)  avgs:[S9=37  H7=37  HK=37  SK=37  SA=33  HJ=33  DT=29]
+  +- score after trick  4: 50 pts
+-- Trick  5 (D leads) ----------------------------------------------------------------
+  D    PIMC:    CK  perf:CK opt= 80  loss=0(D)  avgs:[CK=82  CQ=82  C8=82  C7=82  SQ=52  DJ=50]
+  L *  PIMC:(!) DK  perf:HT opt= 80  loss=1(O)  avgs:[DK=31  HQ=31  S7=30  H9=30  ST=28  HT=26]
+  R *  PIMC:    SK  perf:DT opt= 81  loss=0(O)  avgs:[SK=34  H7=34  DT=34  HK=34  SA=31  HJ=29]
+  +- score after trick  5: 62 pts
+-- Trick  6 (D leads) ----------------------------------------------------------------
+  D    PIMC:    CQ  perf:CQ opt= 81  loss=0(D)  avgs:[CQ=84  C8=84  C7=84  SQ=64  DJ=62]
+  L *  PIMC:(!) ST  perf:HT opt= 81  loss=1(O)  avgs:[ST=35  HQ=31  H9=29  S7=29  HT=26]
+  R    PIMC:    HJ  perf:HJ opt= 82  loss=0(O)  avgs:[HJ=32  H7=25  DT=25  HK=24  SA=23]
+  +- score after trick  6: 62 pts
+-- Trick  7 (R leads) ----------------------------------------------------------------
+  R    PIMC:    DT  perf:DT opt= 82  loss=0(O)  avgs:[DT=30  HK=26  SA=25  H7=23]
+  D *  PIMC:(!) DJ  perf:SQ opt= 82  loss=1(D)  avgs:[DJ=85  SQ=83  C8=73  C7=73]
+  L    PIMC:    HQ  perf:HQ opt= 81  loss=0(O)  avgs:[HQ=35  S7=35  H9=35  HT=24]
+  +- score after trick  7: 77 pts
+-- Trick  8 (D leads) ----------------------------------------------------------------
+  D    PIMC:    C8  perf:C8 opt= 81  loss=0(D)  avgs:[C8=85  C7=85  SQ=77]
+  L *  PIMC:    H9  perf:S7 opt= 81  loss=0(O)  avgs:[H9=34  S7=34  HT=23]
+  R    PIMC:    HK  perf:HK opt= 81  loss=0(O)  avgs:[HK=33  H7=33  SA=18]
+  +- score after trick  8: 81 pts
+-- Trick  9 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    C7  perf:SQ opt= 81  loss=0(D)  avgs:[C7=85  SQ=81]
+  L    PIMC:    S7  perf:S7 opt= 81  loss=0(O)  avgs:[S7=30  HT=20]
+  R    PIMC:    H7  perf:H7 opt= 81  loss=0(O)  avgs:[H7=25  SA=15]
+  +- score after trick  9: 81 pts
+-- Trick 10 (D leads) ----------------------------------------------------------------
+  D    PIMC:    SQ  perf:SQ opt= 81  loss=0(D)  avgs:[SQ=81]
+  L    PIMC:    HT  perf:HT opt= 81  loss=0(O)  avgs:[HT=39]
+  R    PIMC:    SA  perf:SA opt= 81  loss=0(O)  avgs:[SA=39]
+  +- score after trick 10: 81 pts
+Game Finished. Total Point Loss: 9 (D:1 O:8) | Final score: 81 pts
+
+================================================================================
+
+--- GAME 8 ---
+Deal Generated using SmartGrand Heuristics.
+
+Perfect Play (Reference):
+Starting Perfect Play...
+  Trick  1  D:CJ  L:HJ  R:HK
+  Trick  2  D:SJ  L:DJ  R:CQ
+  Trick  3  D:CA  L:C7  R:C8
+  Trick  4  D:SA  L:S8  R:HQ
+  Trick  5  D:CT  L:DK  R:H9
+  Trick  6  D:ST  L:S7  R:H8
+  Trick  7  D:CK  L:DQ  R:H7
+  Trick  8  D:DT  L:D9  R:DA
+  Trick  9  R:HA  D:C9  L:HT
+  Trick 10  R:D7  D:S9  L:SQ
+Perfect Play Finished. Result: 75 pts
+
+Strategy b3) PIMC (Win Probability only):
+Starting PIMC Play...
+--- Trick 1 (Player: Declarer) ---
+    PIMC Analysis: CJ (0.0) SJ (0.0) C9 (0.0)
+  PIMC plays: CJ | Perfect was: CJ | Loss: 0 | (Perfect Val: 75, PIMC Action Val: 75)
+    PIMC Analysis: DJ (1.0) HJ (1.0)
+  PIMC plays: DJ | Perfect was: HJ | Loss: 0 | (Perfect Val: 75, PIMC Action Val: 75)
+    PIMC Analysis: HQ (1.0) CQ (1.0) H8 (1.0)
+  PIMC plays: HQ | Perfect was: HK | Loss: 0 | (Perfect Val: 75, PIMC Action Val: 75)
+--- Trick 2 (Player: Declarer) ---
+    PIMC Analysis: S9 (0.0) DT (0.0) SA (0.0)
+  PIMC plays: S9 | Perfect was: SJ | Loss: 20 | (Perfect Val: 75, PIMC Action Val: 55)
+    PIMC Analysis: SQ (1.0) S7 (0.9) S8 (0.9)
+  PIMC plays: SQ | Perfect was: SQ | Loss: 0 | (Perfect Val: 55, PIMC Action Val: 55)
+    PIMC Analysis: CQ (1.0) H8 (1.0) HK (1.0)
+  PIMC plays: CQ | Perfect was: HA | Loss: 1 | (Perfect Val: 55, PIMC Action Val: 56)
+--- Trick 3 (Player: Left) ---
+    PIMC Analysis: S8 (1.0) DQ (1.0) D9 (1.0)
+  PIMC plays: S8 | Perfect was: HT | Loss: 27 | (Perfect Val: 56, PIMC Action Val: 83)
+    PIMC Analysis: H8 (1.0) HA (1.0) D7 (1.0)
+  PIMC plays: H8 | Perfect was: HA | Loss: 0 | (Perfect Val: 83, PIMC Action Val: 83)
+    PIMC Analysis: SA (0.0) ST (0.0)
+  PIMC plays: SA | Perfect was: SA | Loss: 0 | (Perfect Val: 83, PIMC Action Val: 83)
+--- Trick 4 (Player: Declarer) ---
+    PIMC Analysis: CK (0.0) CA (0.0) C9 (0.0)
+  PIMC plays: CK | Perfect was: SJ | Loss: 0 | (Perfect Val: 83, PIMC Action Val: 83)
+    PIMC Analysis: C7 (1.0)
+  PIMC plays: C7 | Perfect was: C7 | Loss: 0 | (Perfect Val: 83, PIMC Action Val: 83)
+    PIMC Analysis: C8 (1.0)
+  PIMC plays: C8 | Perfect was: C8 | Loss: 0 | (Perfect Val: 83, PIMC Action Val: 83)
+--- Trick 5 (Player: Declarer) ---
+    PIMC Analysis: ST (0.0) SJ (0.0) CA (0.0)
+  PIMC plays: ST | Perfect was: SJ | Loss: 0 | (Perfect Val: 83, PIMC Action Val: 83)
+    PIMC Analysis: S7 (1.0)
+  PIMC plays: S7 | Perfect was: S7 | Loss: 0 | (Perfect Val: 83, PIMC Action Val: 83)
+    PIMC Analysis: DA (1.0) H9 (1.0) H7 (1.0)
+  PIMC plays: DA | Perfect was: HA | Loss: 31 | (Perfect Val: 83, PIMC Action Val: 114)
+--- Trick 6 (Player: Declarer) ---
+    PIMC Analysis: CA (0.0) DT (0.0) SJ (0.0)
+  PIMC plays: CA | Perfect was: SJ | Loss: 24 | (Perfect Val: 114, PIMC Action Val: 90)
+    PIMC Analysis: DQ (1.0) DK (1.0) HT (1.0)
+  PIMC plays: DQ | Perfect was: HJ | Loss: 24 | (Perfect Val: 90, PIMC Action Val: 114)
+    PIMC Analysis: H9 (1.0) H7 (1.0) HA (1.0)
+  PIMC plays: H9 | Perfect was: HA | Loss: 0 | (Perfect Val: 114, PIMC Action Val: 114)
+--- Trick 7 (Player: Declarer) ---
+    PIMC Analysis: C9 (0.0) DT (0.0) CT (0.0)
+  PIMC plays: C9 | Perfect was: SJ | Loss: 13 | (Perfect Val: 114, PIMC Action Val: 101)
+    PIMC Analysis: DK (1.0) D9 (1.0) HJ (1.0)
+  PIMC plays: DK | Perfect was: HJ | Loss: 13 | (Perfect Val: 101, PIMC Action Val: 114)
+    PIMC Analysis: HK (1.0) HA (1.0) H7 (1.0)
+  PIMC plays: HK | Perfect was: HA | Loss: 0 | (Perfect Val: 114, PIMC Action Val: 114)
+--- Trick 8 (Player: Declarer) ---
+    PIMC Analysis: CT (0.0) SJ (0.0) DT (0.0)
+  PIMC plays: CT | Perfect was: SJ | Loss: 23 | (Perfect Val: 114, PIMC Action Val: 91)
+    PIMC Analysis: HJ (1.0) HT (1.0) D9 (1.0)
+  PIMC plays: HJ | Perfect was: HJ | Loss: 0 | (Perfect Val: 91, PIMC Action Val: 91)
+    PIMC Analysis: HA (1.0) D7 (1.0) H7 (1.0)
+  PIMC plays: HA | Perfect was: HA | Loss: 0 | (Perfect Val: 91, PIMC Action Val: 91)
+--- Trick 9 (Player: Left) ---
+    PIMC Analysis: HT (1.0) D9 (1.0)
+  PIMC plays: HT | Perfect was: HT | Loss: 0 | (Perfect Val: 91, PIMC Action Val: 91)
+    PIMC Analysis: H7 (1.0)
+  PIMC plays: H7 | Perfect was: H7 | Loss: 0 | (Perfect Val: 91, PIMC Action Val: 91)
+    PIMC Analysis: SJ (0.0) DT (0.0)
+  PIMC plays: SJ | Perfect was: SJ | Loss: 0 | (Perfect Val: 91, PIMC Action Val: 91)
+--- Trick 10 (Player: Declarer) ---
+    PIMC Analysis: DT (0.0)
+  PIMC plays: DT | Perfect was: DT | Loss: 0 | (Perfect Val: 91, PIMC Action Val: 91)
+    PIMC Analysis: D9 (1.0)
+  PIMC plays: D9 | Perfect was: D9 | Loss: 0 | (Perfect Val: 91, PIMC Action Val: 91)
+    PIMC Analysis: D7 (1.0)
+  PIMC plays: D7 | Perfect was: D7 | Loss: 0 | (Perfect Val: 91, PIMC Action Val: 91)
+Game Finished. Total Point Loss: 176 (Declarer: 80, Opponents: 96)
+
+Strategy b1) PIMC Points Playout (Hybrid Mode with Average Fallback):
+Starting PIMC Points Play...
+-- Trick  1 (D leads) ----------------------------------------------------------------
+  D    PIMC:    CJ  perf:CJ opt= 75  loss=0(D)  avgs:[CJ=0%/92  SJ=0%/92  CK=0%/90  ST=0%/90  SA=0%/90  CT=0%/90  CA=0%/89  DT=0%/76  C9=0%/65  S9=0%/64]
+  L *  PIMC:    DJ  perf:HJ opt= 75  loss=0(O)  avgs:[DJ=100%/22  HJ=100%/22]
+  R *  PIMC:    C8  perf:HK opt= 75  loss=0(O)  avgs:[C8=100%/41  H7=100%/41  H8=100%/41  H9=100%/41  D7=100%/41  HQ=100%/41  HK=100%/40  CQ=100%/40  HA=100%/33  DA=100%/29]
+  +- score after trick  1: 8 pts
+-- Trick  2 (D leads) ----------------------------------------------------------------
+  D    PIMC:    SJ  perf:SJ opt= 75  loss=0(D)  avgs:[SJ=0%/88  ST=0%/87  SA=0%/87  CK=0%/87  CT=0%/86  CA=0%/85  DT=0%/40  S9=0%/29  C9=0%/28]
+  L    PIMC:    HJ  perf:HJ opt= 75  loss=0(O)  avgs:[HJ=85%/18]
+  R *  PIMC:    HQ  perf:HK opt= 75  loss=0(O)  avgs:[HQ=90%/30  HK=90%/30  D7=90%/30  H9=90%/30  CQ=90%/30  H7=90%/30  H8=90%/30  HA=75%/21  DA=75%/20]
+  +- score after trick  2: 15 pts
+-- Trick  3 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    CK  perf:CA opt= 75  loss=0(D)  avgs:[CK=0%/89  CT=0%/89  ST=0%/89  CA=0%/89  SA=0%/89  DT=0%/28  S9=0%/21  C9=0%/21]
+  L    PIMC:    C7  perf:C7 opt= 75  loss=0(O)  avgs:[C7=85%/23]
+  R    PIMC:    CQ  perf:CQ opt= 75  loss=0(O)  avgs:[CQ=65%/25]
+  +- score after trick  3: 22 pts
+-- Trick  4 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    ST  perf:CA opt= 75  loss=0(D)  avgs:[ST=0%/89  CA=0%/89  SA=0%/89  CT=0%/89  C9=0%/89  DT=0%/28  S9=0%/23]
+  L    PIMC:    S8  perf:S8 opt= 75  loss=0(O)  avgs:[S8=90%/24  S7=90%/24  SQ=90%/22]
+  R *  PIMC:    H8  perf:HK opt= 75  loss=0(O)  avgs:[H8=95%/38  H9=95%/38  D7=95%/38  H7=95%/38  HK=95%/38  HA=95%/27  DA=85%/26]
+  +- score after trick  4: 32 pts
+-- Trick  5 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    CT  perf:CA opt= 75  loss=0(D)  avgs:[CT=0%/82  CA=0%/82  C9=0%/82  SA=0%/78  DT=0%/32  S9=0%/32]
+  L *  PIMC:    DQ  perf:DK opt= 75  loss=0(O)  avgs:[DQ=100%/23  D9=100%/23  DK=100%/22  HT=100%/21  S7=50%/10  SQ=50%/10]
+  R    PIMC:    HK  perf:HK opt= 75  loss=0(O)  avgs:[HK=65%/27  D7=65%/27  H9=65%/27  H7=65%/27  HA=65%/19  DA=60%/16]
+  +- score after trick  5: 49 pts
+-- Trick  6 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    C9  perf:CA opt= 75  loss=0(D)  avgs:[C9=0%/83  CA=0%/83  SA=0%/80  DT=0%/53  S9=0%/51]
+  L *  PIMC:    D9  perf:DK opt= 75  loss=0(O)  avgs:[D9=100%/33  DK=100%/33  HT=100%/28  S7=80%/19  SQ=80%/19]
+  R *  PIMC:    H7  perf:H9 opt= 75  loss=0(O)  avgs:[H7=75%/31  D7=75%/31  H9=75%/31  HA=70%/19  DA=50%/14]
+  +- score after trick  6: 49 pts
+-- Trick  7 (D leads) ----------------------------------------------------------------
+  D    PIMC:    CA  perf:CA opt= 75  loss=0(D)  avgs:[CA=0%/82  SA=0%/78  DT=0%/55  S9=0%/52]
+  L    PIMC:    DK  perf:DK opt= 75  loss=0(O)  avgs:[DK=100%/30  HT=100%/26  S7=70%/16  SQ=70%/16]
+  R *  PIMC:    D7  perf:H9 opt= 75  loss=0(O)  avgs:[D7=75%/31  H9=75%/31  HA=70%/19  DA=60%/13]
+  +- score after trick  7: 64 pts
+-- Trick  8 (D leads) ----------------------------------------------------------------
+  D    PIMC:    SA  perf:SA opt= 75  loss=0(D)  avgs:[SA=0%/76  DT=0%/69  S9=0%/68]
+  L    PIMC:    S7  perf:S7 opt= 75  loss=0(O)  avgs:[S7=100%/28  SQ=50%/14]
+  R    PIMC:    H9  perf:H9 opt= 75  loss=0(O)  avgs:[H9=80%/30  HA=65%/19  DA=55%/13]
+  +- score after trick  8: 75 pts
+-- Trick  9 (D leads) ----------------------------------------------------------------
+  D    PIMC:    DT  perf:DT opt= 75  loss=0(D)  avgs:[DT=0%/75  S9=0%/75]
+  L *  PIMC:    SQ  perf:HT opt= 75  loss=0(O)  avgs:[SQ=100%/45  HT=100%/45]
+  R    PIMC:    DA  perf:DA opt= 75  loss=0(O)  avgs:[DA=100%/45]
+  +- score after trick  9: 75 pts
+-- Trick 10 (R leads) ----------------------------------------------------------------
+  R    PIMC:    HA  perf:HA opt= 75  loss=0(O)  avgs:[HA=100%/45]
+  D    PIMC:    S9  perf:S9 opt= 75  loss=0(D)  avgs:[S9=0%/75]
+  L    PIMC:    HT  perf:HT opt= 75  loss=0(O)  avgs:[HT=100%/45]
+  +- score after trick 10: 75 pts
+Game Finished. Total Point Loss: 0 (D:0 O:0) | Final score: 75 pts
+
+Strategy b2) PIMC Points Playout (Average Mode only):
+Starting PIMC Points Play...
+-- Trick  1 (D leads) ----------------------------------------------------------------
+  D    PIMC:    CJ  perf:CJ opt= 75  loss=0(D)  avgs:[CJ=91  SJ=91  ST=89  SA=89  CK=89  CT=88  CA=88  DT=64  C9=56  S9=54]
+  L    PIMC:    HJ  perf:HJ opt= 75  loss=0(O)  avgs:[HJ=25  DJ=25]
+  R *  PIMC:    C8  perf:HK opt= 75  loss=0(O)  avgs:[C8=44  CQ=43  H9=43  H8=43  H7=43  HQ=43  D7=43  HK=42  HA=32  DA=30]
+  +- score after trick  1: 8 pts
+-- Trick  2 (D leads) ----------------------------------------------------------------
+  D    PIMC:    SJ  perf:SJ opt= 75  loss=0(D)  avgs:[SJ=88  ST=88  SA=88  CK=87  CT=84  CA=84  DT=39  S9=26  C9=26]
+  L    PIMC:    DJ  perf:DJ opt= 75  loss=0(O)  avgs:[DJ=28]
+  R *  PIMC:    H8  perf:HK opt= 75  loss=0(O)  avgs:[H8=29  H7=29  CQ=29  H9=29  D7=29  HQ=29  HK=29  HA=22  DA=16]
+  +- score after trick  2: 12 pts
+-- Trick  3 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    CK  perf:CA opt= 75  loss=0(D)  avgs:[CK=89  SA=89  CT=89  CA=89  ST=89  DT=29  C9=19  S9=19]
+  L    PIMC:    C7  perf:C7 opt= 75  loss=0(O)  avgs:[C7=31]
+  R    PIMC:    CQ  perf:CQ opt= 75  loss=0(O)  avgs:[CQ=30]
+  +- score after trick  3: 19 pts
+-- Trick  4 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    CT  perf:CA opt= 75  loss=0(D)  avgs:[CT=87  CA=87  ST=87  C9=87  SA=87  DT=23  S9=20]
+  L *  PIMC:    DQ  perf:DK opt= 75  loss=0(O)  avgs:[DQ=20  D9=20  DK=19  SQ=18  S8=18  S7=18  HT=18]
+  R *  PIMC:    H9  perf:HK opt= 75  loss=0(O)  avgs:[H9=30  HK=30  HQ=30  H7=30  D7=30  DA=20  HA=20]
+  +- score after trick  4: 32 pts
+-- Trick  5 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    ST  perf:CA opt= 75  loss=0(D)  avgs:[ST=87  C9=87  CA=87  SA=87  DT=38  S9=32]
+  L    PIMC:    S8  perf:S8 opt= 75  loss=0(O)  avgs:[S8=36  S7=36  SQ=31]
+  R *  PIMC:    D7  perf:HK opt= 75  loss=0(O)  avgs:[D7=39  HK=39  HQ=39  H7=39  DA=26  HA=25]
+  +- score after trick  5: 42 pts
+-- Trick  6 (D leads) ----------------------------------------------------------------
+  D    PIMC:    CA  perf:CA opt= 75  loss=0(D)  avgs:[CA=81  C9=81  SA=78  DT=45  S9=43]
+  L    PIMC:    DK  perf:DK opt= 75  loss=0(O)  avgs:[DK=28  D9=28  HT=24  SQ=14  S7=14]
+  R *  PIMC:    HQ  perf:HK opt= 75  loss=0(O)  avgs:[HQ=32  H7=32  HK=32  DA=22  HA=16]
+  +- score after trick  6: 60 pts
+-- Trick  7 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    C9  perf:SA opt= 75  loss=0(D)  avgs:[C9=82  SA=79  DT=64  S9=63]
+  L    PIMC:    D9  perf:D9 opt= 75  loss=0(O)  avgs:[D9=30  HT=24  SQ=16  S7=16]
+  R    PIMC:    HK  perf:HK opt= 75  loss=0(O)  avgs:[HK=21  H7=21  HA=12  DA=11]
+  +- score after trick  7: 64 pts
+-- Trick  8 (D leads) ----------------------------------------------------------------
+  D    PIMC:    SA  perf:SA opt= 75  loss=0(D)  avgs:[SA=78  DT=70  S9=70]
+  L    PIMC:    S7  perf:S7 opt= 75  loss=0(O)  avgs:[S7=22  SQ=8]
+  R    PIMC:    H7  perf:H7 opt= 75  loss=0(O)  avgs:[H7=24  DA=14  HA=10]
+  +- score after trick  8: 75 pts
+-- Trick  9 (D leads) ----------------------------------------------------------------
+  D    PIMC:    DT  perf:DT opt= 75  loss=0(D)  avgs:[DT=75  S9=75]
+  L *  PIMC:    SQ  perf:HT opt= 75  loss=0(O)  avgs:[SQ=45  HT=45]
+  R    PIMC:    DA  perf:DA opt= 75  loss=0(O)  avgs:[DA=45]
+  +- score after trick  9: 75 pts
+-- Trick 10 (R leads) ----------------------------------------------------------------
+  R    PIMC:    HA  perf:HA opt= 75  loss=0(O)  avgs:[HA=45]
+  D    PIMC:    S9  perf:S9 opt= 75  loss=0(D)  avgs:[S9=75]
+  L    PIMC:    HT  perf:HT opt= 75  loss=0(O)  avgs:[HT=45]
+  +- score after trick 10: 75 pts
+Game Finished. Total Point Loss: 0 (D:0 O:0) | Final score: 75 pts
+
+================================================================================
+
+--- GAME 9 ---
+Deal Generated using SmartGrand Heuristics.
+
+Perfect Play (Reference):
+Starting Perfect Play...
+  Trick  1  D:SJ  L:CJ  R:HJ
+  Trick  2  L:CA  R:CK  D:DJ
+  Trick  3  D:SA  L:S9  R:SK
+  Trick  4  D:HA  L:H9  R:H8
+  Trick  5  D:DA  L:D7  R:D9
+  Trick  6  D:ST  L:S7  R:CQ
+  Trick  7  D:DT  L:C9  R:D8
+  Trick  8  D:DK  L:C7  R:C8
+  Trick  9  D:HQ  L:H7  R:HT
+  Trick 10  R:CT  D:S8  L:SQ
+Perfect Play Finished. Result: 88 pts
+
+Strategy b3) PIMC (Win Probability only):
+Starting PIMC Play...
+--- Trick 1 (Player: Declarer) ---
+    PIMC Analysis: S8 (0.0) SA (0.0) DT (0.0)
+  PIMC plays: S8 | Perfect was: SJ | Loss: 23 | (Perfect Val: 88, PIMC Action Val: 65)
+    PIMC Analysis: S7 (1.0) SQ (1.0) S9 (1.0)
+  PIMC plays: S7 | Perfect was: SQ | Loss: 0 | (Perfect Val: 65, PIMC Action Val: 65)
+    PIMC Analysis: SK (1.0)
+  PIMC plays: SK | Perfect was: SK | Loss: 0 | (Perfect Val: 65, PIMC Action Val: 65)
+--- Trick 2 (Player: Right) ---
+    PIMC Analysis: CQ (1.0) HT (1.0) HJ (1.0)
+  PIMC plays: CQ | Perfect was: CQ | Loss: 0 | (Perfect Val: 65, PIMC Action Val: 65)
+    PIMC Analysis: ST (0.0) HQ (0.0) DJ (0.0)
+  PIMC plays: ST | Perfect was: SJ | Loss: 12 | (Perfect Val: 65, PIMC Action Val: 53)
+    PIMC Analysis: C7 (1.0) CA (1.0) C9 (1.0)
+  PIMC plays: C7 | Perfect was: CA | Loss: 20 | (Perfect Val: 53, PIMC Action Val: 73)
+--- Trick 3 (Player: Right) ---
+    PIMC Analysis: D9 (1.0) HJ (1.0) D8 (1.0)
+  PIMC plays: D9 | Perfect was: CT | Loss: 8 | (Perfect Val: 73, PIMC Action Val: 81)
+    PIMC Analysis: DK (0.0) DT (0.0) DA (0.0)
+  PIMC plays: DK | Perfect was: DA | Loss: 0 | (Perfect Val: 81, PIMC Action Val: 81)
+    PIMC Analysis: D7 (1.0)
+  PIMC plays: D7 | Perfect was: D7 | Loss: 0 | (Perfect Val: 81, PIMC Action Val: 81)
+--- Trick 4 (Player: Declarer) ---
+    PIMC Analysis: DA (0.0) DJ (0.0) SJ (0.0)
+  PIMC plays: DA | Perfect was: SJ | Loss: 20 | (Perfect Val: 81, PIMC Action Val: 61)
+    PIMC Analysis: S9 (1.0) C9 (1.0) H7 (1.0)
+  PIMC plays: S9 | Perfect was: CJ | Loss: 23 | (Perfect Val: 61, PIMC Action Val: 84)
+    PIMC Analysis: D8 (1.0)
+  PIMC plays: D8 | Perfect was: D8 | Loss: 0 | (Perfect Val: 84, PIMC Action Val: 84)
+--- Trick 5 (Player: Declarer) ---
+    PIMC Analysis: SJ (0.0) SA (0.0) HQ (0.0)
+  PIMC plays: SJ | Perfect was: SJ | Loss: 0 | (Perfect Val: 84, PIMC Action Val: 84)
+    PIMC Analysis: CJ (1.0)
+  PIMC plays: CJ | Perfect was: CJ | Loss: 0 | (Perfect Val: 84, PIMC Action Val: 84)
+    PIMC Analysis: HJ (1.0)
+  PIMC plays: HJ | Perfect was: HJ | Loss: 0 | (Perfect Val: 84, PIMC Action Val: 84)
+--- Trick 6 (Player: Left) ---
+    PIMC Analysis: SQ (1.0) C9 (1.0) H7 (1.0)
+  PIMC plays: SQ | Perfect was: CA | Loss: 0 | (Perfect Val: 84, PIMC Action Val: 84)
+    PIMC Analysis: CT (1.0) HT (1.0) CK (1.0)
+  PIMC plays: CT | Perfect was: CT | Loss: 0 | (Perfect Val: 84, PIMC Action Val: 84)
+    PIMC Analysis: SA (0.0)
+  PIMC plays: SA | Perfect was: SA | Loss: 0 | (Perfect Val: 84, PIMC Action Val: 84)
+--- Trick 7 (Player: Declarer) ---
+    PIMC Analysis: HA (0.0) DT (0.0) DJ (0.0)
+  PIMC plays: HA | Perfect was: HA | Loss: 0 | (Perfect Val: 84, PIMC Action Val: 84)
+    PIMC Analysis: H7 (1.0) H9 (1.0)
+  PIMC plays: H7 | Perfect was: H9 | Loss: 0 | (Perfect Val: 84, PIMC Action Val: 84)
+    PIMC Analysis: HT (1.0) H8 (1.0)
+  PIMC plays: HT | Perfect was: H8 | Loss: 13 | (Perfect Val: 84, PIMC Action Val: 97)
+--- Trick 8 (Player: Declarer) ---
+    PIMC Analysis: DJ (0.0) DT (0.0) HQ (0.0)
+  PIMC plays: DJ | Perfect was: DJ | Loss: 0 | (Perfect Val: 97, PIMC Action Val: 97)
+    PIMC Analysis: CA (1.0) C9 (1.0) H9 (1.0)
+  PIMC plays: CA | Perfect was: CA | Loss: 0 | (Perfect Val: 97, PIMC Action Val: 97)
+    PIMC Analysis: C8 (1.0) CK (1.0) H8 (1.0)
+  PIMC plays: C8 | Perfect was: CK | Loss: 0 | (Perfect Val: 97, PIMC Action Val: 97)
+--- Trick 9 (Player: Declarer) ---
+    PIMC Analysis: DT (0.0) HQ (0.0)
+  PIMC plays: DT | Perfect was: DT | Loss: 0 | (Perfect Val: 97, PIMC Action Val: 97)
+    PIMC Analysis: C9 (1.0) H9 (1.0)
+  PIMC plays: C9 | Perfect was: C9 | Loss: 0 | (Perfect Val: 97, PIMC Action Val: 97)
+    PIMC Analysis: H8 (1.0) CK (1.0)
+  PIMC plays: H8 | Perfect was: CK | Loss: 0 | (Perfect Val: 97, PIMC Action Val: 97)
+--- Trick 10 (Player: Declarer) ---
+    PIMC Analysis: HQ (0.0)
+  PIMC plays: HQ | Perfect was: HQ | Loss: 0 | (Perfect Val: 97, PIMC Action Val: 97)
+    PIMC Analysis: H9 (1.0)
+  PIMC plays: H9 | Perfect was: H9 | Loss: 0 | (Perfect Val: 97, PIMC Action Val: 97)
+    PIMC Analysis: CK (1.0)
+  PIMC plays: CK | Perfect was: CK | Loss: 0 | (Perfect Val: 97, PIMC Action Val: 97)
+Game Finished. Total Point Loss: 119 (Declarer: 55, Opponents: 64)
+
+Strategy b1) PIMC Points Playout (Hybrid Mode with Average Fallback):
+Starting PIMC Points Play...
+-- Trick  1 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    DA  perf:SJ opt= 88  loss=0(D)  avgs:[DA=0%/75  DT=0%/75  SA=0%/75  ST=0%/75  DK=0%/74  HA=0%/74  SJ=0%/66  DJ=0%/66  HQ=0%/61  S8=0%/58]
+  L    PIMC:    D7  perf:D7 opt= 88  loss=0(O)  avgs:[D7=100%/45]
+  R *  PIMC:    D8  perf:D9 opt= 88  loss=0(O)  avgs:[D8=100%/36  D9=100%/36]
+  +- score after trick  1: 18 pts
+-- Trick  2 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    SA  perf:SJ opt= 88  loss=0(D)  avgs:[SA=0%/84  ST=0%/83  HA=0%/80  DK=0%/79  DT=0%/78  SJ=0%/71  DJ=0%/71  HQ=0%/65  S8=0%/60]
+  L    PIMC:    S9  perf:S9 opt= 88  loss=0(O)  avgs:[S9=100%/42  S7=100%/41  SQ=100%/41]
+  R    PIMC:    SK  perf:SK opt= 88  loss=0(O)  avgs:[SK=95%/29]
+  +- score after trick  2: 33 pts
+-- Trick  3 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    HA  perf:SJ opt= 88  loss=0(D)  avgs:[HA=0%/87  DK=0%/82  ST=0%/81  DT=0%/81  SJ=0%/79  DJ=0%/79  S8=0%/67  HQ=0%/64]
+  L    PIMC:    H9  perf:H9 opt= 88  loss=0(O)  avgs:[H9=100%/40  H7=100%/40]
+  R    PIMC:    H8  perf:H8 opt= 88  loss=0(O)  avgs:[H8=95%/34  HT=90%/24]
+  +- score after trick  3: 44 pts
+-- Trick  4 (D leads) ----------------------------------------------------------------
+  D *  PIMC:(!) ST  perf:SJ opt= 88  loss=24(D)  avgs:[ST=0%/80  DK=0%/77  DT=0%/76  SJ=0%/71  DJ=0%/71  HQ=0%/64  S8=0%/57]
+  L    PIMC:    S7  perf:S7 opt= 64  loss=0(O)  avgs:[S7=100%/51  SQ=100%/47]
+  R    PIMC:    HJ  perf:HJ opt= 64  loss=0(O)  avgs:[HJ=100%/47  D9=95%/31  C8=95%/30  CQ=95%/30  CK=95%/30  CT=95%/26  HT=85%/24]
+  +- score after trick  4: 44 pts
+-- Trick  5 (R leads) ----------------------------------------------------------------
+  R *  PIMC:(!) HT  perf:CK opt= 64  loss=6(O)  avgs:[HT=100%/48  CK=100%/47  CQ=100%/47  D9=100%/46  CT=100%/46  C8=100%/43]
+  D    PIMC:    HQ  perf:HQ opt= 70  loss=0(D)  avgs:[HQ=0%/68]
+  L    PIMC:    H7  perf:H7 opt= 70  loss=0(O)  avgs:[H7=100%/67]
+  +- score after trick  5: 44 pts
+-- Trick  6 (R leads) ----------------------------------------------------------------
+  R *  PIMC:(!) D9  perf:CK opt= 70  loss=4(O)  avgs:[D9=100%/44  CQ=100%/43  CK=100%/43  C8=100%/42  CT=100%/40]
+  D    PIMC:    DK  perf:DK opt= 74  loss=0(D)  avgs:[DK=0%/73  DT=0%/72]
+  L *  PIMC:    C7  perf:CA opt= 74  loss=0(O)  avgs:[C7=100%/47  C9=100%/47  CA=100%/47  CJ=100%/46  SQ=100%/40]
+  +- score after trick  6: 48 pts
+-- Trick  7 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    DJ  perf:SJ opt= 74  loss=0(D)  avgs:[DJ=0%/73  SJ=0%/73  DT=0%/65  S8=0%/62]
+  L    PIMC:    CJ  perf:CJ opt= 74  loss=0(O)  avgs:[CJ=100%/46]
+  R    PIMC:    CT  perf:CT opt= 74  loss=0(O)  avgs:[CT=100%/54  CK=100%/53  CQ=100%/53  C8=100%/50]
+  +- score after trick  7: 48 pts
+-- Trick  8 (L leads) ----------------------------------------------------------------
+  L *  PIMC:    SQ  perf:CA opt= 74  loss=0(O)  avgs:[SQ=100%/46  CA=100%/46  C9=100%/43]
+  R    PIMC:    CK  perf:CK opt= 74  loss=0(O)  avgs:[CK=100%/51  CQ=100%/51  C8=100%/49]
+  D    PIMC:    S8  perf:S8 opt= 74  loss=0(D)  avgs:[S8=0%/74]
+  +- score after trick  8: 48 pts
+-- Trick  9 (L leads) ----------------------------------------------------------------
+  L    PIMC:    CA  perf:CA opt= 74  loss=0(O)  avgs:[CA=100%/46  C9=100%/46]
+  R    PIMC:    CQ  perf:CQ opt= 74  loss=0(O)  avgs:[CQ=100%/46  C8=100%/46]
+  D    PIMC:    SJ  perf:SJ opt= 74  loss=0(D)  avgs:[SJ=0%/74  DT=0%/50]
+  +- score after trick  9: 64 pts
+-- Trick 10 (D leads) ----------------------------------------------------------------
+  D    PIMC:    DT  perf:DT opt= 74  loss=0(D)  avgs:[DT=0%/74]
+  L    PIMC:    C9  perf:C9 opt= 74  loss=0(O)  avgs:[C9=100%/46]
+  R    PIMC:    C8  perf:C8 opt= 74  loss=0(O)  avgs:[C8=100%/46]
+  +- score after trick 10: 74 pts
+Game Finished. Total Point Loss: 34 (D:24 O:10) | Final score: 74 pts
+
+Strategy b2) PIMC Points Playout (Average Mode only):
+Starting PIMC Points Play...
+-- Trick  1 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    SA  perf:SJ opt= 88  loss=0(D)  avgs:[SA=87  ST=87  DT=87  DA=87  DK=86  HA=86  DJ=76  SJ=76  HQ=66  S8=66]
+  L    PIMC:    S9  perf:S9 opt= 88  loss=0(O)  avgs:[S9=40  S7=40  SQ=39]
+  R    PIMC:    SK  perf:SK opt= 88  loss=0(O)  avgs:[SK=34]
+  +- score after trick  1: 22 pts
+-- Trick  2 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    DA  perf:SJ opt= 88  loss=0(D)  avgs:[DA=89  DT=89  DK=89  HA=89  ST=87  SJ=83  DJ=83  S8=71  HQ=67]
+  L    PIMC:    D7  perf:D7 opt= 88  loss=0(O)  avgs:[D7=45]
+  R *  PIMC:    D8  perf:D9 opt= 88  loss=0(O)  avgs:[D8=34  D9=34]
+  +- score after trick  2: 33 pts
+-- Trick  3 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    HA  perf:SJ opt= 88  loss=0(D)  avgs:[HA=84  ST=80  DK=79  DJ=78  SJ=78  DT=77  S8=67  HQ=65]
+  L    PIMC:    H9  perf:H9 opt= 88  loss=0(O)  avgs:[H9=44  H7=44]
+  R    PIMC:    H8  perf:H8 opt= 88  loss=0(O)  avgs:[H8=33  HT=24]
+  +- score after trick  3: 44 pts
+-- Trick  4 (D leads) ----------------------------------------------------------------
+  D *  PIMC:(!) ST  perf:SJ opt= 88  loss=24(D)  avgs:[ST=81  DK=78  DT=78  SJ=70  DJ=70  HQ=67  S8=59]
+  L    PIMC:    S7  perf:S7 opt= 64  loss=0(O)  avgs:[S7=52  SQ=48]
+  R    PIMC:    HJ  perf:HJ opt= 64  loss=0(O)  avgs:[HJ=51  D9=34  C8=33  CQ=32  CK=32  CT=28  HT=24]
+  +- score after trick  4: 44 pts
+-- Trick  5 (R leads) ----------------------------------------------------------------
+  R    PIMC:    CK  perf:CK opt= 64  loss=0(O)  avgs:[CK=48  CQ=48  D9=46  HT=46  C8=45  CT=45]
+  D    PIMC:    SJ  perf:SJ opt= 64  loss=0(D)  avgs:[SJ=67  DJ=67  S8=65  HQ=64  DK=54  DT=53]
+  L    PIMC:    C9  perf:C9 opt= 64  loss=0(O)  avgs:[C9=55  C7=55  CA=49]
+  +- score after trick  5: 50 pts
+-- Trick  6 (D leads) ----------------------------------------------------------------
+  D    PIMC:    DT  perf:DT opt= 64  loss=0(D)  avgs:[DT=67  DK=64  HQ=55  S8=52  DJ=52]
+  L *  PIMC:(!) CJ  perf:H7 opt= 64  loss=6(O)  avgs:[CJ=49  H7=48  C7=42  CA=41  SQ=38]
+  R    PIMC:    D9  perf:D9 opt= 70  loss=0(O)  avgs:[D9=43]
+  +- score after trick  6: 50 pts
+-- Trick  7 (L leads) ----------------------------------------------------------------
+  L    PIMC:    CA  perf:CA opt= 70  loss=0(O)  avgs:[CA=49  SQ=49  H7=49  C7=47]
+  R    PIMC:    CQ  perf:CQ opt= 70  loss=0(O)  avgs:[CQ=41  C8=40  CT=38]
+  D    PIMC:    DJ  perf:DJ opt= 70  loss=0(D)  avgs:[DJ=72  HQ=68  S8=67  DK=56]
+  +- score after trick  7: 66 pts
+-- Trick  8 (D leads) ----------------------------------------------------------------
+  D    PIMC:    DK  perf:DK opt= 70  loss=0(D)  avgs:[DK=70  HQ=66  S8=66]
+  L    PIMC:    C7  perf:C7 opt= 70  loss=0(O)  avgs:[C7=46  H7=46  SQ=33]
+  R    PIMC:    C8  perf:C8 opt= 70  loss=0(O)  avgs:[C8=44  CT=38  HT=33]
+  +- score after trick  8: 70 pts
+-- Trick  9 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    S8  perf:HQ opt= 70  loss=0(D)  avgs:[S8=70  HQ=70]
+  L    PIMC:    SQ  perf:SQ opt= 70  loss=0(O)  avgs:[SQ=42]
+  R    PIMC:    CT  perf:CT opt= 70  loss=0(O)  avgs:[CT=50  HT=44]
+  +- score after trick  9: 70 pts
+-- Trick 10 (L leads) ----------------------------------------------------------------
+  L    PIMC:    H7  perf:H7 opt= 70  loss=0(O)  avgs:[H7=44]
+  R    PIMC:    HT  perf:HT opt= 70  loss=0(O)  avgs:[HT=50]
+  D    PIMC:    HQ  perf:HQ opt= 70  loss=0(D)  avgs:[HQ=70]
+  +- score after trick 10: 70 pts
+Game Finished. Total Point Loss: 30 (D:24 O:6) | Final score: 70 pts
+
+================================================================================
+
+--- GAME 10 ---
+Deal Generated using SmartGrand Heuristics.
+
+Perfect Play (Reference):
+Starting Perfect Play...
+  Trick  1  D:SJ  L:DA  R:CJ
+  Trick  2  R:H9  D:H8  L:HT
+  Trick  3  L:ST  R:SQ  D:S9
+  Trick  4  L:HQ  R:CK  D:HA
+  Trick  5  D:S8  L:DT  R:SA
+  Trick  6  R:DK  D:HJ  L:DQ
+  Trick  7  D:DJ  L:C8  R:CQ
+  Trick  8  D:CA  L:H7  R:C9
+  Trick  9  D:CT  L:D8  R:C7
+  Trick 10  D:SK  L:D7  R:D9
+Perfect Play Finished. Result: 61 pts
+
+Strategy b3) PIMC (Win Probability only):
+Starting PIMC Play...
+--- Trick 1 (Player: Declarer) ---
+    PIMC Analysis: CT (0.0) HJ (0.0) SK (0.0)
+  PIMC plays: CT | Perfect was: SJ | Loss: 2 | (Perfect Val: 61, PIMC Action Val: 59)
+    PIMC Analysis: C8 (1.0)
+  PIMC plays: C8 | Perfect was: C8 | Loss: 0 | (Perfect Val: 59, PIMC Action Val: 59)
+    PIMC Analysis: CQ (1.0) C9 (1.0) C7 (1.0)
+  PIMC plays: CQ | Perfect was: C9 | Loss: 2 | (Perfect Val: 59, PIMC Action Val: 61)
+--- Trick 2 (Player: Declarer) ---
+    PIMC Analysis: H8 (0.0) HJ (0.0) DJ (0.0)
+  PIMC plays: H8 | Perfect was: SJ | Loss: 2 | (Perfect Val: 61, PIMC Action Val: 59)
+    PIMC Analysis: H7 (1.0) HT (1.0) HQ (1.0)
+  PIMC plays: H7 | Perfect was: HT | Loss: 3 | (Perfect Val: 59, PIMC Action Val: 62)
+    PIMC Analysis: H9 (1.0)
+  PIMC plays: H9 | Perfect was: H9 | Loss: 0 | (Perfect Val: 62, PIMC Action Val: 62)
+--- Trick 3 (Player: Right) ---
+    PIMC Analysis: CK (1.0) DK (1.0) SQ (1.0)
+  PIMC plays: CK | Perfect was: DK | Loss: 0 | (Perfect Val: 62, PIMC Action Val: 62)
+    PIMC Analysis: CA (0.0)
+  PIMC plays: CA | Perfect was: CA | Loss: 0 | (Perfect Val: 62, PIMC Action Val: 62)
+    PIMC Analysis: DT (0.9) ST (0.9) HQ (0.9)
+  PIMC plays: DT | Perfect was: HQ | Loss: 2 | (Perfect Val: 62, PIMC Action Val: 64)
+--- Trick 4 (Player: Declarer) ---
+    PIMC Analysis: HJ (0.0) SJ (0.0) DJ (0.0)
+  PIMC plays: HJ | Perfect was: SJ | Loss: 0 | (Perfect Val: 64, PIMC Action Val: 64)
+    PIMC Analysis: D7 (0.9) D8 (0.9) HT (0.9)
+  PIMC plays: D7 | Perfect was: DA | Loss: 6 | (Perfect Val: 64, PIMC Action Val: 70)
+    PIMC Analysis: CJ (1.0)
+  PIMC plays: CJ | Perfect was: CJ | Loss: 0 | (Perfect Val: 70, PIMC Action Val: 70)
+--- Trick 5 (Player: Right) ---
+    PIMC Analysis: D9 (1.0) SA (1.0) DK (1.0)
+  PIMC plays: D9 | Perfect was: C9 | Loss: 0 | (Perfect Val: 70, PIMC Action Val: 70)
+    PIMC Analysis: HA (0.0) SK (0.0) S8 (0.0)
+  PIMC plays: HA | Perfect was: SJ | Loss: 11 | (Perfect Val: 70, PIMC Action Val: 59)
+    PIMC Analysis: DA (1.0) DQ (1.0) D8 (1.0)
+  PIMC plays: DA | Perfect was: D8 | Loss: 1 | (Perfect Val: 59, PIMC Action Val: 60)
+--- Trick 6 (Player: Left) ---
+    PIMC Analysis: D8 (1.0) HQ (1.0) ST (1.0)
+  PIMC plays: D8 | Perfect was: ST | Loss: 4 | (Perfect Val: 60, PIMC Action Val: 64)
+    PIMC Analysis: DK (1.0)
+  PIMC plays: DK | Perfect was: DK | Loss: 0 | (Perfect Val: 64, PIMC Action Val: 64)
+    PIMC Analysis: S9 (0.0) SJ (0.0) SK (0.0)
+  PIMC plays: S9 | Perfect was: SJ | Loss: 5 | (Perfect Val: 64, PIMC Action Val: 59)
+--- Trick 7 (Player: Right) ---
+    PIMC Analysis: SQ (1.0) SA (1.0) C7 (1.0)
+  PIMC plays: SQ | Perfect was: C9 | Loss: 4 | (Perfect Val: 59, PIMC Action Val: 63)
+    PIMC Analysis: SK (0.0) S8 (0.0)
+  PIMC plays: SK | Perfect was: SK | Loss: 0 | (Perfect Val: 63, PIMC Action Val: 63)
+    PIMC Analysis: ST (1.0)
+  PIMC plays: ST | Perfect was: ST | Loss: 0 | (Perfect Val: 63, PIMC Action Val: 63)
+--- Trick 8 (Player: Left) ---
+    PIMC Analysis: HQ (1.0) DQ (1.0) HT (1.0)
+  PIMC plays: HQ | Perfect was: HT | Loss: 7 | (Perfect Val: 63, PIMC Action Val: 70)
+    PIMC Analysis: C9 (1.0) C7 (1.0) SA (1.0)
+  PIMC plays: C9 | Perfect was: C9 | Loss: 0 | (Perfect Val: 70, PIMC Action Val: 70)
+    PIMC Analysis: SJ (0.0) S8 (0.0) DJ (0.0)
+  PIMC plays: SJ | Perfect was: S8 | Loss: 18 | (Perfect Val: 70, PIMC Action Val: 52)
+--- Trick 9 (Player: Declarer) ---
+    PIMC Analysis: S8 (0.0) DJ (0.0)
+  PIMC plays: S8 | Perfect was: DJ | Loss: 0 | (Perfect Val: 52, PIMC Action Val: 52)
+    PIMC Analysis: HT (1.0) DQ (1.0)
+  PIMC plays: HT | Perfect was: HT | Loss: 0 | (Perfect Val: 52, PIMC Action Val: 52)
+    PIMC Analysis: SA (1.0)
+  PIMC plays: SA | Perfect was: SA | Loss: 0 | (Perfect Val: 52, PIMC Action Val: 52)
+--- Trick 10 (Player: Right) ---
+    PIMC Analysis: C7 (1.0)
+  PIMC plays: C7 | Perfect was: C7 | Loss: 0 | (Perfect Val: 52, PIMC Action Val: 52)
+    PIMC Analysis: DJ (0.0)
+  PIMC plays: DJ | Perfect was: DJ | Loss: 0 | (Perfect Val: 52, PIMC Action Val: 52)
+    PIMC Analysis: DQ (1.0)
+  PIMC plays: DQ | Perfect was: DQ | Loss: 0 | (Perfect Val: 52, PIMC Action Val: 52)
+Game Finished. Total Point Loss: 67 (Declarer: 38, Opponents: 29)
+
+Strategy b1) PIMC Points Playout (Hybrid Mode with Average Fallback):
+Starting PIMC Points Play...
+-- Trick  1 (D leads) ----------------------------------------------------------------
+  D *  PIMC:(!) CA  perf:SJ opt= 61  loss=2(D)  avgs:[CA=0%/63  CT=0%/63  S9=0%/61  S8=0%/61  HJ=0%/60  SJ=0%/60  DJ=0%/60  HA=0%/59  SK=0%/58  H8=0%/55]
+  L    PIMC:    C8  perf:C8 opt= 59  loss=0(O)  avgs:[C8=100%/41]
+  R *  PIMC:    C7  perf:C9 opt= 59  loss=0(O)  avgs:[C7=100%/44  C9=100%/44  CQ=100%/43  CK=100%/43]
+  +- score after trick  1: 15 pts
+-- Trick  2 (D leads) ----------------------------------------------------------------
+  D    PIMC:    CT  perf:CT opt= 59  loss=0(D)  avgs:[CT=0%/61  HJ=0%/61  DJ=0%/61  SJ=0%/61  S8=0%/60  S9=0%/60  HA=0%/59  SK=0%/57  H8=0%/55]
+  L *  PIMC:(!) ST  perf:DQ opt= 59  loss=5(O)  avgs:[ST=100%/44  DQ=100%/44  HQ=100%/44  D8=100%/44  D7=100%/44  H7=100%/44  DT=100%/43  DA=100%/42  HT=100%/41]
+  R *  PIMC:    C9  perf:CQ opt= 64  loss=0(O)  avgs:[C9=100%/36  CQ=100%/36  CK=100%/35]
+  +- score after trick  2: 35 pts
+-- Trick  3 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    S8  perf:HA opt= 64  loss=0(D)  avgs:[S8=0%/77  S9=0%/77  SJ=0%/75  DJ=0%/75  HJ=0%/75  HA=0%/75  SK=0%/74  H8=0%/73]
+  L *  PIMC:    HT  perf:DA opt= 64  loss=0(O)  avgs:[HT=100%/36  DA=100%/35  DT=100%/35  HQ=100%/30  DQ=100%/30  H7=100%/27  D8=100%/27  D7=100%/27]
+  R    PIMC:    SQ  perf:SQ opt= 64  loss=0(O)  avgs:[SQ=100%/53  SA=100%/44]
+  +- score after trick  3: 35 pts
+-- Trick  4 (R leads) ----------------------------------------------------------------
+  R *  PIMC:    CK  perf:H9 opt= 64  loss=0(O)  avgs:[CK=100%/53  CQ=100%/53  CJ=100%/52  SA=100%/52  H9=100%/52  DK=100%/51  D9=100%/51]
+  D    PIMC:    SJ  perf:SJ opt= 64  loss=0(D)  avgs:[SJ=0%/67  HJ=0%/67  DJ=0%/67  H8=0%/63  S9=0%/58  SK=0%/58  HA=0%/50]
+  L *  PIMC:    D7  perf:DQ opt= 64  loss=0(O)  avgs:[D7=100%/38  D8=100%/38  DQ=100%/38  HQ=100%/36  H7=100%/36  DT=100%/35  DA=100%/34]
+  +- score after trick  4: 41 pts
+-- Trick  5 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    S9  perf:HA opt= 64  loss=0(D)  avgs:[S9=0%/66  HA=0%/65  HJ=0%/63  DJ=0%/63  SK=0%/63  H8=0%/59]
+  L    PIMC:    DA  perf:DA opt= 64  loss=0(O)  avgs:[DA=100%/51  DT=100%/50  DQ=100%/47  HQ=100%/46  D8=100%/45  H7=100%/44]
+  R    PIMC:    SA  perf:SA opt= 64  loss=0(O)  avgs:[SA=100%/54]
+  +- score after trick  5: 41 pts
+-- Trick  6 (R leads) ----------------------------------------------------------------
+  R    PIMC:    CQ  perf:CQ opt= 64  loss=0(O)  avgs:[CQ=100%/53  DK=100%/53  CJ=100%/52  H9=100%/52  D9=100%/51]
+  D *  PIMC:    DJ  perf:HJ opt= 64  loss=0(D)  avgs:[DJ=0%/66  HJ=0%/66  H8=0%/63  SK=0%/57  HA=0%/50]
+  L    PIMC:    DQ  perf:DQ opt= 64  loss=0(O)  avgs:[DQ=100%/52  D8=100%/52  H7=100%/48  HQ=100%/47  DT=100%/43]
+  +- score after trick  6: 49 pts
+-- Trick  7 (D leads) ----------------------------------------------------------------
+  D    PIMC:    HA  perf:HA opt= 64  loss=0(D)  avgs:[HA=0%/67  SK=0%/67  HJ=0%/58  H8=0%/54]
+  L    PIMC:    H7  perf:H7 opt= 64  loss=0(O)  avgs:[H7=100%/54  HQ=100%/49]
+  R    PIMC:    H9  perf:H9 opt= 64  loss=0(O)  avgs:[H9=100%/53]
+  +- score after trick  7: 60 pts
+-- Trick  8 (D leads) ----------------------------------------------------------------
+  D    PIMC:    SK  perf:SK opt= 64  loss=0(D)  avgs:[SK=0%/65  H8=0%/62  HJ=0%/60]
+  L *  PIMC:(!) HQ  perf:D8 opt= 64  loss=7(O)  avgs:[HQ=100%/52  D8=100%/51  DT=100%/49]
+  R *  PIMC:(!) CJ  perf:DK opt= 71  loss=5(O)  avgs:[CJ=100%/46  D9=100%/46  DK=100%/46]
+  +- score after trick  8: 60 pts
+-- Trick  9 (R leads) ----------------------------------------------------------------
+  R    PIMC:    DK  perf:DK opt= 76  loss=0(O)  avgs:[DK=100%/48  D9=100%/47]
+  D    PIMC:    HJ  perf:HJ opt= 76  loss=0(D)  avgs:[HJ=0%/76  H8=0%/67]
+  L    PIMC:    DT  perf:DT opt= 76  loss=0(O)  avgs:[DT=100%/44  D8=100%/44]
+  +- score after trick  9: 76 pts
+-- Trick 10 (D leads) ----------------------------------------------------------------
+  D    PIMC:    H8  perf:H8 opt= 76  loss=0(D)  avgs:[H8=0%/76]
+  L    PIMC:    D8  perf:D8 opt= 76  loss=0(O)  avgs:[D8=100%/44]
+  R    PIMC:    D9  perf:D9 opt= 76  loss=0(O)  avgs:[D9=100%/44]
+  +- score after trick 10: 76 pts
+Game Finished. Total Point Loss: 19 (D:2 O:17) | Final score: 76 pts
+
+Strategy b2) PIMC Points Playout (Average Mode only):
+Starting PIMC Points Play...
+-- Trick  1 (D leads) ----------------------------------------------------------------
+  D *  PIMC:(!) CT  perf:SJ opt= 61  loss=2(D)  avgs:[CT=62  CA=62  DJ=61  SJ=61  HJ=61  S9=61  S8=61  HA=59  SK=58  H8=55]
+  L    PIMC:    C8  perf:C8 opt= 59  loss=0(O)  avgs:[C8=41]
+  R *  PIMC:    C7  perf:C9 opt= 59  loss=0(O)  avgs:[C7=38  C9=38  CQ=38  CK=38]
+  +- score after trick  1: 14 pts
+-- Trick  2 (D leads) ----------------------------------------------------------------
+  D    PIMC:    CA  perf:CA opt= 59  loss=0(D)  avgs:[CA=62  S8=62  S9=62  HA=60  DJ=60  HJ=60  SJ=60  SK=59  H8=55]
+  L *  PIMC:    D8  perf:DQ opt= 59  loss=0(O)  avgs:[D8=43  D7=43  H7=43  DQ=42  HQ=42  ST=40  DT=39  DA=38  HT=38]
+  R *  PIMC:    C9  perf:CQ opt= 59  loss=0(O)  avgs:[C9=44  CQ=44  CK=44]
+  +- score after trick  2: 25 pts
+-- Trick  3 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    S8  perf:S9 opt= 59  loss=0(D)  avgs:[S8=59  S9=59  HA=59  DJ=58  SJ=58  HJ=58  SK=56  H8=53]
+  L    PIMC:    ST  perf:ST opt= 59  loss=0(O)  avgs:[ST=48]
+  R *  PIMC:(!) SA  perf:SQ opt= 59  loss=14(O)  avgs:[SA=66  SQ=60]
+  +- score after trick  3: 25 pts
+-- Trick  4 (R leads) ----------------------------------------------------------------
+  R *  PIMC:    CQ  perf:CK opt= 73  loss=0(O)  avgs:[CQ=61  CK=61  SQ=56  H9=50  DK=49  D9=48  CJ=45]
+  D *  PIMC:    DJ  perf:SJ opt= 73  loss=0(D)  avgs:[DJ=74  SJ=74  HJ=74  H8=72  S9=63  SK=53  HA=51]
+  L *  PIMC:    D7  perf:DA opt= 73  loss=0(O)  avgs:[D7=47  DQ=47  H7=46  HQ=46  DT=45  DA=44  HT=41]
+  +- score after trick  4: 30 pts
+-- Trick  5 (D leads) ----------------------------------------------------------------
+  D    PIMC:    SK  perf:SK opt= 73  loss=0(D)  avgs:[SK=73  H8=72  HA=72  SJ=72  HJ=72  S9=63]
+  L *  PIMC:    DT  perf:DA opt= 73  loss=0(O)  avgs:[DT=37  DA=36  DQ=36  HQ=36  H7=35  HT=35]
+  R    PIMC:    SQ  perf:SQ opt= 73  loss=0(O)  avgs:[SQ=46]
+  +- score after trick  5: 47 pts
+-- Trick  6 (D leads) ----------------------------------------------------------------
+  D *  PIMC:(!) HJ  perf:H8 opt= 73  loss=3(D)  avgs:[HJ=78  SJ=78  S9=78  HA=76  H8=73]
+  L *  PIMC:(!) HT  perf:DA opt= 70  loss=8(O)  avgs:[HT=40  HQ=39  DQ=39  DA=38  H7=37]
+  R    PIMC:    CJ  perf:CJ opt= 78  loss=0(O)  avgs:[CJ=48]
+  +- score after trick  6: 47 pts
+-- Trick  7 (R leads) ----------------------------------------------------------------
+  R    PIMC:    CK  perf:CK opt= 78  loss=0(O)  avgs:[CK=45  H9=43  DK=42  D9=41]
+  D    PIMC:    SJ  perf:SJ opt= 78  loss=0(D)  avgs:[SJ=74  H8=73  S9=69  HA=57]
+  L *  PIMC:    DQ  perf:DA opt= 78  loss=0(O)  avgs:[DQ=47  DA=42  H7=40  HQ=40]
+  +- score after trick  7: 56 pts
+-- Trick  8 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    S9  perf:HA opt= 78  loss=0(D)  avgs:[S9=74  HA=74  H8=59]
+  L *  PIMC:(!) HQ  perf:DA opt= 78  loss=7(O)  avgs:[HQ=42  H7=42  DA=41]
+  R *  PIMC:    H9  perf:DK opt= 85  loss=0(O)  avgs:[H9=42  D9=40  DK=40]
+  +- score after trick  8: 59 pts
+-- Trick  9 (D leads) ----------------------------------------------------------------
+  D *  PIMC:    H8  perf:HA opt= 85  loss=0(D)  avgs:[H8=85  HA=85]
+  L    PIMC:    H7  perf:H7 opt= 85  loss=0(O)  avgs:[H7=35]
+  R    PIMC:    DK  perf:DK opt= 85  loss=0(O)  avgs:[DK=35  D9=35]
+  +- score after trick  9: 63 pts
+-- Trick 10 (D leads) ----------------------------------------------------------------
+  D    PIMC:    HA  perf:HA opt= 85  loss=0(D)  avgs:[HA=85]
+  L    PIMC:    DA  perf:DA opt= 85  loss=0(O)  avgs:[DA=35]
+  R    PIMC:    D9  perf:D9 opt= 85  loss=0(O)  avgs:[D9=35]
+  +- score after trick 10: 85 pts
+Game Finished. Total Point Loss: 34 (D:5 O:29) | Final score: 85 pts
+
+================================================================================
+

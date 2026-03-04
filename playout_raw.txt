@@ -1,0 +1,265 @@
+warning: output filename collision.
+The bin target `skat_aug23` in package `skat_aug23 v0.1.0 (C:\Users\jenaf\source\repos\skatsearch)` has the same output filename as the lib target `skat_aug23` in package `skat_aug23 v0.1.0 (C:\Users\jenaf\source\repos\skatsearch)`.
+Colliding filename is: C:\Users\jenaf\source\repos\skatsearch\target\release\deps\skat_aug23.pdb
+The targets should have unique names.
+Consider changing their names to be unique or compiling them separately.
+This may become a hard error in the future; see <https://github.com/rust-lang/cargo/issues/6313>.
+warning: output filename collision.
+The bin target `skat_aug23` in package `skat_aug23 v0.1.0 (C:\Users\jenaf\source\repos\skatsearch)` has the same output filename as the lib target `skat_aug23` in package `skat_aug23 v0.1.0 (C:\Users\jenaf\source\repos\skatsearch)`.
+Colliding filename is: C:\Users\jenaf\source\repos\skatsearch\target\release\skat_aug23.pdb
+The targets should have unique names.
+Consider changing their names to be unique or compiling them separately.
+This may become a hard error in the future; see <https://github.com/rust-lang/cargo/issues/6313>.
+warning: unused import: `Deserialize`
+ --> src\lib_wasm.rs:7:13
+  |
+7 | use serde::{Deserialize, Serialize};
+  |             ^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` on by default
+
+warning: unused imports: `JACKOFCLUBS`, `JACKOFDIAMONDS`, `JACKOFHEARTS`, and `JACKOFSPADES`
+ --> src\skat\context.rs:7:44
+  |
+7 |     Game, Player, CLUBS, DIAMONDS, HEARTS, JACKOFCLUBS, JACKOFDIAMONDS, JACKOFHEARTS, JACKOFSPADES,
+  |                                            ^^^^^^^^^^^  ^^^^^^^^^^^^^^  ^^^^^^^^^^^^  ^^^^^^^^^^^^
+
+warning: unused variable: `unplayed`
+   --> src\extensions\cli_playout.rs:424:13
+    |
+424 |         let unplayed = position.get_all_unplayed_cards();
+    |             ^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_unplayed`
+    |
+    = note: `#[warn(unused_variables)]` on by default
+
+warning: variable does not need to be mutable
+   --> src\extensions\cli_playout.rs:457:13
+    |
+457 |         let mut builder = PimcProblemBuilder::new(engine.context.game_type())
+    |             ----^^^^^^^
+    |             |
+    |             help: remove this `mut`
+    |
+    = note: `#[warn(unused_mut)]` on by default
+
+warning: variable does not need to be mutable
+   --> src\extensions\cli_playout.rs:474:13
+    |
+474 |         let mut search = PimcSearch::new(problem, samples, None);
+    |             ----^^^^^^
+    |             |
+    |             help: remove this `mut`
+
+warning: unused variable: `unplayed`
+   --> src\extensions\cli_playout.rs:637:13
+    |
+637 |         let unplayed = position.get_all_unplayed_cards();
+    |             ^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_unplayed`
+
+warning: unused variable: `unplayed`
+    --> src\extensions\cli_playout.rs:1089:13
+     |
+1089 |         let unplayed = position.get_all_unplayed_cards();
+     |             ^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_unplayed`
+
+warning: unused variable: `skat_points`
+   --> src\lib_wasm.rs:203:13
+    |
+203 |         let skat_points = skat_cards.points();
+    |             ^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_skat_points`
+
+warning: variable does not need to be mutable
+   --> src\lib_wasm.rs:135:14
+    |
+135 |         let (mut deck, _count) = ALLCARDS.__decompose();
+    |              ----^^^^
+    |              |
+    |              help: remove this `mut`
+
+warning: unreachable pattern
+   --> src\lib_wasm.rs:642:13
+    |
+642 |             _ => "Unknown".to_string(),
+    |             ^ no value can reach this
+    |
+note: multiple earlier patterns match some of the same values
+   --> src\lib_wasm.rs:642:13
+    |
+636 |             (Game::Grand, _) => "Grand".to_string(),
+    |             ---------------- matches some of the same values
+637 |             (Game::Null, _) => "Null".to_string(),
+    |             --------------- matches some of the same values
+638 |             (Game::Suit, None) => "Clubs".to_string(),
+    |             ------------------ matches some of the same values
+639 |             (Game::Suit, Some(SpadesSwitch)) => "Spades".to_string(),
+    |             -------------------------------- matches some of the same values
+...
+642 |             _ => "Unknown".to_string(),
+    |             ^ ...and 2 other patterns collectively make this unreachable
+    = note: `#[warn(unreachable_patterns)]` on by default
+
+warning: unused variable: `score`
+   --> src\lib_wasm.rs:997:26
+    |
+997 |         if let Ok((card, score, val)) = res {
+    |                          ^^^^^ help: if this is intentional, prefix it with an underscore: `_score`
+
+warning: unused variable: `best_card_mask`
+    --> src\lib_wasm.rs:1011:14
+     |
+1011 |         let (best_card_mask, best_val) = self.solve_best_move();
+     |              ^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_best_card_mask`
+
+warning: variable `skat` is assigned to, but never used
+   --> src\pimc\analysis.rs:492:21
+    |
+492 |             let mut skat = 0;
+    |                     ^^^^
+    |
+    = note: consider using `_skat` instead
+
+warning: variable does not need to be mutable
+   --> src\pimc\playout.rs:522:25
+    |
+522 |                     let mut current_winner_rank = get_null_rank(card);
+    |                         ----^^^^^^^^^^^^^^^^^^^
+    |                         |
+    |                         help: remove this `mut`
+
+warning: value assigned to `skat_fulls` is never read
+   --> src\skat\signature.rs:132:17
+    |
+132 |         let mut skat_fulls = 0;
+    |                 ^^^^^^^^^^
+    |
+    = help: maybe it is overwritten before being read?
+    = note: `#[warn(unused_assignments)]` on by default
+
+warning: method `calculate_theoretical_value` is never used
+   --> src\lib_wasm.rs:903:8
+    |
+133 | impl SkatGame {
+    | ------------- method in this implementation
+...
+903 |     fn calculate_theoretical_value(&self) -> i32 {
+    |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` on by default
+
+warning: `skat_aug23` (lib) generated 16 warnings (run `cargo fix --lib -p skat_aug23` to apply 6 suggestions)
+warning: unused import: `Bitboard`
+   --> src\main.rs:526:38
+    |
+526 |             use skat_aug23::traits::{Bitboard, StringConverter};
+    |                                      ^^^^^^^^
+    |
+    = note: `#[warn(unused_imports)]` on by default
+
+warning: `skat_aug23` (bin "skat_aug23") generated 1 warning (run `cargo fix --bin "skat_aug23"` to apply 1 suggestion)
+    Finished `release` profile [optimized + debuginfo] target(s) in 0.05s
+     Running `target\release\skat_aug23.exe playout --game-type suit -c generated_smart_suit_deal.json -d smart-suit`
+Reading context file: generated_smart_suit_deal.json
+Context content read. Parsing JSON...
+JSON parsed successfully.
+Auto-Skat: Determined 11 points in Skat. Adding to declarer start points.
+Calling skat_aug23::extensions::cli_playout::run_playout...
+=== Playout Configuration ===
+Game Type: Suit
+Start Player: Declarer
+PIMC Samples: 20
+=============================
+
+Cards Distribution (Sorted for Suit):
+Declarer: [CJ DJ CA CT CK CQ C9 C8 SQ D9]
+Left    : [SJ C7 ST HA HT H9 H8 DA DT DK]
+Right   : [HJ SK S9 S8 S7 HK HQ DQ D8 D7]
+Skat    : [SA H7]
+Start Player: Declarer
+
+=== Perfect Play Simulation ===
+Starting Perfect Play...
+  Trick  1  D:C9  L:C7  R:HJ
+  Trick  2  R:SK  D:SQ  L:ST
+  Trick  3  L:SJ  R:HK  D:CJ
+  Trick  4  D:DJ  L:HA  R:HQ
+  Trick  5  D:CA  L:HT  R:S9
+  Trick  6  D:CT  L:DT  R:S8
+  Trick  7  D:CK  L:DK  R:S7
+  Trick  8  D:CQ  L:H9  R:D8
+  Trick  9  D:C8  L:H8  R:D7
+  Trick 10  D:D9  L:DA  R:DQ
+Perfect Play Finished. Result: 87 pts
+
+=== PIMC Play Simulation ===
+Starting PIMC Play...
+--- Trick 1 (Player: Declarer) ---
+    PIMC Analysis: CA (0.0) CT (0.0) DJ (0.0)
+  PIMC plays: CA | Perfect was: C9 | Loss: 11 | (Perfect Val: 87, PIMC Action Val: 76)
+    PIMC Analysis: SJ (1.0) C7 (1.0)
+  PIMC plays: SJ | Perfect was: C7 | Loss: 0 | (Perfect Val: 76, PIMC Action Val: 72)
+    PIMC Analysis: HJ (1.0)
+  PIMC plays: HJ | Perfect was: HK | Loss: 2 | (Perfect Val: 72, PIMC Action Val: 74)
+--- Trick 2 (Player: Left) ---
+    PIMC Analysis: H9 (1.0) ST (1.0) DK (1.0)
+  PIMC plays: H9 | Perfect was: HA | Loss: 10 | (Perfect Val: 74, PIMC Action Val: 84)
+    PIMC Analysis: HK (1.0) HQ (1.0)
+  PIMC plays: HK | Perfect was: HK | Loss: 0 | (Perfect Val: 84, PIMC Action Val: 84)
+    PIMC Analysis: C9 (0.0) C8 (0.0) CQ (0.0)
+  PIMC plays: C9 | Perfect was: SQ | Loss: 10 | (Perfect Val: 84, PIMC Action Val: 74)
+--- Trick 3 (Player: Declarer) ---
+    PIMC Analysis: DJ (0.0) CQ (0.0) C8 (0.0)
+  PIMC plays: DJ | Perfect was: CJ | Loss: 0 | (Perfect Val: 74, PIMC Action Val: 74)
+    PIMC Analysis: C7 (1.0)
+  PIMC plays: C7 | Perfect was: C7 | Loss: 0 | (Perfect Val: 74, PIMC Action Val: 74)
+    PIMC Analysis: D8 (1.0) HQ (1.0) S9 (1.0)
+  PIMC plays: D8 | Perfect was: HQ | Loss: 0 | (Perfect Val: 74, PIMC Action Val: 74)
+--- Trick 4 (Player: Declarer) ---
+    PIMC Analysis: CK (0.0) C8 (0.0) CQ (0.0)
+  PIMC plays: CK | Perfect was: CJ | Loss: 0 | (Perfect Val: 74, PIMC Action Val: 74)
+    PIMC Analysis: ST (1.0) DA (1.0) HT (1.0)
+  PIMC plays: ST | Perfect was: HA | Loss: 0 | (Perfect Val: 74, PIMC Action Val: 74)
+    PIMC Analysis: SK (1.0) D7 (1.0) HQ (1.0)
+  PIMC plays: SK | Perfect was: S9 | Loss: 17 | (Perfect Val: 74, PIMC Action Val: 91)
+--- Trick 5 (Player: Declarer) ---
+    PIMC Analysis: D9 (0.0) SQ (0.0) CT (0.0)
+  PIMC plays: D9 | Perfect was: CJ | Loss: 0 | (Perfect Val: 91, PIMC Action Val: 91)
+    PIMC Analysis: DA (1.0) DK (1.0) DT (1.0)
+  PIMC plays: DA | Perfect was: DA | Loss: 0 | (Perfect Val: 91, PIMC Action Val: 91)
+    PIMC Analysis: D7 (1.0) DQ (1.0)
+  PIMC plays: D7 | Perfect was: DQ | Loss: 3 | (Perfect Val: 91, PIMC Action Val: 94)
+--- Trick 6 (Player: Left) ---
+    PIMC Analysis: DK (1.0) HT (1.0) H8 (1.0)
+  PIMC plays: DK | Perfect was: HA | Loss: 0 | (Perfect Val: 94, PIMC Action Val: 94)
+    PIMC Analysis: DQ (1.0)
+  PIMC plays: DQ | Perfect was: DQ | Loss: 0 | (Perfect Val: 94, PIMC Action Val: 94)
+    PIMC Analysis: SQ (0.0) CT (0.0) CQ (0.0)
+  PIMC plays: SQ | Perfect was: CJ | Loss: 10 | (Perfect Val: 94, PIMC Action Val: 84)
+--- Trick 7 (Player: Left) ---
+    PIMC Analysis: HA (1.0) DT (1.0) HT (1.0)
+  PIMC plays: HA | Perfect was: HA | Loss: 0 | (Perfect Val: 84, PIMC Action Val: 84)
+    PIMC Analysis: HQ (1.0)
+  PIMC plays: HQ | Perfect was: HQ | Loss: 0 | (Perfect Val: 84, PIMC Action Val: 84)
+    PIMC Analysis: C8 (0.0) CQ (0.0) CJ (0.0)
+  PIMC plays: C8 | Perfect was: CJ | Loss: 0 | (Perfect Val: 84, PIMC Action Val: 84)
+--- Trick 8 (Player: Declarer) ---
+    PIMC Analysis: CJ (0.0) CQ (0.0) CT (0.0)
+  PIMC plays: CJ | Perfect was: CJ | Loss: 0 | (Perfect Val: 84, PIMC Action Val: 84)
+    PIMC Analysis: DT (1.0) H8 (1.0) HT (1.0)
+  PIMC plays: DT | Perfect was: HT | Loss: 0 | (Perfect Val: 84, PIMC Action Val: 84)
+    PIMC Analysis: S8 (1.0) S7 (1.0) S9 (1.0)
+  PIMC plays: S8 | Perfect was: S9 | Loss: 0 | (Perfect Val: 84, PIMC Action Val: 84)
+--- Trick 9 (Player: Declarer) ---
+    PIMC Analysis: CQ (0.0) CT (0.0)
+  PIMC plays: CQ | Perfect was: CT | Loss: 0 | (Perfect Val: 84, PIMC Action Val: 84)
+    PIMC Analysis: H8 (1.0) HT (1.0)
+  PIMC plays: H8 | Perfect was: HT | Loss: 0 | (Perfect Val: 84, PIMC Action Val: 84)
+    PIMC Analysis: S9 (1.0) S7 (1.0)
+  PIMC plays: S9 | Perfect was: S9 | Loss: 0 | (Perfect Val: 84, PIMC Action Val: 84)
+--- Trick 10 (Player: Declarer) ---
+    PIMC Analysis: CT (0.0)
+  PIMC plays: CT | Perfect was: CT | Loss: 0 | (Perfect Val: 84, PIMC Action Val: 84)
+    PIMC Analysis: HT (1.0)
+  PIMC plays: HT | Perfect was: HT | Loss: 0 | (Perfect Val: 84, PIMC Action Val: 84)
+    PIMC Analysis: S7 (1.0)
+  PIMC plays: S7 | Perfect was: S7 | Loss: 0 | (Perfect Val: 84, PIMC Action Val: 84)
+Game Finished. Total Point Loss: 63 (Declarer: 31, Opponents: 32)
