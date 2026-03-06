@@ -1,0 +1,1731 @@
+================================================================================
+SKAT PIMC Comparison: Average Points  vs  Average + Trump Heuristic
+================================================================================
+Date       : 2026-03-06 10:17:34
+Games      : 5 Grand + 5 Suit  (total 10)
+Min score  : 61 pts (perfect-play threshold for deal acceptance)
+Modes      :
+  1) Perfect Play (reference, omniscient)
+  2) PIMC Average Points Only
+  3) PIMC Average Points + Trump Move Heuristic (threshold=2.0 pts)
+
+Trump Move Heuristic explanation:
+  Within 2.0 avg-pts of the best-scored card:
+    Declarer  → always prefers a trump card
+    Opponents → always prefer a non-trump card
+  Output marker '^' = heuristic overrode the pure avg-points choice
+
+================================================================================
+GAME 1  (Grand)
+================================================================================
+
+--- Heuristic Analysis (Deal Selection Criteria) ---
+  Game type selected  : Grand
+
+  Original 12-card hand (before skat discard, in transformed suit space):
+       [[SJ DJ CQ SA ST S9 HK HQ DA DT DQ D7]]
+  Optimal skat discard: CQ HK
+  Post-discard 10-card hand: [[SJ DJ CQ SA ST S9 HK HQ DA DT DQ D7]] minus [CQ HK]
+
+  1) Biddability check (pre-discard, on the full 12-card hand)
+       Pre-Discard: T=6 J=2 S=4 → BIDDABLE (50k-sample heuristic)
+       Meaning: T=Jacks+longest_suit, J=Jacks, S=Aces+attached_Tens.
+       BIDDABLE => hand qualifies to bid (50k-sample boundary).
+
+  2) Playability check (post-discard, final 10-card hand)
+       Post-Discard Grand: J=2 S=4 → PLAYABLE (10k-sample heuristic)
+       Meaning (Grand): J=Jacks, S=Aces+attached_Tens.
+       PLAYABLE => post-discard hand wins >=50% in 10k simulations.
+
+  3) PIMC sampling filter used during playout
+       smart-grand (Post-Discard Grand filter, J/S boundary)
+       Only distributions where the declarer's sampled hand passes
+       the Grand post-discard filter (J/S boundary) are accepted.
+
+  4) Trump move heuristic (mode 3 only)
+       Threshold : 2.0 avg-pts
+       Declarer  : within 2.0 pts -> prefer trump card (Grand+Suit)
+       Opponents : no trump preference (Grand game - only 4 Jacks are trump)
+       3rd player: if all threshold-candidates win trick -> play highest value card
+                   if all threshold-candidates lose trick -> play lowest value card
+       Marker '^': appears next to '*' (perf-deviation) when heuristic overrides
+
+Cards Distribution:
+(Sorted for Grand):
+Declarer: [SJ DJ SA ST S9 HQ DA DT DQ D7]
+Left    : [CJ CA CK C8 C7 S8 S7 H8 H7 DK]
+Right   : [HJ CT C9 SK SQ HA HT H9 D9 D8]
+Skat    : [CQ HK]
+Start Player: Declarer
+
+--- 1) Perfect Play (Reference) ---
+Starting Perfect Play...
+  Trick  1  D:SJ  L:CJ  R:HJ
+  Trick  2  L:CA  R:CT  D:DJ
+  Trick  3  D:SA  L:S8  R:SK
+  Trick  4  D:DA  L:DK  R:D9
+  Trick  5  D:ST  L:S7  R:SQ
+  Trick  6  D:DT  L:C8  R:D8
+  Trick  7  D:DQ  L:C7  R:HT
+  Trick  8  D:HQ  L:H8  R:HA
+  Trick  9  R:C9  D:S9  L:CK
+  Trick 10  L:H7  R:H9  D:D7
+Perfect Play Finished. Result: 96 pts
+
+--- 2) PIMC Average Points Only ---
+Starting PIMC Points Play...
+-- Trick  1 (D leads) ----------------------------------------------------------------
+  D *   PIMC:    SA  perf:SJ opt= 96  loss=0(D)  avgs:[SA=68  ST=68  DT=66  DA=66  HQ=50  DJ=49  SJ=49  D7=39  DQ=39  S9=37]
+  L *   PIMC:    S7  perf:S8 opt= 96  loss=0(O)  avgs:[S7=49  S8=49]
+  R *   PIMC:    SQ  perf:SK opt= 96  loss=0(O)  avgs:[SQ=50  SK=49]
+  +- score after trick  1: 21 pts
+-- Trick  2 (D leads) ----------------------------------------------------------------
+  D *   PIMC:    DA  perf:SJ opt= 96  loss=0(D)  avgs:[DA=73  DT=73  ST=69  HQ=51  SJ=50  DJ=50  S9=40  DQ=39  D7=39]
+  L     PIMC:    DK  perf:DK opt= 96  loss=0(O)  avgs:[DK=53]
+  R     PIMC:    D9  perf:D9 opt= 96  loss=0(O)  avgs:[D9=44  D8=44]
+  +- score after trick  2: 36 pts
+-- Trick  3 (D leads) ----------------------------------------------------------------
+  D *   PIMC:    ST  perf:SJ opt= 96  loss=0(D)  avgs:[ST=75  DT=72  DQ=72  SJ=70  DJ=70  HQ=57  D7=48  S9=48]
+  L     PIMC:    S8  perf:S8 opt= 96  loss=0(O)  avgs:[S8=53]
+  R     PIMC:    SK  perf:SK opt= 96  loss=0(O)  avgs:[SK=45]
+  +- score after trick  3: 50 pts
+-- Trick  4 (D leads) ----------------------------------------------------------------
+  D *   PIMC:(!) DT  perf:SJ opt= 96  loss=6(D)  avgs:[DT=75  DQ=74  S9=69  DJ=66  SJ=66  HQ=62  D7=57]
+  L     PIMC:    CJ  perf:CJ opt= 90  loss=0(O)  avgs:[CJ=52  H8=42  H7=42  C8=42  C7=42  CK=39  CA=26]
+  R     PIMC:    D8  perf:D8 opt= 90  loss=0(O)  avgs:[D8=47]
+  +- score after trick  4: 50 pts
+-- Trick  5 (L leads) ----------------------------------------------------------------
+  L     PIMC:    CA  perf:CA opt= 90  loss=0(O)  avgs:[CA=47  CK=43  H8=42  H7=42  C8=41  C7=41]
+  R     PIMC:    CT  perf:CT opt= 90  loss=0(O)  avgs:[CT=41  C9=34]
+  D     PIMC:    DJ  perf:DJ opt= 90  loss=0(D)  avgs:[DJ=88  HQ=84  SJ=78  S9=68  D7=68  DQ=64]
+  +- score after trick  5: 73 pts
+-- Trick  6 (D leads) ----------------------------------------------------------------
+  D     PIMC:    SJ  perf:SJ opt= 90  loss=0(D)  avgs:[SJ=88  S9=81  D7=81  HQ=81  DQ=78]
+  L *   PIMC:    H7  perf:C8 opt= 90  loss=0(O)  avgs:[H7=28  H8=28  C8=27  C7=27  CK=24]
+  R     PIMC:    HJ  perf:HJ opt= 90  loss=0(O)  avgs:[HJ=30]
+  +- score after trick  6: 77 pts
+-- Trick  7 (D leads) ----------------------------------------------------------------
+  D     PIMC:    DQ  perf:DQ opt= 90  loss=0(D)  avgs:[DQ=86  S9=86  D7=86  HQ=77]
+  L *   PIMC:    H8  perf:C8 opt= 90  loss=0(O)  avgs:[H8=29  C8=29  C7=29  CK=26]
+  R *   PIMC:    C9  perf:HT opt= 90  loss=0(O)  avgs:[C9=30  H9=30  HT=30  HA=29]
+  +- score after trick  7: 80 pts
+-- Trick  8 (D leads) ----------------------------------------------------------------
+  D *   PIMC:    D7  perf:S9 opt= 90  loss=0(D)  avgs:[D7=86  S9=86  HQ=80]
+  L     PIMC:    C8  perf:C8 opt= 90  loss=0(O)  avgs:[C8=30  C7=30  CK=27]
+  R *   PIMC:    H9  perf:HT opt= 90  loss=0(O)  avgs:[H9=30  HT=30  HA=29]
+  +- score after trick  8: 80 pts
+-- Trick  9 (D leads) ----------------------------------------------------------------
+  D     PIMC:    S9  perf:S9 opt= 90  loss=0(D)  avgs:[S9=86  HQ=80]
+  L     PIMC:    C7  perf:C7 opt= 90  loss=0(O)  avgs:[C7=26  CK=24]
+  R     PIMC:    HT  perf:HT opt= 90  loss=0(O)  avgs:[HT=30  HA=29]
+  +- score after trick  9: 90 pts
+-- Trick 10 (D leads) ----------------------------------------------------------------
+  D     PIMC:    HQ  perf:HQ opt= 90  loss=0(D)  avgs:[HQ=90]
+  L     PIMC:    CK  perf:CK opt= 90  loss=0(O)  avgs:[CK=30]
+  R     PIMC:    HA  perf:HA opt= 90  loss=0(O)  avgs:[HA=30]
+  +- score after trick 10: 90 pts
+Game Finished. Total Point Loss: 6 (D:6 O:0) | Final score: 90 pts
+
+--- 3) PIMC Average Points + Trump Heuristic (threshold=2.0 pts) ---
+Starting PIMC Points Play...
+-- Trick  1 (D leads) ----------------------------------------------------------------
+  D *   PIMC:    ST  perf:SJ opt= 96  loss=0(D)  avgs:[ST=72  DT=72  SA=72  DA=72  DJ=60  SJ=60  HQ=51  S9=39  D7=38  DQ=38]
+  L     PIMC:    S8  perf:S8 opt= 96  loss=0(O)  avgs:[S8=51  S7=51]
+  R *   PIMC:    SQ  perf:SK opt= 96  loss=0(O)  avgs:[SQ=43  SK=43]
+  +- score after trick  1: 20 pts
+-- Trick  2 (D leads) ----------------------------------------------------------------
+  D *   PIMC:    DA  perf:SJ opt= 96  loss=0(D)  avgs:[DA=72  DT=71  SA=69  HQ=51  SJ=46  DJ=46  DQ=40  D7=40  S9=39]
+  L     PIMC:    DK  perf:DK opt= 96  loss=0(O)  avgs:[DK=53]
+  R     PIMC:    D9  perf:D9 opt= 96  loss=0(O)  avgs:[D9=40  D8=40]
+  +- score after trick  2: 35 pts
+-- Trick  3 (D leads) ----------------------------------------------------------------
+  D *   PIMC:(!) DT  perf:SJ opt= 96  loss=6(D)  avgs:[DT=70  SA=69  DQ=69  HQ=54  DJ=52  SJ=52  S9=46  D7=46]
+  L     PIMC:    CJ  perf:CJ opt= 90  loss=0(O)  avgs:[CJ=51  S7=43  H7=42  H8=42  C8=42  C7=42  CK=40  CA=26]
+  R     PIMC:    D8  perf:D8 opt= 90  loss=0(O)  avgs:[D8=42]
+  +- score after trick  3: 35 pts
+-- Trick  4 (L leads) ----------------------------------------------------------------
+  L *   PIMC:(!) S7  perf:CA opt= 90  loss=4(O)  avgs:[S7=46  H8=45  H7=45  CA=44  CK=39  C8=38  C7=38]
+  R     PIMC:    SK  perf:SK opt= 94  loss=0(O)  avgs:[SK=42]
+  D     PIMC:    SA  perf:SA opt= 94  loss=0(D)  avgs:[SA=88  S9=80]
+  +- score after trick  4: 50 pts
+-- Trick  5 (D leads) ----------------------------------------------------------------
+  D  ^  PIMC:    SJ  perf:SJ opt= 94  loss=0(D)  avgs:[SJ=89  HQ=89  D7=78  S9=78  DJ=75  DQ=75]
+  L *   PIMC:    C8  perf:CA opt= 94  loss=0(O)  avgs:[C8=44  C7=44  H8=44  H7=44  CK=42  CA=28]
+  R     PIMC:    HJ  perf:HJ opt= 94  loss=0(O)  avgs:[HJ=36]
+  +- score after trick  5: 54 pts
+-- Trick  6 (D leads) ----------------------------------------------------------------
+  D     PIMC:    HQ  perf:HQ opt= 94  loss=0(D)  avgs:[HQ=86  DQ=85  S9=85  D7=85  DJ=83]
+  L     PIMC:    H8  perf:H8 opt= 94  loss=0(O)  avgs:[H8=57  H7=57]
+  R     PIMC:    HA  perf:HA opt= 94  loss=0(O)  avgs:[HA=37  HT=36  H9=23]
+  +- score after trick  6: 54 pts
+-- Trick  7 (R leads) ----------------------------------------------------------------
+  R     PIMC:    CT  perf:CT opt= 94  loss=0(O)  avgs:[CT=36  HT=33  C9=31  H9=29]
+  D     PIMC:    DJ  perf:DJ opt= 94  loss=0(D)  avgs:[DJ=94  D7=78  S9=78  DQ=74]
+  L *   PIMC:    C7  perf:CA opt= 94  loss=0(O)  avgs:[C7=36  CK=35  CA=32]
+  +- score after trick  7: 66 pts
+-- Trick  8 (D leads) ----------------------------------------------------------------
+  D *   PIMC:    D7  perf:DQ opt= 94  loss=0(D)  avgs:[D7=94  DQ=94  S9=94]
+  L *   PIMC:    H7  perf:CA opt= 94  loss=0(O)  avgs:[H7=43  CK=41  CA=39]
+  R *^  PIMC:    C9  perf:HT opt= 94  loss=0(O)  avgs:[C9=26  H9=26  HT=26]
+  +- score after trick  8: 66 pts
+-- Trick  9 (D leads) ----------------------------------------------------------------
+  D *   PIMC:    S9  perf:DQ opt= 94  loss=0(D)  avgs:[S9=94  DQ=94]
+  L *   PIMC:    CK  perf:CA opt= 94  loss=0(O)  avgs:[CK=26  CA=26]
+  R *   PIMC:    H9  perf:HT opt= 94  loss=0(O)  avgs:[H9=26  HT=26]
+  +- score after trick  9: 70 pts
+-- Trick 10 (D leads) ----------------------------------------------------------------
+  D     PIMC:    DQ  perf:DQ opt= 94  loss=0(D)  avgs:[DQ=94]
+  L     PIMC:    CA  perf:CA opt= 94  loss=0(O)  avgs:[CA=26]
+  R     PIMC:    HT  perf:HT opt= 94  loss=0(O)  avgs:[HT=26]
+  +- score after trick 10: 94 pts
+Game Finished. Total Point Loss: 10 (D:6 O:4) | Final score: 94 pts
+
+  >> Game 1 (Grand) summary:
+       Perfect Play  : 96 pts
+       Avg Only      : 90 pts  WIN   total_loss=6  (D=6 O=0)
+       Avg+Heuristic : 94 pts  WIN   total_loss=10  (D=6 O=4)
+
+================================================================================
+GAME 2  (Grand)
+================================================================================
+
+--- Heuristic Analysis (Deal Selection Criteria) ---
+  Game type selected  : Grand
+
+  Original 12-card hand (before skat discard, in transformed suit space):
+       [[CJ SJ HJ CA CT C8 C7 ST SK H7 DK DQ]]
+  Optimal skat discard: ST SK
+  Post-discard 10-card hand: [[CJ SJ HJ CA CT C8 C7 ST SK H7 DK DQ]] minus [ST SK]
+
+  1) Biddability check (pre-discard, on the full 12-card hand)
+       Pre-Discard: T=7 J=3 S=2 → BIDDABLE (50k-sample heuristic)
+       Meaning: T=Jacks+longest_suit, J=Jacks, S=Aces+attached_Tens.
+       BIDDABLE => hand qualifies to bid (50k-sample boundary).
+
+  2) Playability check (post-discard, final 10-card hand)
+       Post-Discard Grand: J=3 S=2 → PLAYABLE (10k-sample heuristic)
+       Meaning (Grand): J=Jacks, S=Aces+attached_Tens.
+       PLAYABLE => post-discard hand wins >=50% in 10k simulations.
+
+  3) PIMC sampling filter used during playout
+       smart-grand (Post-Discard Grand filter, J/S boundary)
+       Only distributions where the declarer's sampled hand passes
+       the Grand post-discard filter (J/S boundary) are accepted.
+
+  4) Trump move heuristic (mode 3 only)
+       Threshold : 2.0 avg-pts
+       Declarer  : within 2.0 pts -> prefer trump card (Grand+Suit)
+       Opponents : no trump preference (Grand game - only 4 Jacks are trump)
+       3rd player: if all threshold-candidates win trick -> play highest value card
+                   if all threshold-candidates lose trick -> play lowest value card
+       Marker '^': appears next to '*' (perf-deviation) when heuristic overrides
+
+Cards Distribution:
+(Sorted for Grand):
+Declarer: [CJ SJ HJ CA CT C8 C7 H7 DK DQ]
+Left    : [CK CQ SA SQ S9 S7 HQ H9 DA D8]
+Right   : [DJ C9 S8 HA HT HK H8 DT D9 D7]
+Skat    : [ST SK]
+Start Player: Declarer
+
+--- 1) Perfect Play (Reference) ---
+Starting Perfect Play...
+  Trick  1  D:H7  L:HQ  R:HA
+  Trick  2  R:DJ  D:CJ  L:D8
+  Trick  3  D:SJ  L:CK  R:C9
+  Trick  4  D:CA  L:CQ  R:S8
+  Trick  5  D:CT  L:S9  R:HT
+  Trick  6  D:DK  L:DA  R:D9
+  Trick  7  L:SA  R:HK  D:HJ
+  Trick  8  D:DQ  L:SQ  R:DT
+  Trick  9  R:H8  D:C8  L:H9
+  Trick 10  L:S7  R:D7  D:C7
+Perfect Play Finished. Result: 75 pts
+
+--- 2) PIMC Average Points Only ---
+Starting PIMC Points Play...
+-- Trick  1 (D leads) ----------------------------------------------------------------
+  D *   PIMC:(!) HJ  perf:H7 opt= 75  loss=1(D)  avgs:[HJ=68  CJ=68  SJ=68  DK=68  DQ=68  CT=66  CA=66  H7=66  C7=59  C8=59]
+  L *   PIMC:(!) CK  perf:H9 opt= 74  loss=4(O)  avgs:[CK=58  CQ=58  SA=57  HQ=57  SQ=56  H9=55  S9=55  S7=55  D8=54  DA=46]
+  R     PIMC:    DJ  perf:DJ opt= 78  loss=0(O)  avgs:[DJ=42]
+  +- score after trick  1: 22 pts
+-- Trick  2 (D leads) ----------------------------------------------------------------
+  D *   PIMC:    DK  perf:CA opt= 78  loss=0(D)  avgs:[DK=72  DQ=72  CA=72  CT=72  H7=71  CJ=66  SJ=66  C8=64  C7=64]
+  L     PIMC:    DA  perf:DA opt= 78  loss=0(O)  avgs:[DA=46  D8=45]
+  R *   PIMC:(!) DT  perf:D9 opt= 78  loss=3(O)  avgs:[DT=52  D7=49  D9=48]
+  +- score after trick  2: 22 pts
+-- Trick  3 (L leads) ----------------------------------------------------------------
+  L *   PIMC:    HQ  perf:CQ opt= 81  loss=0(O)  avgs:[HQ=48  H9=48  D8=48  SQ=47  SA=47  CQ=47  S9=46  S7=41]
+  R     PIMC:    HA  perf:HA opt= 81  loss=0(O)  avgs:[HA=48  HT=47  HK=43  H8=40]
+  D     PIMC:    H7  perf:H7 opt= 81  loss=0(D)  avgs:[H7=81]
+  +- score after trick  3: 22 pts
+-- Trick  4 (R leads) ----------------------------------------------------------------
+  R *   PIMC:    C9  perf:HT opt= 81  loss=0(O)  avgs:[C9=55  S8=54  HT=54  D9=52  D7=52  HK=51  H8=46]
+  D *   PIMC:    CT  perf:CA opt= 81  loss=0(D)  avgs:[CT=81  CA=81  C7=74  C8=74]
+  L     PIMC:    CQ  perf:CQ opt= 81  loss=0(O)  avgs:[CQ=51]
+  +- score after trick  4: 35 pts
+-- Trick  5 (D leads) ----------------------------------------------------------------
+  D *   PIMC:    DQ  perf:CJ opt= 81  loss=0(D)  avgs:[DQ=81  CA=81  SJ=81  C8=81  CJ=81  C7=81]
+  L     PIMC:    D8  perf:D8 opt= 81  loss=0(O)  avgs:[D8=48]
+  R     PIMC:    D9  perf:D9 opt= 81  loss=0(O)  avgs:[D9=48  D7=48]
+  +- score after trick  5: 38 pts
+-- Trick  6 (D leads) ----------------------------------------------------------------
+  D *   PIMC:    C8  perf:CJ opt= 81  loss=0(D)  avgs:[C8=81  CA=81  C7=81  CJ=81  SJ=81]
+  L *   PIMC:    H9  perf:SA opt= 81  loss=0(O)  avgs:[H9=50  S7=47  SQ=47  S9=47  SA=46]
+  R *   PIMC:    D7  perf:HT opt= 81  loss=0(O)  avgs:[D7=39  HK=39  H8=39  HT=39  S8=39]
+  +- score after trick  6: 38 pts
+-- Trick  7 (D leads) ----------------------------------------------------------------
+  D *   PIMC:    CA  perf:CJ opt= 81  loss=0(D)  avgs:[CA=81  C7=81  CJ=81  SJ=81]
+  L     PIMC:    SA  perf:SA opt= 81  loss=0(O)  avgs:[SA=39  S9=39  SQ=39  S7=39]
+  R *   PIMC:    HK  perf:HT opt= 81  loss=0(O)  avgs:[HK=39  HT=39  H8=39  S8=39]
+  +- score after trick  7: 64 pts
+-- Trick  8 (D leads) ----------------------------------------------------------------
+  D     PIMC:    CJ  perf:CJ opt= 81  loss=0(D)  avgs:[CJ=81  C7=81  SJ=81]
+  L *   PIMC:    S7  perf:SQ opt= 81  loss=0(O)  avgs:[S7=39  SQ=39  S9=39]
+  R *   PIMC:    S8  perf:HT opt= 81  loss=0(O)  avgs:[S8=39  H8=39  HT=39]
+  +- score after trick  8: 66 pts
+-- Trick  9 (D leads) ----------------------------------------------------------------
+  D *   PIMC:    C7  perf:SJ opt= 81  loss=0(D)  avgs:[C7=81  SJ=81]
+  L *   PIMC:    S9  perf:SQ opt= 81  loss=0(O)  avgs:[S9=39  SQ=39]
+  R *   PIMC:    H8  perf:HT opt= 81  loss=0(O)  avgs:[H8=39  HT=39]
+  +- score after trick  9: 66 pts
+-- Trick 10 (D leads) ----------------------------------------------------------------
+  D     PIMC:    SJ  perf:SJ opt= 81  loss=0(D)  avgs:[SJ=81]
+  L     PIMC:    SQ  perf:SQ opt= 81  loss=0(O)  avgs:[SQ=39]
+  R     PIMC:    HT  perf:HT opt= 81  loss=0(O)  avgs:[HT=39]
+  +- score after trick 10: 81 pts
+Game Finished. Total Point Loss: 8 (D:1 O:7) | Final score: 81 pts
+
+--- 3) PIMC Average Points + Trump Heuristic (threshold=2.0 pts) ---
+Starting PIMC Points Play...
+-- Trick  1 (D leads) ----------------------------------------------------------------
+  D *   PIMC:(!) SJ  perf:H7 opt= 75  loss=1(D)  avgs:[SJ=67  CJ=67  HJ=67  DK=66  DQ=66  CT=66  CA=66  H7=66  C7=58  C8=58]
+  L *   PIMC:(!) CK  perf:H9 opt= 74  loss=4(O)  avgs:[CK=65  CQ=65  HQ=65  H9=64  SQ=62  S7=62  S9=62  D8=60  SA=60  DA=53]
+  R     PIMC:    DJ  perf:DJ opt= 78  loss=0(O)  avgs:[DJ=52]
+  +- score after trick  1: 22 pts
+-- Trick  2 (D leads) ----------------------------------------------------------------
+  D *   PIMC:    DQ  perf:CA opt= 78  loss=0(D)  avgs:[DQ=72  DK=72  CT=71  CA=71  H7=70  CJ=67  HJ=67  C8=64  C7=64]
+  L     PIMC:    DA  perf:DA opt= 78  loss=0(O)  avgs:[DA=54  D8=53]
+  R *   PIMC:(!) DT  perf:D9 opt= 78  loss=4(O)  avgs:[DT=51  D7=48  D9=47]
+  +- score after trick  2: 22 pts
+-- Trick  3 (L leads) ----------------------------------------------------------------
+  L *   PIMC:    D8  perf:CQ opt= 82  loss=0(O)  avgs:[D8=48  SA=48  SQ=47  CQ=47  S9=46  HQ=44  H9=44  S7=41]
+  R *   PIMC:    D7  perf:D9 opt= 82  loss=0(O)  avgs:[D7=43  D9=43]
+  D     PIMC:    DK  perf:DK opt= 82  loss=0(D)  avgs:[DK=76]
+  +- score after trick  3: 26 pts
+-- Trick  4 (D leads) ----------------------------------------------------------------
+  D  ^  PIMC:    CJ  perf:CJ opt= 82  loss=0(D)  avgs:[CJ=76  HJ=76  CA=76  CT=76  H7=76  C7=69  C8=69]
+  L *   PIMC:    CQ  perf:SA opt= 82  loss=0(O)  avgs:[CQ=51  H9=50  S9=50  HQ=50  S7=50  SQ=50  SA=43]
+  R *   PIMC:    S8  perf:HT opt= 82  loss=0(O)  avgs:[S8=46  C9=45  H8=45  D9=45  HK=45  HT=44  HA=43]
+  +- score after trick  4: 31 pts
+-- Trick  5 (D leads) ----------------------------------------------------------------
+  D *   PIMC:    H7  perf:CA opt= 82  loss=0(D)  avgs:[H7=78  CA=77  CT=77  HJ=74  C7=68  C8=68]
+  L     PIMC:    HQ  perf:HQ opt= 82  loss=0(O)  avgs:[HQ=49  H9=46]
+  R     PIMC:    HA  perf:HA opt= 82  loss=0(O)  avgs:[HA=51  HT=51  HK=46  H8=42]
+  +- score after trick  5: 31 pts
+-- Trick  6 (R leads) ----------------------------------------------------------------
+  R *   PIMC:    C9  perf:HT opt= 82  loss=0(O)  avgs:[C9=52  HT=50  D9=50  HK=49  H8=46]
+  D *   PIMC:    CT  perf:CA opt= 82  loss=0(D)  avgs:[CT=82  CA=82  C7=71  C8=71]
+  L *   PIMC:    H9  perf:SA opt= 82  loss=0(O)  avgs:[H9=51  SQ=45  SA=45  S9=45  S7=45]
+  +- score after trick  6: 41 pts
+-- Trick  7 (D leads) ----------------------------------------------------------------
+  D  ^  PIMC:    HJ  perf:HJ opt= 82  loss=0(D)  avgs:[HJ=82  CA=82  C8=82  C7=82]
+  L *   PIMC:    S9  perf:SA opt= 82  loss=0(O)  avgs:[S9=52  S7=52  SQ=52  SA=47]
+  R *^  PIMC:    H8  perf:HT opt= 82  loss=0(O)  avgs:[H8=38  D9=38  HK=38  HT=38]
+  +- score after trick  7: 43 pts
+-- Trick  8 (D leads) ----------------------------------------------------------------
+  D *   PIMC:    C8  perf:CA opt= 82  loss=0(D)  avgs:[C8=82  CA=82  C7=82]
+  L *   PIMC:    SQ  perf:SA opt= 82  loss=0(O)  avgs:[SQ=43  S7=43  SA=41]
+  R *   PIMC:    D9  perf:HT opt= 82  loss=0(O)  avgs:[D9=38  HK=38  HT=38]
+  +- score after trick  8: 46 pts
+-- Trick  9 (D leads) ----------------------------------------------------------------
+  D     PIMC:    CA  perf:CA opt= 82  loss=0(D)  avgs:[CA=82  C7=82]
+  L *   PIMC:    S7  perf:SA opt= 82  loss=0(O)  avgs:[S7=38  SA=38]
+  R *   PIMC:    HK  perf:HT opt= 82  loss=0(O)  avgs:[HK=38  HT=38]
+  +- score after trick  9: 61 pts
+-- Trick 10 (D leads) ----------------------------------------------------------------
+  D     PIMC:    C7  perf:C7 opt= 82  loss=0(D)  avgs:[C7=82]
+  L     PIMC:    SA  perf:SA opt= 82  loss=0(O)  avgs:[SA=38]
+  R     PIMC:    HT  perf:HT opt= 82  loss=0(O)  avgs:[HT=38]
+  +- score after trick 10: 82 pts
+Game Finished. Total Point Loss: 9 (D:1 O:8) | Final score: 82 pts
+
+  >> Game 2 (Grand) summary:
+       Perfect Play  : 75 pts
+       Avg Only      : 81 pts  WIN   total_loss=8  (D=1 O=7)
+       Avg+Heuristic : 82 pts  WIN   total_loss=9  (D=1 O=8)
+
+================================================================================
+GAME 3  (Grand)
+================================================================================
+
+--- Heuristic Analysis (Deal Selection Criteria) ---
+  Game type selected  : Grand
+
+  Original 12-card hand (before skat discard, in transformed suit space):
+       [[CJ SJ DJ CK C9 SA SK HT HQ H9 H8 H7]]
+  Optimal skat discard: CK SK
+  Post-discard 10-card hand: [[CJ SJ DJ CK C9 SA SK HT HQ H9 H8 H7]] minus [CK SK]
+
+  1) Biddability check (pre-discard, on the full 12-card hand)
+       Pre-Discard: T=8 J=3 S=1 → BIDDABLE (50k-sample heuristic)
+       Meaning: T=Jacks+longest_suit, J=Jacks, S=Aces+attached_Tens.
+       BIDDABLE => hand qualifies to bid (50k-sample boundary).
+
+  2) Playability check (post-discard, final 10-card hand)
+       Post-Discard Grand: J=3 S=1 → not playable (10k-sample heuristic)
+       Meaning (Grand): J=Jacks, S=Aces+attached_Tens.
+       PLAYABLE => post-discard hand wins >=50% in 10k simulations.
+
+  3) PIMC sampling filter used during playout
+       smart-grand (Post-Discard Grand filter, J/S boundary)
+       Only distributions where the declarer's sampled hand passes
+       the Grand post-discard filter (J/S boundary) are accepted.
+
+  4) Trump move heuristic (mode 3 only)
+       Threshold : 2.0 avg-pts
+       Declarer  : within 2.0 pts -> prefer trump card (Grand+Suit)
+       Opponents : no trump preference (Grand game - only 4 Jacks are trump)
+       3rd player: if all threshold-candidates win trick -> play highest value card
+                   if all threshold-candidates lose trick -> play lowest value card
+       Marker '^': appears next to '*' (perf-deviation) when heuristic overrides
+
+Cards Distribution:
+(Sorted for Grand):
+Declarer: [CJ SJ DJ C9 SA HT HQ H9 H8 H7]
+Left    : [HJ CA CT S8 HA HK DA DT DK D7]
+Right   : [CQ C8 C7 ST SQ S9 S7 DQ D9 D8]
+Skat    : [CK SK]
+Start Player: Declarer
+
+--- 1) Perfect Play (Reference) ---
+Starting Perfect Play...
+  Trick  1  D:CJ  L:HJ  R:DQ
+  Trick  2  D:SA  L:S8  R:S9
+  Trick  3  D:H9  L:HK  R:ST
+  Trick  4  L:CA  R:CQ  D:C9
+  Trick  5  L:HA  R:SQ  D:H8
+  Trick  6  L:DA  R:D9  D:SJ
+  Trick  7  D:DJ  L:CT  R:C8
+  Trick  8  D:HT  L:DT  R:C7
+  Trick  9  D:HQ  L:DK  R:S7
+  Trick 10  D:H7  L:D7  R:D8
+Perfect Play Finished. Result: 78 pts
+
+--- 2) PIMC Average Points Only ---
+Starting PIMC Points Play...
+-- Trick  1 (D leads) ----------------------------------------------------------------
+  D *   PIMC:    SA  perf:CJ opt= 78  loss=0(D)  avgs:[SA=77  H9=76  H8=76  H7=76  CJ=75  SJ=75  HQ=73  HT=66  C9=66  DJ=56]
+  L     PIMC:    S8  perf:S8 opt= 78  loss=0(O)  avgs:[S8=54]
+  R *   PIMC:    S7  perf:SQ opt= 78  loss=0(O)  avgs:[S7=44  S9=44  SQ=43  ST=37]
+  +- score after trick  1: 19 pts
+-- Trick  2 (D leads) ----------------------------------------------------------------
+  D *   PIMC:    H8  perf:CJ opt= 78  loss=0(D)  avgs:[H8=72  H7=72  H9=72  SJ=71  CJ=71  HQ=69  HT=62  C9=55  DJ=45]
+  L     PIMC:    HK  perf:HK opt= 78  loss=0(O)  avgs:[HK=60  HA=59]
+  R     PIMC:    ST  perf:ST opt= 78  loss=0(O)  avgs:[ST=60  DQ=59  SQ=59  D8=58  D9=58  C8=58  C7=58  S9=58  CQ=56]
+  +- score after trick  2: 19 pts
+-- Trick  3 (L leads) ----------------------------------------------------------------
+  L *   PIMC:(!) CT  perf:HJ opt= 78  loss=1(O)  avgs:[CT=96  CA=96  DK=96  D7=94  DT=94  DA=94  HA=92  HJ=92]
+  R *   PIMC:(!) C7  perf:CQ opt= 79  loss=3(O)  avgs:[C7=52  C8=52  CQ=50]
+  D     PIMC:    C9  perf:C9 opt= 82  loss=0(D)  avgs:[C9=75]
+  +- score after trick  3: 19 pts
+-- Trick  4 (L leads) ----------------------------------------------------------------
+  L *   PIMC:    HA  perf:HJ opt= 82  loss=0(O)  avgs:[HA=100  HJ=99  DK=99  DT=98  DA=98  D7=98  CA=96]
+  R *   PIMC:    SQ  perf:CQ opt= 82  loss=0(O)  avgs:[SQ=57  CQ=57  DQ=56  S9=55  C8=55  D9=55  D8=55]
+  D     PIMC:    H9  perf:H9 opt= 82  loss=0(D)  avgs:[H9=82  H7=82  HQ=79  HT=72]
+  +- score after trick  4: 19 pts
+-- Trick  5 (L leads) ----------------------------------------------------------------
+  L *   PIMC:    DK  perf:HJ opt= 82  loss=0(O)  avgs:[DK=92  DT=91  DA=91  D7=91  CA=90  HJ=90]
+  R *   PIMC:    D9  perf:DQ opt= 82  loss=0(O)  avgs:[D9=56  D8=56  DQ=55]
+  D     PIMC:    CJ  perf:CJ opt= 82  loss=0(D)  avgs:[CJ=82  DJ=82  SJ=82  H7=78  HQ=75  HT=68]
+  +- score after trick  5: 25 pts
+-- Trick  6 (D leads) ----------------------------------------------------------------
+  D     PIMC:    SJ  perf:SJ opt= 82  loss=0(D)  avgs:[SJ=82  H7=69  DJ=67  HQ=66  HT=59]
+  L     PIMC:    HJ  perf:HJ opt= 82  loss=0(O)  avgs:[HJ=45]
+  R     PIMC:    CQ  perf:CQ opt= 82  loss=0(O)  avgs:[CQ=42  DQ=42  S9=42  C8=42  D8=42]
+  +- score after trick  6: 32 pts
+-- Trick  7 (D leads) ----------------------------------------------------------------
+  D *   PIMC:    HT  perf:DJ opt= 82  loss=0(D)  avgs:[HT=82  H7=82  DJ=82  HQ=82]
+  L *   PIMC:    DA  perf:CA opt= 82  loss=0(O)  avgs:[DA=38  DT=38  CA=38  D7=38]
+  R *   PIMC:    D8  perf:DQ opt= 82  loss=0(O)  avgs:[D8=50  C8=50  S9=50  DQ=48]
+  +- score after trick  7: 53 pts
+-- Trick  8 (D leads) ----------------------------------------------------------------
+  D     PIMC:    DJ  perf:DJ opt= 82  loss=0(D)  avgs:[DJ=82  H7=82  HQ=82]
+  L *   PIMC:    D7  perf:CA opt= 82  loss=0(O)  avgs:[D7=38  DT=38  CA=38]
+  R *   PIMC:    S9  perf:DQ opt= 82  loss=0(O)  avgs:[S9=38  C8=38  DQ=38]
+  +- score after trick  8: 55 pts
+-- Trick  9 (D leads) ----------------------------------------------------------------
+  D *   PIMC:    H7  perf:HQ opt= 82  loss=0(D)  avgs:[H7=82  HQ=82]
+  L *   PIMC:    DT  perf:CA opt= 82  loss=0(O)  avgs:[DT=38  CA=38]
+  R     PIMC:    DQ  perf:DQ opt= 82  loss=0(O)  avgs:[DQ=38  C8=38]
+  +- score after trick  9: 68 pts
+-- Trick 10 (D leads) ----------------------------------------------------------------
+  D     PIMC:    HQ  perf:HQ opt= 82  loss=0(D)  avgs:[HQ=82]
+  L     PIMC:    CA  perf:CA opt= 82  loss=0(O)  avgs:[CA=38]
+  R     PIMC:    C8  perf:C8 opt= 82  loss=0(O)  avgs:[C8=38]
+  +- score after trick 10: 82 pts
+Game Finished. Total Point Loss: 4 (D:0 O:4) | Final score: 82 pts
+
+--- 3) PIMC Average Points + Trump Heuristic (threshold=2.0 pts) ---
+Starting PIMC Points Play...
+-- Trick  1 (D leads) ----------------------------------------------------------------
+  D *   PIMC:    SA  perf:CJ opt= 78  loss=0(D)  avgs:[SA=79  H8=77  H7=77  H9=77  SJ=76  CJ=76  HQ=74  HT=67  C9=67  DJ=55]
+  L     PIMC:    S8  perf:S8 opt= 78  loss=0(O)  avgs:[S8=54]
+  R *   PIMC:    S7  perf:SQ opt= 78  loss=0(O)  avgs:[S7=60  S9=60  SQ=58  ST=51]
+  +- score after trick  1: 19 pts
+-- Trick  2 (D leads) ----------------------------------------------------------------
+  D  ^  PIMC:    CJ  perf:CJ opt= 78  loss=0(D)  avgs:[CJ=75  SJ=75  H8=77  H9=77  H7=77  HQ=74  HT=67  C9=64  DJ=52]
+  L     PIMC:    HJ  perf:HJ opt= 78  loss=0(O)  avgs:[HJ=57]
+  R *   PIMC:    S9  perf:SQ opt= 78  loss=0(O)  avgs:[S9=44  C7=43  C8=43  D8=43  D9=43  SQ=43  DQ=42  CQ=41  ST=36]
+  +- score after trick  2: 23 pts
+-- Trick  3 (D leads) ----------------------------------------------------------------
+  D *   PIMC:    H7  perf:H9 opt= 78  loss=0(D)  avgs:[H7=81  H9=81  H8=81  HQ=78  HT=71  C9=70  DJ=63  SJ=63]
+  L     PIMC:    HK  perf:HK opt= 78  loss=0(O)  avgs:[HK=54  HA=53]
+  R *^  PIMC:    SQ  perf:ST opt= 78  loss=0(O)  avgs:[SQ=48  DQ=48  ST=49  D9=47  D8=47  C8=46  C7=46  CQ=45]
+  +- score after trick  3: 23 pts
+-- Trick  4 (L leads) ----------------------------------------------------------------
+  L *   PIMC:    DA  perf:CA opt= 78  loss=0(O)  avgs:[DA=21  CT=21  D7=21  CA=21  HA=21  DT=21  DK=21]
+  R     PIMC:    DQ  perf:DQ opt= 78  loss=0(O)  avgs:[DQ=59  D8=58  D9=58]
+  D *   PIMC:    C9  perf:SJ opt= 78  loss=0(D)  avgs:[C9=77  SJ=75  DJ=75  H9=61  H8=61  HQ=58  HT=51]
+  +- score after trick  4: 23 pts
+-- Trick  5 (L leads) ----------------------------------------------------------------
+  L *   PIMC:    DK  perf:CA opt= 78  loss=0(O)  avgs:[DK=42  HA=42  D7=42  CT=42  DT=42  CA=42]
+  R *   PIMC:    D8  perf:D9 opt= 78  loss=0(O)  avgs:[D8=64  D9=64]
+  D     PIMC:    SJ  perf:SJ opt= 78  loss=0(D)  avgs:[SJ=77  DJ=77  H8=73  H9=73  HQ=70  HT=63]
+  +- score after trick  5: 29 pts
+-- Trick  6 (D leads) ----------------------------------------------------------------
+  D     PIMC:    H9  perf:H9 opt= 78  loss=0(D)  avgs:[H9=77  H8=77  HQ=74  HT=67  DJ=31]
+  L     PIMC:    HA  perf:HA opt= 78  loss=0(O)  avgs:[HA=42]
+  R *^  PIMC:(!) C8  perf:ST opt= 78  loss=10(O)  avgs:[C8=58  C7=58  CQ=60  ST=59  D9=55]
+  +- score after trick  6: 29 pts
+-- Trick  7 (L leads) ----------------------------------------------------------------
+  L *   PIMC:    CT  perf:CA opt= 88  loss=0(O)  avgs:[CT=32  D7=32  CA=32  DT=32]
+  R     PIMC:    CQ  perf:CQ opt= 88  loss=0(O)  avgs:[CQ=37  C7=37]
+  D     PIMC:    DJ  perf:DJ opt= 88  loss=0(D)  avgs:[DJ=88  H8=75  HQ=72  HT=65]
+  +- score after trick  7: 44 pts
+-- Trick  8 (D leads) ----------------------------------------------------------------
+  D *   PIMC:    HQ  perf:HT opt= 88  loss=0(D)  avgs:[HQ=88  HT=88  H8=88]
+  L *   PIMC:    DT  perf:CA opt= 88  loss=0(O)  avgs:[DT=32  CA=32  D7=32]
+  R *   PIMC:    C7  perf:ST opt= 88  loss=0(O)  avgs:[C7=32  D9=32  ST=32]
+  +- score after trick  8: 57 pts
+-- Trick  9 (D leads) ----------------------------------------------------------------
+  D *   PIMC:    H8  perf:HT opt= 88  loss=0(D)  avgs:[H8=88  HT=88]
+  L *   PIMC:    D7  perf:CA opt= 88  loss=0(O)  avgs:[D7=32  CA=32]
+  R *^  PIMC:    D9  perf:ST opt= 88  loss=0(O)  avgs:[D9=32  ST=32]
+  +- score after trick  9: 57 pts
+-- Trick 10 (D leads) ----------------------------------------------------------------
+  D     PIMC:    HT  perf:HT opt= 88  loss=0(D)  avgs:[HT=88]
+  L     PIMC:    CA  perf:CA opt= 88  loss=0(O)  avgs:[CA=32]
+  R     PIMC:    ST  perf:ST opt= 88  loss=0(O)  avgs:[ST=32]
+  +- score after trick 10: 88 pts
+Game Finished. Total Point Loss: 10 (D:0 O:10) | Final score: 88 pts
+
+  >> Game 3 (Grand) summary:
+       Perfect Play  : 78 pts
+       Avg Only      : 82 pts  WIN   total_loss=4  (D=0 O=4)
+       Avg+Heuristic : 88 pts  WIN   total_loss=10  (D=0 O=10)
+
+================================================================================
+GAME 4  (Grand)
+================================================================================
+
+--- Heuristic Analysis (Deal Selection Criteria) ---
+  Game type selected  : Grand
+
+  Original 12-card hand (before skat discard, in transformed suit space):
+       [[CJ SJ DJ CT SK SQ S7 DA DT DK D9 D7]]
+  Optimal skat discard: CT DA
+  Post-discard 10-card hand: [[CJ SJ DJ CT SK SQ S7 DA DT DK D9 D7]] minus [CT DA]
+
+  1) Biddability check (pre-discard, on the full 12-card hand)
+       Pre-Discard: T=8 J=3 S=2 → BIDDABLE (50k-sample heuristic)
+       Meaning: T=Jacks+longest_suit, J=Jacks, S=Aces+attached_Tens.
+       BIDDABLE => hand qualifies to bid (50k-sample boundary).
+
+  2) Playability check (post-discard, final 10-card hand)
+       Post-Discard Grand: J=3 S=0 → not playable (10k-sample heuristic)
+       Meaning (Grand): J=Jacks, S=Aces+attached_Tens.
+       PLAYABLE => post-discard hand wins >=50% in 10k simulations.
+
+  3) PIMC sampling filter used during playout
+       smart-grand (Post-Discard Grand filter, J/S boundary)
+       Only distributions where the declarer's sampled hand passes
+       the Grand post-discard filter (J/S boundary) are accepted.
+
+  4) Trump move heuristic (mode 3 only)
+       Threshold : 2.0 avg-pts
+       Declarer  : within 2.0 pts -> prefer trump card (Grand+Suit)
+       Opponents : no trump preference (Grand game - only 4 Jacks are trump)
+       3rd player: if all threshold-candidates win trick -> play highest value card
+                   if all threshold-candidates lose trick -> play lowest value card
+       Marker '^': appears next to '*' (perf-deviation) when heuristic overrides
+
+Cards Distribution:
+(Sorted for Grand):
+Declarer: [CJ SJ DJ SK SQ S7 DT DK D9 D7]
+Left    : [CK CQ C9 C8 SA S8 HT HQ H8 DQ]
+Right   : [HJ CA C7 ST S9 HA HK H9 H7 D8]
+Skat    : [CT DA]
+Start Player: Declarer
+
+--- 1) Perfect Play (Reference) ---
+Starting Perfect Play...
+  Trick  1  D:DT  L:DQ  R:D8
+  Trick  2  D:SQ  L:SA  R:ST
+  Trick  3  L:HT  R:HA  D:CJ
+  Trick  4  D:SJ  L:CK  R:HJ
+  Trick  5  D:DJ  L:CQ  R:CA
+  Trick  6  D:SK  L:S8  R:S9
+  Trick  7  D:DK  L:HQ  R:HK
+  Trick  8  D:S7  L:C9  R:C7
+  Trick  9  D:D9  L:C8  R:H9
+  Trick 10  D:D7  L:H8  R:H7
+Perfect Play Finished. Result: 96 pts
+
+--- 2) PIMC Average Points Only ---
+Starting PIMC Points Play...
+-- Trick  1 (D leads) ----------------------------------------------------------------
+  D *   PIMC:    S7  perf:DT opt= 96  loss=0(D)  avgs:[S7=82  DK=82  DT=81  CJ=81  SJ=81  SQ=80  SK=80  D7=66  D9=66  DJ=61]
+  L     PIMC:    SA  perf:SA opt= 96  loss=0(O)  avgs:[SA=53  S8=52]
+  R     PIMC:    S9  perf:S9 opt= 96  loss=0(O)  avgs:[S9=86  ST=86]
+  +- score after trick  1: 21 pts
+-- Trick  2 (L leads) ----------------------------------------------------------------
+  L *   PIMC:    CQ  perf:HT opt= 96  loss=0(O)  avgs:[CQ=43  C8=43  C9=43  CK=42  DQ=42  S8=42  HQ=39  H8=39  HT=34]
+  R     PIMC:    CA  perf:CA opt= 96  loss=0(O)  avgs:[CA=83  C7=74]
+  D     PIMC:    CJ  perf:CJ opt= 96  loss=0(D)  avgs:[CJ=92  SJ=92  DJ=92  D9=74  D7=74  SK=71  SQ=71  DK=62  DT=56]
+  +- score after trick  2: 37 pts
+-- Trick  3 (D leads) ----------------------------------------------------------------
+  D *   PIMC:    SQ  perf:DT opt= 96  loss=0(D)  avgs:[SQ=89  DK=89  SK=88  DT=88  SJ=87  D7=70  D9=70  DJ=67]
+  L     PIMC:    S8  perf:S8 opt= 96  loss=0(O)  avgs:[S8=64]
+  R     PIMC:    ST  perf:ST opt= 96  loss=0(O)  avgs:[ST=71]
+  +- score after trick  3: 37 pts
+-- Trick  4 (R leads) ----------------------------------------------------------------
+  R *   PIMC:    HA  perf:HJ opt= 96  loss=0(O)  avgs:[HA=69  HJ=69  D8=67  C7=66  H9=62  H7=62  HK=62]
+  D     PIMC:    DJ  perf:DJ opt= 96  loss=0(D)  avgs:[DJ=96  SJ=81  D9=76  D7=76  SK=72  DK=67  DT=62]
+  L *   PIMC:    H8  perf:HT opt= 96  loss=0(O)  avgs:[H8=39  HQ=38  HT=35]
+  +- score after trick  4: 50 pts
+-- Trick  5 (D leads) ----------------------------------------------------------------
+  D     PIMC:    SJ  perf:SJ opt= 96  loss=0(D)  avgs:[SJ=96  DK=94  DT=93  SK=83  D9=60  D7=60]
+  L *   PIMC:    DQ  perf:HT opt= 96  loss=0(O)  avgs:[DQ=33  C9=32  C8=32  CK=31  HQ=31  HT=30]
+  R     PIMC:    HJ  perf:HJ opt= 96  loss=0(O)  avgs:[HJ=24]
+  +- score after trick  5: 57 pts
+-- Trick  6 (D leads) ----------------------------------------------------------------
+  D *   PIMC:    D9  perf:DT opt= 96  loss=0(D)  avgs:[D9=96  DK=96  DT=96  SK=96  D7=57]
+  L *   PIMC:    C8  perf:HT opt= 96  loss=0(O)  avgs:[C8=38  HQ=38  HT=38  CK=38  C9=38]
+  R     PIMC:    D8  perf:D8 opt= 96  loss=0(O)  avgs:[D8=24]
+  +- score after trick  6: 57 pts
+-- Trick  7 (D leads) ----------------------------------------------------------------
+  D *   PIMC:    D7  perf:DT opt= 96  loss=0(D)  avgs:[D7=96  SK=96  DK=96  DT=96]
+  L     PIMC:    HT  perf:HT opt= 96  loss=0(O)  avgs:[HT=24  CK=24  C9=24  HQ=24]
+  R *   PIMC:    C7  perf:HK opt= 96  loss=0(O)  avgs:[C7=24  HK=24  H9=24  H7=24]
+  +- score after trick  7: 67 pts
+-- Trick  8 (D leads) ----------------------------------------------------------------
+  D *   PIMC:    SK  perf:DT opt= 96  loss=0(D)  avgs:[SK=96  DK=96  DT=96]
+  L *   PIMC:    C9  perf:CK opt= 96  loss=0(O)  avgs:[C9=24  CK=24  HQ=24]
+  R *   PIMC:    H7  perf:HK opt= 96  loss=0(O)  avgs:[H7=24  HK=24  H9=24]
+  +- score after trick  8: 71 pts
+-- Trick  9 (D leads) ----------------------------------------------------------------
+  D     PIMC:    DT  perf:DT opt= 96  loss=0(D)  avgs:[DT=96  DK=96]
+  L *   PIMC:    HQ  perf:CK opt= 96  loss=0(O)  avgs:[HQ=24  CK=24]
+  R     PIMC:    HK  perf:HK opt= 96  loss=0(O)  avgs:[HK=24  H9=24]
+  +- score after trick  9: 88 pts
+-- Trick 10 (D leads) ----------------------------------------------------------------
+  D     PIMC:    DK  perf:DK opt= 96  loss=0(D)  avgs:[DK=96]
+  L     PIMC:    CK  perf:CK opt= 96  loss=0(O)  avgs:[CK=24]
+  R     PIMC:    H9  perf:H9 opt= 96  loss=0(O)  avgs:[H9=24]
+  +- score after trick 10: 96 pts
+Game Finished. Total Point Loss: 0 (D:0 O:0) | Final score: 96 pts
+
+--- 3) PIMC Average Points + Trump Heuristic (threshold=2.0 pts) ---
+Starting PIMC Points Play...
+-- Trick  1 (D leads) ----------------------------------------------------------------
+  D *^  PIMC:(!) CJ  perf:DT opt= 96  loss=10(D)  avgs:[CJ=80  SJ=80  S7=81  DK=81  DT=80  SQ=77  SK=77  D9=64  D7=64  DJ=61]
+  L *   PIMC:(!) DQ  perf:S8 opt= 86  loss=10(O)  avgs:[DQ=43  C8=43  C9=43  CQ=43  CK=42  HQ=42  H8=42  S8=41  HT=35  SA=31]
+  R     PIMC:    HJ  perf:HJ opt= 96  loss=0(O)  avgs:[HJ=63]
+  +- score after trick  1: 28 pts
+-- Trick  2 (D leads) ----------------------------------------------------------------
+  D *   PIMC:    S7  perf:SQ opt= 96  loss=0(D)  avgs:[S7=84  SQ=81  DT=81  DK=81  D9=81  SK=81  D7=67  SJ=67  DJ=67]
+  L     PIMC:    SA  perf:SA opt= 96  loss=0(O)  avgs:[SA=49  S8=48]
+  R  ^  PIMC:    S9  perf:S9 opt= 96  loss=0(O)  avgs:[S9=70  ST=71]
+  +- score after trick  2: 28 pts
+-- Trick  3 (L leads) ----------------------------------------------------------------
+  L *   PIMC:    C9  perf:HT opt= 96  loss=0(O)  avgs:[C9=41  C8=41  CQ=41  S8=41  CK=40  HQ=38  H8=38  HT=34]
+  R     PIMC:    CA  perf:CA opt= 96  loss=0(O)  avgs:[CA=69  C7=63]
+  D *   PIMC:    DJ  perf:SJ opt= 96  loss=0(D)  avgs:[DJ=91  SJ=91  D9=79  D7=79  SK=77  SQ=77  DK=75  DT=69]
+  +- score after trick  3: 41 pts
+-- Trick  4 (D leads) ----------------------------------------------------------------
+  D     PIMC:    SQ  perf:SQ opt= 96  loss=0(D)  avgs:[SQ=89  SK=89  DK=88  D9=88  DT=88  D7=71  SJ=68]
+  L     PIMC:    S8  perf:S8 opt= 96  loss=0(O)  avgs:[S8=65]
+  R     PIMC:    ST  perf:ST opt= 96  loss=0(O)  avgs:[ST=60]
+  +- score after trick  4: 41 pts
+-- Trick  5 (R leads) ----------------------------------------------------------------
+  R *   PIMC:    D8  perf:HA opt= 96  loss=0(O)  avgs:[D8=57  C7=52  HA=52  H7=45  H9=45  HK=44]
+  D     PIMC:    DT  perf:DT opt= 96  loss=0(D)  avgs:[DT=96  D9=96  DK=96  D7=87]
+  L *   PIMC:    C8  perf:HT opt= 96  loss=0(O)  avgs:[C8=52  H8=51  CQ=51  HQ=50  CK=50  HT=42]
+  +- score after trick  5: 51 pts
+-- Trick  6 (D leads) ----------------------------------------------------------------
+  D     PIMC:    SJ  perf:SJ opt= 96  loss=0(D)  avgs:[SJ=96  D9=96  D7=96  DK=96  SK=96]
+  L *   PIMC:    H8  perf:HT opt= 96  loss=0(O)  avgs:[H8=48  CQ=47  HQ=47  CK=47  HT=39]
+  R *   PIMC:    H7  perf:HA opt= 96  loss=0(O)  avgs:[H7=36  C7=36  H9=36  HK=36  HA=29]
+  +- score after trick  6: 53 pts
+-- Trick  7 (D leads) ----------------------------------------------------------------
+  D *   PIMC:    D7  perf:SK opt= 96  loss=0(D)  avgs:[D7=96  SK=96  DK=96  D9=96]
+  L     PIMC:    HT  perf:HT opt= 96  loss=0(O)  avgs:[HT=58  HQ=57  CQ=49  CK=49]
+  R *^  PIMC:    H9  perf:HA opt= 96  loss=0(O)  avgs:[H9=37  C7=37  HK=37  HA=32]
+  +- score after trick  7: 63 pts
+-- Trick  8 (D leads) ----------------------------------------------------------------
+  D *   PIMC:    DK  perf:SK opt= 96  loss=0(D)  avgs:[DK=96  D9=96  SK=96]
+  L *   PIMC:    HQ  perf:CK opt= 96  loss=0(O)  avgs:[HQ=32  CQ=32  CK=31]
+  R *^  PIMC:    C7  perf:HA opt= 96  loss=0(O)  avgs:[C7=24  HK=24  HA=24]
+  +- score after trick  8: 70 pts
+-- Trick  9 (D leads) ----------------------------------------------------------------
+  D *   PIMC:    D9  perf:SK opt= 96  loss=0(D)  avgs:[D9=96  SK=96]
+  L *   PIMC:    CQ  perf:CK opt= 96  loss=0(O)  avgs:[CQ=30  CK=29]
+  R *   PIMC:    HK  perf:HA opt= 96  loss=0(O)  avgs:[HK=24  HA=24]
+  +- score after trick  9: 77 pts
+-- Trick 10 (D leads) ----------------------------------------------------------------
+  D     PIMC:    SK  perf:SK opt= 96  loss=0(D)  avgs:[SK=96]
+  L     PIMC:    CK  perf:CK opt= 96  loss=0(O)  avgs:[CK=24]
+  R     PIMC:    HA  perf:HA opt= 96  loss=0(O)  avgs:[HA=24]
+  +- score after trick 10: 96 pts
+Game Finished. Total Point Loss: 20 (D:10 O:10) | Final score: 96 pts
+
+  >> Game 4 (Grand) summary:
+       Perfect Play  : 96 pts
+       Avg Only      : 96 pts  WIN   total_loss=0  (D=0 O=0)
+       Avg+Heuristic : 96 pts  WIN   total_loss=20  (D=10 O=10)
+
+================================================================================
+GAME 5  (Grand)
+================================================================================
+
+--- Heuristic Analysis (Deal Selection Criteria) ---
+  Game type selected  : Grand
+
+  Original 12-card hand (before skat discard, in transformed suit space):
+       [[CJ CA CT C7 SA S7 HA HK H8 H7 DT D8]]
+  Optimal skat discard: CA DT
+  Post-discard 10-card hand: [[CJ CA CT C7 SA S7 HA HK H8 H7 DT D8]] minus [CA DT]
+
+  1) Biddability check (pre-discard, on the full 12-card hand)
+       Pre-Discard: T=5 J=1 S=4 → BIDDABLE (50k-sample heuristic)
+       Meaning: T=Jacks+longest_suit, J=Jacks, S=Aces+attached_Tens.
+       BIDDABLE => hand qualifies to bid (50k-sample boundary).
+
+  2) Playability check (post-discard, final 10-card hand)
+       Post-Discard Grand: J=1 S=2 → not playable (10k-sample heuristic)
+       Meaning (Grand): J=Jacks, S=Aces+attached_Tens.
+       PLAYABLE => post-discard hand wins >=50% in 10k simulations.
+
+  3) PIMC sampling filter used during playout
+       smart-grand (Post-Discard Grand filter, J/S boundary)
+       Only distributions where the declarer's sampled hand passes
+       the Grand post-discard filter (J/S boundary) are accepted.
+
+  4) Trump move heuristic (mode 3 only)
+       Threshold : 2.0 avg-pts
+       Declarer  : within 2.0 pts -> prefer trump card (Grand+Suit)
+       Opponents : no trump preference (Grand game - only 4 Jacks are trump)
+       3rd player: if all threshold-candidates win trick -> play highest value card
+                   if all threshold-candidates lose trick -> play lowest value card
+       Marker '^': appears next to '*' (perf-deviation) when heuristic overrides
+
+Cards Distribution:
+(Sorted for Grand):
+Declarer: [CJ CT C7 SA S7 HA HK H8 H7 D8]
+Left    : [SJ CQ C9 C8 SQ H9 DA DK DQ D7]
+Right   : [HJ DJ CK ST SK S9 S8 HT HQ D9]
+Skat    : [CA DT]
+Start Player: Declarer
+
+--- 1) Perfect Play (Reference) ---
+Starting Perfect Play...
+  Trick  1  D:CJ  L:SJ  R:HJ
+  Trick  2  D:SA  L:SQ  R:S9
+  Trick  3  D:HA  L:H9  R:HQ
+  Trick  4  D:CT  L:C9  R:CK
+  Trick  5  D:HK  L:DA  R:HT
+  Trick  6  R:DJ  D:C7  L:DK
+  Trick  7  R:ST  D:S7  L:CQ
+  Trick  8  R:SK  D:H8  L:DQ
+  Trick  9  R:S8  D:H7  L:C8
+  Trick 10  R:D9  D:D8  L:D7
+Perfect Play Finished. Result: 69 pts
+
+--- 2) PIMC Average Points Only ---
+Starting PIMC Points Play...
+-- Trick  1 (D leads) ----------------------------------------------------------------
+  D     PIMC:    CJ  perf:CJ opt= 69  loss=0(D)  avgs:[CJ=70  CT=68  SA=68  HA=67  D8=65  S7=60  C7=56  H7=50  H8=50  HK=49]
+  L     PIMC:    SJ  perf:SJ opt= 69  loss=0(O)  avgs:[SJ=36]
+  R     PIMC:    HJ  perf:HJ opt= 69  loss=0(O)  avgs:[HJ=66  DJ=66]
+  +- score after trick  1: 27 pts
+-- Trick  2 (D leads) ----------------------------------------------------------------
+  D *   PIMC:    HA  perf:SA opt= 69  loss=0(D)  avgs:[HA=71  CT=68  SA=66  D8=62  S7=56  C7=56  H8=50  H7=50  HK=50]
+  L     PIMC:    H9  perf:H9 opt= 69  loss=0(O)  avgs:[H9=32]
+  R     PIMC:    HQ  perf:HQ opt= 69  loss=0(O)  avgs:[HQ=58  HT=49]
+  +- score after trick  2: 41 pts
+-- Trick  3 (D leads) ----------------------------------------------------------------
+  D     PIMC:    SA  perf:SA opt= 69  loss=0(D)  avgs:[SA=65  CT=64  D8=59  HK=58  H8=58  H7=58  C7=54  S7=53]
+  L     PIMC:    SQ  perf:SQ opt= 69  loss=0(O)  avgs:[SQ=33]
+  R     PIMC:    S9  perf:S9 opt= 69  loss=0(O)  avgs:[S9=55  S8=55  SK=51  ST=45]
+  +- score after trick  3: 55 pts
+-- Trick  4 (D leads) ----------------------------------------------------------------
+  D     PIMC:    CT  perf:CT opt= 69  loss=0(D)  avgs:[CT=66  HK=55  H8=55  H7=55  D8=55  C7=55  S7=55]
+  L     PIMC:    C9  perf:C9 opt= 69  loss=0(O)  avgs:[C9=24  C8=24  CQ=23]
+  R     PIMC:    CK  perf:CK opt= 69  loss=0(O)  avgs:[CK=45]
+  +- score after trick  4: 69 pts
+-- Trick  5 (D leads) ----------------------------------------------------------------
+  D *   PIMC:    H8  perf:HK opt= 69  loss=0(D)  avgs:[H8=69  S7=69  H7=69  D8=69  C7=69  HK=69]
+  L     PIMC:    DA  perf:DA opt= 69  loss=0(O)  avgs:[DA=28  DK=27  DQ=27  CQ=25  C8=24  D7=24]
+  R     PIMC:    HT  perf:HT opt= 69  loss=0(O)  avgs:[HT=49]
+  +- score after trick  5: 69 pts
+-- Trick  6 (R leads) ----------------------------------------------------------------
+  R *   PIMC:    ST  perf:DJ opt= 69  loss=0(O)  avgs:[ST=49  D9=49  DJ=49  SK=49  S8=49]
+  D     PIMC:    S7  perf:S7 opt= 69  loss=0(D)  avgs:[S7=69]
+  L *   PIMC:    DQ  perf:DK opt= 69  loss=0(O)  avgs:[DQ=49  DK=49  CQ=48  D7=48  C8=48]
+  +- score after trick  6: 69 pts
+-- Trick  7 (R leads) ----------------------------------------------------------------
+  R     PIMC:    DJ  perf:DJ opt= 69  loss=0(O)  avgs:[DJ=50  S8=50  SK=50  D9=50]
+  D     PIMC:    HK  perf:HK opt= 69  loss=0(D)  avgs:[HK=69  H7=69  C7=69  D8=69]
+  L *   PIMC:    C8  perf:DK opt= 69  loss=0(O)  avgs:[C8=51  CQ=51  D7=51  DK=51]
+  +- score after trick  7: 69 pts
+-- Trick  8 (R leads) ----------------------------------------------------------------
+  R *   PIMC:    S8  perf:SK opt= 69  loss=0(O)  avgs:[S8=50  SK=50  D9=48]
+  D *   PIMC:    H7  perf:C7 opt= 69  loss=0(D)  avgs:[H7=69  D8=69  C7=69]
+  L *   PIMC:    D7  perf:DK opt= 69  loss=0(O)  avgs:[D7=51  DK=51  CQ=51]
+  +- score after trick  8: 69 pts
+-- Trick  9 (R leads) ----------------------------------------------------------------
+  R     PIMC:    SK  perf:SK opt= 69  loss=0(O)  avgs:[SK=49  D9=45]
+  D     PIMC:    C7  perf:C7 opt= 69  loss=0(D)  avgs:[C7=69  D8=69]
+  L *   PIMC:    CQ  perf:DK opt= 69  loss=0(O)  avgs:[CQ=51  DK=50]
+  +- score after trick  9: 69 pts
+-- Trick 10 (R leads) ----------------------------------------------------------------
+  R     PIMC:    D9  perf:D9 opt= 69  loss=0(O)  avgs:[D9=49]
+  D     PIMC:    D8  perf:D8 opt= 69  loss=0(D)  avgs:[D8=69]
+  L     PIMC:    DK  perf:DK opt= 69  loss=0(O)  avgs:[DK=51]
+  +- score after trick 10: 69 pts
+Game Finished. Total Point Loss: 0 (D:0 O:0) | Final score: 69 pts
+
+--- 3) PIMC Average Points + Trump Heuristic (threshold=2.0 pts) ---
+Starting PIMC Points Play...
+-- Trick  1 (D leads) ----------------------------------------------------------------
+  D     PIMC:    CJ  perf:CJ opt= 69  loss=0(D)  avgs:[CJ=67  CT=67  SA=66  HA=65  D8=63  S7=60  C7=56  H8=51  H7=51  HK=50]
+  L     PIMC:    SJ  perf:SJ opt= 69  loss=0(O)  avgs:[SJ=35]
+  R *   PIMC:    DJ  perf:HJ opt= 69  loss=0(O)  avgs:[DJ=69  HJ=69]
+  +- score after trick  1: 27 pts
+-- Trick  2 (D leads) ----------------------------------------------------------------
+  D *   PIMC:    CT  perf:SA opt= 69  loss=0(D)  avgs:[CT=64  SA=64  HA=63  D8=61  S7=56  C7=56  H8=53  H7=53  HK=52]
+  L *   PIMC:    C8  perf:C9 opt= 69  loss=0(O)  avgs:[C8=23  C9=23  CQ=23]
+  R     PIMC:    CK  perf:CK opt= 69  loss=0(O)  avgs:[CK=56]
+  +- score after trick  2: 41 pts
+-- Trick  3 (D leads) ----------------------------------------------------------------
+  D     PIMC:    SA  perf:SA opt= 69  loss=0(D)  avgs:[SA=73  HA=72  D8=62  C7=62  H7=53  H8=53  HK=53  S7=51]
+  L     PIMC:    SQ  perf:SQ opt= 69  loss=0(O)  avgs:[SQ=17]
+  R     PIMC:    S9  perf:S9 opt= 69  loss=0(O)  avgs:[S9=52  S8=52  SK=48  ST=42]
+  +- score after trick  3: 55 pts
+-- Trick  4 (D leads) ----------------------------------------------------------------
+  D     PIMC:    HA  perf:HA opt= 69  loss=0(D)  avgs:[HA=70  D8=56  S7=56  C7=56  HK=56  H7=56  H8=56]
+  L     PIMC:    H9  perf:H9 opt= 69  loss=0(O)  avgs:[H9=25]
+  R     PIMC:    HQ  perf:HQ opt= 69  loss=0(O)  avgs:[HQ=48  HT=38]
+  +- score after trick  4: 69 pts
+-- Trick  5 (D leads) ----------------------------------------------------------------
+  D *   PIMC:    C7  perf:HK opt= 69  loss=0(D)  avgs:[C7=69  H8=69  HK=69  H7=69  D8=69  S7=69]
+  L     PIMC:    CQ  perf:CQ opt= 69  loss=0(O)  avgs:[CQ=26  C9=23]
+  R *   PIMC:    D9  perf:HJ opt= 69  loss=0(O)  avgs:[D9=51  HT=51  ST=49  SK=49  S8=49  HJ=44]
+  +- score after trick  5: 69 pts
+-- Trick  6 (L leads) ----------------------------------------------------------------
+  L *   PIMC:    D7  perf:DA opt= 69  loss=0(O)  avgs:[D7=19  DA=18  DK=17  DQ=17  C9=15]
+  R     PIMC:    HJ  perf:HJ opt= 69  loss=0(O)  avgs:[HJ=51  S8=45  SK=41  HT=35  ST=35]
+  D     PIMC:    D8  perf:D8 opt= 69  loss=0(D)  avgs:[D8=69]
+  +- score after trick  6: 69 pts
+-- Trick  7 (R leads) ----------------------------------------------------------------
+  R *   PIMC:    HT  perf:ST opt= 69  loss=0(O)  avgs:[HT=51  SK=51  ST=51  S8=51]
+  D *   PIMC:    H8  perf:HK opt= 69  loss=0(D)  avgs:[H8=69  HK=69  H7=69]
+  L *^  PIMC:    DQ  perf:DA opt= 69  loss=0(O)  avgs:[DQ=40  DK=40  DA=40  C9=37]
+  +- score after trick  7: 69 pts
+-- Trick  8 (R leads) ----------------------------------------------------------------
+  R *   PIMC:    SK  perf:ST opt= 69  loss=0(O)  avgs:[SK=51  ST=51  S8=51]
+  D     PIMC:    S7  perf:S7 opt= 69  loss=0(D)  avgs:[S7=69]
+  L *^  PIMC:    DK  perf:DA opt= 69  loss=0(O)  avgs:[DK=42  DA=44  C9=40]
+  +- score after trick  8: 69 pts
+-- Trick  9 (R leads) ----------------------------------------------------------------
+  R *   PIMC:    S8  perf:ST opt= 69  loss=0(O)  avgs:[S8=51  ST=51]
+  D *   PIMC:    H7  perf:HK opt= 69  loss=0(D)  avgs:[H7=69  HK=69]
+  L *^  PIMC:    C9  perf:DA opt= 69  loss=0(O)  avgs:[C9=51  DA=51]
+  +- score after trick  9: 69 pts
+-- Trick 10 (R leads) ----------------------------------------------------------------
+  R     PIMC:    ST  perf:ST opt= 69  loss=0(O)  avgs:[ST=51]
+  D     PIMC:    HK  perf:HK opt= 69  loss=0(D)  avgs:[HK=69]
+  L     PIMC:    DA  perf:DA opt= 69  loss=0(O)  avgs:[DA=51]
+  +- score after trick 10: 69 pts
+Game Finished. Total Point Loss: 0 (D:0 O:0) | Final score: 69 pts
+
+  >> Game 5 (Grand) summary:
+       Perfect Play  : 69 pts
+       Avg Only      : 69 pts  WIN   total_loss=0  (D=0 O=0)
+       Avg+Heuristic : 69 pts  WIN   total_loss=0  (D=0 O=0)
+
+================================================================================
+GAME 6  (Clubs)
+================================================================================
+
+--- Heuristic Analysis (Deal Selection Criteria) ---
+  Game type selected  : Clubs
+
+  Original 12-card hand (before skat discard, in transformed suit space):
+       [[CJ SJ CA CT CK C8 ST S9 S8 HT H7 D9]]
+  Optimal skat discard: HT D9
+  Post-discard 10-card hand: [[CJ SJ CA CT CK C8 ST S9 S8 HT H7 D9]] minus [HT D9]
+
+  1) Biddability check (pre-discard, on the full 12-card hand)
+       Pre-Discard: T=6 J=2 S=2 → BIDDABLE (50k-sample heuristic)
+       Meaning: T=Jacks+longest_suit, J=Jacks, S=Aces+attached_Tens.
+       BIDDABLE => hand qualifies to bid (50k-sample boundary).
+
+  2) Playability check (post-discard, final 10-card hand)
+       Post-Discard Suit/Clubs: TC=6 S=0 → not playable (10k-sample heuristic)
+       Meaning (Suit/Clubs): TC=total trump count (Jacks+Clubs), S=side strength.
+       PLAYABLE => post-discard hand wins >=50% in 10k simulations.
+
+  3) PIMC sampling filter used during playout
+       smart-suit (Post-Discard Suit/Clubs filter, TC/S boundary)
+       Only distributions where the declarer's sampled hand passes
+       the Suit/Clubs post-discard filter (TC/S boundary) are accepted.
+
+  4) Trump move heuristic (mode 3 only)
+       Threshold : 2.0 avg-pts
+       Declarer  : within 2.0 pts -> prefer trump card (Grand+Suit)
+       Opponents : within 2.0 pts -> prefer non-trump card (Suit game)
+       3rd player: if all threshold-candidates win trick -> play highest value card
+                   if all threshold-candidates lose trick -> play lowest value card
+       Marker '^': appears next to '*' (perf-deviation) when heuristic overrides
+
+Cards Distribution:
+(Sorted for Suit):
+Declarer: [CJ SJ CA CT CK C8 ST S9 S8 H7]
+Left    : [HJ DJ C7 SA S7 HK H9 H8 DT D7]
+Right   : [CQ C9 SK SQ HA HQ DA DK DQ D8]
+Skat    : [HT D9]
+Start Player: Declarer
+
+--- 1) Perfect Play (Reference) ---
+Starting Perfect Play...
+  Trick  1  D:S9  L:S7  R:SK
+  Trick  2  R:DK  D:H7  L:DT
+  Trick  3  L:SA  R:SQ  D:S8
+  Trick  4  L:D7  R:DA  D:CA
+  Trick  5  D:CJ  L:HJ  R:C9
+  Trick  6  D:CK  L:DJ  R:CQ
+  Trick  7  L:HK  R:HA  D:SJ
+  Trick  8  D:CT  L:C7  R:HQ
+  Trick  9  D:ST  L:H9  R:DQ
+  Trick 10  D:C8  L:H8  R:D8
+Perfect Play Finished. Result: 79 pts
+
+--- 2) PIMC Average Points Only ---
+Starting PIMC Points Play...
+-- Trick  1 (D leads) ----------------------------------------------------------------
+  D *   PIMC:(!) CJ  perf:S9 opt= 79  loss=4(D)  avgs:[CJ=65  SJ=65  S8=64  S9=64  C8=63  H7=63  CK=61  ST=58  CT=56  CA=55]
+  L *   PIMC:    C7  perf:HJ opt= 75  loss=0(O)  avgs:[C7=51  DJ=50  HJ=50]
+  R     PIMC:    C9  perf:C9 opt= 75  loss=0(O)  avgs:[C9=41  CQ=40]
+  +- score after trick  1: 12 pts
+-- Trick  2 (D leads) ----------------------------------------------------------------
+  D *   PIMC:(!) SJ  perf:C8 opt= 75  loss=1(D)  avgs:[SJ=63  S9=62  S8=62  C8=62  H7=60  CK=59  ST=56  CT=53  CA=52]
+  L *   PIMC:    DJ  perf:HJ opt= 74  loss=0(O)  avgs:[DJ=48  HJ=48]
+  R     PIMC:    CQ  perf:CQ opt= 74  loss=0(O)  avgs:[CQ=39]
+  +- score after trick  2: 19 pts
+-- Trick  3 (D leads) ----------------------------------------------------------------
+  D     PIMC:    C8  perf:C8 opt= 74  loss=0(D)  avgs:[C8=67  S8=67  S9=67  H7=64  CK=63  ST=60  CT=57  CA=56]
+  L     PIMC:    HJ  perf:HJ opt= 74  loss=0(O)  avgs:[HJ=48]
+  R     PIMC:    DA  perf:DA opt= 74  loss=0(O)  avgs:[DA=35  SK=34  DK=34  SQ=34  DQ=33  HQ=31  HA=31  D8=30]
+  +- score after trick  3: 19 pts
+-- Trick  4 (L leads) ----------------------------------------------------------------
+  L *   PIMC:(!) DT  perf:HK opt= 74  loss=1(O)  avgs:[DT=49  H9=47  H8=47  HK=47  SA=46  D7=42  S7=42]
+  R     PIMC:    DK  perf:DK opt= 75  loss=0(O)  avgs:[DK=40  DQ=39  D8=37]
+  D *   PIMC:(!) CT  perf:H7 opt= 75  loss=1(D)  avgs:[CT=68  CA=68  CK=68  H7=66  S8=52  S9=52  ST=49]
+  +- score after trick  4: 43 pts
+-- Trick  5 (D leads) ----------------------------------------------------------------
+  D     PIMC:    S9  perf:S9 opt= 74  loss=0(D)  avgs:[S9=70  S8=70  H7=64  ST=63  CA=63  CK=63]
+  L     PIMC:    S7  perf:S7 opt= 74  loss=0(O)  avgs:[S7=40  SA=38]
+  R     PIMC:    SK  perf:SK opt= 74  loss=0(O)  avgs:[SK=31  SQ=30]
+  +- score after trick  5: 43 pts
+-- Trick  6 (R leads) ----------------------------------------------------------------
+  R *   PIMC:    SQ  perf:HA opt= 74  loss=0(O)  avgs:[SQ=34  HA=31  DQ=28  HQ=26  D8=25]
+  D     PIMC:    S8  perf:S8 opt= 74  loss=0(D)  avgs:[S8=70  ST=69]
+  L     PIMC:    SA  perf:SA opt= 74  loss=0(O)  avgs:[SA=34]
+  +- score after trick  6: 43 pts
+-- Trick  7 (L leads) ----------------------------------------------------------------
+  L *   PIMC:(!) D7  perf:HK opt= 74  loss=12(O)  avgs:[D7=35  HK=32  H8=31  H9=31]
+  R     PIMC:    DQ  perf:DQ opt= 86  loss=0(O)  avgs:[DQ=63  D8=63]
+  D     PIMC:    H7  perf:H7 opt= 86  loss=0(D)  avgs:[H7=86  CK=75  CA=75  ST=62]
+  +- score after trick  7: 43 pts
+-- Trick  8 (R leads) ----------------------------------------------------------------
+  R     PIMC:    HA  perf:HA opt= 86  loss=0(O)  avgs:[HA=67  D8=66  HQ=63]
+  D     PIMC:    CA  perf:CA opt= 86  loss=0(D)  avgs:[CA=86  CK=86  ST=61]
+  L *   PIMC:    H8  perf:HK opt= 86  loss=0(O)  avgs:[H8=34  HK=34  H9=34]
+  +- score after trick  8: 65 pts
+-- Trick  9 (D leads) ----------------------------------------------------------------
+  D     PIMC:    ST  perf:ST opt= 86  loss=0(D)  avgs:[ST=86  CK=86]
+  L *   PIMC:    H9  perf:HK opt= 86  loss=0(O)  avgs:[H9=34  HK=34]
+  R *   PIMC:    D8  perf:HQ opt= 86  loss=0(O)  avgs:[D8=34  HQ=34]
+  +- score after trick  9: 75 pts
+-- Trick 10 (D leads) ----------------------------------------------------------------
+  D     PIMC:    CK  perf:CK opt= 86  loss=0(D)  avgs:[CK=86]
+  L     PIMC:    HK  perf:HK opt= 86  loss=0(O)  avgs:[HK=34]
+  R     PIMC:    HQ  perf:HQ opt= 86  loss=0(O)  avgs:[HQ=34]
+  +- score after trick 10: 86 pts
+Game Finished. Total Point Loss: 19 (D:6 O:13) | Final score: 86 pts
+
+--- 3) PIMC Average Points + Trump Heuristic (threshold=2.0 pts) ---
+Starting PIMC Points Play...
+-- Trick  1 (D leads) ----------------------------------------------------------------
+  D *   PIMC:(!) CJ  perf:S9 opt= 79  loss=4(D)  avgs:[CJ=63  SJ=63  C8=60  H7=60  S9=60  S8=60  CK=58  ST=56  CT=53  CA=52]
+  L *   PIMC:    C7  perf:HJ opt= 75  loss=0(O)  avgs:[C7=51  DJ=50  HJ=50]
+  R     PIMC:    C9  perf:C9 opt= 75  loss=0(O)  avgs:[C9=40  CQ=39]
+  +- score after trick  1: 12 pts
+-- Trick  2 (D leads) ----------------------------------------------------------------
+  D  ^  PIMC:    C8  perf:C8 opt= 75  loss=0(D)  avgs:[C8=66  SJ=65  S9=67  S8=67  CK=63  H7=62  ST=60  CT=57  CA=56]
+  L *   PIMC:    DJ  perf:HJ opt= 75  loss=0(O)  avgs:[DJ=54  HJ=54]
+  R     PIMC:    CQ  perf:CQ opt= 75  loss=0(O)  avgs:[CQ=39]
+  +- score after trick  2: 12 pts
+-- Trick  3 (L leads) ----------------------------------------------------------------
+  L     PIMC:    HJ  perf:HJ opt= 75  loss=0(O)  avgs:[HJ=49  SA=46  HK=45  H9=44  H8=44  DT=44  D7=42  S7=42]
+  R     PIMC:    SQ  perf:SQ opt= 75  loss=0(O)  avgs:[SQ=38  D8=38  DQ=38  SK=38  DK=38  HQ=37  HA=30  DA=28]
+  D     PIMC:    SJ  perf:SJ opt= 75  loss=0(D)  avgs:[SJ=78  CK=69  CT=63  CA=62]
+  +- score after trick  3: 19 pts
+-- Trick  4 (D leads) ----------------------------------------------------------------
+  D *   PIMC:    H7  perf:CA opt= 75  loss=0(D)  avgs:[H7=74  S9=73  S8=73  CA=71  CT=71  CK=71  ST=65]
+  L     PIMC:    HK  perf:HK opt= 75  loss=0(O)  avgs:[HK=40  H8=39  H9=39]
+  R     PIMC:    HA  perf:HA opt= 75  loss=0(O)  avgs:[HA=41  HQ=37]
+  +- score after trick  4: 19 pts
+-- Trick  5 (R leads) ----------------------------------------------------------------
+  R     PIMC:    SK  perf:SK opt= 75  loss=0(O)  avgs:[SK=40  DA=40  HQ=36  DK=33  DQ=33  D8=32]
+  D *   PIMC:(!) S9  perf:ST opt= 75  loss=1(D)  avgs:[S9=76  S8=76  ST=76]
+  L *   PIMC:(!) SA  perf:S7 opt= 74  loss=11(O)  avgs:[SA=43  S7=37]
+  +- score after trick  5: 19 pts
+-- Trick  6 (L leads) ----------------------------------------------------------------
+  L *   PIMC:    S7  perf:DT opt= 85  loss=0(O)  avgs:[S7=43  DT=39  D7=39  H8=38  H9=38]
+  R *   PIMC:    D8  perf:DA opt= 85  loss=0(O)  avgs:[D8=65  HQ=64  DQ=64  DK=64  DA=55]
+  D  ^  PIMC:    ST  perf:ST opt= 85  loss=0(D)  avgs:[ST=85  S8=85]
+  +- score after trick  6: 29 pts
+-- Trick  7 (D leads) ----------------------------------------------------------------
+  D *   PIMC:    CK  perf:CA opt= 85  loss=0(D)  avgs:[CK=85  CA=85  CT=85  S8=85]
+  L *   PIMC:    H8  perf:DT opt= 85  loss=0(O)  avgs:[H8=35  D7=35  H9=35  DT=35]
+  R *   PIMC:    DQ  perf:DA opt= 85  loss=0(O)  avgs:[DQ=47  DK=47  DA=43  HQ=42]
+  +- score after trick  7: 36 pts
+-- Trick  8 (D leads) ----------------------------------------------------------------
+  D *   PIMC:    CT  perf:CA opt= 85  loss=0(D)  avgs:[CT=85  CA=85  S8=85]
+  L     PIMC:    DT  perf:DT opt= 85  loss=0(O)  avgs:[DT=35  H9=35  D7=35]
+  R *^  PIMC:    HQ  perf:DA opt= 85  loss=0(O)  avgs:[HQ=40  DK=40  DA=37]
+  +- score after trick  8: 59 pts
+-- Trick  9 (D leads) ----------------------------------------------------------------
+  D  ^  PIMC:    CA  perf:CA opt= 85  loss=0(D)  avgs:[CA=85  S8=85]
+  L     PIMC:    H9  perf:H9 opt= 85  loss=0(O)  avgs:[H9=35  D7=35]
+  R *   PIMC:    DK  perf:DA opt= 85  loss=0(O)  avgs:[DK=39  DA=36]
+  +- score after trick  9: 74 pts
+-- Trick 10 (D leads) ----------------------------------------------------------------
+  D     PIMC:    S8  perf:S8 opt= 85  loss=0(D)  avgs:[S8=85]
+  L     PIMC:    D7  perf:D7 opt= 85  loss=0(O)  avgs:[D7=35]
+  R     PIMC:    DA  perf:DA opt= 85  loss=0(O)  avgs:[DA=35]
+  +- score after trick 10: 85 pts
+Game Finished. Total Point Loss: 16 (D:5 O:11) | Final score: 85 pts
+
+  >> Game 6 (Clubs) summary:
+       Perfect Play  : 79 pts
+       Avg Only      : 86 pts  WIN   total_loss=19  (D=6 O=13)
+       Avg+Heuristic : 85 pts  WIN   total_loss=16  (D=5 O=11)
+
+================================================================================
+GAME 7  (Spades)
+================================================================================
+
+--- Heuristic Analysis (Deal Selection Criteria) ---
+  Game type selected  : Spades
+
+  Original 12-card hand (before skat discard, in transformed suit space):
+       [[SJ HJ DJ CT CQ C9 SK HT HK H9 DA DT]]
+  Optimal skat discard: HT HK
+  Post-discard 10-card hand: [[SJ HJ DJ CT CQ C9 SK HT HK H9 DA DT]] minus [HT HK]
+
+  1) Biddability check (pre-discard, on the full 12-card hand)
+       Pre-Discard: T=6 J=3 S=2 → BIDDABLE (50k-sample heuristic)
+       Meaning: T=Jacks+longest_suit, J=Jacks, S=Aces+attached_Tens.
+       BIDDABLE => hand qualifies to bid (50k-sample boundary).
+
+  2) Playability check (post-discard, final 10-card hand)
+       Post-Discard Suit/Clubs: TC=6 S=2 → PLAYABLE (10k-sample heuristic)
+       Meaning (Suit/Clubs): TC=total trump count (Jacks+Clubs), S=side strength.
+       PLAYABLE => post-discard hand wins >=50% in 10k simulations.
+
+  3) PIMC sampling filter used during playout
+       smart-suit (Post-Discard Suit/Clubs filter, TC/S boundary)
+       Only distributions where the declarer's sampled hand passes
+       the Suit/Clubs post-discard filter (TC/S boundary) are accepted.
+
+  4) Trump move heuristic (mode 3 only)
+       Threshold : 2.0 avg-pts
+       Declarer  : within 2.0 pts -> prefer trump card (Grand+Suit)
+       Opponents : within 2.0 pts -> prefer non-trump card (Suit game)
+       3rd player: if all threshold-candidates win trick -> play highest value card
+                   if all threshold-candidates lose trick -> play lowest value card
+       Marker '^': appears next to '*' (perf-deviation) when heuristic overrides
+
+Cards Distribution:
+(Sorted for Suit):
+Declarer: [SJ HJ DJ CT CQ C9 SK H9 DA DT]
+Left    : [CA C8 SA ST SQ S8 S7 H7 DK D7]
+Right   : [CJ CK C7 S9 HA HQ H8 DQ D9 D8]
+Skat    : [HT HK]
+Start Player: Declarer
+
+--- 1) Perfect Play (Reference) ---
+Starting Perfect Play...
+  Trick  1  D:SJ  L:CA  R:CJ
+  Trick  2  R:HA  D:H9  L:H7
+  Trick  3  R:CK  D:HJ  L:C8
+  Trick  4  D:DJ  L:ST  R:C7
+  Trick  5  D:DA  L:DK  R:DQ
+  Trick  6  D:DT  L:D7  R:D9
+  Trick  7  D:SK  L:SA  R:S9
+  Trick  8  L:SQ  R:HQ  D:CT
+  Trick  9  D:CQ  L:S8  R:H8
+  Trick 10  D:C9  L:S7  R:D8
+Perfect Play Finished. Result: 79 pts
+
+--- 2) PIMC Average Points Only ---
+Starting PIMC Points Play...
+-- Trick  1 (D leads) ----------------------------------------------------------------
+  D     PIMC:    SJ  perf:SJ opt= 79  loss=0(D)  avgs:[SJ=66  HJ=66  DJ=66  DA=64  DT=64  H9=63  SK=63  C9=60  CQ=59  CT=52]
+  L *   PIMC:    C8  perf:CA opt= 79  loss=0(O)  avgs:[C8=38  CA=37]
+  R *   PIMC:    C7  perf:CK opt= 79  loss=0(O)  avgs:[C7=41  CK=39  CJ=36]
+  +- score after trick  1: 16 pts
+-- Trick  2 (D leads) ----------------------------------------------------------------
+  D *   PIMC:(!) DJ  perf:DA opt= 79  loss=2(D)  avgs:[DJ=70  HJ=70  DA=69  DT=69  SK=67  H9=67  C9=66  CQ=64  CT=57]
+  L     PIMC:    CA  perf:CA opt= 77  loss=0(O)  avgs:[CA=35]
+  R     PIMC:    CJ  perf:CJ opt= 77  loss=0(O)  avgs:[CJ=43  CK=29]
+  +- score after trick  2: 16 pts
+-- Trick  3 (R leads) ----------------------------------------------------------------
+  R *   PIMC:(!) S9  perf:CK opt= 77  loss=2(O)  avgs:[S9=46  CK=42  HA=42  D9=41  D8=41  DQ=41  HQ=39  H8=34]
+  D     PIMC:    SK  perf:SK opt= 79  loss=0(D)  avgs:[SK=77]
+  L     PIMC:    SA  perf:SA opt= 79  loss=0(O)  avgs:[SA=53  ST=52  S7=38  SQ=38  S8=38]
+  +- score after trick  3: 16 pts
+-- Trick  4 (L leads) ----------------------------------------------------------------
+  L *   PIMC:    H7  perf:ST opt= 79  loss=0(O)  avgs:[H7=50  DK=50  D7=48  SQ=48  ST=48  S7=47  S8=47]
+  R     PIMC:    HA  perf:HA opt= 79  loss=0(O)  avgs:[HA=47  HQ=44  H8=40]
+  D     PIMC:    H9  perf:H9 opt= 79  loss=0(D)  avgs:[H9=79]
+  +- score after trick  4: 16 pts
+-- Trick  5 (R leads) ----------------------------------------------------------------
+  R *   PIMC:    HQ  perf:CK opt= 79  loss=0(O)  avgs:[HQ=56  D8=55  D9=55  DQ=55  H8=54  CK=54]
+  D *   PIMC:    CT  perf:HJ opt= 79  loss=0(D)  avgs:[CT=79  HJ=79  C9=77  CQ=76  DT=64  DA=63]
+  L *   PIMC:    S8  perf:ST opt= 79  loss=0(O)  avgs:[S8=55  SQ=55  D7=55  S7=55  ST=53  DK=52]
+  +- score after trick  5: 29 pts
+-- Trick  6 (D leads) ----------------------------------------------------------------
+  D *   PIMC:    DA  perf:HJ opt= 79  loss=0(D)  avgs:[DA=79  DT=79  HJ=79  C9=68  CQ=65]
+  L *   PIMC:    D7  perf:DK opt= 79  loss=0(O)  avgs:[D7=51  DK=49]
+  R *   PIMC:    D9  perf:DQ opt= 79  loss=0(O)  avgs:[D9=49  D8=49  DQ=47]
+  +- score after trick  6: 40 pts
+-- Trick  7 (D leads) ----------------------------------------------------------------
+  D     PIMC:    HJ  perf:HJ opt= 79  loss=0(D)  avgs:[HJ=79  DT=77  C9=67  CQ=64]
+  L *   PIMC:    DK  perf:ST opt= 79  loss=0(O)  avgs:[DK=51  SQ=48  S7=48  ST=48]
+  R     PIMC:    CK  perf:CK opt= 79  loss=0(O)  avgs:[CK=49]
+  +- score after trick  7: 50 pts
+-- Trick  8 (D leads) ----------------------------------------------------------------
+  D     PIMC:    DT  perf:DT opt= 79  loss=0(D)  avgs:[DT=79  CQ=79  C9=79]
+  L *   PIMC:    S7  perf:ST opt= 79  loss=0(O)  avgs:[S7=41  SQ=41  ST=41]
+  R     PIMC:    DQ  perf:DQ opt= 79  loss=0(O)  avgs:[DQ=41  D8=41]
+  +- score after trick  8: 63 pts
+-- Trick  9 (D leads) ----------------------------------------------------------------
+  D *   PIMC:    C9  perf:CQ opt= 79  loss=0(D)  avgs:[C9=79  CQ=79]
+  L *   PIMC:    SQ  perf:ST opt= 79  loss=0(O)  avgs:[SQ=41  ST=41]
+  R     PIMC:    H8  perf:H8 opt= 79  loss=0(O)  avgs:[H8=41  D8=41]
+  +- score after trick  9: 66 pts
+-- Trick 10 (D leads) ----------------------------------------------------------------
+  D     PIMC:    CQ  perf:CQ opt= 79  loss=0(D)  avgs:[CQ=79]
+  L     PIMC:    ST  perf:ST opt= 79  loss=0(O)  avgs:[ST=41]
+  R     PIMC:    D8  perf:D8 opt= 79  loss=0(O)  avgs:[D8=41]
+  +- score after trick 10: 79 pts
+Game Finished. Total Point Loss: 4 (D:2 O:2) | Final score: 79 pts
+
+--- 3) PIMC Average Points + Trump Heuristic (threshold=2.0 pts) ---
+Starting PIMC Points Play...
+-- Trick  1 (D leads) ----------------------------------------------------------------
+  D *   PIMC:    HJ  perf:SJ opt= 79  loss=0(D)  avgs:[HJ=68  DJ=68  SJ=68  DA=68  DT=68  SK=67  H9=66  C9=61  CQ=60  CT=52]
+  L *   PIMC:    C8  perf:CA opt= 79  loss=0(O)  avgs:[C8=39  CA=39]
+  R *   PIMC:    C7  perf:CK opt= 79  loss=0(O)  avgs:[C7=45  CK=44  CJ=40]
+  +- score after trick  1: 16 pts
+-- Trick  2 (D leads) ----------------------------------------------------------------
+  D *   PIMC:(!) SJ  perf:DA opt= 79  loss=2(D)  avgs:[SJ=67  DJ=67  DA=66  DT=66  SK=65  H9=65  C9=60  CQ=58  CT=51]
+  L     PIMC:    CA  perf:CA opt= 77  loss=0(O)  avgs:[CA=41]
+  R     PIMC:    CJ  perf:CJ opt= 77  loss=0(O)  avgs:[CJ=41  CK=27]
+  +- score after trick  2: 16 pts
+-- Trick  3 (R leads) ----------------------------------------------------------------
+  R *   PIMC:(!) S9  perf:CK opt= 77  loss=2(O)  avgs:[S9=38  CK=36  D9=35  D8=35  DQ=35  HA=34  HQ=32  H8=29]
+  D     PIMC:    SK  perf:SK opt= 79  loss=0(D)  avgs:[SK=78]
+  L     PIMC:    SA  perf:SA opt= 79  loss=0(O)  avgs:[SA=52  ST=52  SQ=37  S7=37  S8=37]
+  +- score after trick  3: 16 pts
+-- Trick  4 (L leads) ----------------------------------------------------------------
+  L *   PIMC:    H7  perf:ST opt= 79  loss=0(O)  avgs:[H7=48  DK=48  SQ=47  D7=47  S8=46  S7=46  ST=46]
+  R     PIMC:    HA  perf:HA opt= 79  loss=0(O)  avgs:[HA=43  HQ=40  H8=37]
+  D     PIMC:    H9  perf:H9 opt= 79  loss=0(D)  avgs:[H9=79]
+  +- score after trick  4: 16 pts
+-- Trick  5 (R leads) ----------------------------------------------------------------
+  R *   PIMC:    HQ  perf:CK opt= 79  loss=0(O)  avgs:[HQ=59  H8=58  D9=57  D8=57  DQ=57  CK=56]
+  D     PIMC:    DJ  perf:DJ opt= 79  loss=0(D)  avgs:[DJ=79  CT=79  C9=77  CQ=76  DT=63  DA=62]
+  L *   PIMC:    S8  perf:ST opt= 79  loss=0(O)  avgs:[S8=53  D7=53  S7=53  SQ=53  ST=51  DK=51]
+  +- score after trick  5: 21 pts
+-- Trick  6 (D leads) ----------------------------------------------------------------
+  D *^  PIMC:    CT  perf:DA opt= 79  loss=0(D)  avgs:[CT=79  DA=79  DT=79  C9=68  CQ=65]
+  L *   PIMC:    SQ  perf:ST opt= 79  loss=0(O)  avgs:[SQ=53  S7=53  ST=53  D7=53  DK=50]
+  R     PIMC:    CK  perf:CK opt= 79  loss=0(O)  avgs:[CK=52]
+  +- score after trick  6: 38 pts
+-- Trick  7 (D leads) ----------------------------------------------------------------
+  D *^  PIMC:    CQ  perf:DA opt= 79  loss=0(D)  avgs:[CQ=79  C9=79  DA=79  DT=79]
+  L     PIMC:    ST  perf:ST opt= 79  loss=0(O)  avgs:[ST=51  S7=51  D7=51  DK=48]
+  R *   PIMC:    H8  perf:DQ opt= 79  loss=0(O)  avgs:[H8=50  D8=50  D9=50  DQ=48]
+  +- score after trick  7: 51 pts
+-- Trick  8 (D leads) ----------------------------------------------------------------
+  D *^  PIMC:    C9  perf:DA opt= 79  loss=0(D)  avgs:[C9=79  DA=79  DT=79]
+  L *   PIMC:    S7  perf:DK opt= 79  loss=0(O)  avgs:[S7=53  D7=49  DK=49]
+  R *   PIMC:    D8  perf:DQ opt= 79  loss=0(O)  avgs:[D8=52  D9=52  DQ=50]
+  +- score after trick  8: 51 pts
+-- Trick  9 (D leads) ----------------------------------------------------------------
+  D     PIMC:    DA  perf:DA opt= 79  loss=0(D)  avgs:[DA=79  DT=79]
+  L *   PIMC:    D7  perf:DK opt= 79  loss=0(O)  avgs:[D7=52  DK=49]
+  R *   PIMC:    D9  perf:DQ opt= 79  loss=0(O)  avgs:[D9=47  DQ=46]
+  +- score after trick  9: 62 pts
+-- Trick 10 (D leads) ----------------------------------------------------------------
+  D     PIMC:    DT  perf:DT opt= 79  loss=0(D)  avgs:[DT=79]
+  L     PIMC:    DK  perf:DK opt= 79  loss=0(O)  avgs:[DK=41]
+  R     PIMC:    DQ  perf:DQ opt= 79  loss=0(O)  avgs:[DQ=41]
+  +- score after trick 10: 79 pts
+Game Finished. Total Point Loss: 4 (D:2 O:2) | Final score: 79 pts
+
+  >> Game 7 (Spades) summary:
+       Perfect Play  : 79 pts
+       Avg Only      : 79 pts  WIN   total_loss=4  (D=2 O=2)
+       Avg+Heuristic : 79 pts  WIN   total_loss=4  (D=2 O=2)
+
+================================================================================
+GAME 8  (Hearts)
+================================================================================
+
+--- Heuristic Analysis (Deal Selection Criteria) ---
+  Game type selected  : Hearts
+
+  Original 12-card hand (before skat discard, in transformed suit space):
+       [[HJ DJ CA CQ C9 C8 ST SK SQ S8 H9 DT]]
+  Optimal skat discard: C9 DT
+  Post-discard 10-card hand: [[HJ DJ CA CQ C9 C8 ST SK SQ S8 H9 DT]] minus [C9 DT]
+
+  1) Biddability check (pre-discard, on the full 12-card hand)
+       Pre-Discard: T=6 J=2 S=1 → BIDDABLE (50k-sample heuristic)
+       Meaning: T=Jacks+longest_suit, J=Jacks, S=Aces+attached_Tens.
+       BIDDABLE => hand qualifies to bid (50k-sample boundary).
+
+  2) Playability check (post-discard, final 10-card hand)
+       Post-Discard Suit/Clubs: TC=6 S=0 → not playable (10k-sample heuristic)
+       Meaning (Suit/Clubs): TC=total trump count (Jacks+Clubs), S=side strength.
+       PLAYABLE => post-discard hand wins >=50% in 10k simulations.
+
+  3) PIMC sampling filter used during playout
+       smart-suit (Post-Discard Suit/Clubs filter, TC/S boundary)
+       Only distributions where the declarer's sampled hand passes
+       the Suit/Clubs post-discard filter (TC/S boundary) are accepted.
+
+  4) Trump move heuristic (mode 3 only)
+       Threshold : 2.0 avg-pts
+       Declarer  : within 2.0 pts -> prefer trump card (Grand+Suit)
+       Opponents : within 2.0 pts -> prefer non-trump card (Suit game)
+       3rd player: if all threshold-candidates win trick -> play highest value card
+                   if all threshold-candidates lose trick -> play lowest value card
+       Marker '^': appears next to '*' (perf-deviation) when heuristic overrides
+
+Cards Distribution:
+(Sorted for Suit):
+Declarer: [HJ DJ CA CQ C9 C8 ST SK SQ S8]
+Left    : [CJ CK C7 SA S7 HK HQ H8 DA D7]
+Right   : [SJ CT S9 HA HT H7 DK DQ D9 D8]
+Skat    : [H9 DT]
+Start Player: Declarer
+
+--- 1) Perfect Play (Reference) ---
+Starting Perfect Play...
+  Trick  1  D:SQ  L:SA  R:S9
+  Trick  2  L:S7  R:CT  D:S8
+  Trick  3  R:SJ  D:HJ  L:CK
+  Trick  4  R:HT  D:DJ  L:HK
+  Trick  5  D:C9  L:CJ  R:HA
+  Trick  6  L:DA  R:DK  D:CA
+  Trick  7  D:CQ  L:C7  R:DQ
+  Trick  8  D:ST  L:HQ  R:H7
+  Trick  9  D:SK  L:H8  R:D9
+  Trick 10  D:C8  L:D7  R:D8
+Perfect Play Finished. Result: 75 pts
+
+--- 2) PIMC Average Points Only ---
+Starting PIMC Points Play...
+-- Trick  1 (D leads) ----------------------------------------------------------------
+  D *   PIMC:(!) HJ  perf:SQ opt= 75  loss=2(D)  avgs:[HJ=71  DJ=71  SQ=67  SK=67  ST=65  C9=63  C8=63  CA=62  CQ=60  S8=52]
+  L     PIMC:    CK  perf:CK opt= 73  loss=0(O)  avgs:[CK=53  C7=52  CJ=48]
+  R     PIMC:    SJ  perf:SJ opt= 73  loss=0(O)  avgs:[SJ=57  CT=42]
+  +- score after trick  1: 10 pts
+-- Trick  2 (R leads) ----------------------------------------------------------------
+  R *   PIMC:(!) S9  perf:CT opt= 73  loss=2(O)  avgs:[S9=57  HT=56  HA=56  DK=55  DQ=55  D9=53  D8=53  CT=52  H7=43]
+  D     PIMC:    SQ  perf:SQ opt= 75  loss=0(D)  avgs:[SQ=74  SK=74  ST=73  S8=71]
+  L     PIMC:    SA  perf:SA opt= 75  loss=0(O)  avgs:[SA=54  S7=47]
+  +- score after trick  2: 10 pts
+-- Trick  3 (L leads) ----------------------------------------------------------------
+  L *   PIMC:(!) HQ  perf:S7 opt= 75  loss=9(O)  avgs:[HQ=57  H8=57  HK=57  DA=57  CJ=56  S7=55  C7=54  D7=49]
+  R *   PIMC:    HT  perf:HA opt= 84  loss=0(O)  avgs:[HT=55  HA=55  H7=52]
+  D *   PIMC:    CQ  perf:CA opt= 84  loss=0(D)  avgs:[CQ=79  C8=78  C9=78  CA=76  DJ=74  S8=64  SK=62  ST=56]
+  +- score after trick  3: 26 pts
+-- Trick  4 (D leads) ----------------------------------------------------------------
+  D     PIMC:    DJ  perf:DJ opt= 84  loss=0(D)  avgs:[DJ=79  S8=77  SK=75  C9=75  C8=75  ST=73  CA=71]
+  L     PIMC:    CJ  perf:CJ opt= 84  loss=0(O)  avgs:[CJ=57  C7=55]
+  R     PIMC:    CT  perf:CT opt= 84  loss=0(O)  avgs:[CT=59]
+  +- score after trick  4: 26 pts
+-- Trick  5 (L leads) ----------------------------------------------------------------
+  L *   PIMC:    C7  perf:DA opt= 84  loss=0(O)  avgs:[C7=74  S7=74  H8=73  HK=72  D7=71  DA=70]
+  R *   PIMC:    H7  perf:HA opt= 84  loss=0(O)  avgs:[H7=54  D9=54  D8=54  DQ=54  DK=53  HA=50]
+  D     PIMC:    CA  perf:CA opt= 84  loss=0(D)  avgs:[CA=84  C9=84  C8=84]
+  +- score after trick  5: 37 pts
+-- Trick  6 (D leads) ----------------------------------------------------------------
+  D *   PIMC:    C8  perf:ST opt= 84  loss=0(D)  avgs:[C8=84  S8=84  SK=84  C9=84  ST=84]
+  L *   PIMC:    S7  perf:DA opt= 84  loss=0(O)  avgs:[S7=66  D7=64  H8=64  HK=63  DA=53]
+  R *   PIMC:    D9  perf:HA opt= 84  loss=0(O)  avgs:[D9=48  D8=48  DQ=47  DK=47  HA=46]
+  +- score after trick  6: 37 pts
+-- Trick  7 (D leads) ----------------------------------------------------------------
+  D *   PIMC:    SK  perf:ST opt= 84  loss=0(D)  avgs:[SK=84  C9=84  S8=84  ST=84]
+  L *   PIMC:    HK  perf:DA opt= 84  loss=0(O)  avgs:[HK=59  H8=58  D7=58  DA=52]
+  R *   PIMC:    D8  perf:HA opt= 84  loss=0(O)  avgs:[D8=36  DK=36  HA=36  DQ=36]
+  +- score after trick  7: 45 pts
+-- Trick  8 (D leads) ----------------------------------------------------------------
+  D     PIMC:    ST  perf:ST opt= 84  loss=0(D)  avgs:[ST=84  C9=84  S8=84]
+  L *   PIMC:    H8  perf:DA opt= 84  loss=0(O)  avgs:[H8=36  D7=36  DA=36]
+  R *   PIMC:    DK  perf:HA opt= 84  loss=0(O)  avgs:[DK=36  DQ=36  HA=36]
+  +- score after trick  8: 59 pts
+-- Trick  9 (D leads) ----------------------------------------------------------------
+  D     PIMC:    C9  perf:C9 opt= 84  loss=0(D)  avgs:[C9=84  S8=84]
+  L *   PIMC:    D7  perf:DA opt= 84  loss=0(O)  avgs:[D7=36  DA=36]
+  R *   PIMC:    DQ  perf:HA opt= 84  loss=0(O)  avgs:[DQ=36  HA=36]
+  +- score after trick  9: 62 pts
+-- Trick 10 (D leads) ----------------------------------------------------------------
+  D     PIMC:    S8  perf:S8 opt= 84  loss=0(D)  avgs:[S8=84]
+  L     PIMC:    DA  perf:DA opt= 84  loss=0(O)  avgs:[DA=36]
+  R     PIMC:    HA  perf:HA opt= 84  loss=0(O)  avgs:[HA=36]
+  +- score after trick 10: 84 pts
+Game Finished. Total Point Loss: 13 (D:2 O:11) | Final score: 84 pts
+
+--- 3) PIMC Average Points + Trump Heuristic (threshold=2.0 pts) ---
+Starting PIMC Points Play...
+-- Trick  1 (D leads) ----------------------------------------------------------------
+  D *   PIMC:(!) DJ  perf:SQ opt= 75  loss=2(D)  avgs:[DJ=71  HJ=71  SQ=69  SK=68  ST=66  C9=65  C8=65  CA=62  CQ=62  S8=55]
+  L     PIMC:    CK  perf:CK opt= 73  loss=0(O)  avgs:[CK=59  C7=58  CJ=54]
+  R     PIMC:    SJ  perf:SJ opt= 73  loss=0(O)  avgs:[SJ=62  CT=44]
+  +- score after trick  1: 10 pts
+-- Trick  2 (R leads) ----------------------------------------------------------------
+  R *   PIMC:(!) S9  perf:CT opt= 73  loss=2(O)  avgs:[S9=60  HT=60  HA=60  DQ=59  DK=59  D9=59  D8=59  CT=58  H7=49]
+  D     PIMC:    SQ  perf:SQ opt= 75  loss=0(D)  avgs:[SQ=76  SK=75  S8=73  ST=73]
+  L     PIMC:    SA  perf:SA opt= 75  loss=0(O)  avgs:[SA=54  S7=48]
+  +- score after trick  2: 10 pts
+-- Trick  3 (L leads) ----------------------------------------------------------------
+  L *   PIMC:(!) HQ  perf:S7 opt= 75  loss=9(O)  avgs:[HQ=58  HK=58  H8=57  DA=57  C7=57  S7=56  CJ=54  D7=49]
+  R     PIMC:    HA  perf:HA opt= 84  loss=0(O)  avgs:[HA=53  HT=53  H7=44]
+  D *   PIMC:    CQ  perf:CA opt= 84  loss=0(D)  avgs:[CQ=85  C9=85  C8=85  CA=80  HJ=79  S8=66  SK=65  ST=59]
+  +- score after trick  3: 27 pts
+-- Trick  4 (D leads) ----------------------------------------------------------------
+  D     PIMC:    HJ  perf:HJ opt= 84  loss=0(D)  avgs:[HJ=76  S8=74  C9=72  C8=72  SK=72  ST=70  CA=69]
+  L     PIMC:    CJ  perf:CJ opt= 84  loss=0(O)  avgs:[CJ=57  C7=55]
+  R     PIMC:    CT  perf:CT opt= 84  loss=0(O)  avgs:[CT=55]
+  +- score after trick  4: 27 pts
+-- Trick  5 (L leads) ----------------------------------------------------------------
+  L *^  PIMC:    HK  perf:DA opt= 84  loss=0(O)  avgs:[HK=65  C7=67  DA=65  H8=65  S7=64  D7=60]
+  R *   PIMC:    H7  perf:HT opt= 84  loss=0(O)  avgs:[H7=56  HT=54]
+  D  ^  PIMC:    CA  perf:CA opt= 84  loss=0(D)  avgs:[CA=84  C9=84  C8=84  S8=79  SK=76  ST=70]
+  +- score after trick  5: 42 pts
+-- Trick  6 (D leads) ----------------------------------------------------------------
+  D *   PIMC:    C8  perf:ST opt= 84  loss=0(D)  avgs:[C8=84  C9=84  S8=84  SK=82  ST=80]
+  L     PIMC:    C7  perf:C7 opt= 84  loss=0(O)  avgs:[C7=66]
+  R *   PIMC:    D9  perf:HT opt= 84  loss=0(O)  avgs:[D9=53  D8=53  DQ=52  DK=52  HT=49]
+  +- score after trick  6: 42 pts
+-- Trick  7 (D leads) ----------------------------------------------------------------
+  D *^  PIMC:    C9  perf:ST opt= 84  loss=0(D)  avgs:[C9=84  ST=84  S8=84  SK=84]
+  L *   PIMC:    S7  perf:DA opt= 84  loss=0(O)  avgs:[S7=67  D7=67  H8=67  DA=49]
+  R *^  PIMC:    D8  perf:HT opt= 84  loss=0(O)  avgs:[D8=51  DQ=51  DK=51  HT=48]
+  +- score after trick  7: 42 pts
+-- Trick  8 (D leads) ----------------------------------------------------------------
+  D *   PIMC:    SK  perf:ST opt= 84  loss=0(D)  avgs:[SK=84  ST=84  S8=84]
+  L *   PIMC:    H8  perf:DA opt= 84  loss=0(O)  avgs:[H8=66  D7=66  DA=56]
+  R *   PIMC:    DQ  perf:HT opt= 84  loss=0(O)  avgs:[DQ=36  DK=36  HT=36]
+  +- score after trick  8: 49 pts
+-- Trick  9 (D leads) ----------------------------------------------------------------
+  D *   PIMC:    S8  perf:ST opt= 84  loss=0(D)  avgs:[S8=84  ST=84]
+  L *   PIMC:    D7  perf:DA opt= 84  loss=0(O)  avgs:[D7=36  DA=36]
+  R *^  PIMC:    DK  perf:HT opt= 84  loss=0(O)  avgs:[DK=36  HT=36]
+  +- score after trick  9: 53 pts
+-- Trick 10 (D leads) ----------------------------------------------------------------
+  D     PIMC:    ST  perf:ST opt= 84  loss=0(D)  avgs:[ST=84]
+  L     PIMC:    DA  perf:DA opt= 84  loss=0(O)  avgs:[DA=36]
+  R     PIMC:    HT  perf:HT opt= 84  loss=0(O)  avgs:[HT=36]
+  +- score after trick 10: 84 pts
+Game Finished. Total Point Loss: 13 (D:2 O:11) | Final score: 84 pts
+
+  >> Game 8 (Hearts) summary:
+       Perfect Play  : 75 pts
+       Avg Only      : 84 pts  WIN   total_loss=13  (D=2 O=11)
+       Avg+Heuristic : 84 pts  WIN   total_loss=13  (D=2 O=11)
+
+================================================================================
+GAME 9  (Diamonds)
+================================================================================
+
+--- Heuristic Analysis (Deal Selection Criteria) ---
+  Game type selected  : Diamonds
+
+  Original 12-card hand (before skat discard, in transformed suit space):
+       [[CA CT CQ C8 C7 SA HA HQ H9 H8 DA DQ]]
+  Optimal skat discard: CA CQ
+  Post-discard 10-card hand: [[CA CT CQ C8 C7 SA HA HQ H9 H8 DA DQ]] minus [CA CQ]
+
+  1) Biddability check (pre-discard, on the full 12-card hand)
+       Pre-Discard: T=5 J=0 S=5 → BIDDABLE (50k-sample heuristic)
+       Meaning: T=Jacks+longest_suit, J=Jacks, S=Aces+attached_Tens.
+       BIDDABLE => hand qualifies to bid (50k-sample boundary).
+
+  2) Playability check (post-discard, final 10-card hand)
+       Post-Discard Suit/Clubs: TC=5 S=2 → not playable (10k-sample heuristic)
+       Meaning (Suit/Clubs): TC=total trump count (Jacks+Clubs), S=side strength.
+       PLAYABLE => post-discard hand wins >=50% in 10k simulations.
+
+  3) PIMC sampling filter used during playout
+       smart-suit (Post-Discard Suit/Clubs filter, TC/S boundary)
+       Only distributions where the declarer's sampled hand passes
+       the Suit/Clubs post-discard filter (TC/S boundary) are accepted.
+
+  4) Trump move heuristic (mode 3 only)
+       Threshold : 2.0 avg-pts
+       Declarer  : within 2.0 pts -> prefer trump card (Grand+Suit)
+       Opponents : within 2.0 pts -> prefer non-trump card (Suit game)
+       3rd player: if all threshold-candidates win trick -> play highest value card
+                   if all threshold-candidates lose trick -> play lowest value card
+       Marker '^': appears next to '*' (perf-deviation) when heuristic overrides
+
+Cards Distribution:
+(Sorted for Suit):
+Declarer: [CA CT CQ C8 C7 SA HA HQ H9 H8]
+Left    : [SJ HJ DJ S9 S8 HT HK H7 DT D9]
+Right   : [CJ CK C9 ST SK SQ S7 DK D8 D7]
+Skat    : [DA DQ]
+Start Player: Declarer
+
+--- 1) Perfect Play (Reference) ---
+Starting Perfect Play...
+  Trick  1  D:C7  L:SJ  R:CJ
+  Trick  2  R:D8  D:CA  L:D9
+  Trick  3  D:C8  L:HJ  R:CK
+  Trick  4  L:DJ  R:C9  D:CQ
+  Trick  5  L:DT  R:D7  D:CT
+  Trick  6  D:SA  L:S9  R:SQ
+  Trick  7  D:HA  L:H7  R:S7
+  Trick  8  D:HQ  L:HT  R:ST
+  Trick  9  L:HK  R:SK  D:H9
+  Trick 10  L:S8  R:DK  D:H8
+Perfect Play Finished. Result: 70 pts
+
+--- 2) PIMC Average Points Only ---
+Starting PIMC Points Play...
+-- Trick  1 (D leads) ----------------------------------------------------------------
+  D *   PIMC:(!) SA  perf:C7 opt= 70  loss=17(D)  avgs:[SA=57  C7=55  C8=55  CQ=55  CT=54  HA=53  CA=53  H9=51  H8=51  HQ=51]
+  L     PIMC:    S9  perf:S9 opt= 53  loss=0(O)  avgs:[S9=44  S8=44]
+  R     PIMC:    S7  perf:S7 opt= 53  loss=0(O)  avgs:[S7=52  SQ=52  SK=52  ST=47]
+  +- score after trick  1: 25 pts
+-- Trick  2 (D leads) ----------------------------------------------------------------
+  D *   PIMC:    C8  perf:CQ opt= 53  loss=0(D)  avgs:[C8=59  C7=59  HA=59  CQ=59  CT=54  CA=53  HQ=50  H8=50  H9=50]
+  L *   PIMC:    DJ  perf:SJ opt= 53  loss=0(O)  avgs:[DJ=42  SJ=42  HJ=42]
+  R     PIMC:    CK  perf:CK opt= 53  loss=0(O)  avgs:[CK=51  C9=49  CJ=39]
+  +- score after trick  2: 25 pts
+-- Trick  3 (L leads) ----------------------------------------------------------------
+  L *   PIMC:(!) HT  perf:S8 opt= 53  loss=14(O)  avgs:[HT=39  S8=38  DT=38  SJ=37  HJ=37  HK=37  H7=34  D9=29]
+  R     PIMC:    C9  perf:C9 opt= 67  loss=0(O)  avgs:[C9=53  SK=50  SQ=49  ST=49  DK=48  CJ=48  D8=47  D7=47]
+  D *   PIMC:    H8  perf:HQ opt= 67  loss=0(D)  avgs:[H8=63  H9=63  HQ=63  HA=51]
+  +- score after trick  3: 25 pts
+-- Trick  4 (R leads) ----------------------------------------------------------------
+  R *   PIMC:(!) DK  perf:SQ opt= 67  loss=4(O)  avgs:[DK=50  CJ=48  D8=48  D7=48  ST=47  SK=46  SQ=46]
+  D     PIMC:    CA  perf:CA opt= 71  loss=0(D)  avgs:[CA=64  CT=64  HQ=61  H9=61  CQ=60  C7=57  HA=46]
+  L     PIMC:    D9  perf:D9 opt= 71  loss=0(O)  avgs:[D9=64  DT=54]
+  +- score after trick  4: 40 pts
+-- Trick  5 (D leads) ----------------------------------------------------------------
+  D *   PIMC:    C7  perf:CQ opt= 71  loss=0(D)  avgs:[C7=62  CQ=61  HA=57  HQ=57  H9=57  CT=56]
+  L *   PIMC:    HJ  perf:SJ opt= 71  loss=0(O)  avgs:[HJ=70  SJ=70]
+  R     PIMC:    CJ  perf:CJ opt= 71  loss=0(O)  avgs:[CJ=48]
+  +- score after trick  5: 40 pts
+-- Trick  6 (R leads) ----------------------------------------------------------------
+  R *   PIMC:    D7  perf:D8 opt= 71  loss=0(O)  avgs:[D7=38  D8=38  ST=37  SK=35  SQ=35]
+  D *   PIMC:(!) H9  perf:CT opt= 71  loss=3(D)  avgs:[H9=69  HQ=69  CT=66  CQ=63  HA=55]
+  L     PIMC:    DT  perf:DT opt= 68  loss=0(O)  avgs:[DT=72]
+  +- score after trick  6: 40 pts
+-- Trick  7 (L leads) ----------------------------------------------------------------
+  L     PIMC:    SJ  perf:SJ opt= 68  loss=0(O)  avgs:[SJ=71  HK=71  H7=69  S8=69]
+  R     PIMC:    ST  perf:ST opt= 68  loss=0(O)  avgs:[ST=66  SK=65  SQ=65  D8=63]
+  D     PIMC:    CQ  perf:CQ opt= 68  loss=0(D)  avgs:[CQ=68  CT=61]
+  +- score after trick  7: 40 pts
+-- Trick  8 (L leads) ----------------------------------------------------------------
+  L     PIMC:    S8  perf:S8 opt= 68  loss=0(O)  avgs:[S8=52  H7=45  HK=45]
+  R     PIMC:    SK  perf:SK opt= 68  loss=0(O)  avgs:[SK=66  SQ=66]
+  D     PIMC:    HQ  perf:HQ opt= 68  loss=0(D)  avgs:[HQ=68  CT=65  HA=53]
+  +- score after trick  8: 40 pts
+-- Trick  9 (R leads) ----------------------------------------------------------------
+  R     PIMC:    SQ  perf:SQ opt= 68  loss=0(O)  avgs:[SQ=72  D8=72]
+  D     PIMC:    CT  perf:CT opt= 68  loss=0(D)  avgs:[CT=68  HA=50]
+  L     PIMC:    HK  perf:HK opt= 68  loss=0(O)  avgs:[HK=52  H7=52]
+  +- score after trick  9: 57 pts
+-- Trick 10 (D leads) ----------------------------------------------------------------
+  D     PIMC:    HA  perf:HA opt= 68  loss=0(D)  avgs:[HA=68]
+  L     PIMC:    H7  perf:H7 opt= 68  loss=0(O)  avgs:[H7=52]
+  R     PIMC:    D8  perf:D8 opt= 68  loss=0(O)  avgs:[D8=52]
+  +- score after trick 10: 68 pts
+Game Finished. Total Point Loss: 38 (D:20 O:18) | Final score: 68 pts
+
+--- 3) PIMC Average Points + Trump Heuristic (threshold=2.0 pts) ---
+Starting PIMC Points Play...
+-- Trick  1 (D leads) ----------------------------------------------------------------
+  D *^  PIMC:    C8  perf:C7 opt= 70  loss=0(D)  avgs:[C8=59  C7=59  CQ=59  SA=60  HA=58  CT=58  CA=57  H8=53  H9=53  HQ=52]
+  L     PIMC:    SJ  perf:SJ opt= 70  loss=0(O)  avgs:[SJ=51  HJ=51  DJ=51]
+  R *   PIMC:    CK  perf:CJ opt= 70  loss=0(O)  avgs:[CK=53  C9=51  CJ=39]
+  +- score after trick  1: 14 pts
+-- Trick  2 (L leads) ----------------------------------------------------------------
+  L *^  PIMC:(!) DT  perf:S9 opt= 70  loss=1(O)  avgs:[DT=46  DJ=46  HJ=46  HT=44  S8=44  S9=44  HK=43  H7=41  D9=39]
+  R *   PIMC:    D7  perf:D8 opt= 71  loss=0(O)  avgs:[D7=52  D8=52  DK=51]
+  D     PIMC:    CA  perf:CA opt= 71  loss=0(D)  avgs:[CA=76  CT=76  CQ=69  H9=67  H8=67  C7=66  HQ=66  SA=52  HA=47]
+  +- score after trick  2: 35 pts
+-- Trick  3 (D leads) ----------------------------------------------------------------
+  D *   PIMC:    C7  perf:CQ opt= 71  loss=0(D)  avgs:[C7=68  CQ=68  SA=67  HA=67  CT=64  H9=61  H8=61  HQ=60]
+  L     PIMC:    HJ  perf:HJ opt= 71  loss=0(O)  avgs:[HJ=41  DJ=41]
+  R *   PIMC:    C9  perf:CJ opt= 71  loss=0(O)  avgs:[C9=41  CJ=32]
+  +- score after trick  3: 35 pts
+-- Trick  4 (L leads) ----------------------------------------------------------------
+  L     PIMC:    DJ  perf:DJ opt= 71  loss=0(O)  avgs:[DJ=30  HK=28  D9=27  HT=27  S8=26  S9=26  H7=24]
+  R     PIMC:    CJ  perf:CJ opt= 71  loss=0(O)  avgs:[CJ=28]
+  D     PIMC:    CQ  perf:CQ opt= 71  loss=0(D)  avgs:[CQ=88  CT=82]
+  +- score after trick  4: 35 pts
+-- Trick  5 (R leads) ----------------------------------------------------------------
+  R *   PIMC:(!) SK  perf:S7 opt= 71  loss=4(O)  avgs:[SK=27  SQ=27  DK=25  D8=25  S7=25  ST=24]
+  D     PIMC:    SA  perf:SA opt= 75  loss=0(D)  avgs:[SA=92]
+  L     PIMC:    S9  perf:S9 opt= 75  loss=0(O)  avgs:[S9=28  S8=28]
+  +- score after trick  5: 50 pts
+-- Trick  6 (D leads) ----------------------------------------------------------------
+  D *   PIMC:    H8  perf:HQ opt= 75  loss=0(D)  avgs:[H8=89  H9=89  HQ=86  HA=86  CT=76]
+  L     PIMC:    HT  perf:HT opt= 75  loss=0(O)  avgs:[HT=32  HK=28  H7=24]
+  R     PIMC:    ST  perf:ST opt= 75  loss=0(O)  avgs:[ST=56  SQ=54  D8=52  S7=52  DK=49]
+  +- score after trick  6: 50 pts
+-- Trick  7 (L leads) ----------------------------------------------------------------
+  L *   PIMC:    D9  perf:S8 opt= 75  loss=0(O)  avgs:[D9=58  S8=58  HK=53  H7=53]
+  R     PIMC:    DK  perf:DK opt= 75  loss=0(O)  avgs:[DK=62  D8=59]
+  D     PIMC:    CT  perf:CT opt= 75  loss=0(D)  avgs:[CT=75  H9=74  HQ=74  HA=62]
+  +- score after trick  7: 64 pts
+-- Trick  8 (D leads) ----------------------------------------------------------------
+  D     PIMC:    HA  perf:HA opt= 75  loss=0(D)  avgs:[HA=75  HQ=71  H9=71]
+  L     PIMC:    H7  perf:H7 opt= 75  loss=0(O)  avgs:[H7=45  HK=35]
+  R     PIMC:    S7  perf:S7 opt= 75  loss=0(O)  avgs:[S7=40  D8=40  SQ=38]
+  +- score after trick  8: 75 pts
+-- Trick  9 (D leads) ----------------------------------------------------------------
+  D     PIMC:    HQ  perf:HQ opt= 75  loss=0(D)  avgs:[HQ=75  H9=75]
+  L     PIMC:    HK  perf:HK opt= 75  loss=0(O)  avgs:[HK=45]
+  R *   PIMC:    D8  perf:SQ opt= 75  loss=0(O)  avgs:[D8=45  SQ=45]
+  +- score after trick  9: 75 pts
+-- Trick 10 (L leads) ----------------------------------------------------------------
+  L     PIMC:    S8  perf:S8 opt= 75  loss=0(O)  avgs:[S8=45]
+  R     PIMC:    SQ  perf:SQ opt= 75  loss=0(O)  avgs:[SQ=45]
+  D     PIMC:    H9  perf:H9 opt= 75  loss=0(D)  avgs:[H9=75]
+  +- score after trick 10: 75 pts
+Game Finished. Total Point Loss: 5 (D:0 O:5) | Final score: 75 pts
+
+  >> Game 9 (Diamonds) summary:
+       Perfect Play  : 70 pts
+       Avg Only      : 68 pts  WIN   total_loss=38  (D=20 O=18)
+       Avg+Heuristic : 75 pts  WIN   total_loss=5  (D=0 O=5)
+
+================================================================================
+GAME 10  (Hearts)
+================================================================================
+
+--- Heuristic Analysis (Deal Selection Criteria) ---
+  Game type selected  : Hearts
+
+  Original 12-card hand (before skat discard, in transformed suit space):
+       [[CA CT CK CQ C9 C8 C7 HA HQ DA DQ D8]]
+  Optimal skat discard: HA CQ
+  Post-discard 10-card hand: [[CA CT CK CQ C9 C8 C7 HA HQ DA DQ D8]] minus [HA CQ]
+
+  1) Biddability check (pre-discard, on the full 12-card hand)
+       Pre-Discard: T=7 J=0 S=4 → BIDDABLE (50k-sample heuristic)
+       Meaning: T=Jacks+longest_suit, J=Jacks, S=Aces+attached_Tens.
+       BIDDABLE => hand qualifies to bid (50k-sample boundary).
+
+  2) Playability check (post-discard, final 10-card hand)
+       Post-Discard Suit/Clubs: TC=6 S=2 → PLAYABLE (10k-sample heuristic)
+       Meaning (Suit/Clubs): TC=total trump count (Jacks+Clubs), S=side strength.
+       PLAYABLE => post-discard hand wins >=50% in 10k simulations.
+
+  3) PIMC sampling filter used during playout
+       smart-suit (Post-Discard Suit/Clubs filter, TC/S boundary)
+       Only distributions where the declarer's sampled hand passes
+       the Suit/Clubs post-discard filter (TC/S boundary) are accepted.
+
+  4) Trump move heuristic (mode 3 only)
+       Threshold : 2.0 avg-pts
+       Declarer  : within 2.0 pts -> prefer trump card (Grand+Suit)
+       Opponents : within 2.0 pts -> prefer non-trump card (Suit game)
+       3rd player: if all threshold-candidates win trick -> play highest value card
+                   if all threshold-candidates lose trick -> play lowest value card
+       Marker '^': appears next to '*' (perf-deviation) when heuristic overrides
+
+Cards Distribution:
+(Sorted for Suit):
+Declarer: [CT CK CQ C9 C8 C7 HA DA DQ D8]
+Left    : [CJ HJ SK SQ S8 S7 HT H9 DK D9]
+Right   : [SJ DJ SA ST S9 HK H8 H7 DT D7]
+Skat    : [CA HQ]
+Start Player: Declarer
+
+--- 1) Perfect Play (Reference) ---
+Starting Perfect Play...
+  Trick  1  D:HA  L:HT  R:HK
+  Trick  2  D:DA  L:DK  R:D7
+  Trick  3  D:C9  L:CJ  R:DJ
+  Trick  4  L:H9  R:H8  D:CT
+  Trick  5  D:C8  L:HJ  R:SJ
+  Trick  6  R:H7  D:CK  L:D9
+  Trick  7  D:CQ  L:SQ  R:SA
+  Trick  8  D:D8  L:SK  R:DT
+  Trick  9  R:ST  D:C7  L:S8
+  Trick 10  D:DQ  L:S7  R:S9
+Perfect Play Finished. Result: 98 pts
+
+--- 2) PIMC Average Points Only ---
+Starting PIMC Points Play...
+-- Trick  1 (D leads) ----------------------------------------------------------------
+  D *   PIMC:    C8  perf:HA opt= 98  loss=0(D)  avgs:[C8=82  C7=82  C9=82  DA=79  CQ=79  HA=79  CK=78  D8=76  DQ=74  CT=72]
+  L *   PIMC:    HJ  perf:CJ opt= 98  loss=0(O)  avgs:[HJ=53  CJ=50]
+  R *   PIMC:    DJ  perf:SJ opt= 98  loss=0(O)  avgs:[DJ=51  SJ=51]
+  +- score after trick  1: 14 pts
+-- Trick  2 (L leads) ----------------------------------------------------------------
+  L *   PIMC:    SQ  perf:CJ opt= 98  loss=0(O)  avgs:[SQ=46  SK=45  S7=45  S8=45  CJ=43  DK=42  D9=41  HT=41  H9=39]
+  R     PIMC:    SA  perf:SA opt= 98  loss=0(O)  avgs:[SA=45  ST=45  S9=34]
+  D     PIMC:    CT  perf:CT opt= 98  loss=0(D)  avgs:[CT=85  CK=85  CQ=85  C7=84  C9=84  D8=72  DQ=72  HA=59  DA=54]
+  +- score after trick  2: 38 pts
+-- Trick  3 (D leads) ----------------------------------------------------------------
+  D     PIMC:    HA  perf:HA opt= 98  loss=0(D)  avgs:[HA=87  C9=85  C7=85  DA=83  D8=82  CQ=82  DQ=82  CK=81]
+  L *   PIMC:    H9  perf:HT opt= 98  loss=0(O)  avgs:[H9=34  HT=23]
+  R *   PIMC:    H8  perf:HK opt= 98  loss=0(O)  avgs:[H8=28  H7=28  HK=27]
+  +- score after trick  3: 49 pts
+-- Trick  4 (D leads) ----------------------------------------------------------------
+  D *   PIMC:    C7  perf:DA opt= 98  loss=0(D)  avgs:[C7=88  C9=88  CQ=85  DA=85  CK=84  D8=83  DQ=82]
+  L     PIMC:    CJ  perf:CJ opt= 98  loss=0(O)  avgs:[CJ=39]
+  R     PIMC:    SJ  perf:SJ opt= 98  loss=0(O)  avgs:[SJ=31]
+  +- score after trick  4: 49 pts
+-- Trick  5 (L leads) ----------------------------------------------------------------
+  L     PIMC:    HT  perf:HT opt= 98  loss=0(O)  avgs:[HT=32  SK=31  S7=30  S8=30  DK=29  D9=29]
+  R     PIMC:    HK  perf:HK opt= 98  loss=0(O)  avgs:[HK=25  H7=25]
+  D *   PIMC:    C9  perf:CK opt= 98  loss=0(D)  avgs:[C9=95  CQ=95  CK=95  DQ=84  D8=84  DA=66]
+  +- score after trick  5: 63 pts
+-- Trick  6 (D leads) ----------------------------------------------------------------
+  D *   PIMC:    CK  perf:DA opt= 98  loss=0(D)  avgs:[CK=93  CQ=93  DA=93  D8=92  DQ=91]
+  L *   PIMC:    S8  perf:SK opt= 98  loss=0(O)  avgs:[S8=21  S7=21  SK=20  D9=20  DK=16]
+  R *   PIMC:    H7  perf:ST opt= 98  loss=0(O)  avgs:[H7=30  S9=30  ST=30  D7=30  DT=20]
+  +- score after trick  6: 67 pts
+-- Trick  7 (D leads) ----------------------------------------------------------------
+  D *   PIMC:    D8  perf:DA opt= 98  loss=0(D)  avgs:[D8=92  DQ=90  DA=89  CQ=87]
+  L     PIMC:    DK  perf:DK opt= 98  loss=0(O)  avgs:[DK=28  D9=26]
+  R     PIMC:    DT  perf:DT opt= 98  loss=0(O)  avgs:[DT=26  D7=19]
+  +- score after trick  7: 67 pts
+-- Trick  8 (R leads) ----------------------------------------------------------------
+  R     PIMC:    ST  perf:ST opt= 98  loss=0(O)  avgs:[ST=26  S9=26  D7=25]
+  D     PIMC:    CQ  perf:CQ opt= 98  loss=0(D)  avgs:[CQ=98  DQ=83  DA=75]
+  L *   PIMC:    S7  perf:SK opt= 98  loss=0(O)  avgs:[S7=27  SK=26]
+  +- score after trick  8: 80 pts
+-- Trick  9 (D leads) ----------------------------------------------------------------
+  D *   PIMC:    DQ  perf:DA opt= 98  loss=0(D)  avgs:[DQ=98  DA=98]
+  L     PIMC:    D9  perf:D9 opt= 98  loss=0(O)  avgs:[D9=31]
+  R     PIMC:    D7  perf:D7 opt= 98  loss=0(O)  avgs:[D7=22]
+  +- score after trick  9: 83 pts
+-- Trick 10 (D leads) ----------------------------------------------------------------
+  D     PIMC:    DA  perf:DA opt= 98  loss=0(D)  avgs:[DA=98]
+  L     PIMC:    SK  perf:SK opt= 98  loss=0(O)  avgs:[SK=22]
+  R     PIMC:    S9  perf:S9 opt= 98  loss=0(O)  avgs:[S9=22]
+  +- score after trick 10: 98 pts
+Game Finished. Total Point Loss: 0 (D:0 O:0) | Final score: 98 pts
+
+--- 3) PIMC Average Points + Trump Heuristic (threshold=2.0 pts) ---
+Starting PIMC Points Play...
+-- Trick  1 (D leads) ----------------------------------------------------------------
+  D *   PIMC:    C7  perf:HA opt= 98  loss=0(D)  avgs:[C7=81  C8=81  C9=81  HA=80  CQ=78  D8=77  DA=77  CK=77  DQ=75  CT=71]
+  L *   PIMC:    HJ  perf:CJ opt= 98  loss=0(O)  avgs:[HJ=44  CJ=37]
+  R *   PIMC:    DJ  perf:SJ opt= 98  loss=0(O)  avgs:[DJ=46  SJ=46]
+  +- score after trick  1: 14 pts
+-- Trick  2 (L leads) ----------------------------------------------------------------
+  L *   PIMC:    SQ  perf:CJ opt= 98  loss=0(O)  avgs:[SQ=42  SK=42  S7=41  S8=41  CJ=41  HT=38  DK=37  D9=37  H9=35]
+  R     PIMC:    SA  perf:SA opt= 98  loss=0(O)  avgs:[SA=39  ST=39  S9=27]
+  D  ^  PIMC:    CT  perf:CT opt= 98  loss=0(D)  avgs:[CT=92  CK=92  CQ=92  C9=91  C8=91  DQ=77  D8=77  HA=66  DA=60]
+  +- score after trick  2: 38 pts
+-- Trick  3 (D leads) ----------------------------------------------------------------
+  D     PIMC:    HA  perf:HA opt= 98  loss=0(D)  avgs:[HA=87  C8=85  C9=85  DA=84  D8=83  CQ=82  DQ=81  CK=81]
+  L *   PIMC:    H9  perf:HT opt= 98  loss=0(O)  avgs:[H9=33  HT=23]
+  R *   PIMC:    H7  perf:HK opt= 98  loss=0(O)  avgs:[H7=24  H8=24  HK=24]
+  +- score after trick  3: 49 pts
+-- Trick  4 (D leads) ----------------------------------------------------------------
+  D *   PIMC:    C9  perf:DA opt= 98  loss=0(D)  avgs:[C9=86  C8=86  DA=84  CQ=83  CK=82  D8=81  DQ=79]
+  L     PIMC:    CJ  perf:CJ opt= 98  loss=0(O)  avgs:[CJ=30]
+  R     PIMC:    SJ  perf:SJ opt= 98  loss=0(O)  avgs:[SJ=37]
+  +- score after trick  4: 49 pts
+-- Trick  5 (L leads) ----------------------------------------------------------------
+  L     PIMC:    HT  perf:HT opt= 98  loss=0(O)  avgs:[HT=28  SK=25  S8=25  S7=25  D9=24  DK=24]
+  R     PIMC:    HK  perf:HK opt= 98  loss=0(O)  avgs:[HK=26  H8=26]
+  D  ^  PIMC:    CK  perf:CK opt= 98  loss=0(D)  avgs:[CK=96  CQ=96  C8=96  DQ=84  D8=84  DA=67]
+  +- score after trick  5: 67 pts
+-- Trick  6 (D leads) ----------------------------------------------------------------
+  D *^  PIMC:    C8  perf:DA opt= 98  loss=0(D)  avgs:[C8=94  CQ=94  D8=94  DA=93  DQ=92]
+  L *   PIMC:    D9  perf:SK opt= 98  loss=0(O)  avgs:[D9=29  S7=28  S8=28  SK=27  DK=26]
+  R *   PIMC:    S9  perf:ST opt= 98  loss=0(O)  avgs:[S9=25  H8=25  ST=25  D7=12  DT=10]
+  +- score after trick  6: 67 pts
+-- Trick  7 (D leads) ----------------------------------------------------------------
+  D *   PIMC:    D8  perf:DA opt= 98  loss=0(D)  avgs:[D8=97  DA=94  DQ=94  CQ=87]
+  L     PIMC:    DK  perf:DK opt= 98  loss=0(O)  avgs:[DK=32]
+  R     PIMC:    DT  perf:DT opt= 98  loss=0(O)  avgs:[DT=22  D7=12]
+  +- score after trick  7: 67 pts
+-- Trick  8 (R leads) ----------------------------------------------------------------
+  R     PIMC:    ST  perf:ST opt= 98  loss=0(O)  avgs:[ST=22  D7=22  H8=22]
+  D     PIMC:    CQ  perf:CQ opt= 98  loss=0(D)  avgs:[CQ=98  DQ=83  DA=75]
+  L *   PIMC:    S8  perf:SK opt= 98  loss=0(O)  avgs:[S8=27  S7=27  SK=26]
+  +- score after trick  8: 80 pts
+-- Trick  9 (D leads) ----------------------------------------------------------------
+  D     PIMC:    DA  perf:DA opt= 98  loss=0(D)  avgs:[DA=98  DQ=98]
+  L     PIMC:    SK  perf:SK opt= 98  loss=0(O)  avgs:[SK=22  S7=22]
+  R     PIMC:    D7  perf:D7 opt= 98  loss=0(O)  avgs:[D7=22]
+  +- score after trick  9: 95 pts
+-- Trick 10 (D leads) ----------------------------------------------------------------
+  D     PIMC:    DQ  perf:DQ opt= 98  loss=0(D)  avgs:[DQ=98]
+  L     PIMC:    S7  perf:S7 opt= 98  loss=0(O)  avgs:[S7=22]
+  R     PIMC:    H8  perf:H8 opt= 98  loss=0(O)  avgs:[H8=22]
+  +- score after trick 10: 98 pts
+Game Finished. Total Point Loss: 0 (D:0 O:0) | Final score: 98 pts
+
+  >> Game 10 (Hearts) summary:
+       Perfect Play  : 98 pts
+       Avg Only      : 98 pts  WIN   total_loss=0  (D=0 O=0)
+       Avg+Heuristic : 98 pts  WIN   total_loss=0  (D=0 O=0)
+
+================================================================================
+FINAL SUMMARY
+================================================================================
+
+1) Perfect Play    : avg_score=81.5  wins=10/10  scores=[96, 75, 78, 96, 69, 79, 79, 75, 70, 98]
+2) Average Only    : avg_score=83.3  wins=10/10  scores=[90, 81, 82, 96, 69, 86, 79, 84, 68, 98]
+3) Avg+Heuristic   : avg_score=85.0  wins=10/10  scores=[94, 82, 88, 96, 69, 85, 79, 84, 75, 98]
+
+2) Average Only  : avg_cumulative_loss=9.2  per_game=[6, 8, 4, 0, 0, 19, 4, 13, 38, 0]
+3) Avg+Heuristic : avg_cumulative_loss=8.7  per_game=[10, 9, 10, 20, 0, 16, 4, 13, 5, 0]
+
+VERDICT:
+  >> Avg+Heuristic is BETTER  by 1.7 avg pts  (10 vs 10 wins)
+     Avg loss per game: Avg=9.2  Heur=8.7  (lower = closer to perfect play)

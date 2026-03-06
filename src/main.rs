@@ -529,15 +529,21 @@ fn main() {
             std::fs::write(&out, json).expect("Failed to write deal");
             println!("Wrote generated deal to {}", out);
         }
-        args::Commands::GenerateSmartDeal { min_value, out } => {
-            use skat_aug23::extensions::cli_playout::generate_smart_deal_with_min;
+        args::Commands::GenerateSmartDeal { min_value, out, game_type } => {
+            use skat_aug23::extensions::cli_playout::generate_smart_deal_with_min_typed;
+            use skat_aug23::skat::defs::Game as GDef;
             use skat_aug23::traits::{Bitboard, StringConverter};
-            match generate_smart_deal_with_min(min_value) {
+            let type_filter = match game_type.to_lowercase().as_str() {
+                "grand" => Some(GDef::Grand),
+                "suit" | "clubs" => Some(GDef::Suit),
+                _ => None,
+            };
+            match generate_smart_deal_with_min_typed(min_value, type_filter) {
                 None => {
                     println!("SMART_DEAL_SKIP: deal did not qualify (best value < {}).", min_value);
                     std::process::exit(2);
                 }
-                Some((ctx, game_type, start_player, label, discard)) => {
+                Some((ctx, game_type, start_player, label, discard, original_12)) => {
                     println!("SMART_DEAL_OK: game={} discard={}", label, discard);
 
                     // ── Heuristic logging ──────────────────────────────────────
@@ -546,12 +552,23 @@ fn main() {
                         describe_suit_post_discard,
                     };
                     use skat_aug23::skat::defs::Game as G;
-                    use skat_aug23::traits::Bitboard;
+                    use skat_aug23::traits::{Bitboard, StringConverter};
+                    // Original 12-card pre-discard hand (skat cards marked with *).
                     let final_hand = ctx.declarer_cards();
-                    // Pre-discard: approximate from final 10-card hand (optimal
-                    // discard may differ from original skat, so this is an estimate).
-                    println!("HEURISTIC_PRE: {}", describe_pre_discard(final_hand));
-                    // Post-discard: exact heuristic for the actual playing hand.
+                    let skat_mask = original_12 & !final_hand;
+                    let (cards, n) = original_12.__decompose();
+                    let hand_str: String = cards[..n]
+                        .iter()
+                        .map(|c| {
+                            let s = c.__str();
+                            if c & skat_mask != 0 { format!("{}*", s) } else { s }
+                        })
+                        .collect::<Vec<_>>()
+                        .join(" ");
+                    println!("ORIGINAL_HAND_12: {}", hand_str);
+                    // Pre-discard biddability heuristic (on the full 12-card hand).
+                    println!("HEURISTIC_PRE: {}", describe_pre_discard(original_12));
+                    // Post-discard: exact heuristic for the actual 10-card playing hand.
                     let post_desc = match game_type {
                         G::Grand => describe_grand_post_discard(final_hand),
                         _ => describe_suit_post_discard(final_hand),
@@ -1071,11 +1088,19 @@ fn main() {
             points_mode,
             hybrid_delta,
             hybrid_fallback,
+            trump_heuristic,
+            trump_heuristic_threshold,
         } => {
+            let heuristic_opt = if trump_heuristic {
+                Some(trump_heuristic_threshold)
+            } else {
+                None
+            };
             let point_strategy = skat_aug23::extensions::cli_playout::PointStrategy::from_args(
                 &points_mode,
                 hybrid_delta,
                 &hybrid_fallback,
+                heuristic_opt,
             );
             let mode = match distribution.as_str() {
                 "smart-grand" => skat_aug23::pimc::pimc_problem::SamplingMode::SmartGrand,
@@ -1168,6 +1193,7 @@ fn main() {
                 &points_mode,
                 hybrid_delta,
                 &hybrid_fallback,
+                None,
             );
             use skat_aug23::extensions::cli_playout::generate_smart_deal;
             match generate_smart_deal() {

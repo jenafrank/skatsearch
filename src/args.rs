@@ -95,6 +95,13 @@ pub enum Commands {
         /// Fallback strategy for hybrid mode: "average" or "minimum".
         #[arg(long, default_value = "average")]
         hybrid_fallback: String,
+        /// Enable trump move heuristic: within --trump-heuristic-threshold avg-points of the
+        /// best card, always prefer trump (declarer) or non-trump (opponents).
+        #[arg(long, default_value_t = false)]
+        trump_heuristic: bool,
+        /// Point-threshold for the trump move heuristic (default 2.0).
+        #[arg(long, default_value_t = 2.0)]
+        trump_heuristic_threshold: f32,
     },
     /// Like PointsPlayout, but ONLY simulates "interesting" games:
     /// auto-generates a random deal, runs perfect-information best-game
@@ -269,6 +276,9 @@ pub enum Commands {
         /// Output JSON file path.
         #[arg(short, long, default_value = "smart_deal.json")]
         out: String,
+        /// Restrict to a specific game type: "grand", "suit", or "any" (default).
+        #[arg(long, default_value = "any")]
+        game_type: String,
     },
     GenerateJson {
         /// Number of valid JSONs to find

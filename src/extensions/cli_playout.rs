@@ -3,7 +3,7 @@ use crate::consts::bitboard::{
     NULL_SPADES, QUEENS, SEVENS, SPADES, TENS,
 };
 use crate::extensions::skat_solving::{solve_best_game_all_variants, AccelerationMode};
-use crate::extensions::solver::{solve_optimum_from_position, OptimumMode};
+use crate::extensions::solver::{solve_all_cards_from_position, solve_optimum_from_position, OptimumMode};
 use crate::pimc::facts::Facts;
 use crate::pimc::pimc_problem_builder::PimcProblemBuilder;
 use crate::pimc::pimc_search::PimcSearch;
@@ -28,10 +28,18 @@ pub enum PointStrategy {
         delta: f32,
         fallback: FallbackStrategy,
     },
+    /// Sort by avg_points, but within `threshold` points of the best move prefer
+    /// trump (declarer) or non-trump (opponent) as a realistic move heuristic.
+    AverageWithHeuristic {
+        threshold: f32,
+    },
 }
 
 impl PointStrategy {
-    pub fn from_args(mode: &str, delta: f32, fallback: &str) -> Self {
+    pub fn from_args(mode: &str, delta: f32, fallback: &str, heuristic: Option<f32>) -> Self {
+        if let Some(threshold) = heuristic {
+            return PointStrategy::AverageWithHeuristic { threshold };
+        }
         let fb = match fallback.to_lowercase().as_str() {
             "minimum" | "min" => FallbackStrategy::Minimum,
             _ => FallbackStrategy::Average,
@@ -177,20 +185,22 @@ pub fn generate_random_deal(
 ///   1. Shuffle a full 32-card deck (declarer gets 12, left/right each 10).
 ///   2. Run perfect-information best-game for Grand and all 4 Suit variants
 ///      (Null excluded). Skip Null entirely.
-///   3. Take the variant with the highest value.  Reject if value < 50.
+///   3. Take the variant with the highest value.  Reject if value < min_value.
 ///   4. Apply the optimal 2-card discard → declarer now holds 10 cards.
 ///   5. Apply any suit transformation so the GameContext uses Clubs order.
 ///   6. Return (context_10cards, game_type, start_player, label, discard_str).
 ///
+/// `type_filter`: if Some(Game::Grand) only Grand deals are accepted;
+/// if Some(Game::Suit) only Suit deals are accepted; None = accept both.
+///
 /// Returns `None` if the random deal did not qualify.
-pub fn generate_smart_deal_with_min(min_value: u8) -> Option<(GameContext, Game, Player, String, String)> {
-    // Under the hood, we just generate a general random deal in 'random' mode,
-    // then analyze it.
-    let _ = generate_random_deal(
-        "grand".to_string(),
-        "declarer".to_string(),
-        crate::pimc::pimc_problem::SamplingMode::Random,
-    );
+/// Returns `(ctx, game_type, start_player, label, discard_str, original_12_cards)`.
+/// `original_12_cards` is the declarer's 12-card pre-discard hand in the
+/// (possibly suit-transformed) card space, matching the card names used in `ctx`.
+pub fn generate_smart_deal_with_min_typed(
+    min_value: u8,
+    type_filter: Option<Game>,
+) -> Option<(GameContext, Game, Player, String, String, u32)> {
     let start_player = Player::Declarer; // Declarer always leads first trick
 
     let mut rng = rand::thread_rng();
@@ -220,10 +230,15 @@ pub fn generate_smart_deal_with_min(min_value: u8) -> Option<(GameContext, Game,
         AccelerationMode::AlphaBetaAccelerating,
     );
 
-    // Filter out Null, keep only Grand/Suit, pick best value.
+    // Filter out Null; optionally restrict to Grand or Suit only; pick best value.
     let best = all_variants
         .into_iter()
         .filter(|r| r.game_type != Game::Null)
+        .filter(|r| match type_filter {
+            Some(Game::Grand) => r.game_type == Game::Grand,
+            Some(Game::Suit) => r.game_type == Game::Suit,
+            _ => true,
+        })
         .max_by_key(|r| r.value)?;
 
     let skat_discard = best.skat_1 | best.skat_2;
@@ -251,10 +266,22 @@ pub fn generate_smart_deal_with_min(min_value: u8) -> Option<(GameContext, Game,
         ),
     };
 
-    let mut ctx = GameContext::create(d_final, l_final, r_final, best.game_type, start_player);
-    // ctx.set_declarer_start_points(skat_points); // Handled by Engine now
+    let ctx = GameContext::create(d_final, l_final, r_final, best.game_type, start_player);
 
-    Some((ctx, best.game_type, start_player, best.label, discard_str))
+    // Original 12-card hand in the same (possibly transformed) card space as ctx.
+    let skat_final = match best.transformation {
+        None => best.skat_1 | best.skat_2,
+        Some(trans) => GameContext::get_switched_cards(best.skat_1 | best.skat_2, trans),
+    };
+    let decl_12_final = d_final | skat_final;
+
+    Some((ctx, best.game_type, start_player, best.label, discard_str, decl_12_final))
+}
+
+/// Backward-compatible wrapper: uses the old 50-pt threshold, no type filter.
+pub fn generate_smart_deal_with_min(min_value: u8) -> Option<(GameContext, Game, Player, String, String)> {
+    generate_smart_deal_with_min_typed(min_value, None)
+        .map(|(ctx, g, p, l, d, _)| (ctx, g, p, l, d))
 }
 
 /// Backward-compatible wrapper: uses the old 50-pt threshold.
@@ -574,6 +601,63 @@ fn run_pimc_play(
 // Average-Points PIMC Playout
 // ---------------------------------------------------------------------------
 
+/// Returns the highest-set bit of `x` as an isolated bit mask.
+/// Panics if `x == 0`.
+#[inline]
+fn highest_bit(x: u32) -> u32 {
+    debug_assert!(x != 0);
+    1u32 << (31 - x.leading_zeros())
+}
+
+/// Returns `true` if `candidate_card` (single bit) would win the trick when
+/// played as the **last** (3rd) card.
+///
+/// `trick_cards_so_far` contains exactly 2 bits (the two already-played cards).
+/// `trick_suit` is the lead suit established by the first card of the trick.
+fn would_win_trick_regular(
+    candidate_card: u32,
+    trick_cards_so_far: u32,
+    trick_suit: u32,
+    game_type: Game,
+) -> bool {
+    if trick_cards_so_far == 0 {
+        return false;
+    }
+    let trump = game_type.get_trump();
+    let is_trump_played = (trick_cards_so_far & trump) != 0;
+    let candidate_is_trump = (candidate_card & trump) != 0;
+
+    if is_trump_played {
+        // Effective suit is trump: candidate must also be trump and beat the
+        // current best trump.
+        if !candidate_is_trump {
+            return false;
+        }
+        let trump_in_trick = trick_cards_so_far & trump;
+        return candidate_card > highest_bit(trump_in_trick);
+    }
+
+    // No trump played yet.
+    if candidate_is_trump {
+        // Playing trump on a non-trump trick always wins (legal play only).
+        return true;
+    }
+
+    // Neither trump played nor candidate is trump: compare within lead suit.
+    let candidate_in_lead = (candidate_card & trick_suit) != 0;
+    if !candidate_in_lead {
+        return false; // discarding off-suit – can never win
+    }
+
+    let lead_in_trick = trick_cards_so_far & trick_suit;
+    if lead_in_trick == 0 {
+        // Neither played card followed the lead suit – candidate is the only one.
+        return true;
+    }
+
+    candidate_card > highest_bit(lead_in_trick)
+}
+
 /// Entry point for the points-maximising PIMC playout.
 /// First runs `run_perfect_play` as a benchmark, then `run_pimc_points_play`.
 pub fn run_points_playout(
@@ -644,6 +728,10 @@ fn run_pimc_points_play(
         let (perfect_card, _, pv_u8) =
             solve_optimum_from_position(&mut engine, &position, OptimumMode::BestValue).unwrap();
         let perfect_val = pv_u8 as i16;
+        // Per-card perfect values (TT already warm from the call above → fast).
+        let all_perf = solve_all_cards_from_position(&mut engine, &position, 0, 120);
+        let perfect_map: std::collections::HashMap<u32, u8> =
+            all_perf.results.iter().map(|(c, _, v)| (*c, *v)).collect();
 
         // ── PIMC problem ────────────────────────────────────────────────────────
         let unplayed = position.get_all_unplayed_cards();
@@ -699,6 +787,10 @@ fn run_pimc_points_play(
         let mut scores =
             PimcSearch::new(builder.build(), samples, None).estimate_move_metrics(false);
 
+        // Tracks whether the trump heuristic overrode the pure avg-points best card.
+        // Only set to true for AverageWithHeuristic when the chosen card changes.
+        let mut trump_heuristic_overrode = false;
+
         match point_strategy {
             PointStrategy::Average => {
                 scores.sort_by(|a, b| {
@@ -741,6 +833,112 @@ fn run_pimc_points_play(
                     }
                 });
             }
+            PointStrategy::AverageWithHeuristic { threshold } => {
+                // ── Phase 1: sort by avg_points to establish the baseline winner ──
+                scores.sort_by(|a, b| {
+                    b.1.avg_points
+                        .partial_cmp(&a.1.avg_points)
+                        .unwrap_or(std::cmp::Ordering::Equal)
+                });
+                let pure_avg_best = scores.first().map(|(c, _)| *c);
+
+                if !scores.is_empty() {
+                    let best_pts = scores[0].1.avg_points;
+                    let game_type = engine.context.game_type();
+                    let trump_mask = game_type.get_trump();
+                    let is_declarer = cur_player == Player::Declarer;
+
+                    // Trump preference rules:
+                    //   Declarer always prefers trump (Grand + Suit).
+                    //   Opponents prefer non-trump ONLY in Suit games (not Grand –
+                    //   Grand's only trump is the four Jacks, avoiding them makes
+                    //   less tactical sense for defenders).
+                    let apply_trump_pref =
+                        is_declarer || game_type == Game::Suit;
+
+                    // ── Phase 2: card-value tiebreak for 3rd player ──────────
+                    // When we're last to play (cards_in_trick == 2) and all
+                    // threshold-eligible candidates share the same trick outcome
+                    // (all win or all lose), break ties by card point value:
+                    //   winning trick → play highest value  (collect more points fast)
+                    //   losing trick  → play lowest value   (don't waste good cards)
+                    let value_sort: Option<bool> = if cards_in_trick == 2 {
+                        let played: u32 = current_trick
+                            .iter()
+                            .map(|(_, c)| *c)
+                            .fold(0u32, |a, c| a | c);
+                        let ts = position.trick_suit;
+                        let in_range_outcomes: Vec<bool> = scores
+                            .iter()
+                            .filter(|(_, m)| m.avg_points >= best_pts - threshold)
+                            .map(|(c, _)| {
+                                would_win_trick_regular(*c, played, ts, game_type)
+                            })
+                            .collect();
+                        if in_range_outcomes.iter().all(|&w| w) {
+                            Some(true) // all win → pick highest card value
+                        } else if in_range_outcomes.iter().all(|&w| !w) {
+                            Some(false) // all lose → pick lowest card value
+                        } else {
+                            None // mixed – no value tiebreak
+                        }
+                    } else {
+                        None
+                    };
+
+                    // ── Phase 3: unified sort with four-level priority ────────
+                    scores.sort_by(|a, b| {
+                        use std::cmp::Ordering::*;
+                        let a_in = a.1.avg_points >= best_pts - threshold;
+                        let b_in = b.1.avg_points >= best_pts - threshold;
+
+                        // P1: in-range beats out-of-range
+                        if a_in != b_in {
+                            return if b_in { Greater } else { Less };
+                        }
+
+                        if a_in {
+                            // P2: trump preference
+                            if apply_trump_pref {
+                                let a_trump = (a.0 & trump_mask) != 0;
+                                let b_trump = (b.0 & trump_mask) != 0;
+                                if a_trump != b_trump {
+                                    let a_pref =
+                                        if is_declarer { a_trump } else { !a_trump };
+                                    let b_pref =
+                                        if is_declarer { b_trump } else { !b_trump };
+                                    if a_pref != b_pref {
+                                        return if b_pref { Greater } else { Less };
+                                    }
+                                }
+                            }
+
+                            // P3: card-value tiebreak (3rd player only)
+                            if let Some(prefer_high) = value_sort {
+                                let va = a.0.card_points();
+                                let vb = b.0.card_points();
+                                let vord = if prefer_high {
+                                    vb.cmp(&va) // DESC – highest value first
+                                } else {
+                                    va.cmp(&vb) // ASC – lowest value first
+                                };
+                                if vord != Equal {
+                                    return vord;
+                                }
+                            }
+                        }
+
+                        // P4: avg_points descending (baseline)
+                        b.1.avg_points
+                            .partial_cmp(&a.1.avg_points)
+                            .unwrap_or(Equal)
+                    });
+                }
+
+                // Detect override: heuristic chose a different card than pure avg.
+                trump_heuristic_overrode =
+                    scores.first().map(|(c, _)| *c) != pure_avg_best;
+            }
         }
 
         let (pimc_card, all_scores_str): (u32, Vec<(u32, String)>) = if scores.is_empty() {
@@ -758,6 +956,15 @@ fn run_pimc_points_play(
                             FallbackStrategy::Minimum => m.min_points,
                         };
                         (*c, format!("{:.0}%/{:.0}", m.win_prob * 100.0, fval))
+                    }
+                    PointStrategy::AverageWithHeuristic { .. } => {
+                        let decl_pv = perfect_map.get(c).copied().unwrap_or(0);
+                        let pv = if cur_player == Player::Declarer {
+                            decl_pv as i16
+                        } else {
+                            120 - decl_pv as i16
+                        };
+                        (*c, format!("{:.0}(\u{00B1}{:.1})|{}", m.avg_points, m.std_dev, pv))
                     }
                 })
                 .collect();
@@ -827,6 +1034,9 @@ fn run_pimc_points_play(
         } else {
             "   "
         };
+        // "^" marks when the trump heuristic overrode the pure avg-points best card.
+        let perf_mark = if pimc_card != perfect_card { "*" } else { " " };
+        let trump_mark = if trump_heuristic_overrode { "^" } else { " " };
         let who = if is_decl { "D" } else { "O" };
         let scores_str: String = all_scores_str
             .iter()
@@ -835,9 +1045,10 @@ fn run_pimc_points_play(
             .join("  ");
 
         println!(
-            "  {} {}  PIMC:{} {}  perf:{} opt={:3}  loss={}({})  avgs:[{}]",
+            "  {} {}{}  PIMC:{} {}  perf:{} opt={:3}  loss={}({})  avgs:[{}]",
             player_abbr(cur_player),
-            if pimc_card != perfect_card { "*" } else { " " },
+            perf_mark,
+            trump_mark,
             diff_mark,
             pimc_card.__str(),
             perfect_card.__str(),

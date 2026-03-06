@@ -17,6 +17,7 @@ pub struct MoveMetrics {
     pub win_prob: f32,
     pub avg_points: f32,
     pub min_points: f32,
+    pub std_dev: f32,
 }
 
 pub struct PimcSearch {
@@ -284,8 +285,8 @@ impl PimcSearch {
         let game_type = self.uproblem.game_type();
         let threshold = self.uproblem.threshold();
 
-        // Accumulator: card -> (wins, points_sum, points_min, count)
-        let global: Mutex<HashMap<u32, (u32, f32, f32, u32)>> = Mutex::new(HashMap::new());
+        // Accumulator: card -> (wins, points_sum, points_sum_sq, points_min, count)
+        let global: Mutex<HashMap<u32, (u32, f32, f32, f32, u32)>> = Mutex::new(HashMap::new());
 
         (0..self.sample_size).into_par_iter().for_each(|i| {
             let concrete_problem = self.uproblem.generate_concrete_problem();
@@ -337,15 +338,16 @@ impl PimcSearch {
             {
                 let mut g = global.lock().unwrap();
                 for (card, win, score) in local {
-                    let entry = g.entry(card).or_insert((0, 0.0, 150.0, 0));
+                    let entry = g.entry(card).or_insert((0, 0.0, 0.0, 150.0, 0));
                     if win {
                         entry.0 += 1;
                     }
                     entry.1 += score;
-                    if score < entry.2 {
-                        entry.2 = score;
+                    entry.2 += score * score;
+                    if score < entry.3 {
+                        entry.3 = score;
                     }
-                    entry.3 += 1;
+                    entry.4 += 1;
                 }
             }
 
@@ -363,14 +365,18 @@ impl PimcSearch {
         let g = global.into_inner().unwrap();
         let mut results: Vec<(u32, MoveMetrics)> = g
             .into_iter()
-            .map(|(card, (wins, sum, min, count))| {
+            .map(|(card, (wins, sum, sum_sq, min, count))| {
                 let cnt = count.max(1) as f32;
+                let avg = sum / cnt;
+                let variance = (sum_sq / cnt) - avg * avg;
+                let std_dev = variance.max(0.0).sqrt();
                 (
                     card,
                     MoveMetrics {
                         win_prob: wins as f32 / cnt,
-                        avg_points: sum / cnt,
+                        avg_points: avg,
                         min_points: if count == 0 { 0.0 } else { min },
+                        std_dev,
                     },
                 )
             })

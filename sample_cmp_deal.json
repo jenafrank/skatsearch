@@ -1,7 +1,7 @@
 {
-  "declarer_cards": "[CT CK CQ C9 C8 C7 HA DA DQ D8]",
-  "left_cards": "[CJ HJ SK SQ S8 S7 HT H9 DK D9]",
-  "right_cards": "[SJ DJ SA ST S9 HK H8 H7 DT D7]",
+  "declarer_cards": "[SJ CA CT C9 C8 C7 HK H8 H7 DK]",
+  "left_cards": "[DJ CK CQ SA SK SQ S8 S7 HT H9]",
+  "right_cards": "[CJ HJ ST S9 HA HQ DQ D9 D8 D7]",
   "game_type": "Suit",
   "start_player": "Declarer",
   "mode": null,

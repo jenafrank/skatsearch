@@ -1,0 +1,13 @@
+{
+  "declarer_cards": "[CJ SJ HJ C8 S8 H8 DA DK D9 D8]",
+  "left_cards": "[DJ C7 SA ST SQ S7 H9 H7 DQ D7]",
+  "right_cards": "[CA CT CK C9 SK S9 HA HT HK DT]",
+  "game_type": "Grand",
+  "start_player": "Declarer",
+  "mode": null,
+  "trick_cards": null,
+  "trick_suit": null,
+  "declarer_start_points": null,
+  "samples": null,
+  "god_players": null
+}
