@@ -16,7 +16,7 @@ sns.set_context("notebook", font_scale=1.2)
 def analyze_decision_map():
     # --- 1. Load Pre-Discard Data (Pickup Probability) ---
     # Find latest general_pre_stats
-    search_pattern = "research/data/general_pre_stats_final_50k_*.csv"
+    search_pattern = "research/data/heuristics/general_pre_stats_final_50k_*.csv"
     files = glob.glob(search_pattern)
     if not files:
         print("No Pre-Discard data found.")

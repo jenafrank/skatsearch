@@ -2,9 +2,9 @@ import pandas as pd
 import os
 
 def dump():
-    pre_file = "research/data/general_pre_stats_final_50k_36611593.csv"
+    pre_file = "research/data/heuristics/general_pre_stats_final_50k_36611593.csv"
     import glob
-    files = glob.glob("research/data/general_pre_stats_final_50k_*.csv")
+    files = glob.glob("research/data/heuristics/general_pre_stats_final_50k_*.csv")
     pre_file = max(files, key=os.path.getctime)
     df_pre = pd.read_csv(pre_file)
     df_pre.columns = df_pre.columns.str.strip()

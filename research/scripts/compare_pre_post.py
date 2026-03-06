@@ -64,4 +64,4 @@ def analyze_file(filename, label):
 
 if __name__ == "__main__":
     analyze_file("grand_pickup_1000.csv", "PRE-PICKUP")
-    analyze_file("grand_post_discard_10k.csv", "POST-DISCARD")
+    analyze_file("../data/heuristics/grand_post_discard_10k.csv", "POST-DISCARD")

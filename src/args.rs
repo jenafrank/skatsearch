@@ -256,6 +256,20 @@ pub enum Commands {
         #[arg(short, long)]
         out: String,
     },
+    /// Generates a deal via full best-game analysis + optimal skat discard.
+    /// Shuffles a 32-card deck (12 for declarer, 10 each for opponents), evaluates
+    /// all Grand/Suit game variants with perfect-information solving, keeps the best,
+    /// discards optimally, and applies the suit transformation (so Clubs is always trump).
+    /// Rejects the deal if the best perfect-play score is below --min-value.
+    /// Exits with code 2 if the deal is rejected (so callers can loop).
+    GenerateSmartDeal {
+        /// Minimum perfect-play score required (61 = guaranteed win, default 61).
+        #[arg(long, default_value_t = 61)]
+        min_value: u8,
+        /// Output JSON file path.
+        #[arg(short, long, default_value = "smart_deal.json")]
+        out: String,
+    },
     GenerateJson {
         /// Number of valid JSONs to find
         #[arg(short, long, default_value_t = 10)]

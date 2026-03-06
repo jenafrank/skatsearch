@@ -1,0 +1,268 @@
+﻿cargo : warning: output filename collision.
+In Zeile:1 Zeichen:1
++ cargo test stress_test_perfect_play 2>&1 | Out-File -Encoding 
+utf8 co ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (warning: output fil 
+   ename collision.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+The bin target `skat_aug23` in package `skat_aug23 v0.1.0 
+(C:\Users\jenaf\source\repos\skatsearch)` has the same output 
+filename as the lib target `skat_aug23` in package `skat_aug23 
+v0.1.0 (C:\Users\jenaf\source\repos\skatsearch)`.
+Colliding filename is: C:\Users\jenaf\source\repos\skatsearch\tar
+get\debug\deps\skat_aug23.pdb
+The targets should have unique names.
+Consider changing their names to be unique or compiling them 
+separately.
+This may become a hard error in the future; see 
+<https://github.com/rust-lang/cargo/issues/6313>.
+warning: unused import: `crate::traits::Points`
+ --> src\extensions\solver.rs:9:5
+  |
+9 | use crate::traits::Points;
+  |     ^^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` on by default
+
+warning: unused import: `Deserialize`
+ --> src\lib_wasm.rs:7:13
+  |
+7 | use serde::{Deserialize, Serialize};
+  |             ^^^^^^^^^^^
+
+warning: unused imports: `JACKOFCLUBS`, `JACKOFDIAMONDS`, 
+`JACKOFHEARTS`, and `JACKOFSPADES`
+ --> src\skat\context.rs:7:44
+  |
+7 | ...S, JACKOFCLUBS, JACKOFDIAMONDS, JACKOFHEARTS, 
+JACKOFSPAD...
+  |       ^^^^^^^^^^^  ^^^^^^^^^^^^^^  ^^^^^^^^^^^^  ^^^^^^^^^^^^
+
+warning: unused variable: `skat_points`
+   --> src\extensions\cli_playout.rs:235:9
+    |
+235 |     let skat_points = skat_discard.points();
+    |         ^^^^^^^^^^^ help: if this is intentional, prefix 
+it with an underscore: `_skat_points`
+    |
+    = note: `#[warn(unused_variables)]` on by default
+
+warning: variable does not need to be mutable
+   --> src\extensions\cli_playout.rs:250:9
+    |
+250 |     let mut ctx = GameContext::create(d_final, l_final, ...
+    |         ----^^^
+    |         |
+    |         help: remove this `mut`
+    |
+    = note: `#[warn(unused_mut)]` on by default
+
+warning: unused variable: `unplayed`
+   --> src\extensions\cli_playout.rs:424:13
+    |
+424 |         let unplayed = position.get_all_unplayed_cards();
+    |             ^^^^^^^^ help: if this is intentional, prefix 
+it with an underscore: `_unplayed`
+
+warning: variable does not need to be mutable
+   --> src\extensions\cli_playout.rs:457:13
+    |
+457 | ...   let mut builder = PimcProblemBuilder::new(engine.c...
+    |           ----^^^^^^^
+    |           |
+    |           help: remove this `mut`
+
+warning: variable does not need to be mutable
+   --> src\extensions\cli_playout.rs:474:13
+    |
+474 | ...   let mut search = PimcSearch::new(problem, samples,...
+    |           ----^^^^^^
+    |           |
+    |           help: remove this `mut`
+
+warning: unused variable: `unplayed`
+   --> src\extensions\cli_playout.rs:637:13
+    |
+637 |         let unplayed = position.get_all_unplayed_cards();
+    |             ^^^^^^^^ help: if this is intentional, prefix 
+it with an underscore: `_unplayed`
+
+warning: unused variable: `unplayed`
+    --> src\extensions\cli_playout.rs:1089:13
+     |
+1089 |         let unplayed = position.get_all_unplayed_cards();
+     |             ^^^^^^^^ help: if this is intentional, prefix 
+it with an underscore: `_unplayed`
+
+warning: unused variable: `skat_points`
+   --> src\lib_wasm.rs:203:13
+    |
+203 |         let skat_points = skat_cards.points();
+    |             ^^^^^^^^^^^ help: if this is intentional, 
+prefix it with an underscore: `_skat_points`
+
+warning: variable does not need to be mutable
+   --> src\lib_wasm.rs:135:14
+    |
+135 |         let (mut deck, _count) = ALLCARDS.__decompose();
+    |              ----^^^^
+    |              |
+    |              help: remove this `mut`
+
+warning: unreachable pattern
+   --> src\lib_wasm.rs:642:13
+    |
+642 |             _ => "Unknown".to_string(),
+    |             ^ no value can reach this
+    |
+note: multiple earlier patterns match some of the same values
+   --> src\lib_wasm.rs:642:13
+    |
+636 |             (Game::Grand, _) => "Grand".to_string(),
+    |             ---------------- matches some of the same 
+values
+637 |             (Game::Null, _) => "Null".to_string(),
+    |             --------------- matches some of the same values
+638 |             (Game::Suit, None) => "Clubs".to_string(),
+    |             ------------------ matches some of the same 
+values
+639 |             (Game::Suit, Some(SpadesSwitch)) => "Spades"...
+    |             -------------------------------- matches some 
+of the same values
+...
+642 |             _ => "Unknown".to_string(),
+    |             ^ ...and 2 other patterns collectively make 
+this unreachable
+    = note: `#[warn(unreachable_patterns)]` on by default
+
+warning: unused variable: `score`
+   --> src\lib_wasm.rs:997:26
+    |
+997 |         if let Ok((card, score, val)) = res {
+    |                          ^^^^^ help: if this is 
+intentional, prefix it with an underscore: `_score`
+
+warning: unused variable: `best_card_mask`
+    --> src\lib_wasm.rs:1011:14
+     |
+1011 |         let (best_card_mask, best_val) = self.solve_bes...
+     |              ^^^^^^^^^^^^^^ help: if this is intentional, 
+prefix it with an underscore: `_best_card_mask`
+
+warning: variable `skat` is assigned to, but never used
+   --> src\pimc\analysis.rs:492:21
+    |
+492 |             let mut skat = 0;
+    |                     ^^^^
+    |
+    = note: consider using `_skat` instead
+
+warning: variable does not need to be mutable
+   --> src\pimc\playout.rs:522:25
+    |
+522 | ...   let mut current_winner_rank = get_null_rank(card);
+    |           ----^^^^^^^^^^^^^^^^^^^
+    |           |
+    |           help: remove this `mut`
+
+warning: value assigned to `skat_fulls` is never read
+   --> src\skat\signature.rs:132:17
+    |
+132 |         let mut skat_fulls = 0;
+    |                 ^^^^^^^^^^
+    |
+    = help: maybe it is overwritten before being read?
+    = note: `#[warn(unused_assignments)]` on by default
+
+warning: method `calculate_theoretical_value` is never used
+   --> src\lib_wasm.rs:903:8
+    |
+133 | impl SkatGame {
+    | ------------- method in this implementation
+...
+903 |     fn calculate_theoretical_value(&self) -> i32 {
+    |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` on by default
+
+warning: unused imports: `JACKOFDIAMONDS` and `JACKOFHEARTS`
+ --> src\skat\context.rs:7:57
+  |
+7 | ...JACKOFCLUBS, JACKOFDIAMONDS, JACKOFHEARTS, JACKOFSPADES,
+  |                 ^^^^^^^^^^^^^^  ^^^^^^^^^^^^
+
+warning: unused import: `crate::traits::Bitboard`
+  --> src\lib.rs:18:9
+   |
+18 |     use crate::traits::Bitboard;
+   |         ^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: `skat_aug23` (lib) generated 19 warnings (run `cargo 
+fix --lib -p skat_aug23` to apply 8 suggestions)
+warning: `skat_aug23` (lib test) generated 20 warnings (18 
+duplicates) (run `cargo fix --lib -p skat_aug23 --tests` to 
+apply 2 suggestions)
+   Compiling skat_aug23 v0.1.0 
+(C:\Users\jenaf\source\repos\skatsearch)
+warning: unused import: `Bitboard`
+   --> src\main.rs:526:38
+    |
+526 | ...   use skat_aug23::traits::{Bitboard, StringConverter};
+    |                                ^^^^^^^^
+    |
+    = note: `#[warn(unused_imports)]` on by default
+
+warning: `skat_aug23` (bin "skat_aug23") generated 1 warning 
+(run `cargo fix --bin "skat_aug23"` to apply 1 suggestion)
+warning: `skat_aug23` (bin "skat_aug23" test) generated 1 
+warning (1 duplicate)
+error[E0433]: failed to resolve: use of undeclared crate or 
+module `skatsearch`
+ --> tests\stress_test_perfect_play.rs:2:5
+  |
+2 | use 
+skatsearch::extensions::solver::{solve_optimum_from_position, 
+OptimumMode};
+  |     ^^^^^^^^^^ use of undeclared crate or module `skatsearch`
+
+error[E0433]: failed to resolve: use of undeclared crate or 
+module `skatsearch`
+ --> tests\stress_test_perfect_play.rs:3:5
+  |
+3 | use skatsearch::skat::context::GameContext;
+  |     ^^^^^^^^^^ use of undeclared crate or module `skatsearch`
+
+error[E0433]: failed to resolve: use of undeclared crate or 
+module `skatsearch`
+ --> tests\stress_test_perfect_play.rs:4:5
+  |
+4 | use skatsearch::skat::defs::{Game, Player};
+  |     ^^^^^^^^^^ use of undeclared crate or module `skatsearch`
+
+error[E0433]: failed to resolve: use of undeclared crate or 
+module `skatsearch`
+ --> tests\stress_test_perfect_play.rs:5:5
+  |
+5 | use skatsearch::skat::engine::SkatEngine;
+  |     ^^^^^^^^^^ use of undeclared crate or module `skatsearch`
+
+error[E0433]: failed to resolve: use of undeclared crate or 
+module `skatsearch`
+ --> tests\stress_test_perfect_play.rs:6:5
+  |
+6 | use skatsearch::skat::rules::get_legal_moves;
+  |     ^^^^^^^^^^ use of undeclared crate or module `skatsearch`
+
+error[E0433]: failed to resolve: use of undeclared crate or 
+module `skatsearch`
+ --> tests\stress_test_perfect_play.rs:7:5
+  |
+7 | use skatsearch::traits::StringConverter;
+  |     ^^^^^^^^^^ use of undeclared crate or module `skatsearch`
+
+For more information about this error, try `rustc --explain 
+E0433`.
+error: could not compile `skat_aug23` (test 
+"stress_test_perfect_play") due to 6 previous errors

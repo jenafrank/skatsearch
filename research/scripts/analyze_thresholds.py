@@ -39,8 +39,8 @@ def parse_cards(card_str):
 
 def analyze_thresholds():
     # 1. Load Data
-    suit_path = "../data/suit_large_10k.csv"
-    grand_path = "../data/grand_post_discard_10k.csv"
+    suit_path = "../data/heuristics/suit_large_10k.csv"
+    grand_path = "../data/heuristics/grand_post_discard_10k.csv"
     
     try:
         df_suit = pd.read_csv(suit_path)

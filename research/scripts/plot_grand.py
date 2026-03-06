@@ -19,7 +19,7 @@ def parse_cards_max_suit(card_str):
 def plot_grand():
     # Load data
     pre_file = "../data/grand_pickup_1000.csv"
-    post_file = "../data/grand_post_discard_10k.csv"
+    post_file = "../data/heuristics/grand_post_discard_10k.csv"
     
     try:
         pre = pd.read_csv(pre_file)

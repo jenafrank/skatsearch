@@ -4,7 +4,7 @@
 $ServerIP = "62.171.133.101"
 $User = "root"
 $RemotePath = "~/skatsearch/research/data"
-$LocalPath = "research/data"
+$LocalPath = "research/data"           # default; overridden below for heuristics files
 
 Write-Host "Checking for latest file on server..."
 # Check for latest file
@@ -20,6 +20,10 @@ if ([string]::IsNullOrWhiteSpace($LatestFile)) {
 $FileName = Split-Path $LatestFile -Leaf
 Write-Host "Found: $FileName"
 
+# Route heuristics-source files to the dedicated subfolder.
+if ($FileName -like "general_pre_stats_final_50k_*.csv") {
+    $LocalPath = "research/data/heuristics"
+}
 $LocalFile = Join-Path $LocalPath $FileName
 
 if (Test-Path $LocalFile) {

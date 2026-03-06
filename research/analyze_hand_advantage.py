@@ -32,7 +32,7 @@ def analyze_hand_advantage():
     df_hand.rename(columns={'WinProb': 'Prob_Hand'}, inplace=True)
     
     # 2. Load Pickup (Pre-Discard) Data
-    list_of_files = glob.glob('research/data/general_pre_stats_final_50k_*.csv')
+    list_of_files = glob.glob('research/data/heuristics/general_pre_stats_final_50k_*.csv')
     if not list_of_files:
         print("No Pre-Discard CSV found.")
         return

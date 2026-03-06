@@ -2,7 +2,7 @@ import pandas as pd
 import sys
 
 def analyze():
-    csv_file = "../data/suit_large_10k.csv"
+    csv_file = "../data/heuristics/suit_large_10k.csv"
     try:
         df = pd.read_csv(csv_file)
     except:

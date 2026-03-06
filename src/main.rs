@@ -511,25 +511,13 @@ fn main() {
                 mode,
             );
 
-            let trick_suit = match gt {
-                skat_aug23::skat::defs::Game::Suit => {
-                    let s = game_type.to_lowercase();
-                    if s == "spades" || s == "hearts" || s == "diamonds" {
-                        Some(s)
-                    } else {
-                        Some("clubs".to_string())
-                    }
-                }
-                _ => None,
-            };
-
             use skat_aug23::traits::{Bitboard, StringConverter};
             let input = args::GameContextInput {
                 declarer_cards: ctx.declarer_cards().__str(),
                 left_cards: ctx.left_cards().__str(),
                 right_cards: ctx.right_cards().__str(),
                 trick_cards: None,
-                trick_suit,
+                trick_suit: None, // No trick in progress for a fresh game
                 declarer_start_points: None,
                 game_type: gt,
                 start_player: sp,
@@ -540,6 +528,61 @@ fn main() {
             let json = serde_json::to_string_pretty(&input).unwrap();
             std::fs::write(&out, json).expect("Failed to write deal");
             println!("Wrote generated deal to {}", out);
+        }
+        args::Commands::GenerateSmartDeal { min_value, out } => {
+            use skat_aug23::extensions::cli_playout::generate_smart_deal_with_min;
+            use skat_aug23::traits::{Bitboard, StringConverter};
+            match generate_smart_deal_with_min(min_value) {
+                None => {
+                    println!("SMART_DEAL_SKIP: deal did not qualify (best value < {}).", min_value);
+                    std::process::exit(2);
+                }
+                Some((ctx, game_type, start_player, label, discard)) => {
+                    println!("SMART_DEAL_OK: game={} discard={}", label, discard);
+
+                    // ── Heuristic logging ──────────────────────────────────────
+                    use skat_aug23::pimc::pimc_problem::{
+                        describe_grand_post_discard, describe_pre_discard,
+                        describe_suit_post_discard,
+                    };
+                    use skat_aug23::skat::defs::Game as G;
+                    use skat_aug23::traits::Bitboard;
+                    let final_hand = ctx.declarer_cards();
+                    // Pre-discard: approximate from final 10-card hand (optimal
+                    // discard may differ from original skat, so this is an estimate).
+                    println!("HEURISTIC_PRE: {}", describe_pre_discard(final_hand));
+                    // Post-discard: exact heuristic for the actual playing hand.
+                    let post_desc = match game_type {
+                        G::Grand => describe_grand_post_discard(final_hand),
+                        _ => describe_suit_post_discard(final_hand),
+                    };
+                    println!("HEURISTIC_POST: {}", post_desc);
+                    // Sampling mode used in PIMC playout for this deal.
+                    let sampling_label = match game_type {
+                        G::Grand => "smart-grand (Post-Discard Grand filter, J/S boundary)",
+                        _ => "smart-suit (Post-Discard Suit/Clubs filter, TC/S boundary)",
+                    };
+                    println!("HEURISTIC_SAMPLING: {}", sampling_label);
+                    // ──────────────────────────────────────────────────────────
+
+                    let input = args::GameContextInput {
+                        declarer_cards: ctx.declarer_cards().__str(),
+                        left_cards: ctx.left_cards().__str(),
+                        right_cards: ctx.right_cards().__str(),
+                        trick_cards: None,
+                        trick_suit: None,
+                        declarer_start_points: None,
+                        game_type,
+                        start_player,
+                        mode: None,
+                        samples: None,
+                        god_players: None,
+                    };
+                    let json = serde_json::to_string_pretty(&input).unwrap();
+                    std::fs::write(&out, json).expect("Failed to write deal");
+                    println!("Wrote smart deal to {}", out);
+                }
+            }
         }
         args::Commands::GenerateJson {
             count,

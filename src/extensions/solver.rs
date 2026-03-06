@@ -112,6 +112,13 @@ pub fn solve_all_cards_from_position(
         let child_pos = position.make_move(*mov, &engine.context);
         let (best_response, value) = engine.search(&child_pos, &mut cnt, alpha, beta);
 
+        if (crate::skat::rules::get_legal_moves(position.trick_suit, position.player_cards) & *mov)
+            == 0
+        {
+            println!("CRITICAL: Solver considering ILLEGAL move {} for player {}! Trick suit: {:032b}, Hand: {:032b}", 
+                crate::traits::StringConverter::__str(mov), position.player, position.trick_suit, position.player_cards);
+        }
+
         results.push((*mov, best_response, value));
     }
 

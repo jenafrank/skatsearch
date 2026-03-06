@@ -1,0 +1,13 @@
+{
+  "declarer_cards": "[CJ SJ CA CT C7 SA ST S9 S8 D8]",
+  "left_cards": "[HJ DJ C8 SK S7 HA H9 DK DQ D9]",
+  "right_cards": "[CK CQ C9 SQ HT HK H8 H7 DA D7]",
+  "game_type": "Suit",
+  "start_player": "Declarer",
+  "mode": null,
+  "trick_cards": null,
+  "trick_suit": null,
+  "declarer_start_points": null,
+  "samples": null,
+  "god_players": null
+}

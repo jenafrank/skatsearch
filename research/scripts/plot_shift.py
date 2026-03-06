@@ -8,7 +8,7 @@ import numpy as np
 
 def plot_shift():
     # Load data
-    csv_file = "../data/suit_large_10k.csv"
+    csv_file = "../data/heuristics/suit_large_10k.csv"
     try:
         df = pd.read_csv(csv_file)
         print(f"Loaded {len(df)} rows from {csv_file}")

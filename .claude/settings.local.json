@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cargo build:*)",
+      "Bash(python:*)",
+      "Bash(ls:*)",
+      "Bash(cargo run:*)",
+      "WebFetch(domain:)",
+      "Bash(python3:*)",
+      "Bash(sort -n -k1 -k2)"
+    ]
+  }
+}

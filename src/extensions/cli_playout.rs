@@ -86,7 +86,8 @@ pub fn generate_random_deal(
     let game_type = match game_type_str.to_lowercase().as_str() {
         "grand" => Game::Grand,
         "null" => Game::Null,
-        "clubs" | "suit" => Game::Suit, // Canonical Suit Game
+        // All suit variants use Game::Suit internally (engine uses Clubs as canonical trump)
+        "clubs" | "suit" | "spades" | "hearts" | "diamonds" => Game::Suit,
         _ => panic!("Invalid game type: {}", game_type_str),
     };
 
@@ -182,7 +183,7 @@ pub fn generate_random_deal(
 ///   6. Return (context_10cards, game_type, start_player, label, discard_str).
 ///
 /// Returns `None` if the random deal did not qualify.
-pub fn generate_smart_deal() -> Option<(GameContext, Game, Player, String, String)> {
+pub fn generate_smart_deal_with_min(min_value: u8) -> Option<(GameContext, Game, Player, String, String)> {
     // Under the hood, we just generate a general random deal in 'random' mode,
     // then analyze it.
     let _ = generate_random_deal(
@@ -225,14 +226,17 @@ pub fn generate_smart_deal() -> Option<(GameContext, Game, Player, String, Strin
         .filter(|r| r.game_type != Game::Null)
         .max_by_key(|r| r.value)?;
 
-    // Reject deals where perfect-play score is below 50 pts.
-    if best.value < 50 {
-        return None;
-    }
-
     let skat_discard = best.skat_1 | best.skat_2;
     let discard_str = format!("{} {}", best.skat_1.__str(), best.skat_2.__str());
     let skat_points = skat_discard.points();
+
+    // best.value is inflated: evaluate_skat_combination adds skat_points on top of
+    // solve_double_dummy's result, which already includes skat via create_initial_position().
+    // So best.value = true_score + skat_points. Correct for this before filtering.
+    let true_score = best.value.saturating_sub(skat_points);
+    if true_score < min_value {
+        return None;
+    }
 
     // The declarer's final 10-card hand after discard.
     let decl_10 = decl_12 & !skat_discard;
@@ -251,6 +255,11 @@ pub fn generate_smart_deal() -> Option<(GameContext, Game, Player, String, Strin
     // ctx.set_declarer_start_points(skat_points); // Handled by Engine now
 
     Some((ctx, best.game_type, start_player, best.label, discard_str))
+}
+
+/// Backward-compatible wrapper: uses the old 50-pt threshold.
+pub fn generate_smart_deal() -> Option<(GameContext, Game, Player, String, String)> {
+    generate_smart_deal_with_min(50)
 }
 
 use crate::skat::formatter::format_hand_for_game;
@@ -394,113 +403,101 @@ fn run_pimc_play(
 ) {
     let mut engine = SkatEngine::new(initial_ctx.clone(), None);
     let mut position = engine.create_initial_position();
-    let mut trick_count = 1;
+    let mut trick_num = 0usize;
+    let mut cards_in_trick = 0u8;
 
-    let mut declarer_loss = 0;
-    let mut opponent_loss = 0;
+    let mut declarer_loss = 0i16;
+    let mut opponent_loss = 0i16;
     let mut facts_tracker = FactsTracker::new();
     let mut current_trick: Vec<(Player, u32)> = Vec::new();
 
     println!("Starting PIMC Play...");
     while position.get_legal_moves() != 0 {
-        if position.trick_cards_count == 0 {
-            println!(
-                "--- Trick {} (Player: {:?}) ---",
-                trick_count, position.player
-            );
-            trick_count += 1;
+        // ── Trick separator ─────────────────────────────────────────────────────
+        if cards_in_trick == 0 {
+            trick_num += 1;
             current_trick.clear();
+            println!(
+                "-- Trick {:2} ({} leads) ----------------------------------------------------------------",
+                trick_num, player_abbr(position.player)
+            );
         }
+
+        let cur_player = position.player;
 
         // 1. Get Perfect Move & Value (Benchmark)
         let (perfect_card, _, perfect_val_u8) =
             solve_optimum_from_position(&mut engine, &position, OptimumMode::BestValue).unwrap();
         let perfect_val = perfect_val_u8 as i16;
 
-        // 2. Get PIMC Move
-        // We track unplayed cards from the position.
-        // Position tracks 'declarer_cards', 'left_cards', 'right_cards'.
-        // unplayed includes all keys.
-        let unplayed = position.get_all_unplayed_cards();
-
-        let prev_c = {
-            let pred = match position.player {
-                Player::Declarer => Player::Right,
-                Player::Left => Player::Declarer,
-                Player::Right => Player::Left,
-            };
-            current_trick
-                .iter()
-                .find(|(p, _)| *p == pred)
-                .map(|(_, c)| *c)
-                .unwrap_or(0)
+        // 2. Build PIMC problem
+        let pred = match cur_player {
+            Player::Declarer => Player::Right,
+            Player::Left => Player::Declarer,
+            Player::Right => Player::Left,
         };
-
-        let next_c = {
-            let succ = match position.player {
-                Player::Declarer => Player::Left,
-                Player::Left => Player::Right,
-                Player::Right => Player::Declarer,
-            };
-            current_trick
-                .iter()
-                .find(|(p, _)| *p == succ)
-                .map(|(_, c)| *c)
-                .unwrap_or(0)
+        let succ = match cur_player {
+            Player::Declarer => Player::Left,
+            Player::Left => Player::Right,
+            Player::Right => Player::Declarer,
         };
+        let prev_c = current_trick
+            .iter()
+            .find(|(p, _)| *p == pred)
+            .map(|(_, c)| *c)
+            .unwrap_or(0);
+        let next_c = current_trick
+            .iter()
+            .find(|(p, _)| *p == succ)
+            .map(|(_, c)| *c)
+            .unwrap_or(0);
 
-        // Use only the 30 cards actually in the game (exclude the 2 Skat cards)
         let all_game_cards_pimc = engine.context.declarer_cards()
             | engine.context.left_cards()
             | engine.context.right_cards();
 
-        let mut builder = PimcProblemBuilder::new(engine.context.game_type())
-            .my_player(position.player)
+        // position.declarer_points already includes skat (added by create_initial_position
+        // at game start). The PIMC sample's create_initial_position will add skat again,
+        // so we subtract it here to avoid double-counting.
+        let pimc_decl_pts = position
+            .declarer_points
+            .saturating_sub(engine.context.get_skat().points());
+
+        let builder = PimcProblemBuilder::new(engine.context.game_type())
+            .my_player(cur_player)
             .my_cards_val(position.player_cards)
             .all_cards_val(all_game_cards_pimc & !position.played_cards)
-            .turn(position.player)
+            .turn(cur_player)
             .threshold(engine.context.points_to_win())
-            .declarer_start_points(position.declarer_points)
+            .declarer_start_points(pimc_decl_pts)
             .trick_previous_player(position.trick_suit, prev_c)
             .trick_next_player(next_c)
             .facts(Player::Declarer, facts_tracker.declarer)
             .facts(Player::Left, facts_tracker.left)
             .facts(Player::Right, facts_tracker.right)
             .sampling_mode(sampling_mode)
-            .declarer_played_cards(initial_ctx.declarer_cards() & !position.declarer_cards);
+            .declarer_played_cards(initial_ctx.declarer_cards() & !position.declarer_cards)
+            .all_played_cards(position.played_cards);
 
-        let problem = builder.build();
-
-        let mut search = PimcSearch::new(problem, samples, None);
+        let mut search = PimcSearch::new(builder.build(), samples, None);
         let probs = search.estimate_probability_of_all_cards(false);
 
         // Pick best card
         let pimc_card = if probs.is_empty() {
-            let moves_mask = position.get_legal_moves();
-            let (arr, _) = moves_mask.__decompose();
+            let (arr, _) = position.get_legal_moves().__decompose();
             arr[0]
         } else {
-            // Log top 3 probabilities
-            print!("    PIMC Analysis:");
-            for i in 0..std::cmp::min(3, probs.len()) {
-                print!(" {} ({:.1})", probs[i].0.__str(), probs[i].1);
-            }
-            println!();
             probs[0].0
         };
 
         // 3. Compare with Benchmark
-        let actual_val_of_pimc_move = if pimc_card == perfect_card {
+        let actual_val = if pimc_card == perfect_card {
             perfect_val
         } else {
             let child_pos = position.make_move(pimc_card, &engine.context);
             if child_pos.get_legal_moves() == 0 {
                 if engine.context.game_type() == Game::Null {
-                    if child_pos.declarer_points > 0 {
-                        1i16
-                    } else {
-                        0i16
-                    }
+                    if child_pos.declarer_points > 0 { 1i16 } else { 0i16 }
                 } else {
                     child_pos.declarer_points as i16
                 }
@@ -512,49 +509,64 @@ fn run_pimc_play(
             }
         };
 
-        let loss = if engine.context.game_type() == Game::Null {
-            if position.player == Player::Declarer {
-                actual_val_of_pimc_move - perfect_val
-            } else {
-                perfect_val - actual_val_of_pimc_move
-            }
+        let raw_loss = if engine.context.game_type() == Game::Null {
+            if cur_player == Player::Declarer { actual_val - perfect_val } else { perfect_val - actual_val }
         } else {
-            if position.player == Player::Declarer {
-                perfect_val - actual_val_of_pimc_move
-            } else {
-                actual_val_of_pimc_move - perfect_val
-            }
+            if cur_player == Player::Declarer { perfect_val - actual_val } else { actual_val - perfect_val }
         };
-
-        let loss = if loss < 0 { 0 } else { loss };
+        let loss = raw_loss.max(0);
+        let is_decl = cur_player == Player::Declarer;
         if loss > 0 {
-            if position.player == Player::Declarer {
-                declarer_loss += loss;
-            } else {
-                opponent_loss += loss;
-            }
+            if is_decl { declarer_loss += loss; } else { opponent_loss += loss; }
         }
-
-        println!("  PIMC plays: {} | Perfect was: {} | Loss: {} | (Perfect Val: {}, PIMC Action Val: {})", 
-            pimc_card.__str(), perfect_card.__str(), loss, perfect_val, actual_val_of_pimc_move);
 
         // 4. Update State
         facts_tracker.update_voids(
             pimc_card,
-            position.player,
+            cur_player,
             position.trick_suit,
             engine.context.game_type(),
         );
-        current_trick.push((position.player, pimc_card));
-
+        current_trick.push((cur_player, pimc_card));
         position = position.make_move(pimc_card, &engine.context);
+        cards_in_trick = (cards_in_trick + 1) % 3;
+
+        // 5. Print card line
+        let diff_mark = if pimc_card != perfect_card && loss > 0 { "(!)" } else { "   " };
+        let who = if is_decl { "D" } else { "O" };
+        let probs_str: String = probs
+            .iter()
+            .map(|(c, p)| format!("{}={:.0}%", c.__str(), p * 100.0))
+            .collect::<Vec<_>>()
+            .join("  ");
+
+        println!(
+            "  {} {}  PIMC:{} {}  perf:{} opt={:3}  loss={}({})  probs:[{}]",
+            player_abbr(cur_player),
+            if pimc_card != perfect_card { "*" } else { " " },
+            diff_mark,
+            pimc_card.__str(),
+            perfect_card.__str(),
+            perfect_val,
+            loss,
+            who,
+            probs_str,
+        );
+
+        if cards_in_trick == 0 {
+            println!(
+                "  +- score after trick {:2}: {} pts",
+                trick_num, position.declarer_points
+            );
+        }
     }
 
     println!(
-        "Game Finished. Total Point Loss: {} (Declarer: {}, Opponents: {})",
+        "Game Finished. Total Point Loss: {} (D:{} O:{}) | Final score: {} pts",
         declarer_loss + opponent_loss,
         declarer_loss,
-        opponent_loss
+        opponent_loss,
+        position.declarer_points
     );
 }
 
@@ -661,20 +673,28 @@ fn run_pimc_points_play(
             | engine.context.left_cards()
             | engine.context.right_cards();
 
+        // position.declarer_points already includes skat (added by create_initial_position
+        // at game start). The PIMC sample's create_initial_position will add skat again,
+        // so we subtract it here to avoid double-counting.
+        let pimc_decl_pts = position
+            .declarer_points
+            .saturating_sub(engine.context.get_skat().points());
+
         let builder = PimcProblemBuilder::new(engine.context.game_type())
             .my_player(cur_player)
             .my_cards_val(position.player_cards)
             .all_cards_val(all_game_cards & !position.played_cards)
             .turn(cur_player)
             .threshold(engine.context.points_to_win())
-            .declarer_start_points(position.declarer_points)
+            .declarer_start_points(pimc_decl_pts)
             .trick_previous_player(position.trick_suit, prev_c)
             .trick_next_player(next_c)
             .facts(Player::Declarer, facts_tracker.declarer)
             .facts(Player::Left, facts_tracker.left)
             .facts(Player::Right, facts_tracker.right)
             .sampling_mode(sampling_mode)
-            .declarer_played_cards(initial_ctx.declarer_cards() & !position.declarer_cards);
+            .declarer_played_cards(initial_ctx.declarer_cards() & !position.declarer_cards)
+            .all_played_cards(position.played_cards);
 
         let mut scores =
             PimcSearch::new(builder.build(), samples, None).estimate_move_metrics(false);

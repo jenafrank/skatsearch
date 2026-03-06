@@ -103,42 +103,109 @@ pub fn is_likely_null_hand(hand: u32) -> bool {
     total <= 2 && suit_count <= 2
 }
 
-/// Returns `true` if the hand qualifies as a smart Grand hand.
-/// Extracted from research data for Grand EV (2.66 * P - 1.33 > 0).
-pub fn is_playable_grand_hand(hand: u32) -> bool {
+// ── Heuristic decision tables derived from 50k/10k PIMC research simulations ─
+//
+// 3D space: J = jack count, S = aces + attached_tens, T = J + max_suit_len.
+//   • Pre-Discard  — 10-card initial hand before skat pickup. (50k samples)
+//   • Post-Discard Grand — 10-card final hand for Grand games. (10k samples)
+//   • Post-Discard Suit  — 10-card final hand for Suit/Clubs games. (10k samples)
+// All thresholds represent the boundary where win_probability ≥ 0.50.
+
+/// Pre-discard biddability check (10-card hand, before skat pickup).
+/// T = J + max_suit_len; S = aces + attached_tens.
+/// Source: research/data/heuristics/general_pre_stats_final_50k_*.csv, 50 000 simulated hands.
+pub fn is_biddable_pre_discard(hand: u32) -> bool {
     use crate::skat::signature::HandSignature;
     let sig = HandSignature::from_hand(hand);
-
-    // In Grand, trump_count = Jacks count for HandSignature
-    let j = sig.trump_count as i32;
+    let j = sig.trump_count as i32; // jack count (from_hand: trump_count = jacks)
     let s = (sig.aces + sig.attached_tens) as i32;
     let t = j + sig.max_suit_len as i32;
-
+    if t >= 6 {
+        return true; // all T≥6 groups exceed 50 % win probability
+    }
     match t {
-        4 => (j == 1 && s >= 6) || (j == 2 && s >= 5),
-        5 => (j == 2 && s >= 5) || (j == 3 && s >= 4),
-        6 => (j == 2 && s >= 4) || (j == 3 && s >= 3) || (j == 4 && s >= 3),
-        7 => (j == 2 && s >= 4) || (j == 3 && s >= 3) || (j == 4 && s >= 3),
-        8 => (j == 2 && s >= 3) || (j == 3 && s >= 2) || (j == 4 && s >= 1),
-        _ => false,
+        5 => match j {
+            0 => s >= 4,
+            1 => s >= 3,
+            2 => s >= 2,
+            _ => s >= 1, // j≥3
+        },
+        4 => match j {
+            0 => s >= 5,
+            1 => s >= 4,
+            _ => s >= 2, // j≥2
+        },
+        3 => j == 0 && s >= 5, // extremely weak zone; only very heavy side cards help
+        _ => false,             // T≤2: essentially never biddable
     }
 }
 
-/// Returns `true` if the hand qualifies as a smart Suit hand.
-/// Extracted from research data for Suit EV (2 * P - 1 > 0).
-pub fn is_playable_suit_hand(hand: u32) -> bool {
+/// Returns a human-readable summary of the pre-discard heuristic for `hand`.
+pub fn describe_pre_discard(hand: u32) -> String {
     use crate::skat::signature::HandSignature;
     let sig = HandSignature::from_hand(hand);
-
     let j = sig.trump_count as i32;
     let s = (sig.aces + sig.attached_tens) as i32;
     let t = j + sig.max_suit_len as i32;
+    let verdict = if is_biddable_pre_discard(hand) { "BIDDABLE" } else { "not biddable" };
+    format!("Pre-Discard: T={t} J={j} S={s} → {verdict} (50k-sample heuristic)")
+}
 
-    match t {
-        6 => (j == 0 && s >= 5) || (j == 1 && s >= 6), // In Trumps=6 grouping, Suit is optimal at these boundaries
-        8 => (j == 2 && s >= 2) || (j == 4 && s >= 0),
-        _ => false,
+/// Grand post-discard PIMC filter (10-card hand after skat discard).
+/// For Grand only jacks (J) and side strength (S = aces + attached_tens) matter;
+/// there is no suit-trump dimension.
+/// Source: research/data/heuristics/grand_post_discard_10k.csv, 10 000 simulated hands.
+pub fn is_playable_grand_hand(hand: u32) -> bool {
+    use crate::skat::signature::HandSignature;
+    let sig = HandSignature::from_hand(hand);
+    let j = sig.trump_count as i32; // jack count
+    let s = (sig.aces + sig.attached_tens) as i32;
+    match j {
+        1 => s >= 5,
+        2 => s >= 3,
+        3 => s >= 2,
+        4 => s >= 2,
+        _ => false, // 0 jacks: essentially never viable for Grand
     }
+}
+
+/// Returns a human-readable summary of the Grand post-discard heuristic for `hand`.
+pub fn describe_grand_post_discard(hand: u32) -> String {
+    use crate::skat::signature::HandSignature;
+    let sig = HandSignature::from_hand(hand);
+    let j = sig.trump_count as i32;
+    let s = (sig.aces + sig.attached_tens) as i32;
+    let verdict = if is_playable_grand_hand(hand) { "PLAYABLE" } else { "not playable" };
+    format!("Post-Discard Grand: J={j} S={s} → {verdict} (10k-sample heuristic)")
+}
+
+/// Suit post-discard PIMC filter (10-card hand after skat discard, **Clubs as trump**).
+/// TC = jacks + clubs non-jack cards; S = aces + attached_tens of non-trump suits.
+/// All suit games are internally normalised to Clubs before calling this filter.
+/// Source: research/data/heuristics/suit_large_10k.csv, 10 000 simulated hands.
+pub fn is_playable_suit_hand(hand: u32) -> bool {
+    use crate::skat::signature::HandSignature;
+    // Pass suit index 0 (Clubs) so trump_count includes Clubs non-jack cards.
+    let sig = HandSignature::from_hand_and_skat_suit(hand, 0, Some(0));
+    let tc = sig.trump_count as i32; // total trump count: jacks + clubs cards
+    let s = (sig.aces + sig.attached_tens) as i32; // side-suit strength
+    match tc {
+        tc if tc >= 7 => true, // dominant trump holdings
+        6 => s >= 1,
+        5 => s >= 3,
+        4 => s >= 5,
+        _ => false, // TC≤3: essentially never viable
+    }
+}
+
+/// Returns a human-readable summary of the Suit post-discard heuristic for `hand`.
+pub fn describe_suit_post_discard(hand: u32) -> String {
+    use crate::skat::signature::HandSignature;
+    let sig = HandSignature::from_hand_and_skat_suit(hand, 0, Some(0));
+    let tc = sig.trump_count as i32;
+    let s = (sig.aces + sig.attached_tens) as i32;
+    let verdict = if is_playable_suit_hand(hand) { "PLAYABLE" } else { "not playable" };
+    format!("Post-Discard Suit/Clubs: TC={tc} S={s} → {verdict} (10k-sample heuristic)")
 }
 
 #[derive(Clone, Copy)]
@@ -169,6 +236,9 @@ pub struct PimcProblem {
 
     // Original cards tracking
     pub declarer_played_cards: u32,
+
+    // All cards collected in completed tricks (by all players)
+    pub all_played_cards: u32,
 }
 
 impl PimcProblem {
@@ -688,6 +758,7 @@ impl PimcProblem {
             skat_cards: None,
             sampling_mode: SamplingMode::Random,
             declarer_played_cards: 0,
+            all_played_cards: 0,
         }
     }
 
@@ -765,7 +836,7 @@ impl PimcProblem {
                 self.previous_player_facts(),
             )
             .declarer_start_points(self.declarer_start_points)
-            .played_cards(self.declarer_played_cards)
+            .played_cards(self.all_played_cards)
             .build();
 
         if verify_card_distribution(&problem) {
@@ -864,6 +935,7 @@ mod tests {
             skat_cards: None,
             sampling_mode: SamplingMode::Random,
             declarer_played_cards: 0,
+            all_played_cards: 0,
         };
 
         let problem = uproblem.generate_concrete_problem();
@@ -891,6 +963,7 @@ mod tests {
             skat_cards: None,
             sampling_mode: SamplingMode::Random,
             declarer_played_cards: 0,
+            all_played_cards: 0,
         };
 
         let problem = uproblem.generate_concrete_problem();
@@ -935,6 +1008,7 @@ mod tests {
             skat_cards: None,
             sampling_mode: SamplingMode::Random,
             declarer_played_cards: 0,
+            all_played_cards: 0,
         };
 
         // Run multiple times to ensure randomness doesn't accidentally succeed
@@ -993,6 +1067,7 @@ mod tests {
             skat_cards: None,
             sampling_mode: SamplingMode::Random,
             declarer_played_cards: 0,
+            all_played_cards: 0,
         };
 
         for _ in 0..20 {
@@ -1046,6 +1121,7 @@ mod tests {
             skat_cards: None,
             sampling_mode: SamplingMode::Random,
             declarer_played_cards: 0,
+            all_played_cards: 0,
         };
 
         for _ in 0..20 {
@@ -1102,6 +1178,7 @@ mod tests {
             skat_cards: None,
             sampling_mode: SamplingMode::Random,
             declarer_played_cards: 0,
+            all_played_cards: 0,
         };
 
         for _ in 0..20 {
@@ -1145,6 +1222,7 @@ mod tests {
             skat_cards: None,
             sampling_mode: SamplingMode::Random,
             declarer_played_cards: 0,
+            all_played_cards: 0,
         };
 
         for _ in 0..20 {
@@ -1189,6 +1267,7 @@ mod tests {
             skat_cards: None,
             sampling_mode: SamplingMode::Random,
             declarer_played_cards: 0,
+            all_played_cards: 0,
         };
 
         for _ in 0..20 {
@@ -1232,6 +1311,7 @@ mod tests {
             skat_cards: None,
             sampling_mode: SamplingMode::Random,
             declarer_played_cards: 0,
+            all_played_cards: 0,
         };
 
         for _ in 0..20 {
@@ -1275,6 +1355,7 @@ mod tests {
             skat_cards: None,
             sampling_mode: SamplingMode::Random,
             declarer_played_cards: 0,
+            all_played_cards: 0,
         };
 
         for _ in 0..20 {

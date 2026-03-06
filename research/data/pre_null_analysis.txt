@@ -1,5 +1,5 @@
 --- Pre-Discard Null Game Analysis ---
-Source: research/data/general_pre_stats_final_50k_20260120-2156.csv
+Source: research/data/heuristics/general_pre_stats_final_50k_20260120-2156.csv
 Total Hands Analyzed: 33993
 
 Analysis Logic:

@@ -30,6 +30,9 @@ pub struct PimcProblemBuilder {
     // Sampling Mode
     sampling_mode: Option<SamplingMode>,
     declarer_played_cards: Option<u32>,
+
+    // All cards collected in completed tricks (by all players)
+    all_played_cards: Option<u32>,
 }
 
 impl PimcProblemBuilder {
@@ -66,6 +69,11 @@ impl PimcProblemBuilder {
 
     pub fn declarer_played_cards(mut self, cards: u32) -> PimcProblemBuilder {
         self.declarer_played_cards = Some(cards);
+        self
+    }
+
+    pub fn all_played_cards(mut self, cards: u32) -> PimcProblemBuilder {
+        self.all_played_cards = Some(cards);
         self
     }
 
@@ -307,6 +315,10 @@ impl PimcProblemBuilder {
             uproblem.declarer_played_cards = played;
         }
 
+        if let Some(played) = self.all_played_cards {
+            uproblem.all_played_cards = played;
+        }
+
         uproblem
     }
 
@@ -398,6 +410,7 @@ impl Default for PimcProblemBuilder {
             skat_cards: None,
             sampling_mode: None,
             declarer_played_cards: None,
+            all_played_cards: None,
         }
     }
 }

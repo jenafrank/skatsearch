@@ -1,0 +1,12 @@
+﻿
+running 1 test
+After D plays ST:
+  Legal Moves for L: SA SQ 
+Perfect Play for L suggested: SA
+After L plays SA:
+  Legal Moves for R: S9 
+Perfect Play for R suggested: S9
+test reproduction_tests::test_illegal_move_bug ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.42s
+

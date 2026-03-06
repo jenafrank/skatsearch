@@ -11,7 +11,7 @@ sns.set_context("notebook", font_scale=1.2)
 
 def analyze_bubbles_pre():
     # 1. Find latest CSV
-    list_of_files = glob.glob('research/data/general_pre_stats_final_50k_*.csv') 
+    list_of_files = glob.glob('research/data/heuristics/general_pre_stats_final_50k_*.csv') 
     if not list_of_files:
         print("No CSV files found in research/data/")
         return

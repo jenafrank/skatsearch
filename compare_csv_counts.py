@@ -56,6 +56,6 @@ def compare_counts(file1, file2):
 
 if __name__ == "__main__":
     compare_counts(
-        'research/data/general_pre_stats_final_50k_20260120-2156.csv', 
+        'research/data/heuristics/general_pre_stats_final_50k_20260120-2156.csv', 
         'research/data/hand_best_game_cluster.csv'
     )
